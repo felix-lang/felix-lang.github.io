@@ -306,7 +306,9 @@ function toggle(button,id)
 }
 var allbuttons = [
 "Top",
-"next"
+"next",
+"high",
+"med"
 ];
 function expand_all(dummy)
 {
@@ -369,7 +371,11 @@ function mouseout(id)
       <div class=sm id=menu1>
       <div class=m2><a href="#next_h">next</a></div>
       </div>
-    <script>counter_max=1;</script>
+      <div class=m1 onclick="mshow('menu2','#high_h')"> <a href="#high_h">high</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#med_h">med</a></div>
+      </div>
+    <script>counter_max=2;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -382,6 +388,12 @@ function mouseout(id)
 <h1 id='Top_h'><img src='/share/src/web/images/minus.gif' id='Top' onclick='toggle(this,"Top_d")' alt='+'/> 1 Top</h1><div id='Top_d' style='display:block'>
 <p>blam
 </p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 1.1 next</h2><div id='next_d' style='display:block'>
+<p>stuff
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
+</pre></p><p>stuff
+</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 2 high</h1><div id='high_d' style='display:block'>
+<p>blam
+</p><h2 id='med_h'><img src='/share/src/web/images/minus.gif' id='med' onclick='toggle(this,"med_d")' alt='+'/> 2.1 med</h2><div id='med_d' style='display:block'>
 <p>stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff
