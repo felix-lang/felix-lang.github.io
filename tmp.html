@@ -305,7 +305,7 @@ function toggle(button,id)
   }
 }
 var allbuttons = [
-"Top",
+"The concept of fibration",
 "next",
 "high",
 "med1",
@@ -370,7 +370,7 @@ function mouseout(id)
   <!--Left Margin Toc-->
   <div id="leftmargintoc">
     <!--Left Margin Toc Main Contents-->
-      <div class=m1 onclick="mshow('menu1','#Top_h')"> <a href="#Top_h">Top</a></div>
+      <div class=m1 onclick="mshow('menu1','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
       <div class=sm id=menu1>
       <div class=m2><a href="#next_h">next</a></div>
       </div>
@@ -390,8 +390,27 @@ function mouseout(id)
         <span id="right" class="rightpanel">
           <div class="maincontent">
 <!--Main Content Body-->
-<h1 id='Top_h'><img src='/share/src/web/images/minus.gif' id='Top' onclick='toggle(this,"Top_d")' alt='+'/> 1 Top</h1><div id='Top_d' style='display:block'>
-<p>blam
+<h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 1 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
+<p>A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
+with these properties:
+<ul>
+<li>Exactly one process can be <em>running</em> at once, the others are said to be <em>suspended</em></li>
+<li>Control cannot be pre-empted, but is yielded voluntarily</li>
+</ul>
+In our system, there are four principle operations:
+<ol>
+<li><em>spawn</em> a new fibre</li>
+<li><em>read/em> from a channel</li>
+<li><em>write/em> to a channel</li>
+<li>Commit <em>suicide</em>
+</ol>
+A fibre of control can be in one of four states:
+<ol>
+<li>Running</em>
+<li>Active (but not running)</li>
+<li>Waiting on I/O</li>
+<li>Dead</li>
+</ol>
 </p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 1.1 next</h2><div id='next_d' style='display:block'>
 <p>stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah

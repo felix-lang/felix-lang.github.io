@@ -1,7 +1,25 @@
-
 @title coroutines
-@h1 Top
-blam
+@h1 The concept of fibration
+A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
+with these properties:
+<ul>
+<li>Exactly one process can be <em>running</em> at once, the others are said to be <em>suspended</em></li>
+<li>Control cannot be pre-empted, but is yielded voluntarily</li>
+</ul>
+In our system, there are four principle operations:
+<ol>
+<li><em>spawn</em> a new fibre</li>
+<li><em>read/em> from a channel</li>
+<li><em>write/em> to a channel</li>
+<li>Commit <em>suicide</em>
+</ol>
+A fibre of control can be in one of four states:
+<ol>
+<li>Running</em>
+<li>Active (but not running)</li>
+<li>Waiting on I/O</li>
+<li>Dead</li>
+</ol>
 @h2 next
 stuff
 @felix 
