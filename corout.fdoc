@@ -10,8 +10,14 @@ blah
 stuff
 @h1 high
 blam
-@h2 med
+@h2 med1
 stuff
+@h2 med2
+stuff
+@h2 med3
+stuff
+@h3 low
+level 3 stuff
 @felix 
 blah
 @

@@ -308,7 +308,10 @@ var allbuttons = [
 "Top",
 "next",
 "high",
-"med"
+"med1",
+"med2",
+"med3",
+"low"
 ];
 function expand_all(dummy)
 {
@@ -373,7 +376,9 @@ function mouseout(id)
       </div>
       <div class=m1 onclick="mshow('menu2','#high_h')"> <a href="#high_h">high</a></div>
       <div class=sm id=menu2>
-      <div class=m2><a href="#med_h">med</a></div>
+      <div class=m2><a href="#med1_h">med1</a></div>
+      <div class=m2><a href="#med2_h">med2</a></div>
+      <div class=m2><a href="#med3_h">med3</a></div>
       </div>
     <script>counter_max=2;</script>
   </div>
@@ -393,11 +398,17 @@ function mouseout(id)
 </pre></p><p>stuff
 </p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 2 high</h1><div id='high_d' style='display:block'>
 <p>blam
-</p><h2 id='med_h'><img src='/share/src/web/images/minus.gif' id='med' onclick='toggle(this,"med_d")' alt='+'/> 2.1 med</h2><div id='med_d' style='display:block'>
+</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 2.1 med1</h2><div id='med1_d' style='display:block'>
 <p>stuff
+</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 2.2 med2</h2><div id='med2_d' style='display:block'>
+<p>stuff
+</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 2.3 med3</h2><div id='med3_d' style='display:block'>
+<p>stuff
+</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 2.3.1 low</h3><div id='low_d' style='display:block'>
+<p>level 3 stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff
-</p></div></div><!--Main Content Body End-->
+</p></div></div></div><!--Main Content Body End-->
 
           </div> <!-- rightpanel contents end -->
           <hr>
