@@ -15,7 +15,8 @@ stuff
 @h2 med2
 stuff
 @h2 med3
-stuff
+stuff <em>inline html doesn't work</em>
+but we have @{micros}. 
 @h3 low
 level 3 stuff
 @felix 
