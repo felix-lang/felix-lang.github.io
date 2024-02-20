@@ -15,8 +15,9 @@ stuff
 @h2 med2
 stuff
 @h2 med3
-stuff <em>inline html doesn't work</em>
-but we have @{micros}. 
+stuff <em>inline html works</em>
+but we have @{micros} for inline code as well.
+<a href= https://www.itkservices2.com/nem_review_1.2>See ITK stuff</a>
 @h3 low
 level 3 stuff
 @felix 
