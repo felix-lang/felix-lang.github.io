@@ -38,7 +38,7 @@ Now we have a transducer which writes the square of every integer it reads.
 proc squarer (inp: %<int, out: %>int) () {
   while true do 
     var i = read inp;
-    write (out, i * I);
+    write (out, i * i);
   done
 }
 @

@@ -422,7 +422,7 @@ procedure will have type
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> squarer (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
-<span class="lineno" id=line4></span>      <span class="library" title="Print a string to a stream">write</span> (out, i * I);
+<span class="lineno" id=line4></span>      <span class="library" title="Print a string to a stream">write</span> (out, i * i);
 <span class="lineno" id=line5></span>    <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line6></span>  }
 </pre></p><p>You should notice the previous three components were all infinite loops.
