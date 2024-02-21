@@ -1,4 +1,5 @@
 @tangler ex1 = examples/ex1.flx
+@tangler ex2 = examples/ex2.flx
 @title coroutines
 @h1 A low level example.
 I will show a simple low level example of coroutines, it will be a 
@@ -84,6 +85,16 @@ proc run_pipeline() {
 run_pipeline();
 @
 
+@h1 Using the chip DSSL
+The code above involves a bit of boilerplate so I'm going to show you how to do the
+same job using the <em>chip</em> DSSL. A DSSL is a unique feature of Felix which allows
+the <em>user/em> to define an extension to the existing language, which has an application
+in a specific domain. Unlike DSLs or domain specific languages, Felix has DSSLs or domain
+specific <em>sub-</em>languages.
+
+Let me show you:
+@tangle ex2
+@
 
 
 @h1 The concept of fibration
