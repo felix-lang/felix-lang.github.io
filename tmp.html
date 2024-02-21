@@ -400,17 +400,53 @@ with these properties:
 In our system, there are four principle operations:
 <ol>
 <li><em>spawn</em> a new fibre</li>
-<li><em>read/em> from a channel</li>
-<li><em>write/em> to a channel</li>
+<li><em>read</em> from a channel</li>
+<li><em>write</em> to a channel</li>
 <li>Commit <em>suicide</em>
 </ol>
-A fibre of control can be in one of four states:
+A fibre of control can be in one of five states:
 <ol>
 <li>Running</em>
 <li>Active (but not running)</li>
-<li>Waiting on I/O</li>
+<li>Waiting on read</li>
+<li>Waiting on write</ii>
 <li>Dead</li>
 </ol>
+In our system, all the resources associated by an <em>unreachable</em> dead
+fibre are automatically reaped by the garbage collector so that in fact
+the fibre is not technically dead because it no longer exists.
+</p><p>A <em>channel</em> is an object associated with which 
+set of fibres all waiting to read or all waiting to write.
+</p><p>When a write operation is performed on a channel by the running fibre,
+if there are fibres on the channel which are waiting to read
+then one is selected, the data to be written is tranfered from the writer to the reader,
+the fibre is removed from association with the channel,
+and both the running and reader fibre are made active.
+</p><p>When a read operation is performed on a channel by the running fibre,
+if there are fibres on the channel which are waiting to write
+then one is selected, the data to be written is transfered from the writer to the reader, 
+fibre, the fibre is removed from association with the channel,
+and both the running and reader fibre are made active.
+</p><p>When a fibre commits suicide, it is removed as the running fibre.
+</p><p>When a new fibre is spawned, both the spawner and spawnee are made active.
+</p><p>When there is no running fibre, then if an active fibre exists,
+an active fibre is selected and promoted to running state
+and the thread of control begins executing it.
+</p><p>When there is no running fibre, and no active fibres,
+the whole system terminates. Any fibres waiting on I/O become dead
+</p><p>The description above is a complete account of the abstract semantics
+known as <em>Communicating Sequential Coroutines</em> or CSC, it is a
+sub system obtain from Tony Hoare's <em>Communicating Sequenmtial Processes</em>
+or CSP, in which concurrency is replaced by an indeterminate total ordering.
+</p><p>To be precise in CSC all events are totally ordered, however the exact ordering
+is not determinate. This is because a scheduler running the system is free
+to pick any active fibre to run when one is needed.
+</p><p>In the Felix implementation, a spawned fibre runs immediately
+if the <code>spawn_fthread</code> procedure is used to launch it, or the
+running fibre continues instead, of <code>schedule_fthread</code> is used instead.
+</p><p>In addition, I/O transfers always result in the reader proceeding,
+to give it a chance to actually fetch the data before the write
+might modify it.
 </p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 1.1 next</h2><div id='next_d' style='display:block'>
 <p>stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
