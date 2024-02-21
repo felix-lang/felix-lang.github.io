@@ -54,7 +54,7 @@ proc limiter (var limit: int) (inp: %<int, out: %>int) () {
     write (out, i);
     --limit;
   done
-};
+}
 @
 This procedure drops through, but it cannot return control, because
 there is nowhere to return it to, so it has, in effect, committed
@@ -89,12 +89,91 @@ Here is the complete program: <a href="https://github.com/felix-lang/felix-lang.
 @h1 Using the chip DSSL
 The code above involves a bit of boilerplate so I'm going to show you how to do the
 same job using the <em>chip</em> DSSL. A DSSL is a unique feature of Felix which allows
-the <em>user/em> to define an extension to the existing language, which has an application
+the <em>user</em> to define an extension to the existing language, which has an application
 in a specific domain. Unlike DSLs or domain specific languages, Felix has DSSLs or domain
 specific <em>sub-</em>languages.
 
-Let me show you:
+Let me show you: first our source:
 @tangle ex2
+chip source
+  connector io
+   pin out: %>int
+{
+  var i = 0;
+  while true do 
+    write (io.out,i); 
+    ++i; 
+  done
+}
+@
+This is the same as before except that the channel name now has the form @{connector.pin} 
+and so we put @{io.out} as the channel name. There is no magic here, the connector name
+is the name of the parameter, and the pin names are fields of a record, so the parameter
+actually has a record type.
+
+Now here is the sink:
+@tangle ex2
+chip sink 
+  connector io
+    pin inp: %<int
+{
+  while true do 
+    var i = read io.inp;
+    println$ i;
+  done
+}
+@
+Now here is the transducer and limiter
+@tangle ex2
+chip squarer 
+  connector io
+    pin inp: %<int
+    pin out: %>int
+{
+  while true do 
+    var i = read io.inp;
+    write (io.out, i * i);
+  done
+}
+chip limiter (var limit: int) 
+  connector io
+    pin inp: %<int
+    pin out: %>int
+{
+  while limit > 0 do
+    var i = read io.inp;
+    write (io.out, i);
+    --limit;
+  done
+};
+@
+Now to connect these things we say this:
+@tangle ex2
+proc run_pipeline1() {
+  device limit8  = limiter 8;
+  circuit
+    connect source.out, squarer.inp
+    connect squarer.out, limit8.inp
+    connect limit8.out, sink.inp
+  endcircuit
+}
+run_pipeline1();
+@
+The @{circuit} statement connects all the chips into a circuit and runs it.
+The most important feature here is that the chips are <em>anonymous</em>.
+Note the @{connect} clause does not need to use the connector name,
+it uses the first connector. This particular feature is implemented in the
+compiler itself to allow I/O direction checking and exhaustion checking.
+You cannot leave any pin disconnected.
+
+The @{circuit} feature is very general. For pipelines there is an even easer
+syntax:
+
+@tangle ex2
+proc run_pipeline2() { 
+  (source |-> squarer |-> limiter 8 |-> sink)();
+}
+run_pipeline2();
 @
 
 

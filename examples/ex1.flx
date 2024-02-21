@@ -1,4 +1,4 @@
-#line 12 "corout.fdoc"
+#line 13 "corout.fdoc"
 proc source (out: %>int) () {
   var i = 0;
   while true do
@@ -6,29 +6,29 @@ proc source (out: %>int) () {
     ++i;
   done
 }
-#line 23 "corout.fdoc"
+#line 24 "corout.fdoc"
 proc sink (inp: %<int) () {
   while true do
     var i = read inp;
     println$ i;
   done
 }
-#line 39 "corout.fdoc"
+#line 40 "corout.fdoc"
 proc squarer (inp: %<int, out: %>int) () {
   while true do
     var i = read inp;
     write (out, i * i);
   done
 }
-#line 50 "corout.fdoc"
+#line 51 "corout.fdoc"
 proc limiter (var limit: int) (inp: %<int, out: %>int) () {
   while limit > 0 do
     var i = read inp;
     write (out, i);
     --limit;
   done
-};
-#line 64 "corout.fdoc"
+}
+#line 65 "corout.fdoc"
 proc run_pipeline() {
   // make channels
   var i1,o1 = mk_ioschannel_pair[int]();

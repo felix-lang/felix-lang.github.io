@@ -24,6 +24,22 @@ Tangle id=ex2
 Tangler filename=examples/ex2.flx
 Extension=.flx
 flx ....
+Tangle id=ex2
+Tangler filename=examples/ex2.flx
+Extension=.flx
+flx ....
+Tangle id=ex2
+Tangler filename=examples/ex2.flx
+Extension=.flx
+flx ....
+Tangle id=ex2
+Tangler filename=examples/ex2.flx
+Extension=.flx
+flx ....
+Tangle id=ex2
+Tangler filename=examples/ex2.flx
+Extension=.flx
+flx ....
 <html><head>
 <style type="text/css">
 body {margin:3%; }
@@ -471,7 +487,7 @@ examples/ex1.flx</pre>
 <span class="lineno" id=line4></span>      <span class="library" title="Print a string to a stream">write</span> (out, i);
 <span class="lineno" id=line5></span>      --limit;
 <span class="lineno" id=line6></span>    <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line7></span>  };
+<span class="lineno" id=line7></span>  }
 </pre></p><p>This procedure drops through, but it cannot return control, because
 there is nowhere to return it to, so it has, in effect, committed
 suicide implicitly.
@@ -503,13 +519,89 @@ examples/ex1.flx</pre>
 </p></div><h1 id='Using_the_chip_DSSL_h'><img src='/share/src/web/images/minus.gif' id='Using the chip DSSL' onclick='toggle(this,"Using_the_chip_DSSL_d")' alt='+'/> 2 Using the chip DSSL</h1><div id='Using_the_chip_DSSL_d' style='display:block'>
 <p>The code above involves a bit of boilerplate so I'm going to show you how to do the
 same job using the <em>chip</em> DSSL. A DSSL is a unique feature of Felix which allows
-the <em>user/em> to define an extension to the existing language, which has an application
+the <em>user</em> to define an extension to the existing language, which has an application
 in a specific domain. Unlike DSLs or domain specific languages, Felix has DSSLs or domain
 specific <em>sub-</em>languages.
-</p><p>Let me show you:
+</p><p>Let me show you: first our source:
 </p><pre class='inclusion'>
 examples/ex2.flx</pre>
-<p><pre class='flxbg'></pre></p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 3 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  chip source
+<span class="lineno" id=line2></span>    connector io
+<span class="lineno" id=line3></span>     pin out: %&gt;<span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i = 0;
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line7></span>      <span class="library" title="Print a string to a stream">write</span> (io.out,i); 
+<span class="lineno" id=line8></span>      ++i; 
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line10></span>  }
+</pre></p><p>This is the same as before except that the channel name now has the form <code>connector.pin</code> 
+and so we put <code>io.out</code> as the channel name. There is no magic here, the connector name
+is the name of the parameter, and the pin names are fields of a record, so the parameter
+actually has a record type.
+</p><p>Now here is the sink:
+</p><pre class='inclusion'>
+examples/ex2.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  chip sink 
+<span class="lineno" id=line2></span>    connector io
+<span class="lineno" id=line3></span>      pin inp: %&lt;<span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read io.inp;
+<span class="lineno" id=line7></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ i;
+<span class="lineno" id=line8></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line9></span>  }
+</pre></p><p>Now here is the transducer and limiter
+</p><pre class='inclusion'>
+examples/ex2.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  chip squarer 
+<span class="lineno" id=line2></span>    connector io
+<span class="lineno" id=line3></span>      pin inp: %&lt;<span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line4></span>      pin out: %&gt;<span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read io.inp;
+<span class="lineno" id=line8></span>      <span class="library" title="Print a string to a stream">write</span> (io.out, i * i);
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line10></span>  }
+<span class="lineno" id=line11></span>  chip limiter (<span class="big_keyword" title="Define a mutable variable">var</span> limit: <span class="library" title="binding of C int type">int</span>) 
+<span class="lineno" id=line12></span>    connector io
+<span class="lineno" id=line13></span>      pin inp: %&lt;<span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line14></span>      pin out: %&gt;<span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line15></span>  {
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="while loop">while</span> limit &gt; 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read io.inp;
+<span class="lineno" id=line18></span>      <span class="library" title="Print a string to a stream">write</span> (io.out, i);
+<span class="lineno" id=line19></span>      --limit;
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line21></span>  };
+</pre></p><p>Now to connect these things we say this:
+</p><pre class='inclusion'>
+examples/ex2.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline1() {
+<span class="lineno" id=line2></span>    device limit8  = limiter 8;
+<span class="lineno" id=line3></span>    circuit
+<span class="lineno" id=line4></span>      connect source.out, squarer.inp
+<span class="lineno" id=line5></span>      connect squarer.out, limit8.inp
+<span class="lineno" id=line6></span>      connect limit8.out, sink.inp
+<span class="lineno" id=line7></span>    endcircuit
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  run_pipeline1();
+</pre></p><p>The <code>circuit</code> statement connects all the chips into a circuit and runs it.
+The most important feature here is that the chips are <em>anonymous</em>.
+Note the <code>connect</code> clause does not need to use the connector name,
+it uses the first connector. This particular feature is implemented in the
+compiler itself to allow I/O direction checking and exhaustion checking.
+You cannot leave any pin disconnected.
+</p><p>The <code>circuit</code> feature is very general. For pipelines there is an even easer
+syntax:
+</p><pre class='inclusion'>
+examples/ex2.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline2() { 
+<span class="lineno" id=line2></span>    (source |-&gt; squarer |-&gt; limiter 8 |-&gt; sink)();
+<span class="lineno" id=line3></span>  }
+<span class="lineno" id=line4></span>  run_pipeline2();
+</pre></p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 3 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
 <p>A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
 with these properties:
 <ul>

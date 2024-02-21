@@ -1,0 +1,58 @@
+#line 98 "corout.fdoc"
+chip source
+  connector io
+   pin out: %>int
+{
+  var i = 0;
+  while true do
+    write (io.out,i);
+    ++i;
+  done
+}
+#line 116 "corout.fdoc"
+chip sink
+  connector io
+    pin inp: %<int
+{
+  while true do
+    var i = read io.inp;
+    println$ i;
+  done
+}
+#line 128 "corout.fdoc"
+chip squarer
+  connector io
+    pin inp: %<int
+    pin out: %>int
+{
+  while true do
+    var i = read io.inp;
+    write (io.out, i * i);
+  done
+}
+chip limiter (var limit: int)
+  connector io
+    pin inp: %<int
+    pin out: %>int
+{
+  while limit > 0 do
+    var i = read io.inp;
+    write (io.out, i);
+    --limit;
+  done
+};
+#line 152 "corout.fdoc"
+proc run_pipeline1() {
+  device limit8  = limiter 8;
+  circuit
+    connect source.out, squarer.inp
+    connect squarer.out, limit8.inp
+    connect limit8.out, sink.inp
+  endcircuit
+}
+run_pipeline1();
+#line 173 "corout.fdoc"
+proc run_pipeline2() {
+  (source |-> squarer |-> limiter 8 |-> sink)();
+}
+run_pipeline2();
