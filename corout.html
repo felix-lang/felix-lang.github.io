@@ -348,7 +348,14 @@ function toggle(button,id)
 }
 var allbuttons = [
 "A low level example.",
+"The source",
+"The sink",
+"The transducer",
+"The limiter",
+"The runner",
 "Using the chip DSSL",
+"How does it stop?",
+"Felix is a coroutine",
 "The concept of fibration",
 "next",
 "high",
@@ -416,21 +423,30 @@ function mouseout(id)
     <!--Left Margin Toc Main Contents-->
       <div class=m1 onclick="mshow('menu1','#A low level example._h')"> <a href="#A_low_level_example._h">A low level example.</a></div>
       <div class=sm id=menu1>
+      <div class=m2><a href="#The_source_h">The source</a></div>
+      <div class=m2><a href="#The_sink_h">The sink</a></div>
+      <div class=m2><a href="#The_transducer_h">The transducer</a></div>
+      <div class=m2><a href="#The_limiter_h">The limiter</a></div>
+      <div class=m2><a href="#The_runner_h">The runner</a></div>
       </div>
       <div class=m1 onclick="mshow('menu2','#Using the chip DSSL_h')"> <a href="#Using_the_chip_DSSL_h">Using the chip DSSL</a></div>
       <div class=sm id=menu2>
+      <div class=m2><a href="#How_does_it_stop?_h">How does it stop?</a></div>
       </div>
-      <div class=m1 onclick="mshow('menu3','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
+      <div class=m1 onclick="mshow('menu3','#Felix is a coroutine_h')"> <a href="#Felix_is_a_coroutine_h">Felix is a coroutine</a></div>
       <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
+      <div class=sm id=menu4>
       <div class=m2><a href="#next_h">next</a></div>
       </div>
-      <div class=m1 onclick="mshow('menu4','#high_h')"> <a href="#high_h">high</a></div>
-      <div class=sm id=menu4>
+      <div class=m1 onclick="mshow('menu5','#high_h')"> <a href="#high_h">high</a></div>
+      <div class=sm id=menu5>
       <div class=m2><a href="#med1_h">med1</a></div>
       <div class=m2><a href="#med2_h">med2</a></div>
       <div class=m2><a href="#med3_h">med3</a></div>
       </div>
-    <script>counter_max=4;</script>
+    <script>counter_max=5;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -443,7 +459,8 @@ function mouseout(id)
 <h1 id='A_low_level_example._h'><img src='/share/src/web/images/minus.gif' id='A low level example.' onclick='toggle(this,"A_low_level_example._d")' alt='+'/> 1 A low level example.</h1><div id='A_low_level_example._d' style='display:block'>
 <p>I will show a simple low level example of coroutines, it will be a 
 simple pipeline consisting of a source, a transducer, a limiter, and a sink.
-</p><p>First we have our source, which just write all the integers starting from 0
+</p><h2 id='The_source_h'><img src='/share/src/web/images/minus.gif' id='The source' onclick='toggle(this,"The_source_d")' alt='+'/> 1.1 The source</h2><div id='The_source_d' style='display:block'>
+<p>First we have our source, which just write all the integers starting from 0
 down the channel <code>out</code>. The type <code>%>int</code> is an output channel endpoint
 for <code>int</code>.
 </p><pre class='inclusion'>
@@ -455,7 +472,8 @@ examples/ex1.flx</pre>
 <span class="lineno" id=line5></span>      ++i; 
 <span class="lineno" id=line6></span>    <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line7></span>  }
-</pre></p><p>Now we have a simple sink, which just prints everything it reads:
+</pre></p></div><h2 id='The_sink_h'><img src='/share/src/web/images/minus.gif' id='The sink' onclick='toggle(this,"The_sink_d")' alt='+'/> 1.2 The sink</h2><div id='The_sink_d' style='display:block'>
+<p>Now we have a simple sink, which just prints everything it reads:
 </p><pre class='inclusion'>
 examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> sink (inp: %&lt;<span class="library" title="binding of C int type">int</span>) () {
@@ -468,7 +486,8 @@ examples/ex1.flx</pre>
 procedure will have type
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="Type with one values (), the empty tuple">unit</span>
 </pre></p><p>which is the type required to spawn fibre from a coroutine.
-</p><p>Now we have a transducer which writes the square of every integer it reads.
+</p></div><h2 id='The_transducer_h'><img src='/share/src/web/images/minus.gif' id='The transducer' onclick='toggle(this,"The_transducer_d")' alt='+'/> 1.3 The transducer</h2><div id='The_transducer_d' style='display:block'>
+<p>Now we have a transducer which writes the square of every integer it reads.
 </p><pre class='inclusion'>
 examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> squarer (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
@@ -477,7 +496,8 @@ examples/ex1.flx</pre>
 <span class="lineno" id=line4></span>      <span class="library" title="Print a string to a stream">write</span> (out, i * i);
 <span class="lineno" id=line5></span>    <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line6></span>  }
-</pre></p><p>You should notice the previous three components were all infinite loops.
+</pre></p></div><h2 id='The_limiter_h'><img src='/share/src/web/images/minus.gif' id='The limiter' onclick='toggle(this,"The_limiter_d")' alt='+'/> 1.4 The limiter</h2><div id='The_limiter_d' style='display:block'>
+<p>You should notice the previous three components were all infinite loops.
 Since we don't want our demo to run forever we will throw in a limiter chip:
 </p><pre class='inclusion'>
 examples/ex1.flx</pre>
@@ -491,7 +511,8 @@ examples/ex1.flx</pre>
 </pre></p><p>This procedure drops through, but it cannot return control, because
 there is nowhere to return it to, so it has, in effect, committed
 suicide implicitly.
-</p><p>Now we need have four components so we need three channels to connect them:
+</p></div><h2 id='The_runner_h'><img src='/share/src/web/images/minus.gif' id='The runner' onclick='toggle(this,"The_runner_d")' alt='+'/> 1.5 The runner</h2><div id='The_runner_d' style='display:block'>
+<p>Now we need have four components so we need three channels to connect them:
 </p><pre class='inclusion'>
 examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline() {
@@ -516,7 +537,7 @@ examples/ex1.flx</pre>
 <span class="lineno" id=line20></span>  }
 <span class="lineno" id=line21></span>  run_pipeline();
 </pre></p><p>Here is the complete program: <a href="https://github.com/felix-lang/felix-lang.github.io/blob/main/examples/ex1.flx">ex1.flx</a>
-</p></div><h1 id='Using_the_chip_DSSL_h'><img src='/share/src/web/images/minus.gif' id='Using the chip DSSL' onclick='toggle(this,"Using_the_chip_DSSL_d")' alt='+'/> 2 Using the chip DSSL</h1><div id='Using_the_chip_DSSL_d' style='display:block'>
+</p></div></div><h1 id='Using_the_chip_DSSL_h'><img src='/share/src/web/images/minus.gif' id='Using the chip DSSL' onclick='toggle(this,"Using_the_chip_DSSL_d")' alt='+'/> 2 Using the chip DSSL</h1><div id='Using_the_chip_DSSL_d' style='display:block'>
 <p>The code above involves a bit of boilerplate so I'm going to show you how to do the
 same job using the <em>chip</em> DSSL. A DSSL is a unique feature of Felix which allows
 the <em>user</em> to define an extension to the existing language, which has an application
@@ -603,7 +624,36 @@ examples/ex2.flx</pre>
 <span class="lineno" id=line4></span>  run_pipeline2();
 </pre></p><p>For any functional programmers around, a pipeline is semantically identical
 to a Monad.
-</p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 3 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
+</p><h2 id='How_does_it_stop?_h'><img src='/share/src/web/images/minus.gif' id='How does it stop?' onclick='toggle(this,"How_does_it_stop?_d")' alt='+'/> 2.1 How does it stop?</h2><div id='How_does_it_stop?_d' style='display:block'>
+<p>It is clear, because I told you, that we put the <code>limiter</code> into the pipeline so it terminates.
+So the <code>limiter</code> commits suicide by dropping off the end after a certain number of data transfers.
+But the other three components are infinite loops, so how does the system terminate?
+</p><p>First consider the transducer <code>squarer</code> tries to write to the limiter, but alas, it is dead?
+The write stalls, and we say the fibre is <em>blocked</em> or being vulgar, <em>constipated</em>.
+And now, since it is blocked, it cannot read the input from the <code>source</code>, so it too is blocked.
+</p><p>The <code>sink</code> on the other hand has a different problem: it is trying to read from the <code>limiter</code>
+but the limiter is dead, so there is no input coming: the sink is said to be <code>starved</code>.
+</p><p>There are therefore <em>no active fibres</em> so the system terminates.
+I will emphasise this point heavily because these are the correct termination semantics.
+There is another language with processes and channels, namely <code>golang</code>. 
+Unfortunately <code>golang</code> got the termination semantics completely wrong.
+in addition, <code>golang</code> channel semantics are also wrong because channels can be closed
+and a reader can detect if a writer closed the channel. 
+</p><p>Although this is not possible in Felix, you can write the option type <code>opt</code> and use
+the <code>None</code> case to signal end of data. In fact, in Felix you can write <em>any</em>
+type down a channel, even channels!
+</p></div></div><h1 id='Felix_is_a_coroutine_h'><img src='/share/src/web/images/minus.gif' id='Felix is a coroutine' onclick='toggle(this,"Felix_is_a_coroutine_d")' alt='+'/> 3 Felix is a coroutine</h1><div id='Felix_is_a_coroutine_d' style='display:block'>
+<p>Most programming language generate programs which consist of single top level procedure,
+for example <code>main()</code> in C. It is a subroutine called by the startup code which in turn
+was invoked by the operating system.
+</p><p>Felix, as usual, is different. For a start, Felix generates libraries, in fact the
+default is a shared library. So in fact, what you think is mainline code running
+is in fact just the initialisation code for the library. You can also  
+add a procedure <code>flx_main()</code> to your code and that will also be run after
+the initialisation of the library.
+</p><p>However there is something else different: the Felix mainline code is not
+a subroutine, it is a coroutine!
+</p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 4 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
 <p>A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
 with these properties:
 <ul>
@@ -664,13 +714,13 @@ running fibre continues instead, of <code>schedule_fthread</code> is used instea
 </p><p>In addition, I/O transfers always result in the reader proceeding,
 to give it a chance to actually fetch the data before the write
 might modify it.
-</p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 3.1 next</h2><div id='next_d' style='display:block'>
+</p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 4.1 next</h2><div id='next_d' style='display:block'>
 <p>stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff
-</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 4 high</h1><div id='high_d' style='display:block'>
+</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 5 high</h1><div id='high_d' style='display:block'>
 <p>blam
-</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 4.1 med1</h2><div id='med1_d' style='display:block'>
+</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 5.1 med1</h2><div id='med1_d' style='display:block'>
 <p>stuff
 stuff
 stuff
@@ -707,13 +757,13 @@ stuff
 stuff
 stuff
 stuff
-</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 4.2 med2</h2><div id='med2_d' style='display:block'>
+</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 5.2 med2</h2><div id='med2_d' style='display:block'>
 <p>stuff
-</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 4.3 med3</h2><div id='med3_d' style='display:block'>
+</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 5.3 med3</h2><div id='med3_d' style='display:block'>
 <p>stuff <em>inline html works</em>
 but we have <code>micros</code> for inline code as well.
 <a href= https://www.itkservices2.com/nem_review_1.2>See ITK stuff</a>
-</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 4.3.1 low</h3><div id='low_d' style='display:block'>
+</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 5.3.1 low</h3><div id='low_d' style='display:block'>
 <p>level 3 stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff

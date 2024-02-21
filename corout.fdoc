@@ -5,6 +5,7 @@
 I will show a simple low level example of coroutines, it will be a 
 simple pipeline consisting of a source, a transducer, a limiter, and a sink.
 
+@h2 The source
 First we have our source, which just write all the integers starting from 0
 down the channel @{out}. The type @{%>int} is an output channel endpoint
 for @{int}.
@@ -19,6 +20,7 @@ proc source (out: %>int) () {
 }
 @
 
+@h2 The sink
 Now we have a simple sink, which just prints everything it reads:
 @tangle ex1
 proc sink (inp: %<int) () {
@@ -35,6 +37,7 @@ unit -> unit
 @
 which is the type required to spawn fibre from a coroutine.
 
+@h2 The transducer
 Now we have a transducer which writes the square of every integer it reads.
 @tangle ex1
 proc squarer (inp: %<int, out: %>int) () {
@@ -45,6 +48,7 @@ proc squarer (inp: %<int, out: %>int) () {
 }
 @
 
+@h2 The limiter
 You should notice the previous three components were all infinite loops.
 Since we don't want our demo to run forever we will throw in a limiter chip:
 @tangle ex1
@@ -60,6 +64,7 @@ This procedure drops through, but it cannot return control, because
 there is nowhere to return it to, so it has, in effect, committed
 suicide implicitly.
 
+@h2 The runner
 Now we need have four components so we need three channels to connect them:
 @tangle ex1
 proc run_pipeline() {
@@ -86,6 +91,7 @@ run_pipeline();
 @
 
 Here is the complete program: <a href="https://github.com/felix-lang/felix-lang.github.io/blob/main/examples/ex1.flx">ex1.flx</a>
+
 @h1 Using the chip DSSL
 The code above involves a bit of boilerplate so I'm going to show you how to do the
 same job using the <em>chip</em> DSSL. A DSSL is a unique feature of Felix which allows
@@ -177,6 +183,44 @@ run_pipeline2();
 @
 For any functional programmers around, a pipeline is semantically identical
 to a Monad.
+
+@h2 How does it stop?
+It is clear, because I told you, that we put the @{limiter} into the pipeline so it terminates.
+So the @{limiter} commits suicide by dropping off the end after a certain number of data transfers.
+But the other three components are infinite loops, so how does the system terminate?
+
+First consider the transducer @{squarer} tries to write to the limiter, but alas, it is dead?
+The write stalls, and we say the fibre is <em>blocked</em> or being vulgar, <em>constipated</em>.
+And now, since it is blocked, it cannot read the input from the @{source}, so it too is blocked.
+
+The @{sink} on the other hand has a different problem: it is trying to read from the @{limiter}
+but the limiter is dead, so there is no input coming: the sink is said to be @{starved}.
+
+There are therefore <em>no active fibres</em> so the system terminates.
+I will emphasise this point heavily because these are the correct termination semantics.
+There is another language with processes and channels, namely @{golang}. 
+Unfortunately @{golang} got the termination semantics completely wrong.
+in addition, @{golang} channel semantics are also wrong because channels can be closed
+and a reader can detect if a writer closed the channel. 
+
+Although this is not possible in Felix, you can write the option type @{opt} and use
+the @{None} case to signal end of data. In fact, in Felix you can write <em>any</em>
+type down a channel, even channels!
+
+@h1 Felix is a coroutine
+Most programming language generate programs which consist of single top level procedure,
+for example @{main()} in C. It is a subroutine called by the startup code which in turn
+was invoked by the operating system.
+
+Felix, as usual, is different. For a start, Felix generates libraries, in fact the
+default is a shared library. So in fact, what you think is mainline code running
+is in fact just the initialisation code for the library. You can also  
+add a procedure @{flx_main()} to your code and that will also be run after
+the initialisation of the library.
+
+However there is something else different: the Felix mainline code is not
+a subroutine, it is a coroutine!
+
 
 @h1 The concept of fibration
 A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
