@@ -1,4 +1,5 @@
 Add tangler id=ex1 filename=examples/ex1.flx
+Add tangler id=ex2 filename=examples/ex2.flx
 Tangle id=ex1
 Tangler filename=examples/ex1.flx
 Extension=.flx
@@ -17,6 +18,10 @@ Extension=.flx
 flx ....
 Tangle id=ex1
 Tangler filename=examples/ex1.flx
+Extension=.flx
+flx ....
+Tangle id=ex2
+Tangler filename=examples/ex2.flx
 Extension=.flx
 flx ....
 <html><head>
@@ -327,6 +332,7 @@ function toggle(button,id)
 }
 var allbuttons = [
 "A low level example.",
+"Using the chip DSSL",
 "The concept of fibration",
 "next",
 "high",
@@ -395,17 +401,20 @@ function mouseout(id)
       <div class=m1 onclick="mshow('menu1','#A low level example._h')"> <a href="#A_low_level_example._h">A low level example.</a></div>
       <div class=sm id=menu1>
       </div>
-      <div class=m1 onclick="mshow('menu2','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
+      <div class=m1 onclick="mshow('menu2','#Using the chip DSSL_h')"> <a href="#Using_the_chip_DSSL_h">Using the chip DSSL</a></div>
       <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
+      <div class=sm id=menu3>
       <div class=m2><a href="#next_h">next</a></div>
       </div>
-      <div class=m1 onclick="mshow('menu3','#high_h')"> <a href="#high_h">high</a></div>
-      <div class=sm id=menu3>
+      <div class=m1 onclick="mshow('menu4','#high_h')"> <a href="#high_h">high</a></div>
+      <div class=sm id=menu4>
       <div class=m2><a href="#med1_h">med1</a></div>
       <div class=m2><a href="#med2_h">med2</a></div>
       <div class=m2><a href="#med3_h">med3</a></div>
       </div>
-    <script>counter_max=3;</script>
+    <script>counter_max=4;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -490,7 +499,17 @@ examples/ex1.flx</pre>
 <span class="lineno" id=line19></span>    <span class="comment">// exit</span>
 <span class="lineno" id=line20></span>  }
 <span class="lineno" id=line21></span>  run_pipeline();
-</pre></p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 2 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
+</pre></p><p>Here is the complete program: <a href="https://github.com/felix-lang/felix-lang.github.io/blob/main/examples/ex1.flx">ex1.flx</a>
+</p></div><h1 id='Using_the_chip_DSSL_h'><img src='/share/src/web/images/minus.gif' id='Using the chip DSSL' onclick='toggle(this,"Using_the_chip_DSSL_d")' alt='+'/> 2 Using the chip DSSL</h1><div id='Using_the_chip_DSSL_d' style='display:block'>
+<p>The code above involves a bit of boilerplate so I'm going to show you how to do the
+same job using the <em>chip</em> DSSL. A DSSL is a unique feature of Felix which allows
+the <em>user/em> to define an extension to the existing language, which has an application
+in a specific domain. Unlike DSLs or domain specific languages, Felix has DSSLs or domain
+specific <em>sub-</em>languages.
+</p><p>Let me show you:
+</p><pre class='inclusion'>
+examples/ex2.flx</pre>
+<p><pre class='flxbg'></pre></p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 3 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
 <p>A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
 with these properties:
 <ul>
@@ -551,13 +570,13 @@ running fibre continues instead, of <code>schedule_fthread</code> is used instea
 </p><p>In addition, I/O transfers always result in the reader proceeding,
 to give it a chance to actually fetch the data before the write
 might modify it.
-</p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 2.1 next</h2><div id='next_d' style='display:block'>
+</p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 3.1 next</h2><div id='next_d' style='display:block'>
 <p>stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff
-</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 3 high</h1><div id='high_d' style='display:block'>
+</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 4 high</h1><div id='high_d' style='display:block'>
 <p>blam
-</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 3.1 med1</h2><div id='med1_d' style='display:block'>
+</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 4.1 med1</h2><div id='med1_d' style='display:block'>
 <p>stuff
 stuff
 stuff
@@ -594,13 +613,13 @@ stuff
 stuff
 stuff
 stuff
-</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 3.2 med2</h2><div id='med2_d' style='display:block'>
+</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 4.2 med2</h2><div id='med2_d' style='display:block'>
 <p>stuff
-</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 3.3 med3</h2><div id='med3_d' style='display:block'>
+</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 4.3 med3</h2><div id='med3_d' style='display:block'>
 <p>stuff <em>inline html works</em>
 but we have <code>micros</code> for inline code as well.
 <a href= https://www.itkservices2.com/nem_review_1.2>See ITK stuff</a>
-</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 3.3.1 low</h3><div id='low_d' style='display:block'>
+</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 4.3.1 low</h3><div id='low_d' style='display:block'>
 <p>level 3 stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff

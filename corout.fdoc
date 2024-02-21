@@ -85,6 +85,7 @@ proc run_pipeline() {
 run_pipeline();
 @
 
+Here is the complete program: <a href="https://github.com/felix-lang/felix-lang.github.io/blob/main/examples/ex1.flx">ex1.flx</a>
 @h1 Using the chip DSSL
 The code above involves a bit of boilerplate so I'm going to show you how to do the
 same job using the <em>chip</em> DSSL. A DSSL is a unique feature of Felix which allows
