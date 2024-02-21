@@ -1,22 +1,22 @@
-Add tangler id=ex1 filename=$PWD/examples/ex1.flx
+Add tangler id=ex1 filename=examples/ex1.flx
 Tangle id=ex1
-Tangler filename=$PWD/examples/ex1.flx
+Tangler filename=examples/ex1.flx
 Extension=.flx
 flx ....
 Tangle id=ex1
-Tangler filename=$PWD/examples/ex1.flx
+Tangler filename=examples/ex1.flx
 Extension=.flx
 flx ....
 Tangle id=ex1
-Tangler filename=$PWD/examples/ex1.flx
+Tangler filename=examples/ex1.flx
 Extension=.flx
 flx ....
 Tangle id=ex1
-Tangler filename=$PWD/examples/ex1.flx
+Tangler filename=examples/ex1.flx
 Extension=.flx
 flx ....
 Tangle id=ex1
-Tangler filename=$PWD/examples/ex1.flx
+Tangler filename=examples/ex1.flx
 Extension=.flx
 flx ....
 <html><head>
@@ -422,7 +422,7 @@ simple pipeline consisting of a source, a transducer, a limiter, and a sink.
 down the channel <code>out</code>. The type <code>%>int</code> is an output channel endpoint
 for <code>int</code>.
 </p><pre class='inclusion'>
-$PWD/examples/ex1.flx</pre>
+examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> source (out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i = 0;
 <span class="lineno" id=line3></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
@@ -432,7 +432,7 @@ $PWD/examples/ex1.flx</pre>
 <span class="lineno" id=line7></span>  }
 </pre></p><p>Now we have a simple sink, which just prints everything it reads:
 </p><pre class='inclusion'>
-$PWD/examples/ex1.flx</pre>
+examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> sink (inp: %&lt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
@@ -445,7 +445,7 @@ procedure will have type
 </pre></p><p>which is the type required to spawn fibre from a coroutine.
 </p><p>Now we have a transducer which writes the square of every integer it reads.
 </p><pre class='inclusion'>
-$PWD/examples/ex1.flx</pre>
+examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> squarer (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
@@ -455,7 +455,7 @@ $PWD/examples/ex1.flx</pre>
 </pre></p><p>You should notice the previous three components were all infinite loops.
 Since we don't want our demo to run forever we will throw in a limiter chip:
 </p><pre class='inclusion'>
-$PWD/examples/ex1.flx</pre>
+examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> limiter (<span class="big_keyword" title="Define a mutable variable">var</span> limit: <span class="library" title="binding of C int type">int</span>) (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> limit &gt; 0 <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
@@ -468,7 +468,7 @@ there is nowhere to return it to, so it has, in effect, committed
 suicide implicitly.
 </p><p>Now we need have four components so we need three channels to connect them:
 </p><pre class='inclusion'>
-$PWD/examples/ex1.flx</pre>
+examples/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline() {
 <span class="lineno" id=line2></span>    <span class="comment">// make channels</span>
 <span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i1,o1 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 

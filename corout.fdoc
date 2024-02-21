@@ -1,4 +1,4 @@
-@tangler ex1 = $PWD/examples/ex1.flx
+@tangler ex1 = examples/ex1.flx
 @title coroutines
 @h1 A low level example.
 I will show a simple low level example of coroutines, it will be a 
