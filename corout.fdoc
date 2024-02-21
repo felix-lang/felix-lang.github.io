@@ -1,4 +1,89 @@
 @title coroutines
+@h1 A low level example.
+I will show a simple low level example of coroutines, it will be a 
+simple pipeline consisting of a source, a transducer, a limiter, and a sink.
+
+First we have our source, which just write all the integers starting from 0
+down the channel @{inp}. The type @{%>int} is an output channel endpoint
+for @{int}.
+
+@felix
+proc source (out: %>int) () {
+  var i = 0;
+  while true do 
+    write (out,i); 
+    ++i; 
+  done
+}
+@
+
+Now we have a simple sink, which just prints everything it reads:
+@felix
+proc sink (inp: %<int) () {
+  while true do 
+    var i = read inp;
+    println$ i;
+  done
+}
+@
+You should note the extra unit parameter @{()}. After the input is bound, the resulting
+procedure will have type
+@felix
+unit -> unit
+@
+which is the type required to spawn fibre from a coroutine.
+
+Now we have a transducer which writes the square of every integer it reads.
+@felix
+proc squarer (inp: %<int, out: %>int) () {
+  while true do 
+    var i = read inp;
+    write (out, i * I);
+  done
+}
+@
+
+You should notice the previous three components were all infinite loops.
+Since we don't want our demo to run forever we will throw in a limiter chip:
+@felix
+proc limiter (var limit: int) (inp: %<int, out: %>int) () {
+  while limit > 0 do
+    var i = read inp;
+    write (out, i);
+    --limit;
+  done
+};
+@
+This procedure drops through, but it cannot return control, because
+there is nowhere to return it to, so it has, in effect, committed
+suicide implicitly.
+
+@felix
+Now we need have four components so we need three channels to connect them:
+proc run_pipeline() {
+  // make channels
+  var i1,o1 = mk_ioschannel_pair[int](); 
+  var i2,o2 = mk_ioschannel_pair[int](); 
+  var i3,o3 = mk_ioschannel_pair[int](); 
+
+  // make coroutines by binding the channels
+  var d1 = source(o1);
+  var d2 = squarer(i1,o2);
+  var d3 = limiter 8 (i2,o3);
+  var d4 = sink (i3);
+
+  // spawn coroutines as fibres
+  spawn_fthread d1;
+  spawn_fthread d2;
+  spawn_fthread d3;
+  spawn_fthread d4;
+ 
+  // exit
+}
+@
+
+
+
 @h1 The concept of fibration
 A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
 with these properties:
@@ -6,7 +91,7 @@ with these properties:
 <li>Exactly one process can be <em>running</em> at once, the others are said to be <em>suspended</em></li>
 <li>Control cannot be pre-empted, but is yielded voluntarily</li>
 </ul>
-In our system, there are four principle operations:
+In our system, there are four principle operations which yield control:
 <ol>
 <li><em>spawn</em> a new fibre</li>
 <li><em>read</em> from a channel</li>
@@ -33,12 +118,16 @@ if there are fibres on the channel which are waiting to read
 then one is selected, the data to be written is tranfered from the writer to the reader,
 the fibre is removed from association with the channel,
 and both the running and reader fibre are made active.
+Otherwise if there is no readers waiting on the channel, the writer is 
+suspended and put on the channel.
 
 When a read operation is performed on a channel by the running fibre,
 if there are fibres on the channel which are waiting to write
 then one is selected, the data to be written is transfered from the writer to the reader, 
 fibre, the fibre is removed from association with the channel,
 and both the running and reader fibre are made active.
+Otherwise if there is no writers waiting on the channel, the writer is 
+suspended and put on the channel.
 
 When a fibre commits suicide, it is removed as the running fibre.
 

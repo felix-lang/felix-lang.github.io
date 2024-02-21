@@ -305,6 +305,7 @@ function toggle(button,id)
   }
 }
 var allbuttons = [
+"A low level example.",
 "The concept of fibration",
 "next",
 "high",
@@ -370,17 +371,20 @@ function mouseout(id)
   <!--Left Margin Toc-->
   <div id="leftmargintoc">
     <!--Left Margin Toc Main Contents-->
-      <div class=m1 onclick="mshow('menu1','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
+      <div class=m1 onclick="mshow('menu1','#A low level example._h')"> <a href="#A_low_level_example._h">A low level example.</a></div>
       <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
+      <div class=sm id=menu2>
       <div class=m2><a href="#next_h">next</a></div>
       </div>
-      <div class=m1 onclick="mshow('menu2','#high_h')"> <a href="#high_h">high</a></div>
-      <div class=sm id=menu2>
+      <div class=m1 onclick="mshow('menu3','#high_h')"> <a href="#high_h">high</a></div>
+      <div class=sm id=menu3>
       <div class=m2><a href="#med1_h">med1</a></div>
       <div class=m2><a href="#med2_h">med2</a></div>
       <div class=m2><a href="#med3_h">med3</a></div>
       </div>
-    <script>counter_max=2;</script>
+    <script>counter_max=3;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -390,14 +394,78 @@ function mouseout(id)
         <span id="right" class="rightpanel">
           <div class="maincontent">
 <!--Main Content Body-->
-<h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 1 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
+<h1 id='A_low_level_example._h'><img src='/share/src/web/images/minus.gif' id='A low level example.' onclick='toggle(this,"A_low_level_example._d")' alt='+'/> 1 A low level example.</h1><div id='A_low_level_example._d' style='display:block'>
+<p>I will show a simple low level example of coroutines, it will be a 
+simple pipeline consisting of a source, a transducer, a limiter, and a sink.
+</p><p>First we have our source, which just write all the integers starting from 0
+down the channel <code>inp</code>. The type <code>%>int</code> is an output channel endpoint
+for <code>int</code>.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> source (out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i = 0;
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line4></span>      <span class="library" title="Print a string to a stream">write</span> (out,i); 
+<span class="lineno" id=line5></span>      ++i; 
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line7></span>  }
+</pre></p><p>Now we have a simple sink, which just prints everything it reads:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> sink (inp: %&lt;<span class="library" title="binding of C int type">int</span>) () {
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
+<span class="lineno" id=line4></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ i;
+<span class="lineno" id=line5></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line6></span>  }
+</pre></p><p>You should note the extra unit parameter <code>()</code>. After the input is bound, the resulting
+procedure will have type
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="Type with one values (), the empty tuple">unit</span>
+</pre></p><p>which is the type required to spawn fibre from a coroutine.
+</p><p>Now we have a transducer which writes the square of every integer it reads.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> squarer (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
+<span class="lineno" id=line4></span>      <span class="library" title="Print a string to a stream">write</span> (out, i * I);
+<span class="lineno" id=line5></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line6></span>  }
+</pre></p><p>You should notice the previous three components were all infinite loops.
+Since we don't want our demo to run forever we will throw in a limiter chip:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> limiter (<span class="big_keyword" title="Define a mutable variable">var</span> limit: <span class="library" title="binding of C int type">int</span>) (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> limit &gt; 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
+<span class="lineno" id=line4></span>      <span class="library" title="Print a string to a stream">write</span> (out, i);
+<span class="lineno" id=line5></span>      --limit;
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line7></span>  };
+</pre></p><p>This procedure drops through, but it cannot return control, because
+there is nowhere to return it to, so it has, in effect, committed
+suicide implicitly.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  Now we need have four components so we need three channels <span class="small_keyword" title="substring range separator">to</span> connect them:
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline() {
+<span class="lineno" id=line3></span>    <span class="comment">// make channels</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i1,o1 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i2,o2 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i3,o3 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="comment">// make coroutines by binding the channels</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d1 = source(o1);
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d2 = squarer(i1,o2);
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d3 = limiter 8 (i2,o3);
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d4 = sink (i3);
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="comment">// spawn coroutines as fibres</span>
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d1;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d2;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d3;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d4;
+<span class="lineno" id=line19></span>   
+<span class="lineno" id=line20></span>    <span class="comment">// exit</span>
+<span class="lineno" id=line21></span>  }
+</pre></p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 2 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
 <p>A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
 with these properties:
 <ul>
 <li>Exactly one process can be <em>running</em> at once, the others are said to be <em>suspended</em></li>
 <li>Control cannot be pre-empted, but is yielded voluntarily</li>
 </ul>
-In our system, there are four principle operations:
+In our system, there are four principle operations which yield control:
 <ol>
 <li><em>spawn</em> a new fibre</li>
 <li><em>read</em> from a channel</li>
@@ -422,11 +490,15 @@ if there are fibres on the channel which are waiting to read
 then one is selected, the data to be written is tranfered from the writer to the reader,
 the fibre is removed from association with the channel,
 and both the running and reader fibre are made active.
+Otherwise if there is no readers waiting on the channel, the writer is 
+suspended and put on the channel.
 </p><p>When a read operation is performed on a channel by the running fibre,
 if there are fibres on the channel which are waiting to write
 then one is selected, the data to be written is transfered from the writer to the reader, 
 fibre, the fibre is removed from association with the channel,
 and both the running and reader fibre are made active.
+Otherwise if there is no writers waiting on the channel, the writer is 
+suspended and put on the channel.
 </p><p>When a fibre commits suicide, it is removed as the running fibre.
 </p><p>When a new fibre is spawned, both the spawner and spawnee are made active.
 </p><p>When there is no running fibre, then if an active fibre exists,
@@ -447,13 +519,13 @@ running fibre continues instead, of <code>schedule_fthread</code> is used instea
 </p><p>In addition, I/O transfers always result in the reader proceeding,
 to give it a chance to actually fetch the data before the write
 might modify it.
-</p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 1.1 next</h2><div id='next_d' style='display:block'>
+</p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 2.1 next</h2><div id='next_d' style='display:block'>
 <p>stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff
-</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 2 high</h1><div id='high_d' style='display:block'>
+</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 3 high</h1><div id='high_d' style='display:block'>
 <p>blam
-</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 2.1 med1</h2><div id='med1_d' style='display:block'>
+</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 3.1 med1</h2><div id='med1_d' style='display:block'>
 <p>stuff
 stuff
 stuff
@@ -490,13 +562,13 @@ stuff
 stuff
 stuff
 stuff
-</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 2.2 med2</h2><div id='med2_d' style='display:block'>
+</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 3.2 med2</h2><div id='med2_d' style='display:block'>
 <p>stuff
-</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 2.3 med3</h2><div id='med3_d' style='display:block'>
+</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 3.3 med3</h2><div id='med3_d' style='display:block'>
 <p>stuff <em>inline html works</em>
 but we have <code>micros</code> for inline code as well.
 <a href= https://www.itkservices2.com/nem_review_1.2>See ITK stuff</a>
-</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 2.3.1 low</h3><div id='low_d' style='display:block'>
+</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 3.3.1 low</h3><div id='low_d' style='display:block'>
 <p>level 3 stuff
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
 </pre></p><p>stuff
