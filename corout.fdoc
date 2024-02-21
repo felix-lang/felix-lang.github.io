@@ -175,7 +175,8 @@ proc run_pipeline2() {
 }
 run_pipeline2();
 @
-
+For any functional programmers around, a pipeline is semantically identical
+to a Monad.
 
 @h1 The concept of fibration
 A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
