@@ -1,13 +1,14 @@
+@tangler ex1 = $PWD/examples/ex1.flx
 @title coroutines
 @h1 A low level example.
 I will show a simple low level example of coroutines, it will be a 
 simple pipeline consisting of a source, a transducer, a limiter, and a sink.
 
 First we have our source, which just write all the integers starting from 0
-down the channel @{inp}. The type @{%>int} is an output channel endpoint
+down the channel @{out}. The type @{%>int} is an output channel endpoint
 for @{int}.
 
-@felix
+@tangle ex1
 proc source (out: %>int) () {
   var i = 0;
   while true do 
@@ -18,7 +19,7 @@ proc source (out: %>int) () {
 @
 
 Now we have a simple sink, which just prints everything it reads:
-@felix
+@tangle ex1
 proc sink (inp: %<int) () {
   while true do 
     var i = read inp;
@@ -34,7 +35,7 @@ unit -> unit
 which is the type required to spawn fibre from a coroutine.
 
 Now we have a transducer which writes the square of every integer it reads.
-@felix
+@tangle ex1
 proc squarer (inp: %<int, out: %>int) () {
   while true do 
     var i = read inp;
@@ -45,7 +46,7 @@ proc squarer (inp: %<int, out: %>int) () {
 
 You should notice the previous three components were all infinite loops.
 Since we don't want our demo to run forever we will throw in a limiter chip:
-@felix
+@tangle ex1
 proc limiter (var limit: int) (inp: %<int, out: %>int) () {
   while limit > 0 do
     var i = read inp;
@@ -58,7 +59,7 @@ This procedure drops through, but it cannot return control, because
 there is nowhere to return it to, so it has, in effect, committed
 suicide implicitly.
 
-@felix
+@tangle ex1
 Now we need have four components so we need three channels to connect them:
 proc run_pipeline() {
   // make channels
@@ -80,6 +81,7 @@ proc run_pipeline() {
  
   // exit
 }
+run_pipeline();
 @
 
 
