@@ -59,8 +59,8 @@ This procedure drops through, but it cannot return control, because
 there is nowhere to return it to, so it has, in effect, committed
 suicide implicitly.
 
-@tangle ex1
 Now we need have four components so we need three channels to connect them:
+@tangle ex1
 proc run_pipeline() {
   // make channels
   var i1,o1 = mk_ioschannel_pair[int](); 

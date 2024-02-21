@@ -466,30 +466,30 @@ $PWD/examples/ex1.flx</pre>
 </pre></p><p>This procedure drops through, but it cannot return control, because
 there is nowhere to return it to, so it has, in effect, committed
 suicide implicitly.
+</p><p>Now we need have four components so we need three channels to connect them:
 </p><pre class='inclusion'>
 $PWD/examples/ex1.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  Now we need have four components so we need three channels <span class="small_keyword" title="substring range separator">to</span> connect them:
-<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline() {
-<span class="lineno" id=line3></span>    <span class="comment">// make channels</span>
-<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i1,o1 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
-<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i2,o2 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
-<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i3,o3 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
-<span class="lineno" id=line7></span>  
-<span class="lineno" id=line8></span>    <span class="comment">// make coroutines by binding the channels</span>
-<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d1 = source(o1);
-<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d2 = squarer(i1,o2);
-<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d3 = limiter 8 (i2,o3);
-<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d4 = sink (i3);
-<span class="lineno" id=line13></span>  
-<span class="lineno" id=line14></span>    <span class="comment">// spawn coroutines as fibres</span>
-<span class="lineno" id=line15></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d1;
-<span class="lineno" id=line16></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d2;
-<span class="lineno" id=line17></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d3;
-<span class="lineno" id=line18></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d4;
-<span class="lineno" id=line19></span>   
-<span class="lineno" id=line20></span>    <span class="comment">// exit</span>
-<span class="lineno" id=line21></span>  }
-<span class="lineno" id=line22></span>  run_pipeline();
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline() {
+<span class="lineno" id=line2></span>    <span class="comment">// make channels</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i1,o1 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i2,o2 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i3,o3 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="comment">// make coroutines by binding the channels</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d1 = source(o1);
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d2 = squarer(i1,o2);
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d3 = limiter 8 (i2,o3);
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a mutable variable">var</span> d4 = sink (i3);
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="comment">// spawn coroutines as fibres</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d1;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d2;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d3;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> d4;
+<span class="lineno" id=line18></span>   
+<span class="lineno" id=line19></span>    <span class="comment">// exit</span>
+<span class="lineno" id=line20></span>  }
+<span class="lineno" id=line21></span>  run_pipeline();
 </pre></p></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 2 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
 <p>A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
 with these properties:
