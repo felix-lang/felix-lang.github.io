@@ -1,5 +1,7 @@
 @tangler ex1 = examples/ex1.flx
 @tangler ex2 = examples/ex2.flx
+@tangler ex3 = examples/ex3.flx
+@tangler ex4 = examples/ex4.flx
 @title coroutines
 @h1 A low level example.
 I will show a simple low level example of coroutines, it will be a 
@@ -207,7 +209,52 @@ Although this is not possible in Felix, you can write the option type @{opt} and
 the @{None} case to signal end of data. In fact, in Felix you can write <em>any</em>
 type down a channel, even channels!
 
-@h1 Felix is a coroutine
+@h1 Asynchronous I/O
+Although coroutines are <em>synchronous</em> Felix supports an extension
+which allows two kinds of <em>asynchronous</em> I/O.
+
+First, the library contains routines which can perform operations on sockets
+including @{read}, @{write}, @{bind}, and @{connect}. That subsystem was used
+to construct @{flx_web} which is the fastest web server in existence and can handle
+enormous loads. It outperforms other webservers because it associates a fibre,
+rather than a thread, with each connection, so context switching is lightning fast
+and occurs in user space.
+
+The socket system also uses advanced socket state notificantion services such
+as @{kqueue} on MacOS and @{epoll} on Linux.
+
+However we will demonstrate a simpler service, namely the system alarm closk
+because it has a really simply API.
+@tangle ex3
+println$ "Begin Spawning";
+
+spawn_fthread {
+  println "Start1"; sleep (2.0); println$ "End1";
+};
+
+spawn_fthread {
+  println "Start2"; sleep (1.0); println$ "End2";
+};
+
+sleep (0.25);
+println$ "Mainline terminates";
+@
+And here's the output:
+@pre
+Begin Spawning
+Start1
+Start2
+Mainline terminates
+End2
+End1
+@
+
+The @{sleep} procedure <em>suspends</em> the coroutine, it does not block
+the pthread running the coroutine system. So aftedr the first coroutine
+goes to sleep, the mainline continues and spawns the second coroutine.
+But then, the mainline itself completes and suicides by fall through.
+
+@h2 Felix is a coroutine
 Most programming language generate programs which consist of single top level procedure,
 for example @{main()} in C. It is a subroutine called by the startup code which in turn
 was invoked by the operating system.
@@ -219,7 +266,111 @@ add a procedure @{flx_main()} to your code and that will also be run after
 the initialisation of the library.
 
 However there is something else different: the Felix mainline code is not
-a subroutine, it is a coroutine!
+a subroutine, it is a coroutine! The mainline can happily terminate and
+leave other fibres running: there's really nothing special about your
+main program code, it's just another coroutine.
+
+The Felix startup code creates a scheduler to run coroutines, and your
+program code is just the initial coroutine. So your program terminates
+when there is nothing left to do precisely because it's just another
+coroutine.
+
+@h2 Running subsystems
+So far we have worked with the main scheduler,  which terminates when there
+is nothing left to do. So I want to show you a little problem and 
+how to solve it:
+@tangle ex4
+var x = list[int] (1,2,3,4,5);
+fun addup (acc: int) (elt:int) => acc + elt;
+var y = fold_left addup 0 x;
+println$ y;
+@ 
+This is the purely functional way to add up a list. It is a client server application
+where the fold operation is the service provider and the @{addup}
+function is the client. However the technical implementation has a severe
+problem: the client if forced to write a function to do the work, which can
+only handle one element at a time, and has a single state variable, @{acc},
+the accumulator. In other words, the client has to provide a callback,
+which is a slave to master fold routine.
+
+Here is another way to do the same thing:
+@tangle ex4
+var acc = 0;
+for elt in x do
+  acc = acc + elt;
+done
+@
+In this case we're using an iterator over the list which is provided
+by the library, and that iterator is a slave to the client code
+which is master: the iterator is called by the client.
+
+Both these solutions work, and they are in fact dual or <em>control inverse</em>:
+each one is the other one turned inside out with respect to control relations.
+The client is a slave in the first solution whilst the iterator is a slave
+in the second.
+
+There is way to do this without slavery .. using coroutines of course!
+@tangle ex4
+begin 
+  chip adder connector io pin inp: %<int  {
+    var acc = 0;
+    while true do
+      var elt = read io.inp;
+      acc = acc + elt;
+      println$ acc;
+    done
+  }
+  (source_from_list x |-> adder)();
+end
+@
+The chip @{source_from_list} comes from the standard library, it just writes
+each element of a list down its output channel.
+
+The code terminates when you expect and the last result printed is the answer.
+But we just want the answer!
+
+So here is our first attempt:
+@tangle ex4
+begin
+  var acc = 0;
+  chip adder connector io pin inp: %<int  {
+    while true do
+      sleep (0.025);
+      var elt = read io.inp;
+      acc = acc + elt;
+    done
+  }
+
+  (source_from_list x |-> adder)();
+  println$ "Attempt1: " + acc.str;
+end
+@
+Of course this doesn't work we get:
+@pre
+Attempt1: 0
+@
+because as we know, the mainline is a coroutine, and it continues on whilst
+the @{adder} is sleeping. In the abstract semantics when there is a set
+of coroutines waiting to run, the scheduler can run <em>any one</em> of them
+so even without the sleep, it could complete the mainline before completing
+the pipeline.
+
+
+@tangle ex4
+begin
+  var acc = 0;
+  chip adder connector io pin inp: %<int  {
+    while true do
+      var elt = read io.inp;
+      acc = acc + elt;
+    done
+  }
+
+  run (source_from_list x |-> adder);
+  println$ "Attempt2: " + acc.str;
+end
+@
+
 
 
 @h1 The concept of fibration
