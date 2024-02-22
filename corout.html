@@ -46,26 +46,6 @@ Tangle id=ex3
 Tangler filename=examples/ex3.flx
 Extension=.flx
 flx ....
-Tangle id=ex4
-Tangler filename=examples/ex4.flx
-Extension=.flx
-flx ....
-Tangle id=ex4
-Tangler filename=examples/ex4.flx
-Extension=.flx
-flx ....
-Tangle id=ex4
-Tangler filename=examples/ex4.flx
-Extension=.flx
-flx ....
-Tangle id=ex4
-Tangler filename=examples/ex4.flx
-Extension=.flx
-flx ....
-Tangle id=ex4
-Tangler filename=examples/ex4.flx
-Extension=.flx
-flx ....
 <html><head>
 <style type="text/css">
 body {margin:3%; }
@@ -384,13 +364,7 @@ var allbuttons = [
 "Asynchronous I/O",
 "Felix is a coroutine",
 "Running subsystems",
-"The concept of fibration",
-"next",
-"high",
-"med1",
-"med2",
-"med3",
-"low"
+"The concept of fibration"
 ];
 function expand_all(dummy)
 {
@@ -468,15 +442,8 @@ function mouseout(id)
       </div>
       <div class=m1 onclick="mshow('menu4','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
       <div class=sm id=menu4>
-      <div class=m2><a href="#next_h">next</a></div>
       </div>
-      <div class=m1 onclick="mshow('menu5','#high_h')"> <a href="#high_h">high</a></div>
-      <div class=sm id=menu5>
-      <div class=m2><a href="#med1_h">med1</a></div>
-      <div class=m2><a href="#med2_h">med2</a></div>
-      <div class=m2><a href="#med3_h">med3</a></div>
-      </div>
-    <script>counter_max=5;</script>
+    <script>counter_max=4;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -728,92 +695,14 @@ program code is just the initial coroutine. So your program terminates
 when there is nothing left to do precisely because it's just another
 coroutine.
 </p></div><h2 id='Running_subsystems_h'><img src='/share/src/web/images/minus.gif' id='Running subsystems' onclick='toggle(this,"Running_subsystems_d")' alt='+'/> 3.2 Running subsystems</h2><div id='Running_subsystems_d' style='display:block'>
-<p>So far we have worked with the main scheduler,  which terminates when there
-is nothing left to do. So I want to show you a little problem and 
-how to solve it:
-</p><pre class='inclusion'>
-examples/ex4.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> x = <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C int type">int</span>] (1,2,3,4,5);
-<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> addup (acc: <span class="library" title="binding of C int type">int</span>) (elt:<span class="library" title="binding of C int type">int</span>) =&gt; acc + elt;
-<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y = <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> addup 0 x;
-<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y;
-</pre></p><p>This is the purely functional way to add up a list. It is a client server application
-where the fold operation is the service provider and the <code>addup</code>
-function is the client. However the technical implementation has a severe
-problem: the client if forced to write a function to do the work, which can
-only handle one element at a time, and has a single state variable, <code>acc</code>,
-the accumulator. In other words, the client has to provide a callback,
-which is a slave to master fold routine.
-</p><p>Here is another way to do the same thing:
-</p><pre class='inclusion'>
-examples/ex4.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> acc = 0;
-<span class="lineno" id=line2></span>  <span class="small_keyword" title="for loop">for</span> elt <span class="small_keyword" title="membership operator, function mem">in</span> x <span class="small_keyword" title="imperative code begins">do</span>
-<span class="lineno" id=line3></span>    acc = acc + elt;
-<span class="lineno" id=line4></span>  <span class="small_keyword" title="end of body">done</span>
-</pre></p><p>In this case we're using an iterator over the list which is provided
-by the library, and that iterator is a slave to the client code
-which is master: the iterator is called by the client.
-</p><p>Both these solutions work, and they are in fact dual or <em>control inverse</em>:
-each one is the other one turned inside out with respect to control relations.
-The client is a slave in the first solution whilst the iterator is a slave
-in the second.
-</p><p>There is way to do this without slavery .. using coroutines of course!
-</p><pre class='inclusion'>
-examples/ex4.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="small_keyword" title="end of extension">begin</span> 
-<span class="lineno" id=line2></span>    chip adder connector io pin inp: %&lt;<span class="library" title="binding of C int type">int</span>  {
-<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> acc = 0;
-<span class="lineno" id=line4></span>      <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
-<span class="lineno" id=line5></span>        <span class="big_keyword" title="Define a mutable variable">var</span> elt = read io.inp;
-<span class="lineno" id=line6></span>        acc = acc + elt;
-<span class="lineno" id=line7></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ acc;
-<span class="lineno" id=line8></span>      <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line9></span>    }
-<span class="lineno" id=line10></span>    (source_from_list x |-&gt; adder)();
-<span class="lineno" id=line11></span>  <span class="small_keyword" title="end of extension">end</span>
-</pre></p><p>The chip <code>source_from_list</code> comes from the standard library, it just writes
-each element of a list down its output channel.
-</p><p>The code terminates when you expect and the last result printed is the answer.
-But we just want the answer!
-</p><p>So here is our first attempt:
-</p><pre class='inclusion'>
-examples/ex4.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="small_keyword" title="end of extension">begin</span>
-<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a mutable variable">var</span> acc = 0;
-<span class="lineno" id=line3></span>    chip adder connector io pin inp: %&lt;<span class="library" title="binding of C int type">int</span>  {
-<span class="lineno" id=line4></span>      <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
-<span class="lineno" id=line5></span>        sleep (0.025);
-<span class="lineno" id=line6></span>        <span class="big_keyword" title="Define a mutable variable">var</span> elt = read io.inp;
-<span class="lineno" id=line7></span>        acc = acc + elt;
-<span class="lineno" id=line8></span>      <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line9></span>    }
-<span class="lineno" id=line10></span>  
-<span class="lineno" id=line11></span>    (source_from_list x |-&gt; adder)();
-<span class="lineno" id=line12></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Attempt1: "</span> + acc.<span class="library" title="Convert a value to a string">str</span>;
-<span class="lineno" id=line13></span>  <span class="small_keyword" title="end of extension">end</span>
-</pre></p><p>Of course this doesn't work we get:
-</p><p><pre class="prefmtbg">Attempt1: 0
-</pre></p><p>because as we know, the mainline is a coroutine, and it continues on whilst
-the <code>adder</code> is sleeping. In the abstract semantics when there is a set
-of coroutines waiting to run, the scheduler can run <em>any one</em> of them
-so even without the sleep, it could complete the mainline before completing
-the pipeline.
-</p><pre class='inclusion'>
-examples/ex4.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="small_keyword" title="end of extension">begin</span>
-<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a mutable variable">var</span> acc = 0;
-<span class="lineno" id=line3></span>    chip adder connector io pin inp: %&lt;<span class="library" title="binding of C int type">int</span>  {
-<span class="lineno" id=line4></span>      <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
-<span class="lineno" id=line5></span>        <span class="big_keyword" title="Define a mutable variable">var</span> elt = read io.inp;
-<span class="lineno" id=line6></span>        acc = acc + elt;
-<span class="lineno" id=line7></span>      <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line8></span>    }
-<span class="lineno" id=line9></span>  
-<span class="lineno" id=line10></span>    run (source_from_list x |-&gt; adder);
-<span class="lineno" id=line11></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Attempt2: "</span> + acc.<span class="library" title="Convert a value to a string">str</span>;
-<span class="lineno" id=line12></span>  <span class="small_keyword" title="end of extension">end</span>
-</pre></p></div></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 4 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
+<p>There is a constraint on Felix coroutines: they have to be procedures.
+Functions cannot read and write channels. However there is a way around
+this problem: you can use the <code>run</code> subroutine to create an run a new,
+nested, scheduler. 
+</p><p>The <code>run</code> subroutine, being a subroutine, returns when it is finished.
+</p><p>Unfortunately there is another constraint on nested schedulers: they cannot
+do asynchronous I/O.
+</p></div></div><h1 id='The_concept_of_fibration_h'><img src='/share/src/web/images/minus.gif' id='The concept of fibration' onclick='toggle(this,"The_concept_of_fibration_d")' alt='+'/> 4 The concept of fibration</h1><div id='The_concept_of_fibration_d' style='display:block'>
 <p>A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
 with these properties:
 <ul>
@@ -874,60 +763,7 @@ running fibre continues instead, of <code>schedule_fthread</code> is used instea
 </p><p>In addition, I/O transfers always result in the reader proceeding,
 to give it a chance to actually fetch the data before the write
 might modify it.
-</p><h2 id='next_h'><img src='/share/src/web/images/minus.gif' id='next' onclick='toggle(this,"next_d")' alt='+'/> 4.1 next</h2><div id='next_d' style='display:block'>
-<p>stuff
-</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
-</pre></p><p>stuff
-</p></div></div><h1 id='high_h'><img src='/share/src/web/images/minus.gif' id='high' onclick='toggle(this,"high_d")' alt='+'/> 5 high</h1><div id='high_d' style='display:block'>
-<p>blam
-</p><h2 id='med1_h'><img src='/share/src/web/images/minus.gif' id='med1' onclick='toggle(this,"med1_d")' alt='+'/> 5.1 med1</h2><div id='med1_d' style='display:block'>
-<p>stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-</p></div><h2 id='med2_h'><img src='/share/src/web/images/minus.gif' id='med2' onclick='toggle(this,"med2_d")' alt='+'/> 5.2 med2</h2><div id='med2_d' style='display:block'>
-<p>stuff
-</p></div><h2 id='med3_h'><img src='/share/src/web/images/minus.gif' id='med3' onclick='toggle(this,"med3_d")' alt='+'/> 5.3 med3</h2><div id='med3_d' style='display:block'>
-<p>stuff <em>inline html works</em>
-but we have <code>micros</code> for inline code as well.
-<a href= https://www.itkservices2.com/nem_review_1.2>See ITK stuff</a>
-</p><h3 id='low_h'><img src='/share/src/web/images/minus.gif' id='low' onclick='toggle(this,"low_d")' alt='+'/> 5.3.1 low</h3><div id='low_d' style='display:block'>
-<p>level 3 stuff
-</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  blah
-</pre></p><p>stuff
-</p></div></div></div><!--Main Content Body End-->
+</p></div><!--Main Content Body End-->
 
           </div> <!-- rightpanel contents end -->
           <hr>

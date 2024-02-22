@@ -276,102 +276,15 @@ when there is nothing left to do precisely because it's just another
 coroutine.
 
 @h2 Running subsystems
-So far we have worked with the main scheduler,  which terminates when there
-is nothing left to do. So I want to show you a little problem and 
-how to solve it:
-@tangle ex4
-var x = list[int] (1,2,3,4,5);
-fun addup (acc: int) (elt:int) => acc + elt;
-var y = fold_left addup 0 x;
-println$ y;
-@ 
-This is the purely functional way to add up a list. It is a client server application
-where the fold operation is the service provider and the @{addup}
-function is the client. However the technical implementation has a severe
-problem: the client if forced to write a function to do the work, which can
-only handle one element at a time, and has a single state variable, @{acc},
-the accumulator. In other words, the client has to provide a callback,
-which is a slave to master fold routine.
+There is a constraint on Felix coroutines: they have to be procedures.
+Functions cannot read and write channels. However there is a way around
+this problem: you can use the @{run} subroutine to create an run a new,
+nested, scheduler. 
 
-Here is another way to do the same thing:
-@tangle ex4
-var acc = 0;
-for elt in x do
-  acc = acc + elt;
-done
-@
-In this case we're using an iterator over the list which is provided
-by the library, and that iterator is a slave to the client code
-which is master: the iterator is called by the client.
+The @{run} subroutine, being a subroutine, returns when it is finished.
 
-Both these solutions work, and they are in fact dual or <em>control inverse</em>:
-each one is the other one turned inside out with respect to control relations.
-The client is a slave in the first solution whilst the iterator is a slave
-in the second.
-
-There is way to do this without slavery .. using coroutines of course!
-@tangle ex4
-begin 
-  chip adder connector io pin inp: %<int  {
-    var acc = 0;
-    while true do
-      var elt = read io.inp;
-      acc = acc + elt;
-      println$ acc;
-    done
-  }
-  (source_from_list x |-> adder)();
-end
-@
-The chip @{source_from_list} comes from the standard library, it just writes
-each element of a list down its output channel.
-
-The code terminates when you expect and the last result printed is the answer.
-But we just want the answer!
-
-So here is our first attempt:
-@tangle ex4
-begin
-  var acc = 0;
-  chip adder connector io pin inp: %<int  {
-    while true do
-      sleep (0.025);
-      var elt = read io.inp;
-      acc = acc + elt;
-    done
-  }
-
-  (source_from_list x |-> adder)();
-  println$ "Attempt1: " + acc.str;
-end
-@
-Of course this doesn't work we get:
-@pre
-Attempt1: 0
-@
-because as we know, the mainline is a coroutine, and it continues on whilst
-the @{adder} is sleeping. In the abstract semantics when there is a set
-of coroutines waiting to run, the scheduler can run <em>any one</em> of them
-so even without the sleep, it could complete the mainline before completing
-the pipeline.
-
-
-@tangle ex4
-begin
-  var acc = 0;
-  chip adder connector io pin inp: %<int  {
-    while true do
-      var elt = read io.inp;
-      acc = acc + elt;
-    done
-  }
-
-  run (source_from_list x |-> adder);
-  println$ "Attempt2: " + acc.str;
-end
-@
-
-
+Unfortunately there is another constraint on nested schedulers: they cannot
+do asynchronous I/O.
 
 @h1 The concept of fibration
 A <em>coroutine system</em> is a collection of processes called <em>fibres</em>
@@ -445,64 +358,5 @@ running fibre continues instead, of @{schedule_fthread} is used instead.
 In addition, I/O transfers always result in the reader proceeding,
 to give it a chance to actually fetch the data before the write
 might modify it.
-
-
-@h2 next
-stuff
-@felix 
-blah
-@
-stuff
-@h1 high
-blam
-@h2 med1
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-stuff
-@h2 med2
-stuff
-@h2 med3
-stuff <em>inline html works</em>
-but we have @{micros} for inline code as well.
-<a href= https://www.itkservices2.com/nem_review_1.2>See ITK stuff</a>
-@h3 low
-level 3 stuff
-@felix 
-blah
-@
-stuff
 
 
