@@ -1,0 +1,123 @@
+@tangler ex1 = examples/embedc/ex1.flx
+@title Embedding C++
+@h1 Basics
+Felix is a unique language in that, unlike other languages, it does
+not have any primitive types.
+
+Instead, Felix provides machinery to <em>lift</em> types from C++ code.
+This means Felix is really a C++ meta-programming language.
+
+I will show the basics here but first a caveat: we have to use weird
+names for things to avoid conflicts with the Felix standard library.
+
+@tangle ex1
+type cplx = "::std::complex<double>" 
+  requires header '#include <complex>'
+;
+ctor cplx : double * double = 
+  "::std::complex<double>($1,$2)"
+;
+fun + : cplx * cplx -> cplx = "$1+$2";
+fun - : cplx * cplx -> cplx = "$1-$2";
+fun * : cplx * cplx -> cplx = "$1*$2";
+fun / : cplx * cplx -> cplx = "$1/$2";
+fun == : cplx * cplx -> bool = "$1==$2";
+fun real: cplx -> double = "$1.real()";
+fun imag: cplx -> double = "$1.imag()";
+fun abs: cplx -> double = "$1.abs()";
+fun arg: cplx -> double = "$1.arg()";
+fun norm: cplx -> double = "$1.norm()";
+fun conj: cplx -> double = "$1.conj()";
+
+typedef polarbear = cplx;
+ctor polarbear: double * double = "::std::polar<double>($1,$2)";
+
+fun str (x: cplx) => x.real.str + "+" + x.imag.str + "i";
+
+// test
+var x = cplx (1.0,2.0);
+var y = polarbear (1.0,0.5);
+println$ (x+y).str;
+println$ (x == y).str;
+@
+@h2 Type Classes
+Let us try an experiment:
+@tangle ex1
+println$ (x,y);
+@
+
+If you run it at this point without the rest of the tutorial, this happens:
+@pre
+CLIENT ERROR
+[flx_frontend/flx_typeclass.ml:752: E367] [Cannotmatch] Cannot instantiate virtual str<17781>[Nominal[] cplx]
+In /Users/skaller/felix/src/packages/core_type_constructors.fdoc: line 693, cols 4 to 59
+692: instance[T] Str[T*T] {
+693:    fun str (t1:T, t2:T) => "("+str t1 + ", " + str t2+")";
+        ********************************************************
+694: }
+@
+Its not very helpful. But here is a fix:
+@tangle ex1
+instance Str[cplx] {
+  fun str (x: cplx) => x.real.str + "+" + x.imag.str + "i";
+}
+@
+and now we get this:
+@pre
+(1+2i, 0.877583+0.479426i)
+@
+To understand what's going on you need to see some of the
+Standard Library:
+@felix
+class Str [T] {
+  virtual fun str: T -> string;
+}
+@
+By instantiating the virtual function in an @{instance} the definition
+is available universally.
+
+@h1 Another type class
+Since the last type class was a bit easy here's a slightly harder one.. only 
+slightly harder I promise!
+@felix
+// equality: technically, equivalence relation
+class Eq[t] {
+  virtual fun == : t * t -> bool;
+  virtual fun != (x:t,y:t):bool => not (x == y);
+
+  axiom reflex(x:t): x == x;
+  axiom sym(x:t, y:t): (x == y) == (y == x);
+  axiom trans(x:t, y:t, z:t): x == y and y == z implies x == z;
+
+  fun eq(x:t, y:t)=> x == y;
+  fun ne(x:t, y:t)=> x != y;
+  fun \ne(x:t, y:t)=> x != y;
+  fun \neq(x:t, y:t)=> x != y;
+}
+@
+This is a Felix <em>type class</em> . The design is modelled after Haskell.
+It has:
+
+<ol>
+<li> A name @{Eq}
+<li> A type parameter @{t}
+<li> An undefined virtual function for equality
+<li> An virtual function for inequality with a default definition
+<li> A set of @{axiom} which help to define the semantics
+<li> A collection of derived functions all of which are trivial renamings
+</ol>
+
+You have already seen the syntax for instantiating virtuals by
+setting the type variable @{t} to the type @{cplx}. The inquality
+can be defined as well but if not, as in this case, is derived
+from the euqliaty.
+
+The derived functions are available with the class also, but
+cannot be defined in an @{instance}.
+
+@h1 TeX symbols
+You may have notices in the @{Eq} type class that there is a 
+function with the weird name @{\ne}. Which shown as $\eq$ in TeX.
+
+
+
