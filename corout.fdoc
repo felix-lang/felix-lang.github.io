@@ -2,6 +2,7 @@
 @tangler ex2 = examples/ex2.flx
 @tangler ex3 = examples/ex3.flx
 @tangler ex4 = examples/ex4.flx
+@tangler ex5 = examples/ex5.flx
 @title coroutines
 @h1 A low level example.
 I will show a simple low level example of coroutines, it will be a 
@@ -315,6 +316,8 @@ the fibre is not technically dead because it no longer exists.
 A <em>channel</em> is an object associated with which 
 set of fibres all waiting to read or all waiting to write.
 
+@h2 Operations
+@h3 write
 When a write operation is performed on a channel by the running fibre,
 if there are fibres on the channel which are waiting to read
 then one is selected, the data to be written is tranfered from the writer to the reader,
@@ -323,6 +326,7 @@ and both the running and reader fibre are made active.
 Otherwise if there is no readers waiting on the channel, the writer is 
 suspended and put on the channel.
 
+@h3 read
 When a read operation is performed on a channel by the running fibre,
 if there are fibres on the channel which are waiting to write
 then one is selected, the data to be written is transfered from the writer to the reader, 
@@ -331,10 +335,13 @@ and both the running and reader fibre are made active.
 Otherwise if there is no writers waiting on the channel, the writer is 
 suspended and put on the channel.
 
+@h3 suicide
 When a fibre commits suicide, it is removed as the running fibre.
 
+@h3 spawn 
 When a new fibre is spawned, both the spawner and spawnee are made active.
 
+@h3 Scheduler operation
 When there is no running fibre, then if an active fibre exists,
 an active fibre is selected and promoted to running state
 and the thread of control begins executing it.
@@ -342,6 +349,7 @@ and the thread of control begins executing it.
 When there is no running fibre, and no active fibres,
 the whole system terminates. Any fibres waiting on I/O become dead
 
+@h2 Communication Sequential Coroutines
 The description above is a complete account of the abstract semantics
 known as <em>Communicating Sequential Coroutines</em> or CSC, it is a
 sub system obtain from Tony Hoare's <em>Communicating Sequenmtial Processes</em>
@@ -349,7 +357,8 @@ or CSP, in which concurrency is replaced by an indeterminate total ordering.
 
 To be precise in CSC all events are totally ordered, however the exact ordering
 is not determinate. This is because a scheduler running the system is free
-to pick any active fibre to run when one is needed.
+to pick any active fibre to run when one is needed; similarly
+a read or write operation can match with any dual operation on a channel.
 
 In the Felix implementation, a spawned fibre runs immediately
 if the @{spawn_fthread} procedure is used to launch it, or the
@@ -358,5 +367,43 @@ running fibre continues instead, of @{schedule_fthread} is used instead.
 In addition, I/O transfers always result in the reader proceeding,
 to give it a chance to actually fetch the data before the write
 might modify it.
+
+@h1 No Deadlocks
+Most threading systems can deadlock. Here is the classical situation:
+@tangle ex5
+chip D connector io pin inp: %<int pin out: %>int 
+{
+   while true do
+     var x = read io.inp;
+     write (io.out, x);
+   done
+}
+device A = D;
+device B = D;
+circuit 
+  connect A.out, B.inp
+  connect B.out, A.inp
+endcircuit
+println$ "Done";
+@
+Both devices start by reading, so there's nothing to read because
+neither can proceed to writing. So the system hangs, right!
+
+Er .. NO! Both chips are suspended, the mainline completes,
+and the scheduler terminates the program because there is no work to do.
+
+Let me repeat in bold letters:
+
+<bf style="color:red">FELIX COROUTINES CANNOT DEADLOCK</bf>
+
+However they can <em>livelock</em>, but only if you mismanage
+manual circuit construction. Here's an example:
+@tangle ex6
+var inp,out = mk_ioschannel_pair[int]();
+spawn_fthread { write (out, 42); };
+@
+
+This is a livelock because the mainline <em>could</em> read
+the written data on the channel endpoint @{inp} but doesn't.
 
 

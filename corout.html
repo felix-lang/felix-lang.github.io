@@ -316,7 +316,15 @@ var allbuttons = [
 "Asynchronous I/O",
 "Felix is a coroutine",
 "Running subsystems",
-"The concept of fibration"
+"The concept of fibration",
+"Operations",
+"write",
+"read",
+"suicide",
+"spawn",
+"Scheduler operation",
+"Communication Sequential Coroutines",
+"No Deadlocks"
 ];
 function expand_all(dummy)
 {
@@ -394,8 +402,13 @@ function mouseout(id)
       </div>
       <div class=m1 onclick="mshow('menu4','#The concept of fibration_h')"> <a href="#The_concept_of_fibration_h">The concept of fibration</a></div>
       <div class=sm id=menu4>
+      <div class=m2><a href="#Operations_h">Operations</a></div>
+      <div class=m2><a href="#Communication_Sequential_Coroutines_h">Communication Sequential Coroutines</a></div>
       </div>
-    <script>counter_max=4;</script>
+      <div class=m1 onclick="mshow('menu5','#No Deadlocks_h')"> <a href="#No_Deadlocks_h">No Deadlocks</a></div>
+      <div class=sm id=menu5>
+      </div>
+    <script>counter_max=5;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -681,40 +694,78 @@ fibre are automatically reaped by the garbage collector so that in fact
 the fibre is not technically dead because it no longer exists.
 </p><p>A <em>channel</em> is an object associated with which 
 set of fibres all waiting to read or all waiting to write.
-</p><p>When a write operation is performed on a channel by the running fibre,
+</p><h2 id='Operations_h'><img src='/share/src/web/images/minus.gif' id='Operations' onclick='toggle(this,"Operations_d")' alt='+'/> 4.1 Operations</h2><div id='Operations_d' style='display:block'>
+<h3 id='write_h'><img src='/share/src/web/images/minus.gif' id='write' onclick='toggle(this,"write_d")' alt='+'/> 4.1.1 write</h3><div id='write_d' style='display:block'>
+<p>When a write operation is performed on a channel by the running fibre,
 if there are fibres on the channel which are waiting to read
 then one is selected, the data to be written is tranfered from the writer to the reader,
 the fibre is removed from association with the channel,
 and both the running and reader fibre are made active.
 Otherwise if there is no readers waiting on the channel, the writer is 
 suspended and put on the channel.
-</p><p>When a read operation is performed on a channel by the running fibre,
+</p></div><h3 id='read_h'><img src='/share/src/web/images/minus.gif' id='read' onclick='toggle(this,"read_d")' alt='+'/> 4.1.2 read</h3><div id='read_d' style='display:block'>
+<p>When a read operation is performed on a channel by the running fibre,
 if there are fibres on the channel which are waiting to write
 then one is selected, the data to be written is transfered from the writer to the reader, 
 fibre, the fibre is removed from association with the channel,
 and both the running and reader fibre are made active.
 Otherwise if there is no writers waiting on the channel, the writer is 
 suspended and put on the channel.
-</p><p>When a fibre commits suicide, it is removed as the running fibre.
-</p><p>When a new fibre is spawned, both the spawner and spawnee are made active.
-</p><p>When there is no running fibre, then if an active fibre exists,
+</p></div><h3 id='suicide_h'><img src='/share/src/web/images/minus.gif' id='suicide' onclick='toggle(this,"suicide_d")' alt='+'/> 4.1.3 suicide</h3><div id='suicide_d' style='display:block'>
+<p>When a fibre commits suicide, it is removed as the running fibre.
+</p></div><h3 id='spawn_h'><img src='/share/src/web/images/minus.gif' id='spawn' onclick='toggle(this,"spawn_d")' alt='+'/> 4.1.4 spawn</h3><div id='spawn_d' style='display:block'>
+<p>When a new fibre is spawned, both the spawner and spawnee are made active.
+</p></div><h3 id='Scheduler_operation_h'><img src='/share/src/web/images/minus.gif' id='Scheduler operation' onclick='toggle(this,"Scheduler_operation_d")' alt='+'/> 4.1.5 Scheduler operation</h3><div id='Scheduler_operation_d' style='display:block'>
+<p>When there is no running fibre, then if an active fibre exists,
 an active fibre is selected and promoted to running state
 and the thread of control begins executing it.
 </p><p>When there is no running fibre, and no active fibres,
 the whole system terminates. Any fibres waiting on I/O become dead
-</p><p>The description above is a complete account of the abstract semantics
+</p></div></div><h2 id='Communication_Sequential_Coroutines_h'><img src='/share/src/web/images/minus.gif' id='Communication Sequential Coroutines' onclick='toggle(this,"Communication_Sequential_Coroutines_d")' alt='+'/> 4.2 Communication Sequential Coroutines</h2><div id='Communication_Sequential_Coroutines_d' style='display:block'>
+<p>The description above is a complete account of the abstract semantics
 known as <em>Communicating Sequential Coroutines</em> or CSC, it is a
 sub system obtain from Tony Hoare's <em>Communicating Sequenmtial Processes</em>
 or CSP, in which concurrency is replaced by an indeterminate total ordering.
 </p><p>To be precise in CSC all events are totally ordered, however the exact ordering
 is not determinate. This is because a scheduler running the system is free
-to pick any active fibre to run when one is needed.
+to pick any active fibre to run when one is needed; similarly
+a read or write operation can match with any dual operation on a channel.
 </p><p>In the Felix implementation, a spawned fibre runs immediately
 if the <code>spawn_fthread</code> procedure is used to launch it, or the
 running fibre continues instead, of <code>schedule_fthread</code> is used instead.
 </p><p>In addition, I/O transfers always result in the reader proceeding,
 to give it a chance to actually fetch the data before the write
 might modify it.
+</p></div></div><h1 id='No_Deadlocks_h'><img src='/share/src/web/images/minus.gif' id='No Deadlocks' onclick='toggle(this,"No_Deadlocks_d")' alt='+'/> 5 No Deadlocks</h1><div id='No_Deadlocks_d' style='display:block'>
+<p>Most threading systems can deadlock. Here is the classical situation:
+</p><pre class='inclusion'>
+examples/ex5.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> D <span class="small_keyword" title="the parameter of a chip">connector</span> io <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;<span class="library" title="binding of C int type">int</span> <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;<span class="library" title="binding of C int type">int</span> 
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>     <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line4></span>       <span class="big_keyword" title="Define a mutable variable">var</span> x = read io.inp;
+<span class="lineno" id=line5></span>       <span class="library" title="Print a string to a stream">write</span> (io.out, x);
+<span class="lineno" id=line6></span>     <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line7></span>  }
+<span class="lineno" id=line8></span>  <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> A = D;
+<span class="lineno" id=line9></span>  <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> B = D;
+<span class="lineno" id=line10></span>  <span class="small_keyword" title="defines the topology of chip connections">circuit</span> 
+<span class="lineno" id=line11></span>    <span class="small_keyword" title="connects two pins with a channel">connect</span> A.out, B.inp
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="connects two pins with a channel">connect</span> B.out, A.inp
+<span class="lineno" id=line13></span>  <span class="small_keyword" title="defines the topology of chip connections">endcircuit</span>
+<span class="lineno" id=line14></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Done"</span>;
+</pre></p><p>Both devices start by reading, so there's nothing to read because
+neither can proceed to writing. So the system hangs, right!
+</p><p>Er .. NO! Both chips are suspended, the mainline completes,
+and the scheduler terminates the program because there is no work to do.
+</p><p>Let me repeat in bold letters:
+</p><p><bf style="color:red">FELIX COROUTINES CANNOT DEADLOCK</bf>
+</p><p>However they can <em>livelock</em>, but only if you mismanage
+manual circuit construction. Here's an example:
+</p><p><pre class="prefmtbg">var inp,out = mk_ioschannel_pair[int]();
+spawn_fthread { write (out, 42); };
+</pre></p><p>This is a livelock because the mainline <em>could</em> read
+the written data on the channel endpoint <code>inp</code> but doesn't.
 </p></div><!--Main Content Body End-->
 
           </div> <!-- rightpanel contents end -->
