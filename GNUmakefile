@@ -1,6 +1,12 @@
 pretty: 
-	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty embedc.fdoc
-	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty corout.fdoc
+	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web embedc.fdoc
+	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web corout.fdoc
+	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web ../felix/src/packages/lists.fdoc
+
+tut:
+	for file in /Users/skaller/felix/src/web/tut/*.fdoc; do \
+	  env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web "$${file}"; \
+	  done
 
 extract:
 	flx_iscr embedc.fdoc

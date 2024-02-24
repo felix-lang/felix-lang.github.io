@@ -1,0 +1,616 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>/Users/skaller/felix/src/web/tut/func_01.html</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Functions and Procedures",
+"Felix functions",
+"Felix Procedures",
+"Multiple arguments",
+"Function types",
+"Generators",
+"C functions",
+"Higher Order Functions",
+"A style issue",
+"Anonymous function values"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='func_02.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='func_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Functions and Procedures_h')"> <a href="#Functions_and_Procedures_h">Functions and Procedures</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Felix_functions_h">Felix functions</a></div>
+      <div class=m2><a href="#Felix_Procedures_h">Felix Procedures</a></div>
+      <div class=m2><a href="#Multiple_arguments_h">Multiple arguments</a></div>
+      <div class=m2><a href="#Function_types_h">Function types</a></div>
+      <div class=m2><a href="#Generators_h">Generators</a></div>
+      <div class=m2><a href="#C_functions_h">C functions</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Higher Order Functions_h')"> <a href="#Higher_Order_Functions_h">Higher Order Functions</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#A_style_issue_h">A style issue</a></div>
+      <div class=m2><a href="#Anonymous_function_values_h">Anonymous function values</a></div>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Functions_and_Procedures_h'><img src='/share/src/web/images/minus.gif' id='Functions and Procedures' onclick='toggle(this,"Functions_and_Procedures_d")' alt='+'/> 1.1 Functions and Procedures</h1><div id='Functions_and_Procedures_d' style='display:block'>
+<h2 id='Felix_functions_h'><img src='/share/src/web/images/minus.gif' id='Felix functions' onclick='toggle(this,"Felix_functions_d")' alt='+'/> 1.1.1 Felix functions</h2><div id='Felix_functions_d' style='display:block'>
+<p>When you see code like this:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Square of "</span> + <span class="library" title="Convert a value to a string">str</span> 1 + <span class="fstring">" is "</span> + <span class="library" title="Convert a value to a string">str</span> (1 * 1);
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Square of "</span> + <span class="library" title="Convert a value to a string">str</span> 2 + <span class="fstring">" is "</span> + <span class="library" title="Convert a value to a string">str</span> (2 * 2);
+<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Sguare of "</span> + <span class="library" title="Convert a value to a string">str</span> 3 + <span class="fstring">" is "</span> + <span class="library" title="Convert a value to a string">str</span> (3 * 1);
+</pre></p><p><pre class="expected">Square of 1 is 1
+Square of 2 is 4
+Sguare of 3 is 3
+</pre></p><p>You know you need a function (notice the typos on the last line?)
+Basic Felix functions are easy:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> square(x:<span class="library" title="binding of C int type">int</span>)=&gt;x * x;  <span class="comment">// define a function</span>
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Square of "</span> + <span class="library" title="Convert a value to a string">str</span> 1 + <span class="fstring">" is "</span> + <span class="library" title="Convert a value to a string">str</span> (square 1);
+<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Square of "</span> + <span class="library" title="Convert a value to a string">str</span> 2 + <span class="fstring">" is "</span> + <span class="library" title="Convert a value to a string">str</span> 2.square;
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Sguare of "</span> + <span class="library" title="Convert a value to a string">str</span> 3 + <span class="fstring">" is "</span> + (<span class="library" title="Convert a value to a string">str</span>$ square 3);
+</pre></p><p><pre class="expected">Square of 1 is 1
+Square of 2 is 4
+Sguare of 3 is 9
+</pre></p><p>We fixed the bug in the calculation of the square of 3, and 
+we're also showing the three ways to apply a function: 
+high precedence application using operator whitespace
+which needs surrounding parentheses for correct grouping,
+reverse application using operator dot, which is even higher
+precedence than whitespace, and so does not, and finally we're
+applying the <code>str</code> function to a whitespace application
+using operator dollar, which has lower precedence than whitespace.
+</p><p>There's a longer way to write a function:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> long-winded-square(x:<span class="library" title="binding of C int type">int</span>):<span class="library" title="binding of C int type">int</span> = {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define an immutable value">val</span> s = x * x;
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="return">return</span> x;
+<span class="lineno" id=line4></span>  }
+</pre></p><p>This way allows complicated expressions to be broken up
+into arbitrary code. 
+</p><p>Functions are not allowed to have side effects.
+</p></div><h2 id='Felix_Procedures_h'><img src='/share/src/web/images/minus.gif' id='Felix Procedures' onclick='toggle(this,"Felix_Procedures_d")' alt='+'/> 1.1.2 Felix Procedures</h2><div id='Felix_Procedures_d' style='display:block'>
+<p>Still, there must be a way to repeat the print: there is,
+by using a procedure.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ps(x:<span class="library" title="binding of C int type">int</span>) {
+<span class="lineno" id=line2></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Square of "</span> + <span class="library" title="Convert a value to a string">str</span> x + <span class="fstring">" is "</span> + <span class="library" title="Convert a value to a string">str</span> x.square;
+<span class="lineno" id=line3></span>  }
+<span class="lineno" id=line4></span>  ps 1; ps 2; ps 3;
+</pre></p><p><pre class="expected">Square of 1 is 1
+Square of 2 is 4
+Square of 3 is 9
+</pre></p><p>A procedure is like a function, except it returns no value,
+and it may and indeed should have side effects.
+</p></div><h2 id='Multiple_arguments_h'><img src='/share/src/web/images/minus.gif' id='Multiple arguments' onclick='toggle(this,"Multiple_arguments_d")' alt='+'/> 1.1.3 Multiple arguments</h2><div id='Multiple_arguments_d' style='display:block'>
+<p>A function (or procedure) always has exactly one argument.
+However you can simulate multiple arguments with a tuple:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> addup (x:<span class="library" title="binding of C int type">int</span>, y:<span class="library" title="binding of C int type">int</span>) =&gt; x + y;
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ addup (1,2); <span class="comment">// 3</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define an immutable value">val</span> pair = 1,2;
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ addup pair; <span class="comment">// 3</span>
+</pre></p><p><pre class="expected">3
+3
+</pre></p><p>The last line shows clearly that <code>addup</code> takes a single argument
+which is a pair (tuple with two components).
+</p></div><h2 id='Function_types_h'><img src='/share/src/web/images/minus.gif' id='Function types' onclick='toggle(this,"Function_types_d")' alt='+'/> 1.1.4 Function types</h2><div id='Function_types_d' style='display:block'>
+<p>A function value has a type:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>       <span class="comment">// type of square</span>
+<span class="lineno" id=line2></span>    <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>      <span class="comment">// type of ps</span>
+<span class="lineno" id=line3></span>    <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span> <span class="comment">// type of addup</span>
+</pre></p></div><h2 id='Generators_h'><img src='/share/src/web/images/minus.gif' id='Generators' onclick='toggle(this,"Generators_d")' alt='+'/> 1.1.5 Generators</h2><div id='Generators_d' style='display:block'>
+<p>There is a special kind of procedure that looks like
+a function and may have side-effects, it is called
+a generator:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> x =0;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> incx():<span class="library" title="binding of C int type">int</span> = { <span class="big_keyword" title="Define an immutable value">val</span> tmp = x; ++x; <span class="small_keyword" title="return">return</span> tmp; }
+<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ incx(), incx();
+</pre></p><p><pre class="expected">(0, 1)
+</pre></p><p>When an expression contains one or more generator application, the applications
+are lifted out and evaluated in pre-order: this is basically left to right
+order of writing for terms at the same level, except that if a generator has
+an argument that is, or contains a generator application, that will have to
+be evaluated first. The serialisation of generator application is deterministic
+and based on the structure of the expression being evaluated <em>after</em>
+syntactic sugar is removed. For example
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> g1 (y:<span class="library" title="binding of C int type">int</span>) = { ++x; <span class="small_keyword" title="return">return</span> y + x; } 
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> g2 (y:<span class="library" title="binding of C int type">int</span>) = { ++x; <span class="small_keyword" title="return">return</span> y + 2 * x; } 
+<span class="lineno" id=line3></span>  x = 0;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a mutable variable">var</span> r1 = (g1 1).g2;
+<span class="lineno" id=line5></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ r1;
+</pre></p><p><pre class="expected">6
+</pre></p><p><code>r</code> will be evaluated as:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  x = 0;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> a1 = g1 1;  <span class="comment">// 2 (x=1) </span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> r2 = g2 a1; <span class="comment">// 6 (x=2)</span>
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ r2;
+</pre></p><p><pre class="expected">6
+</pre></p><p>noting reverse application is just sugar for a swapped forward application.
+</p><p><p class=caveat>
+Generators have the same type as a function. This is a design compromise 
+in Felix.
+</p>
+</p></div><h2 id='C_functions_h'><img src='/share/src/web/images/minus.gif' id='C functions' onclick='toggle(this,"C_functions_d")' alt='+'/> 1.1.6 C functions</h2><div id='C_functions_d' style='display:block'>
+<p>The function and procedure:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a C function">cfun</span> f(x:<span class="library" title="binding of C int type">int</span>) =&gt; x;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a C procedure">cproc</span> p(x:<span class="library" title="binding of C int type">int</span>) { <span class="library" title="Print a string to standard output with newline appended">println</span> x; }
+</pre></p><p>have types
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>     <span class="library" title="binding of C int type">int</span> --&gt; <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line2></span>     <span class="library" title="binding of C int type">int</span> --&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>
+</pre></p><p>respectively, which are the types of classic C functions:
+</p><p><pre class='cppbg'>  <span class="qualifier">int</span> (*)(<span class="qualifier">int</span>)
+  <span class="qualifier">void</span> (*)(<span class="qualifier">int</span>)
+</pre></p><p>You can use this kind of function to force generation of
+a classic C style function for performance, so you that know
+the type exactly, and so you can pass it as an argument
+to a C library. In particular such a function or procedure should not reference
+Felix globals (because this requires passing the thread frame pointer), nor
+do anything directly or indirectly requiring garbage collection
+(which also requires thread frame pointer since that in turn contains a pointer
+to the garbage collector).
+</p><p>C functions can be used wherever a Felix function is required,
+a wrapper is generated automatically.
+</p><p>C functions of this kind are still defined with 
+Felix code: they're Felix functions with an enforced
+C interface. In fact many ordinary Felix functions will
+be reduced to C functions by the optimiser, but this
+form enforces the use of C interface.
+</p><p><p class=caveat>
+It seems unfortunate that <em>whilst</em> a <code>cfun</code> or <code>cproc</code> has a C interface it
+is defined in Felix, <em>whereas</em> a <code>cstruct</code> is a Felix interface to a
+struct defined in C, and <code>cenum</code> and <code>cflag</code> provide Felix models of enumerations
+or sets of integer constants defined in C.  The role reversal here seems confusing, 
+especially as Felix functions and types can be defined in C using <code>fun</code>, <code>proc</code> and <code>type</code>
+keywords and C code given as a string, and <code>ctypes</code> provides a shorthand form for
+multiple instances of <code>type</code> eliding the strings. In turn <code>cenum</code> may be considered
+a shorthand for a <code>type</code> binding and a list of <code>const</code> definitions. Also, a shorthand
+for lifting C functions from libraries using a <code>fun</code> or <code>proc</code> without a 
+defining string can be used. The situation is further complicated by the
+<code>callback</code> feature.
+</p>
+</p></div></div><h1 id='Higher_Order_Functions_h'><img src='/share/src/web/images/minus.gif' id='Higher Order Functions' onclick='toggle(this,"Higher_Order_Functions_d")' alt='+'/> 1.2 Higher Order Functions</h1><div id='Higher_Order_Functions_d' style='display:block'>
+<p>In Felix, functions can be nested:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> f(x:<span class="library" title="binding of C int type">int</span>) = {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> g(y:<span class="library" title="binding of C long type">long</span>)=&gt; x.<span class="library" title="binding of C long type">long</span> + y;
+<span class="lineno" id=line3></span>     <span class="small_keyword" title="return">return</span> g;
+<span class="lineno" id=line4></span>  }
+</pre></p><p>The function <code>f</code> here has type {int -> (long -> long)}. This type is 
+the same as {int -> long -> long} since the arrow operator is right
+associative. There's a simpler way to write the function <code>f</code>:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> f(x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C long type">long</span>) =&gt; x.<span class="library" title="binding of C long type">long</span> + y;
+</pre></p><p>Here one says <code>f</code> has arity 2. Note it still has only
+one argument, namely <code>x</code> of type <code>int</code>. A function with arity
+2 or greater is called a <em>higher order function</em>
+or Hof for short.
+</p><p>Note that in:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> h(x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C long type">long</span>) { <span class="library" title="Print a string to standard output with newline appended">println</span>$ x.<span class="library" title="binding of C long type">long</span> + y; }
+</pre></p><p><code>h</code> is a function, not a procedure: it has type
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>  <span class="library" title="binding of C int type">int</span> -&gt; (<span class="library" title="binding of C long type">long</span> -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>)
+</pre></p><p>so that rather, <code>h</code> is a function returning a procedure.
+</p><p>It is possible to partially apply a higher order function.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> f2(x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C long type">long</span>) =&gt; x.<span class="library" title="binding of C long type">long</span> + y;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an immutable value">val</span> g = f2 1;
+<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ g 2l;
+</pre></p><p><pre class="expected">3
+</pre></p><p>Here <code>g</code> is just the value returned by <code>f</code> when applied
+to 1, which is a function accepting a <code>long</code> and returning
+a <code>long</code>.
+</p><h2 id='A_style_issue_h'><img src='/share/src/web/images/minus.gif' id='A style issue' onclick='toggle(this,"A_style_issue_d")' alt='+'/> 1.2.1 A style issue</h2><div id='A_style_issue_d' style='display:block'>
+<p>Many functions of "two" arguments can be written either accepting
+a tuple of two components or as a higher order function of arity 2.
+Without optimisation, higher order functions are extremely inefficient:
+tuples are faster, but they cannot be partially applied.
+However, the higher order form does not permit the "arguments" 
+to be "compressed" into a single value which the tuple form does.
+</p><p>However, Felix is pretty good at optimisation and both version of <code>f</code>
+given above will likely reduce to a simple addition after inlining.
+</p><p>Therefore the question really is: are you most likely to aggregate
+the arguments, or the function with the first argument?
+Use a tuple in the first case and a higher order function in the second.
+</p><p>Of course, you should chose the form of a function which itself has
+the type required for it to be an argument of a higher order function
+such as an iteration, map or fold of some data structure.
+</p><p>The library module <code>categ</code> defines a way to convert between these styles
+for 2 or 3 "arguments". The function <code>curry</code> takes a function accepting
+a tuple of 2 or 3 components and makes it into a higher order function
+with arity 2 or 3. The functions <code>uncurry2</code> and <code>uncurry3</code> reverse
+this transformation and convert a higher order function of arity 2 or 3,
+into a function accepting a tuple of 2 or 3 components, respectively.
+</p></div><h2 id='Anonymous_function_values_h'><img src='/share/src/web/images/minus.gif' id='Anonymous function values' onclick='toggle(this,"Anonymous_function_values_d")' alt='+'/> 1.2.2 Anonymous function values</h2><div id='Anonymous_function_values_d' style='display:block'>
+<p>You can write a function without a name in an expression:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> three = (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:<span class="library" title="binding of C int type">int</span>)=&gt; x + 1) 2;
+</pre></p><p>There is a special short hand for procedures of unit argument:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> hello1 = { <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Hello"</span>; };
+</pre></p><p>This is an expression equivalent to
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> hello2 = <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> () { <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Hello"</span>; };
+</pre></p><p>There's a similar shorthand for function or unit argument:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> y = 1;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an immutable value">val</span> add1 = { <span class="big_keyword" title="Define an immutable value">val</span> x = y + 1; <span class="small_keyword" title="return">return</span> x; };
+</pre></p><p>distinguished from the procedure case by ending with
+a return statement.
+</p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

@@ -1,0 +1,676 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Embedding Felix</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Purpose.",
+"General Principles.",
+"Using Felix async I/O.",
+"Real time Scheduling.",
+"Network scheduling.",
+"Spawning Pthreads.",
+"Using manually driven schannels.",
+"Clocking with an emulated write.",
+"Using Event channels.",
+"Solving the return code problem.",
+"Caveats with schannels.",
+"Using service code <code>svc_general</code>."
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='embedding_felix_02.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='embedding_felix_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Purpose._h')"> <a href="#Purpose._h">Purpose.</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#General Principles._h')"> <a href="#General_Principles._h">General Principles.</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Using Felix async I/O._h')"> <a href="#Using_Felix_async_I/O._h">Using Felix async I/O.</a></div>
+      <div class=sm id=menu3>
+      <div class=m2><a href="#Real_time_Scheduling._h">Real time Scheduling.</a></div>
+      <div class=m2><a href="#Network_scheduling._h">Network scheduling.</a></div>
+      <div class=m2><a href="#Spawning_Pthreads._h">Spawning Pthreads.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Using manually driven schannels._h')"> <a href="#Using_manually_driven_schannels._h">Using manually driven schannels.</a></div>
+      <div class=sm id=menu4>
+      <div class=m2><a href="#Clocking_with_an_emulated_write._h">Clocking with an emulated write.</a></div>
+      <div class=m2><a href="#Using_Event_channels._h">Using Event channels.</a></div>
+      <div class=m2><a href="#Solving_the_return_code_problem._h">Solving the return code problem.</a></div>
+      <div class=m2><a href="#Caveats_with_schannels._h">Caveats with schannels.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Using service code <code>svc_general</code>._h')"> <a href="#Using_service_code_<code>svc_general</code>._h">Using service code <code>svc_general</code>.</a></div>
+      <div class=sm id=menu5>
+      </div>
+    <script>counter_max=5;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Purpose._h'><img src='/share/src/web/images/minus.gif' id='Purpose.' onclick='toggle(this,"Purpose._d")' alt='+'/> 1.1 Purpose.</h1><div id='Purpose._d' style='display:block'>
+<p>This document describes how to embed Felix in C++ code.
+</p><p>The primary use of doing this is to be able to use Felix
+in a foreign event loop as a coroutine. 
+</p><p>Normally, event loops invoke callbacks via a user 
+supplied function pointer, calling the function with
+a user supplied client data pointer together with some
+event specific data.
+</p><p>The Felix system provides a way to map Felix functions
+into callbacks by generating a wrapper based on the
+required C function signature which casts the client
+data pointer to the corresponding Felix function and
+invokes that.
+</p><p>Such wrappers are invariant: you only need one per
+function type. However the Felix function which is 
+invoked runs in isolation: there is no means to
+communicate with other Felix code.
+</p><p>In this article we will describe how to run a Felix
+program which interfaces to event loop callbacks.
+</p></div><h1 id='General_Principles._h'><img src='/share/src/web/images/minus.gif' id='General Principles.' onclick='toggle(this,"General_Principles._d")' alt='+'/> 1.2 General Principles.</h1><div id='General_Principles._d' style='display:block'>
+<p>The general principle of operation is to first create
+a Felix world. A world contains a garbage collector,
+a scheduler, and asynchronous event handler, and of course
+your Felix program.
+</p><p>At the end, if you have one, you may cleanup the world,
+removing any resources Felix has allocated. This step
+is usually omitted at the end of the program since
+it involves garbage collecting all the allocated memory,
+which would be freed at program termination anyhow.
+</p><p>In between, we will conspire to run some Felix code
+with each callback. Other non-Felix callbacks in your
+event loop may communicate with the Felix program
+using shared memory. You will have to design this
+mechanism yourself.
+</p><p>The successive invocations of Felix, on the other hand,
+will operate transparently, and will typically communicate
+and synchronise with your event loop using synchronous channels.
+</p><p>Each invocation of your Felix system will call a specific function
+on your Felix world {run_until_blocked()}. This call will invoke
+a Felix scheduler to run all the scheduled fibres until there are
+none left to run. Then it returns.
+</p><p>In order for this to work, some callback must put fibres on
+the scheduler before the Felix world is invoked. There are many
+ways to do this so we will consider just one design first.
+</p></div><h1 id='Using_Felix_async_I/O._h'><img src='/share/src/web/images/minus.gif' id='Using Felix async I/O.' onclick='toggle(this,"Using_Felix_async_I/O._d")' alt='+'/> 1.3 Using Felix async I/O.</h1><div id='Using_Felix_async_I/O._d' style='display:block'>
+<p>This is the easiest method so we will deal with it first.
+</p><h2 id='Real_time_Scheduling._h'><img src='/share/src/web/images/minus.gif' id='Real time Scheduling.' onclick='toggle(this,"Real_time_Scheduling._d")' alt='+'/> 1.3.1 Real time Scheduling.</h2><div id='Real_time_Scheduling._d' style='display:block'>
+<p>By far the simplest design we can consider for our
+Felix world is to use real time scheduling. This design
+is the simplest .. because there is nothing to do. 
+It works out of the box!
+</p><p>With this method you block Felix fibres with calls to the
+Felix asynchronous I/O system <code>faio</code> using an alarm clock.
+All you need to do is create a clock and sleep for some
+period.
+</p><p>When your fibre goes to sleep it is removed from the synchronous
+scheduler list and added to a list of fibres waiting on an 
+external event. When that event occurs the event notification
+system puts the fibre back on the scheduler queue. 
+</p><p>For the sleep operation the notification system is <code>demux</code>.
+It tells <code>faio</code> to reschedule a fibre when its sleep timeout
+has expired. This happens in a separate <code>pthread</code> by placing
+the fibre on a special queue of fibres waiting to be rescheduled.
+</p><p>When the synchronous scheduler runs out of fibres to run, it checks
+the ready queue and if it is not empty, pulls off the waiting fibres
+and puts them on its scheduler list. It then starts scheduling
+them.
+</p><p>In stand alone mode, Felix locks up on the waiting on fibres
+to be put on the ready queue, provided there are in fact
+fibres waiting for asynchronous events. If there are no
+waiting fibres, your program is finished and will terminate.
+</p><p>In embedded mode, Felix does not terminate but simply returns.
+This is the return from <code>run_until_blocked</code>. A bit later
+when you call it again, some fibres may have been woken from
+their sleep, and they will be rescheduled.
+</p><p>In your event loop, you would normally run Felix inside the
+event loop's idle-tasks callback. Take care to ensure in 
+the real-time programming case the loop does not spin
+in idle-tasks without a delay. Some event loops will provide
+a delay or a way to specify one, others will require you
+to insert the delay yourself. A delay of between 
+0.1 and 10 milliseconds is reasonable on many platforms. 
+It allows other pthreads with affinity to the loops CPU
+to work efficiently without too much pre-emption.
+</p><p>You should note careully that this model works by polling.
+Your event loop polls Felix for activity using the idle-tasks
+callback. Polling is very general and a good method, but
+it is not the only way. Felix network I/O and timer operation
+usually does not work by polling, but instead is interrupt
+driven by the readiness notification system provided by
+the underlying OS.
+</p></div><h2 id='Network_scheduling._h'><img src='/share/src/web/images/minus.gif' id='Network scheduling.' onclick='toggle(this,"Network_scheduling._d")' alt='+'/> 1.3.2 Network scheduling.</h2><div id='Network_scheduling._d' style='display:block'>
+<p>You can use the same method as above for scheduling
+based on availability of data on sockets. Again, this
+is built into Felix and does not require any special
+coding.
+</p></div><h2 id='Spawning_Pthreads._h'><img src='/share/src/web/images/minus.gif' id='Spawning Pthreads.' onclick='toggle(this,"Spawning_Pthreads._d")' alt='+'/> 1.3.3 Spawning Pthreads.</h2><div id='Spawning_Pthreads._d' style='display:block'>
+<p>Felix can spawn pthreads (pre-emptive threads) and you may
+wonder how this fits in with our model. The answer is,
+it works!
+</p><p>If you want to do a whole lot of stuff independently of your 
+mainline event loop, you can just launch
+a pthread from Felix code using the <code>spawn_pthread</code> procedure.
+</p><p>However you must take care you do not block the main event
+loop. You can use critical sections with a mutex and shared
+memory to communicate. You should <em>not</em> use Felix
+<code>pchannel</code>s because these block client pthreads.
+</p></div></div><h1 id='Using_manually_driven_schannels._h'><img src='/share/src/web/images/minus.gif' id='Using manually driven schannels.' onclick='toggle(this,"Using_manually_driven_schannels._d")' alt='+'/> 1.4 Using manually driven schannels.</h1><div id='Using_manually_driven_schannels._d' style='display:block'>
+<p>The method described here leverages how Felix synchronous
+channels interact with the scheduler.
+</p><p>What normally happens is that an Felix fibre will try to do
+a read operation on an schannel. Since there is no data there,
+the fibre is attached to the schannel as a reader, and removed
+from the scheduler.
+</p><p>Now the scheduler runs another fibre which writes to that
+schannel. The writer notices that there is a reader waiting.
+It puts the data where the reader wants it, adds itself
+to the scheduler list, and then makes the reader the current
+fibre. The scheduler then resumes the reader where it left
+off, only now the reader has the data it was waiting for.
+</p><p>Later, the writer can continue too, when the reader blocks
+again, or otherwise terminates.
+</p><p>A similar process occurs if the writer goes first. Noticing there
+is no reader, it deschedules itself and hangs itself on the schannel.
+Later, a reader comes along and notices there's a writer waiting,
+so it grabs the data, reschedules the writer, and continues on.
+</p><h2 id='Clocking_with_an_emulated_write._h'><img src='/share/src/web/images/minus.gif' id='Clocking with an emulated write.' onclick='toggle(this,"Clocking_with_an_emulated_write._d")' alt='+'/> 1.4.1 Clocking with an emulated write.</h2><div id='Clocking_with_an_emulated_write._d' style='display:block'>
+<p>A simple way to organise your fibres is to have them each
+do some work and read an integer from an schannel we will
+call the trigger. A single Felix fthread reads from
+another channel we will call the clock, and writes to the
+trigger channel with a mult-write. This will reschedule
+all those fibres.
+</p><p>So we have reduced the problem to emulating a write.
+This is particularly easy! All you have to do is store the
+integer data where it is supposed to go, as indicated
+by the reader on the schannel, and then schedule the
+fibre. Since the writer isn't a fibre you don't have to worry
+about scheduling it. You do, however, have to make sure the schannel
+is reachable by adding it as a GC root.
+</p></div><h2 id='Using_Event_channels._h'><img src='/share/src/web/images/minus.gif' id='Using Event channels.' onclick='toggle(this,"Using_Event_channels._d")' alt='+'/> 1.4.2 Using Event channels.</h2><div id='Using_Event_channels._d' style='display:block'>
+<p>The clocking method we described above is a special case
+of a more general mechanism in which a system with
+N classes of events, such as mouse movement events,
+screen size change events, keyboard events, or whatever,
+can be mapped onto schannels.
+</p><p>It is not always possible to do this, but I will first
+show how it works then discuss the caveats.
+</p><p>When you get an event specific callback, you can
+handle it trivially by writing the data on a corresponding 
+event specific schannel. For example a keypress can simply
+be written to an schannel using the emulation technique.
+</p><p>Your Felix program then simply spawns a fibre to handle
+key presses by reading the channel. How you dispatch or
+deal with them may not be simple, but you can now do it
+all in Felix. You have leveraged the ability of Felix
+to control invert the callback providing the event
+into a read operation which allows state to be preserved.
+</p><p>This method is very simple and easy to set up. But there
+is a caveat. Don't forget, the Felix program is running
+in your loops idle-tasks callback so no action will occur
+until the event loop triggers it.
+</p><p>Unfortunately, some callbacks require an answer. That is,
+they're functions, not procedures. This is typical in
+windowing systems, where, for example, you're using some
+notion of subclassing and you have to tell the window manager
+whether you have handled an event, or whether it should be
+passed on to a parent (or both!).
+</p><p>Since we have to return a code from the callback, we cannot
+wait for Felix to start up in the idle-tasks callback.
+</p></div><h2 id='Solving_the_return_code_problem._h'><img src='/share/src/web/images/minus.gif' id='Solving the return code problem.' onclick='toggle(this,"Solving_the_return_code_problem._d")' alt='+'/> 1.4.3 Solving the return code problem.</h2><div id='Solving_the_return_code_problem._d' style='display:block'>
+<p>The solution to this problem is .. well its obvious!!
+</p><p>Since we can't wait for the idle-tasks callback to resume
+Felix .. we don't. We resume it immediately!
+</p><p>After all, a callback is a callback! As long as you have
+a client data pointer to the Felix world, you can resume
+Felix.
+</p><p>The biggest problem here is how to get a response <em>out</em>
+of your Felix program.
+</p><p>Well .. is the answer not obvious??
+</p><p>Recall, we used an schannel write emulation to reschedule
+Felix fibres based on some external event.
+</p><p>So a bright light dawns and we appy the principle
+of duality, and consider reading the return code from
+an schannel using an emulation!
+</p><p>Note it is of course important that we don't try to
+read that return code from a channel until
+after we have <code>run_until_blocked</code>. Obviously there can't
+be any return code there until after the Felix handler
+fibre has run!
+</p></div><h2 id='Caveats_with_schannels._h'><img src='/share/src/web/images/minus.gif' id='Caveats with schannels.' onclick='toggle(this,"Caveats_with_schannels._d")' alt='+'/> 1.4.4 Caveats with schannels.</h2><div id='Caveats_with_schannels._d' style='display:block'>
+<p>Although the principles of schannel operation are quite simple
+they are not quite as easy to use as you might think.
+</p><p><em>It is vital you forget the idea that a channel is a pipe
+down which you send data.</em>
+</p><p><em>Channels are not message passing.</em>
+</p><p>The sending of data along a channel is a convenient side
+effect, just as passing parameters to a subroutine is
+a convenient side effect. The real purpose and fundamental
+operation in both cases has nothing to do with data.
+</p><p><em>Channels are about passing control.</em>
+</p><p>Just like a subroutine, channel operations are fundamentally
+control structures. So what this means is that you cannot just
+randomly read and write channels and expect things to work.
+Channels are not buffered and they do not carry any data.
+Rather, they mediate data transmission by synchronising data
+access.
+</p><p>In practice what this means is that you must ensure
+reads and writes on channels match up temporaly.
+If one fibre writes to channel A then B, and another
+reads from channel B then A, we have a deadlock.
+If the channel is unknown by other fibres deadlocks
+lead to suicides -- the fibres simply cease to exist,
+causing the deadlock to evaporate, since neither fibre
+is reachable except by an unreachable channel.
+</p><p>So you must carefully plan the order of schannel operations
+for each fibre to synchronise will all the others. Fibres
+form an anarchy. They work by cooperation based on a set
+of individual agreements. There are no police to enforce policy.
+Those who fail to agree and abide by agreements simply disappear
+from the community.
+</p></div></div><h1 id='Using_service_code_<code>svc_general</code>._h'><img src='/share/src/web/images/minus.gif' id='Using service code <code>svc_general</code>.' onclick='toggle(this,"Using_service_code_<code>svc_general</code>._d")' alt='+'/> 1.5 Using service code <code>svc_general</code>.</h1><div id='Using_service_code_<code>svc_general</code>._d' style='display:block'>
+<p>There is another way to organise ourselves. Instead of using
+schannels or the builtin asynchronous I/O support in Felix,
+we provide a way to leverage the way Felix already does
+asynchronous I/O, using the service call <code>svc_general</code>.
+</p><p>This uses special C++ objects to organise suspending
+of the calling fibre until an asynchronous external
+event tells us the encoded request is satisfied,
+then puts the fibre on ready queue to be rescheduled.
+</p><p>This is the most complex mechanism, and you will have to
+create both the request and service objects to leverage it,
+including a conforming C++ implementation and a Felix binding.
+</p><p>The result will be that function calls in the Felix library
+will allow a fibre to suspend itself until some arbitrary
+event occurs. 
+</p><p>With this mechanism we emulate the asynchronous event management
+by doing the required operations inside your main event loop
+callback for that event.
+</p><p>The primary advantage of this method is that data communication
+is not limited to the simple message passing model and control
+exchange schannels provide.
+</p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

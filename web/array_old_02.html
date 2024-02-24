@@ -1,0 +1,545 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>/Users/skaller/felix/src/web/tut/array_old_02.html</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Array Objects",
+"Array Object: writeable array.",
+"Contiguous Array Object: Array as sequence.",
+"Carray"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='array_old_01.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('prev')"
+  onmouseout="mouseout('prev')"
+  onclick="nop('prev')"
+  ><span id="prev"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span><span id="prev_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span></span></a> <a href='array_old_03.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='array_old_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>     <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Array Objects_h')"> <a href="#Array_Objects_h">Array Objects</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Array_Object:_writeable_array._h">Array Object: writeable array.</a></div>
+      <div class=m2><a href="#Contiguous_Array_Object:_Array_as_sequence._h">Contiguous Array Object: Array as sequence.</a></div>
+      <div class=m2><a href="#Carray_h">Carray</a></div>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Array_Objects_h'><img src='/share/src/web/images/minus.gif' id='Array Objects' onclick='toggle(this,"Array_Objects_d")' alt='+'/> 2.1 Array Objects</h1><div id='Array_Objects_d' style='display:block'>
+<p>Ok, so in the last mail we discovered ArrayValues and you may
+have noted you cannot actually modify or store anything in something
+which is "merely" an ArrayValue.
+</p><h2 id='Array_Object:_writeable_array._h'><img src='/share/src/web/images/minus.gif' id='Array Object: writeable array.' onclick='toggle(this,"Array_Object:_writeable_array._d")' alt='+'/> 2.1.1 Array Object: writeable array.</h2><div id='Array_Object:_writeable_array._d' style='display:block'>
+<p>To store something, you need an ArrayObject.
+i am NOT going to explain it. Here is the definition in the library,
+you should be able to read the code!
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Array as Object (mutable).</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> ArrayObject[t,v]
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>   <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> ArrayValue[t,v];
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>   <span class="doccomment">Unsafe store value into array by common index.</span>
+<span class="lineno" id=line7></span>   <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> unsafe_set: t * <span class="library" title="binding of C size_t type">size</span> * v;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>   <span class="doccomment">Checked store value into array by common index.</span>
+<span class="lineno" id=line10></span>   <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set[I <span class="small_keyword" title="membership operator, function mem">in</span> ints] (x:t, i:I, a:v) { 
+<span class="lineno" id=line11></span>     <span class="big_keyword" title="Run time assertion">assert</span> i.<span class="library" title="binding of C size_t type">size</span> &lt; x.<span class="library" title="number of elements in data structure">len</span>; unsafe_set (x,i.<span class="library" title="binding of C size_t type">size</span>,a); 
+<span class="lineno" id=line12></span>   } 
+<span class="lineno" id=line13></span>  }
+</pre></p></div><h2 id='Contiguous_Array_Object:_Array_as_sequence._h'><img src='/share/src/web/images/minus.gif' id='Contiguous Array Object: Array as sequence.' onclick='toggle(this,"Contiguous_Array_Object:_Array_as_sequence._d")' alt='+'/> 2.1.2 Contiguous Array Object: Array as sequence.</h2><div id='Contiguous_Array_Object:_Array_as_sequence._d' style='display:block'>
+<p>Now, there is one more useful class in the file:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Array as Contiguous STL Object.</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">Provides STL iterators type +v</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> ContiguousArrayObject[t,v]
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>   <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> ArrayObject[t,v];
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>   <span class="doccomment">Start of array iterator.</span>
+<span class="lineno" id=line8></span>   <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> stl_begin: t -&gt; +v;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>   <span class="doccomment">One past the end of array iterator.</span>
+<span class="lineno" id=line11></span>   <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> stl_end: t -&gt; +v;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>   <span class="doccomment">Add integer to iterator.</span>
+<span class="lineno" id=line14></span>   <span class="big_keyword" title="Define a function with no side-effects">fun</span> + [I <span class="small_keyword" title="membership operator, function mem">in</span> ints] (pa:t, i:I) : carray [v] = { 
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Run time assertion">assert</span> i.<span class="library" title="binding of C size_t type">size</span> &lt; pa.<span class="library" title="number of elements in data structure">len</span>; 
+<span class="lineno" id=line16></span>      <span class="small_keyword" title="return">return</span> pa.stl_begin + i.<span class="library" title="binding of C size_t type">size</span>; 
+<span class="lineno" id=line17></span>   }
+<span class="lineno" id=line18></span>  }
+</pre></p><p>This is an ArrayObject which also provides two methods:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    stl_begin
+<span class="lineno" id=line2></span>    stl_end
+</pre></p><p>which return incrementable pointers to the array,
+similar to STL in C++ begin() and end() methods,
+however here these are assured to be actual pointers.
+</p></div><h2 id='Carray_h'><img src='/share/src/web/images/minus.gif' id='Carray' onclick='toggle(this,"Carray_d")' alt='+'/> 2.1.3 Carray</h2><div id='Carray_d' style='display:block'>
+<p>The type:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    +v
+</pre></p><p>is a pointer to v which can be incremented. Now, if a pointer can
+be incremented, it must point into an array! This has an alias
+in the library
+  
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    carray[v]
+</pre></p><p>and properties described in the class
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    Carray
+</pre></p><p>defined in the file lib/std/carray.flx.
+</p><p>It is your traditional C array (only safer because it may not be NULL).
+Carray is dangerous, because pointers can dangle or go off the end.
+Felix cannot check, because C arrays do not have a fixed way to 
+determine the length.
+</p><p>It is instructive to look at the class. In particular look at this:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>  <span class="doccomment">A carray[T] = +T is an incrementable, non-NULL, pointer.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Carray
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>   <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line5></span>   <span class="big_keyword" title="Open a module or class">open</span> <span class="hack">C_hack</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>   <span class="doccomment">The carray type.</span>
+<span class="lineno" id=line8></span>   <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> carray[T] = new &amp;T;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>   <span class="doccomment">Define prefix + notation.</span>
+<span class="lineno" id=line11></span>   typefun +(T:TYPE) : TYPE =&gt; carray[T]; 
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>   <span class="doccomment">Unsafe conversion of Felix pointer to carray.</span>
+<span class="lineno" id=line14></span>   <span class="big_keyword" title="Define a function with no side-effects">fun</span> +[T]:&amp;T -&gt; carray[T] = <span class="fstring">"$1"</span>; <span class="comment">// unsafe</span>
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>   <span class="doccomment">Demote carray to Felix pointer (safe unless off the end).</span>
+<span class="lineno" id=line17></span>   <span class="big_keyword" title="Define a function with no side-effects">fun</span> -[T]: carray[T] -&gt; &amp;T = <span class="fstring">"$1"</span>; <span class="comment">// safe (unless we allow +T to be NULL later ..)</span>
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>   <span class="doccomment">Unsafe conversion of Felix pointer to carray.</span>
+<span class="lineno" id=line20></span>   <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] carray[T] : &amp;T = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>   <span class="doccomment">Get a carray from a Felix array object.</span>
+<span class="lineno" id=line23></span>   <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T,N] carray[T]: &amp;<span class="library" title="array type, a tuple of all components the same type">array</span>[T,N] = <span class="fstring">"($1)-&gt;data"</span>;
+</pre></p><p>First, the open class specification says that all the methods in
+the class are available without qualification.
+</p><p>The requires clause says that we need the C++ header file <cstdlib>.
+opening of C_hack makes the hackery in the C_hack class available
+for our definitions (but these are NOT exported by opening Carray!)
+</p><p>Ok, so, the definition:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> carray[T] = new &amp;T;
+</pre></p><p>makes a new abstract type carray[T] which is *implemented* by a pointer
+to a T.  Then, this bit:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Define prefix + notation.</span>
+<span class="lineno" id=line2></span>    typefun +(T:TYPE) : TYPE =&gt; carray[T]; 
+</pre></p><p>says that + is a type function, which maps
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    +T <span class="small_keyword" title="substring range separator">to</span> carray[T]
+</pre></p><p>so you can just use +int for a carray of ints. The next bit:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Unsafe conversion of Felix pointer to carray.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> +[T]:&amp;T -&gt; carray[T] = <span class="fstring">"$1"</span>; <span class="comment">// unsafe</span>
+</pre></p><p>says that if you have an object pointer p, you can
+promote it, unsafely, to an array pointer:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a mutable variable">var</span> x = 1; <span class="comment">// an object of type int</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a mutable variable">var</span> px : &amp;<span class="library" title="binding of C int type">int</span> = &amp;x; <span class="comment">// a pointer to an int</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ipx = +px; <span class="comment">// an incrementable pointer</span>
+</pre></p><p>The conversion is obviously unsafe as you can see from
+the example! You can also go back, to get an ordinary
+pointer from an incrementable one:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a mutable variable">var</span> px' : &amp;<span class="library" title="binding of C int type">int</span> = -ipx;
+</pre></p><p>This isn't safe either, because ipx might be "past the end" of the array,
+or even dangle.
+</p><p>We have to provide these unsafe operations so we can actually work
+with C arrays: C arrays are intrinsically unsafe, meaning, they're not
+just unsafe, but they cannot be made safe (because there is no 
+consistent way to find their length).
+</p><p>The rest of the operations in the class provide the usual
+C like operations on pointers: increment, decrement,
+adding integers, difference of pointers, comparions,
+and allocation and freeing arrays on the heap.
+</p><p>carrays should be used with care but they're useful, and,
+utility and performance come before safety in Felix.
+[That doesn't mean safety isn't important! It just means we will
+provide unsafe operations until we find a safe way to do them
+which is easy to use and which doesn't have a performance hit]
+</p><p>An example is easily given:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> sort[T] : +T * +T = <span class="fstring">"::std::sort($1, $2)"</span>;
+</pre></p><p>There's a one liner to sort an array. It works because
+{+T} is just a pointer, so it is also a valid RandomAccessIterator
+in C++ STL.
+</p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

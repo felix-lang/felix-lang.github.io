@@ -1,0 +1,1247 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>An interpreter of arithmetic expressions</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"An interpreter of arithmetic expressions",
+"Basics",
+"Lexical analysis",
+"Alphanumeric",
+"Tokens",
+"The "lexer"",
+"Parsing",
+"Abstract syntax trees and primitives",
+"The "parsa"",
+"Parser interface",
+"Evaluation",
+"The "repl""
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#An interpreter of arithmetic expressions_h')"> <a href="#An_interpreter_of_arithmetic_expressions_h">An interpreter of arithmetic expressions</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Basics_h')"> <a href="#Basics_h">Basics</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Lexical analysis_h')"> <a href="#Lexical_analysis_h">Lexical analysis</a></div>
+      <div class=sm id=menu3>
+      <div class=m2><a href="#Alphanumeric_h">Alphanumeric</a></div>
+      <div class=m2><a href="#Tokens_h">Tokens</a></div>
+      <div class=m2><a href="#The_"lexer"_h">The "lexer"</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Parsing_h')"> <a href="#Parsing_h">Parsing</a></div>
+      <div class=sm id=menu4>
+      <div class=m2><a href="#Abstract_syntax_trees_and_primitives_h">Abstract syntax trees and primitives</a></div>
+      <div class=m2><a href="#The_"parsa"_h">The "parsa"</a></div>
+      <div class=m2><a href="#Parser_interface_h">Parser interface</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Evaluation_h')"> <a href="#Evaluation_h">Evaluation</a></div>
+      <div class=sm id=menu5>
+      <div class=m2><a href="#The_"repl"_h">The "repl"</a></div>
+      </div>
+    <script>counter_max=5;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='An_interpreter_of_arithmetic_expressions_h'><img src='/share/src/web/images/minus.gif' id='An interpreter of arithmetic expressions' onclick='toggle(this,"An_interpreter_of_arithmetic_expressions_d")' alt='+'/> 1 An interpreter of arithmetic expressions</h1><div id='An_interpreter_of_arithmetic_expressions_d' style='display:block'>
+<p>This is a tutorial implementing an interpreter of arithmetic
+expressions. No code generation tools are employed, the program is
+self-contained. Lexical analysis is performed using parsa
+combinators, evaluation by the method of environments. An interactive
+program for testing the interpreter is also provided.
+</p><p><pre class="prefmtbg">//URL : http://localhost/$/home/fletch/project/felix.git/src/web/tut/arithmetic.html
+//To exectue : /home/fletch/project/felix.git/build/release/host/bin/flx  --test=build/release src/web/tut/arithmetic.html
+</pre></p></div><h1 id='Basics_h'><img src='/share/src/web/images/minus.gif' id='Basics' onclick='toggle(this,"Basics_d")' alt='+'/> 2 Basics</h1><div id='Basics_d' style='display:block'>
+<p>Let tokens be of type <code>A</code> and parse results be of type <code>B</code>. Parsers
+work on lists of tokens; they consume part of the list and produce a
+result together with the list of tokens remaining or, indication of
+failure.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Result of a parse</span>
+<span class="lineno" id=line2></span>  variant parsed[A, B] = 
+<span class="lineno" id=line3></span>    | Returns of B * <span class="library" title="functional, singly linked list">list</span>[A] 
+<span class="lineno" id=line4></span>    | Parse_failed
+<span class="lineno" id=line5></span>    ;
+</pre></p><p>Parsers are functions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Type of a parsa</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> parsa[A, B] = <span class="library" title="functional, singly linked list">list</span>[A] -&gt; parsed[A, B];
+</pre></p><p>For example, the <code>empty</code> parsa recognizes the empty string. It
+always returns a value and never consumes any tokens. The value it
+returns is <code>v</code>, the first argument.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Emtpy string parsa</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty[A, B] (v:B)(toks:<span class="library" title="functional, singly linked list">list</span>[A]):parsed[A, B] =&gt; 
+<span class="lineno" id=line3></span>    Returns (v, toks)
+<span class="lineno" id=line4></span>    ;
+</pre></p><p><code>token</code> takes a predicate argument and returns a parsa. The parsa
+succeeds (or not) by testing the predicate on the head token of the
+token list.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Given a predicate, produce a parsa</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> token[A, B](test:A-&gt;<span class="library" title="option type: Some x or None">opt</span>[B]):parsa[A,B] =&gt;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> (l:<span class="library" title="functional, singly linked list">list</span>[A]):parsed[A, B] =&gt; 
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="match statement or expression">match</span> l <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>      | Cons (t, ts) =&gt;
+<span class="lineno" id=line6></span>          <span class="small_keyword" title="match statement or expression">match</span> test t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>          | Some r =&gt; Returns[A, B] (r, ts)
+<span class="lineno" id=line8></span>          | #None =&gt; Parse_failed[A, B]
+<span class="lineno" id=line9></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line10></span>      | #Empty =&gt; Parse_failed[A, B]
+<span class="lineno" id=line11></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line12></span>    ;
+</pre></p><p><code>char_</code> is a function that computes a parsa to match a specific
+token.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Parser of a specific token</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> char_[A <span class="small_keyword" title="type-class constraint">with</span> Eq[A]] (ch:A):parsa[A, A] =&gt;
+<span class="lineno" id=line3></span>    token (
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> (tok:A):<span class="library" title="option type: Some x or None">opt</span>[A] =&gt;
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="match statement or expression">match</span> tok <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>        | $(ch) =&gt; Some ch
+<span class="lineno" id=line7></span>        | _ =&gt; None[A]
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line9></span>    )
+<span class="lineno" id=line10></span>    ;
+</pre></p><p>The <em>disjunction</em> of two parsas <code>p</code> and <code>q</code> say, is the
+parsa <code>p</code> "or else" <code>q</code>.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Parser disjunction</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> orelse[A, B] (p1:parsa[A, B], p2:parsa[A, B]):parsa[A, B] =&gt;
+<span class="lineno" id=line3></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> (toks:<span class="library" title="functional, singly linked list">list</span>[A]):parsed[A, B] =&gt;
+<span class="lineno" id=line4></span>        <span class="small_keyword" title="match statement or expression">match</span> p1 toks <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>          | #Parse_failed =&gt; p2 toks
+<span class="lineno" id=line6></span>          | res =&gt; res
+<span class="lineno" id=line7></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>    ;
+</pre></p><p>The <em>conjunction</em> of two parsas <code>p</code> and <code>q</code> say, is the
+parsa <code>p</code> "and then" <code>q</code>.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Parser conjunction</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> andalso[A, B, C] (p1:parsa[A, B],p2:parsa[A, C]):parsa[A, (B * C)] =&gt;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> (toks:<span class="library" title="functional, singly linked list">list</span>[A]) : parsed[A, (B * C)]=&gt;
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="match statement or expression">match</span> p1 toks <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>        | Returns (r1, toks1) =&gt;
+<span class="lineno" id=line6></span>            <span class="small_keyword" title="match statement or expression">match</span> p2 toks1 <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>              | Returns (r2, toks2) =&gt; Returns ((r1, r2), toks2)
+<span class="lineno" id=line8></span>              | _ =&gt; Parse_failed[A, (B * C)]
+<span class="lineno" id=line9></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line10></span>        | _ =&gt; Parse_failed[A, (B * C)]
+<span class="lineno" id=line11></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line12></span>    ;
+</pre></p><p>The function <code>gives</code> takes a parsa <code>p</code> and a function <code>f</code>. It
+parses with <code>p</code> and applies <code>f</code> to the parse result. This provides a
+facility to transform simple parse results into more complicated
+abstract syntax trees.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Transform the result of a parse</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> gives[A, B, C] (p:parsa[A, B], f:B -&gt; C):parsa[A, C] =&gt;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> (toks:<span class="library" title="functional, singly linked list">list</span>[A]):parsed[A, C] =&gt;
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="match statement or expression">match</span> p toks <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>        | Returns (v, toks1) =&gt; Returns (f v, toks1)
+<span class="lineno" id=line6></span>        | _ =&gt; Parse_failed[A, C]
+<span class="lineno" id=line7></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>    ;
+</pre></p><p>In this section, infix operator syntax is introduced.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Infix operators</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="define domain specific sublanguage module">syntax</span> infix_c
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="comment">//orelse</span>
+<span class="lineno" id=line5></span>    x[ssetunion_pri] := 
+<span class="lineno" id=line6></span>     x[ssetunion_pri] <span class="fstring">"|~"</span> x[&gt;ssetunion_pri] =&gt;# 
+<span class="lineno" id=line7></span>      <span class="fstring">'''`(ast_apply ,_sr (,(nos "orelse") (ast_tuple ,_sr (,_1 ,_3))))'''</span>
+<span class="lineno" id=line8></span>    ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="comment">//andalso</span>
+<span class="lineno" id=line11></span>    x[ssetintersection_pri] := 
+<span class="lineno" id=line12></span>     x[ssetintersection_pri] <span class="fstring">"&amp;~"</span> x[&gt;ssetintersection_pri] =&gt;# 
+<span class="lineno" id=line13></span>      <span class="fstring">'''`(ast_apply ,_sr (,(nos "andalso") (ast_tuple ,_sr (,_1 ,_3))))'''</span>
+<span class="lineno" id=line14></span>    ;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="comment">//gives</span>
+<span class="lineno" id=line17></span>    x[scomparison_pri]:= 
+<span class="lineno" id=line18></span>     x[scomparison_pri] <span class="fstring">"&gt;=~"</span> x[&gt;scomparison_pri] =&gt;# 
+<span class="lineno" id=line19></span>      <span class="fstring">'''`(ast_apply ,_sr (,(nos "gives") (ast_tuple ,_sr (,_1 ,_3))))'''</span>
+<span class="lineno" id=line20></span>    ;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="comment">//givento</span>
+<span class="lineno" id=line23></span>    x[scomparison_pri]:= 
+<span class="lineno" id=line24></span>     x[scomparison_pri] <span class="fstring">"&gt;&gt;=~"</span> x[&gt;scomparison_pri] =&gt;# 
+<span class="lineno" id=line25></span>      <span class="fstring">'''`(ast_apply ,_sr (,(nos "givento") (ast_tuple ,_sr (,_1 ,_3))))'''</span>
+<span class="lineno" id=line26></span>    ;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>  }
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="define domain specific sublanguage module">syntax</span> infix_c;
+</pre></p><p>That is,
+<table align="center" border="1" style=width:100%>
+<tr><th>Infix</th><th>Prefix</th><th>meaning</th></tr>
+<tr><td><code>|~</code></td><td><code>orelse</code></td><td><code>p</code>"or else"<code>q</code></td></tr>
+<tr><td><code>&~</code></td><td><code>andalso</code></td><td><code>p</code>"and then"<code>q</code></td></tr>
+<tr><td><code>&gt;=~</code></td><td><code>gives</code></td><td><code>p</code>"gives"<code>q</code></td></tr>
+<tr><td><code>&gt;&gt;=~</code></td><td><code>givento</code></td><td><code>p</code>"given to"<code>q</code></td></tr>
+</table>
+</p><p>The last one, "given to", has not been defined yet. It's for when
+parsa is computed as a parse result and parsing resumes with that
+parsa on the tokens remanining. In Felix there is no problem
+referring to a definition that follows later in the program.
+</p><p>To implement the next combinator, we need to enlist the help of some
+well known utilities.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">//These idioms comes up enough to be worth factoring them out</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> fst[A, B] (p : A * B) : A =&gt; p.0 ;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> snd[A, B] (p : A * B) : B =&gt; p.1 ;
+</pre></p><p>With these we can write the "Kleene 'star'" operator", <code>*</code>.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Kleene '*'</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> zero_or_more[A, B] (p:parsa[A, B]): parsa[A, <span class="library" title="functional, singly linked list">list</span>[B]] =&gt;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> (toks:<span class="library" title="functional, singly linked list">list</span>[A]) : parsed[A, <span class="library" title="functional, singly linked list">list</span>[B]] =&gt;
+<span class="lineno" id=line4></span>     ( (p &amp;~ zero_or_more p &gt;=~ Cons[B])
+<span class="lineno" id=line5></span>     |~ (empty[A, <span class="library" title="functional, singly linked list">list</span>[B]] (<span class="library" title="functional, singly linked list">list</span>[B]())) ) toks
+<span class="lineno" id=line6></span>  ;
+</pre></p><p>Syntax for <code>*</code> in prefix position is provided for by the following.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define domain specific sublanguage module">syntax</span> prefix_c 
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="comment">//zero_or_more</span>
+<span class="lineno" id=line4></span>    x[srefr_pri] := <span class="fstring">"*"</span> x[srefr_pri] =&gt;# <span class="fstring">"(prefix 'zero_or_more)"</span>;
+<span class="lineno" id=line5></span>  }
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="define domain specific sublanguage module">syntax</span> prefix_c;
+</pre></p></div><h1 id='Lexical_analysis_h'><img src='/share/src/web/images/minus.gif' id='Lexical analysis' onclick='toggle(this,"Lexical_analysis_d")' alt='+'/> 3 Lexical analysis</h1><div id='Lexical_analysis_d' style='display:block'>
+<h2 id='Alphanumeric_h'><img src='/share/src/web/images/minus.gif' id='Alphanumeric' onclick='toggle(this,"Alphanumeric_d")' alt='+'/> 3.1 Alphanumeric</h2><div id='Alphanumeric_d' style='display:block'>
+<p>This <em>is not</em> a parsa, this is a function that tests a <code>char</code>
+for membership in a list of ranges like <code>['a'-'z']['A'-'Z']</code>.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Check if a character is a member of one of the provided ranges</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> char_range (c:<span class="library" title="binding of C char type">char</span>)(l:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C char type">char</span>]):bool =&gt;
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="match statement or expression">match</span> l <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line4></span>      | #Empty =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line5></span>      | Cons ((c1, c2), tl) =&gt;    
+<span class="lineno" id=line6></span>         (ord c1 &lt;= ord c <span class="small_keyword" title="logical conjunction">and</span> ord c &lt;= ord c2) <span class="small_keyword" title="logical disjunction">or</span> char_range c tl
+<span class="lineno" id=line7></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>    ;
+</pre></p><p>The function <code>letter</code> on the other hand, <em>is</em> a
+parsa. Analysis succeeds for alphabetic characters.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//An element of the alphabet</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> letter : parsa[<span class="library" title="binding of C char type">char</span>, <span class="library" title="binding of C char type">char</span>] =
+<span class="lineno" id=line3></span>    token (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (c:<span class="library" title="binding of C char type">char</span>) =&gt; 
+<span class="lineno" id=line4></span>             <span class="small_keyword" title="conditional">if</span> char_range c 
+<span class="lineno" id=line5></span>              (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>*<span class="library" title="binding of C char type">char</span>](
+<span class="lineno" id=line6></span>               (<span class="library" title="binding of C char type">char</span> <span class="fstring">'a'</span>, <span class="library" title="binding of C char type">char</span> <span class="fstring">'z'</span>), 
+<span class="lineno" id=line7></span>              (<span class="library" title="binding of C char type">char</span> <span class="fstring">'A'</span>, <span class="library" title="binding of C char type">char</span> <span class="fstring">'Z'</span>))) 
+<span class="lineno" id=line8></span>             <span class="small_keyword" title="conditional">then</span> Some c <span class="small_keyword" title="conditional">else</span> None[<span class="library" title="binding of C char type">char</span>])
+<span class="lineno" id=line9></span>    ;
+</pre></p><p>This next function is a digit parsa.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Digit parsa</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> digit : parsa[<span class="library" title="binding of C char type">char</span>, <span class="library" title="binding of C char type">char</span>] = 
+<span class="lineno" id=line3></span>    token (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (c:<span class="library" title="binding of C char type">char</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C char type">char</span>] =&gt; 
+<span class="lineno" id=line4></span>    <span class="small_keyword" title="conditional">if</span> isdigit c <span class="small_keyword" title="conditional">then</span> Some c <span class="small_keyword" title="conditional">else</span> None[<span class="library" title="binding of C char type">char</span>] 
+<span class="lineno" id=line5></span>    )
+<span class="lineno" id=line6></span>    ;
+</pre></p><p>The expression <code>(digit &~ *digit)</code> computes a pair. The first element
+of the pair is the leading digit, the second element of the pair, a
+list of zero or more digits. We "give" that pair to the constructor
+<code>Cons[char]</code>, which joins the pair into a single list with head the
+leading digit.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Parser of a sequence of digit</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> digits : parsa[<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] = 
+<span class="lineno" id=line3></span>    (digit &amp;~ *digit) &gt;=~ Cons[<span class="library" title="binding of C char type">char</span>]
+<span class="lineno" id=line4></span>    ;
+</pre></p><p>Next up, floating point numbers. Here's the grammar.
+</p><p><pre class="prefmtbg">  digit   := '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'
+  digits  := digit digit*
+  optsign := '-'|'+'|&amp;epsilon;
+  optfrac := ('.' digit*)|&amp;epsilon;
+  optexp  := (('e'|'E') optsign digits)|&amp;epsilon;
+  number  := digits optfrac optexp
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// '-' | '+' | eps</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> optsign : parsa[<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] =
+<span class="lineno" id=line3></span>    token (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (c:<span class="library" title="binding of C char type">char</span>):<span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] =&gt;
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="match statement or expression">match</span> c <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>      | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'-'</span> =&gt; Some (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] (c))
+<span class="lineno" id=line6></span>      | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'+'</span>=&gt; Some (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] (c))
+<span class="lineno" id=line7></span>      | _ =&gt; None[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]]
+<span class="lineno" id=line8></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>) |~ empty[<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] ())
+<span class="lineno" id=line9></span>    ;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  <span class="comment">// '.' digit* | eps</span>
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a mutable variable">var</span> optfrac : parsa[<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] =
+<span class="lineno" id=line13></span>    ( char_ (<span class="library" title="binding of C char type">char</span> <span class="fstring">'.'</span>) &amp;~ *digit &gt;=~ Cons[<span class="library" title="binding of C char type">char</span>])
+<span class="lineno" id=line14></span>    |~ empty[<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] ())
+<span class="lineno" id=line15></span>    ;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="comment">//(('e'|'E') optsign digits)|eps</span>
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Define a mutable variable">var</span> optexp : parsa[<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] =
+<span class="lineno" id=line19></span>    (((((char_ (<span class="library" title="binding of C char type">char</span> <span class="fstring">'e'</span>) |~ char_ (<span class="library" title="binding of C char type">char</span> <span class="fstring">'E'</span>)) &amp;~ optsign) 
+<span class="lineno" id=line20></span>      &gt;=~ Cons[<span class="library" title="binding of C char type">char</span>]) &amp;~ digits) 
+<span class="lineno" id=line21></span>      &gt;=~ (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>], y:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] =&gt; x + y)) 
+<span class="lineno" id=line22></span>    |~ empty[<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]] (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] ())
+<span class="lineno" id=line23></span>  ;
+</pre></p></div><h2 id='Tokens_h'><img src='/share/src/web/images/minus.gif' id='Tokens' onclick='toggle(this,"Tokens_d")' alt='+'/> 3.2 Tokens</h2><div id='Tokens_d' style='display:block'>
+<p>In readiness for parsing, some functions for switching representations
+between <code>string</code> and <code>list[char]</code>.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Explode a string into a list of char</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> explode (s:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] =
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define an immutable value">val</span> n:<span class="library" title="binding of C size_t type">size</span> = <span class="library" title="number of elements in data structure">len</span> s;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="self-tail call">loop</span> (acc:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]) (i:<span class="library" title="binding of C size_t type">size</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] =&gt;
+<span class="lineno" id=line6></span>      <span class="small_keyword" title="conditional">if</span> (i == n) <span class="small_keyword" title="conditional">then</span> unbox$ <span class="library" title="return data structure with elements reversed">rev</span> acc
+<span class="lineno" id=line7></span>      <span class="small_keyword" title="conditional">else</span> <span class="small_keyword" title="self-tail call">loop</span> (Cons (s.[i], acc)) (i + 1)
+<span class="lineno" id=line8></span>    ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="self-tail call">loop</span> (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]()) 0uz;
+<span class="lineno" id=line11></span>  };
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>  <span class="comment">//Implode a list of char to a string</span>
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> implode (xs:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]) =&gt;
+<span class="lineno" id=line15></span>    <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (a:<span class="library" title="binding of C++ string type">string</span>) (b:<span class="library" title="binding of C char type">char</span>):<span class="library" title="binding of C++ string type">string</span> =&gt; a + b) <span class="fstring">""</span> xs
+<span class="lineno" id=line16></span>    ;
+</pre></p><p>At this point, it makes sense to introduce a type for the tokens that
+we will admit into our language of arithmetic expressions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Tokens</span>
+<span class="lineno" id=line2></span>  variant token_t  =
+<span class="lineno" id=line3></span>    | T_num of <span class="library" title="binding of C double float type">double</span>
+<span class="lineno" id=line4></span>    | T_ident of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line5></span>    | T_lparen | T_rparen
+<span class="lineno" id=line6></span>    | T_plus | T_minus | T_star | T_slash | T_semicolon | T_equal
+<span class="lineno" id=line7></span>    ;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[token_t] {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (tok : token_t) : <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line11></span>      <span class="small_keyword" title="match statement or expression">match</span> tok <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line12></span>        | T_num f =&gt; <span class="fstring">"T_num "</span> + (<span class="library" title="Convert a value to a string">str</span> f)
+<span class="lineno" id=line13></span>        | T_ident s =&gt; <span class="fstring">"T_ident "</span> + s
+<span class="lineno" id=line14></span>        | #T_lparen =&gt; <span class="fstring">"T_lparen"</span>
+<span class="lineno" id=line15></span>        | #T_rparen =&gt; <span class="fstring">"T_rparen"</span>
+<span class="lineno" id=line16></span>        | #T_plus =&gt; <span class="fstring">"T_plus"</span>
+<span class="lineno" id=line17></span>        | #T_minus =&gt; <span class="fstring">"T_minus"</span>
+<span class="lineno" id=line18></span>        | #T_star =&gt; <span class="fstring">"T_star"</span>
+<span class="lineno" id=line19></span>        | #T_slash =&gt; <span class="fstring">"T_slash"</span>
+<span class="lineno" id=line20></span>        | #T_semicolon =&gt; <span class="fstring">"T_semicolon"</span>
+<span class="lineno" id=line21></span>        | #T_equal =&gt; <span class="fstring">"T_equal"</span>
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line23></span>      ;
+<span class="lineno" id=line24></span>  }
+</pre></p></div><h2 id='The_"lexer"_h'><img src='/share/src/web/images/minus.gif' id='The "lexer"' onclick='toggle(this,"The_"lexer"_d")' alt='+'/> 3.3 The "lexer"</h2><div id='The_"lexer"_d' style='display:block'>
+<p><code>number</code> produces "number" tokens.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Number token</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> number:parsa[<span class="library" title="binding of C char type">char</span>, token_t] =
+<span class="lineno" id=line3></span>    (digits &amp;~ optfrac &amp;~ optexp) &gt;=~
+<span class="lineno" id=line4></span>      (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (p:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>], cse:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]):token_t =&gt;
+<span class="lineno" id=line5></span>        T_num (atof (implode (p.0 + p.1 + cse))))
+<span class="lineno" id=line6></span>    ;
+</pre></p><p><code>identifier</code> produces "identifier" tokens.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Identifier token</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> identifier : parsa[<span class="library" title="binding of C char type">char</span>, token_t] =
+<span class="lineno" id=line3></span>    (letter &amp;~ (zero_or_more letter)) &gt;=~ 
+<span class="lineno" id=line4></span>      (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (c:<span class="library" title="binding of C char type">char</span>, cs:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]):token_t =&gt; 
+<span class="lineno" id=line5></span>         T_ident (implode (Cons (c, cs))))
+<span class="lineno" id=line6></span>    ;
+</pre></p><p>The following set of parsas deals with the remaining single character
+token types.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Operator token</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> operator : parsa[<span class="library" title="binding of C char type">char</span>, token_t] =
+<span class="lineno" id=line3></span>    token (
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (ch:<span class="library" title="binding of C char type">char</span>) : <span class="library" title="option type: Some x or None">opt</span>[token_t] =&gt;
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="match statement or expression">match</span> ch <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'-'</span> =&gt; Some T_minus
+<span class="lineno" id=line7></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'+'</span> =&gt; Some T_plus
+<span class="lineno" id=line8></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'*'</span> =&gt; Some T_star
+<span class="lineno" id=line9></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'/'</span> =&gt; Some T_slash
+<span class="lineno" id=line10></span>        | _ =&gt; None[token_t]
+<span class="lineno" id=line11></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line12></span>    );
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  <span class="comment">//Parenthesis token</span>
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a mutable variable">var</span> paren : parsa[<span class="library" title="binding of C char type">char</span>, token_t] =
+<span class="lineno" id=line16></span>    token (
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (ch:<span class="library" title="binding of C char type">char</span>) : <span class="library" title="option type: Some x or None">opt</span>[token_t] =&gt;
+<span class="lineno" id=line18></span>        <span class="small_keyword" title="match statement or expression">match</span> ch <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line19></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'('</span> =&gt; Some T_lparen
+<span class="lineno" id=line20></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">')'</span> =&gt; Some T_rparen
+<span class="lineno" id=line21></span>        | _ =&gt; None[token_t]
+<span class="lineno" id=line22></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line23></span>    );
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  <span class="comment">//Equal token</span>
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Define a mutable variable">var</span> equal : parsa[<span class="library" title="binding of C char type">char</span>, token_t] =
+<span class="lineno" id=line27></span>    token (
+<span class="lineno" id=line28></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> (ch:<span class="library" title="binding of C char type">char</span>) : <span class="library" title="option type: Some x or None">opt</span>[token_t] =&gt;
+<span class="lineno" id=line29></span>        <span class="small_keyword" title="match statement or expression">match</span> ch <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line30></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="fstring">'='</span> =&gt; Some T_equal
+<span class="lineno" id=line31></span>        | _ =&gt; None[token_t]
+<span class="lineno" id=line32></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line33></span>    );
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>  <span class="comment">//Semicolon token</span>
+<span class="lineno" id=line36></span>  <span class="big_keyword" title="Define a mutable variable">var</span> semicolon : parsa[<span class="library" title="binding of C char type">char</span>, token_t] =
+<span class="lineno" id=line37></span>    token (
+<span class="lineno" id=line38></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (ch:<span class="library" title="binding of C char type">char</span>) : <span class="library" title="option type: Some x or None">opt</span>[token_t] =&gt;
+<span class="lineno" id=line39></span>        <span class="small_keyword" title="match statement or expression">match</span> ch <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line40></span>        | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="fstring">';'</span> =&gt; Some T_semicolon
+<span class="lineno" id=line41></span>        | _ =&gt; None[token_t]
+<span class="lineno" id=line42></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line43></span>    );
+</pre></p><p>A parsa of white space consumes a space character but produces no
+significant information.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Parse a whitespace character</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> space_ : parsa[<span class="library" title="binding of C char type">char</span>, <span class="library" title="Type with one values (), the empty tuple">unit</span>] =
+<span class="lineno" id=line3></span>   token (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (ch:<span class="library" title="binding of C char type">char</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="Type with one values (), the empty tuple">unit</span>] =&gt;
+<span class="lineno" id=line4></span>     <span class="small_keyword" title="match statement or expression">match</span> ch <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>       | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">' '</span> =&gt; Some ()
+<span class="lineno" id=line6></span>       | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'\t'</span> =&gt; Some ()
+<span class="lineno" id=line7></span>       | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'\n'</span> =&gt; Some ()
+<span class="lineno" id=line8></span>       | c <span class="small_keyword" title="predicative type constraint or precondition">when</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">'\r'</span> =&gt; Some ()
+<span class="lineno" id=line9></span>       | _ =&gt; None[<span class="library" title="Type with one values (), the empty tuple">unit</span>]
+<span class="lineno" id=line10></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line11></span>    );
+</pre></p><p>A parsa of spaces follows easily.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Parser of whitespace</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> spaces (toks:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]) : parsed[<span class="library" title="binding of C char type">char</span>, <span class="library" title="Type with one values (), the empty tuple">unit</span>] =&gt;
+<span class="lineno" id=line3></span>    (((space_ &amp;~ spaces) &gt;=~ 
+<span class="lineno" id=line4></span>         fst[<span class="library" title="Type with one values (), the empty tuple">unit</span>, <span class="library" title="Type with one values (), the empty tuple">unit</span>])
+<span class="lineno" id=line5></span>      |~ empty[<span class="library" title="binding of C char type">char</span>, <span class="library" title="Type with one values (), the empty tuple">unit</span>](()))
+<span class="lineno" id=line6></span>    toks
+<span class="lineno" id=line7></span>    ;
+</pre></p><p>Finally, the lexical analyzer which computes a <code>list[token_t]</code> from
+an input <code>list[char]</code>. It is defined by the regular expression
+</p><p><pre class="prefmtbg">lex := spaces((identifier|number|operator|paren|semicolon|equal)spaces)*
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Lexer for the language of arithmetic expressions</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> lex (toks : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span>]) : parsed [<span class="library" title="binding of C char type">char</span>, <span class="library" title="functional, singly linked list">list</span>[token_t]] =&gt;
+<span class="lineno" id=line3></span>      (spaces &amp;~ 
+<span class="lineno" id=line4></span>      *((( identifier 
+<span class="lineno" id=line5></span>          |~ number 
+<span class="lineno" id=line6></span>          |~ operator 
+<span class="lineno" id=line7></span>          |~ paren 
+<span class="lineno" id=line8></span>          |~ semicolon 
+<span class="lineno" id=line9></span>          |~ equal) &amp;~ spaces) &gt;=~ 
+<span class="lineno" id=line10></span>      (fst[token_t, <span class="library" title="Type with one values (), the empty tuple">unit</span>])) 
+<span class="lineno" id=line11></span>         &gt;=~ snd[<span class="library" title="Type with one values (), the empty tuple">unit</span>, <span class="library" title="functional, singly linked list">list</span>[token_t]]) toks
+<span class="lineno" id=line12></span>    ;
+</pre></p></div></div><h1 id='Parsing_h'><img src='/share/src/web/images/minus.gif' id='Parsing' onclick='toggle(this,"Parsing_d")' alt='+'/> 4 Parsing</h1><div id='Parsing_d' style='display:block'>
+<p>We present the type of ASTs (abstract syntax trees). It is with values
+of this type that arithmetic expressions will be realized.
+</p><h2 id='Abstract_syntax_trees_and_primitives_h'><img src='/share/src/web/images/minus.gif' id='Abstract syntax trees and primitives' onclick='toggle(this,"Abstract_syntax_trees_and_primitives_d")' alt='+'/> 4.1 Abstract syntax trees and primitives</h2><div id='Abstract_syntax_trees_and_primitives_d' style='display:block'>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Arithmetic expressions</span>
+<span class="lineno" id=line2></span>  variant ast_t =
+<span class="lineno" id=line3></span>    | E_const of <span class="library" title="binding of C double float type">double</span>
+<span class="lineno" id=line4></span>    | E_var of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line5></span>    | E_add of ast_t * ast_t
+<span class="lineno" id=line6></span>    | E_sub of ast_t * ast_t
+<span class="lineno" id=line7></span>    | E_mul of ast_t * ast_t
+<span class="lineno" id=line8></span>    | E_div of ast_t * ast_t
+<span class="lineno" id=line9></span>    | E_let of (<span class="library" title="binding of C++ string type">string</span> * ast_t)
+<span class="lineno" id=line10></span>    ;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (ast : ast_t) : <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="match statement or expression">match</span> ast <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line14></span>      | E_const f =&gt; <span class="fstring">"E_const ("</span> + <span class="library" title="Convert a value to a string">str</span> f + <span class="fstring">")"</span>
+<span class="lineno" id=line15></span>      | E_var s =&gt; <span class="fstring">"E_var ("</span> + s + <span class="fstring">")"</span>
+<span class="lineno" id=line16></span>      | E_add (x, y) =&gt; <span class="fstring">"E_add ("</span> + <span class="library" title="Convert a value to a string">str</span> x + <span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> y + <span class="fstring">")"</span>
+<span class="lineno" id=line17></span>      | E_sub (x, y) =&gt; <span class="fstring">"E_sub ("</span> + <span class="library" title="Convert a value to a string">str</span> x + <span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> y + <span class="fstring">")"</span>
+<span class="lineno" id=line18></span>      | E_mul (x, y) =&gt; <span class="fstring">"E_mul ("</span> + <span class="library" title="Convert a value to a string">str</span> x + <span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> y + <span class="fstring">")"</span>
+<span class="lineno" id=line19></span>      | E_div (x, y) =&gt; <span class="fstring">"E_div ("</span> + <span class="library" title="Convert a value to a string">str</span> x + <span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> y + <span class="fstring">")"</span>
+<span class="lineno" id=line20></span>      | E_let (s, e) =&gt; <span class="fstring">"E_let ("</span> + s + <span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> e + <span class="fstring">")"</span>
+<span class="lineno" id=line21></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line22></span>    ;
+</pre></p><p>The first in this set of functions, <code>num</code>, is a parsa of number
+tokens producing (literal) number expressions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Constants</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an immutable value">val</span> num:parsa[token_t, ast_t] =
+<span class="lineno" id=line3></span>    token (
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (t:token_t):<span class="library" title="option type: Some x or None">opt</span>[ast_t] =&gt;
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="match statement or expression">match</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>          | T_num n =&gt; Some (E_const n)
+<span class="lineno" id=line7></span>          | _ =&gt; None[ast_t]
+<span class="lineno" id=line8></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line9></span>    );
+</pre></p><p><code>ident</code> is a parsa of "identifier" expressions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Identifiers</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an immutable value">val</span> xident:parsa[token_t, ast_t] =
+<span class="lineno" id=line3></span>    token (
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (t:token_t):<span class="library" title="option type: Some x or None">opt</span>[ast_t] =&gt;
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="match statement or expression">match</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>          | T_ident s =&gt; Some (E_var s)
+<span class="lineno" id=line7></span>          | _ =&gt; None[ast_t]
+<span class="lineno" id=line8></span>    );
+</pre></p><p><code>addop</code> is the parsa of additive expressions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Addition, subtraction operators</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an immutable value">val</span> addop:parsa[token_t, ast_t -&gt; ast_t -&gt; ast_t] =
+<span class="lineno" id=line3></span>    token (
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (t:token_t):<span class="library" title="option type: Some x or None">opt</span>[ast_t -&gt; ast_t -&gt; ast_t] =&gt;
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="match statement or expression">match</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>          | #T_plus =&gt; Some (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (e1:ast_t)(e2:ast_t):ast_t =&gt; E_add (e1, e2))
+<span class="lineno" id=line7></span>          | #T_minus =&gt; Some (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (e1:ast_t)(e2:ast_t):ast_t =&gt; E_sub (e1, e2))
+<span class="lineno" id=line8></span>          | _ =&gt; None[ast_t -&gt; ast_t -&gt; ast_t]
+<span class="lineno" id=line9></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line10></span>    );
+</pre></p><p><code>mulop</code> the parsa of multiplicative expressions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Multiplication, division operators</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an immutable value">val</span> mulop:parsa[token_t, ast_t -&gt; ast_t -&gt; ast_t] =
+<span class="lineno" id=line3></span>    token (
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (t:token_t):<span class="library" title="option type: Some x or None">opt</span>[ast_t -&gt; ast_t -&gt; ast_t] =&gt;
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="match statement or expression">match</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>          | #T_star =&gt; Some (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (e1:ast_t)(e2:ast_t):ast_t =&gt; E_mul (e1, e2))
+<span class="lineno" id=line7></span>          | #T_slash =&gt; Some (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (e1:ast_t)(e2:ast_t):ast_t =&gt; E_div (e1, e2))
+<span class="lineno" id=line8></span>          | _ =&gt; None[ast_t -&gt; ast_t -&gt; ast_t]
+<span class="lineno" id=line9></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line10></span>    );
+</pre></p><p>Note that <code>addop</code> amd <code>mulop</code> produce <em>functions</em> on a
+successful parse.
+</p><p>The result of a parsa <code>p</code> say, can be used to compute a new parsa
+<code>q</code> that then attempts a parse on the remains. Informally we might
+say this as <code>p</code> "given to" <code>q</code>. This function has infix operator
+form <code>&gt;&gt;=~</code>
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//A parsa that feeds its result into another</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> givento[A, B, C] (p1:parsa[A, B], p2:B -&gt; parsa[A, C]) : parsa[A, C] =&gt;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> (toks : <span class="library" title="functional, singly linked list">list</span>[A]) : parsed[A, C] =&gt;
+<span class="lineno" id=line4></span>       <span class="small_keyword" title="match statement or expression">match</span> p1 toks <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>        | Returns (r1, toks1) =&gt; p2 r1 toks1
+<span class="lineno" id=line6></span>        | #Parse_failed =&gt; Parse_failed[A, C]
+<span class="lineno" id=line7></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>      ;
+</pre></p><p>The <code>&gt;&gt;=~</code> operator is critical to the implementation of
+<code>left_assoc</code> : the analyzer for expressions with associative infix
+operators which recognizes the grammar
+</p><p><pre class="prefmtbg">expr := term (op term)* 
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Build left-associative trees e.g. expr := term (op term)*</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> left_assoc[A, B] 
+<span class="lineno" id=line3></span>    (term : parsa[A, B]) 
+<span class="lineno" id=line4></span>    (op : parsa[A, B -&gt; B-&gt; B]) : parsa[A, B] =&gt;
+<span class="lineno" id=line5></span>    <span class="small_keyword" title="let binder">let</span> 
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> sequence (t1:B) : parsa [A, B] =&gt;
+<span class="lineno" id=line7></span>        <span class="small_keyword" title="let binder">let</span> fn = <span class="big_keyword" title="Define a function with no side-effects">fun</span> (f:B -&gt; B -&gt; B, t2:B) =&gt; f t1 t2 <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line8></span>        (op &amp;~ term &gt;=~ fn &gt;&gt;=~ sequence of (B)) |~ (empty[A, B] t1)
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line10></span>      (term &gt;&gt;=~ sequence)
+<span class="lineno" id=line11></span>  ;
+</pre></p><p>These are all the single token parsas that don't don't map to actual
+expressions (their occurrences do not result in nodes in the abstract
+syntax tree).
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Opening paren</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> open_paren : parsa[token_t, <span class="library" title="Type with one values (), the empty tuple">unit</span>] =
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="let binder">let</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> t (tok : token_t) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="Type with one values (), the empty tuple">unit</span>] =&gt;
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="match statement or expression">match</span> tok <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>      | #T_lparen =&gt; Some ()
+<span class="lineno" id=line6></span>      | _ =&gt; None[<span class="library" title="Type with one values (), the empty tuple">unit</span>]
+<span class="lineno" id=line7></span>    <span class="small_keyword" title="membership operator, function mem">in</span> token t
+<span class="lineno" id=line8></span>  ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="comment">//Closing paren</span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a mutable variable">var</span> close_paren : parsa[token_t, <span class="library" title="Type with one values (), the empty tuple">unit</span>] =
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="let binder">let</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> t (tok : token_t) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="Type with one values (), the empty tuple">unit</span>] =&gt;
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="match statement or expression">match</span> tok <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line14></span>      | #T_rparen =&gt; Some ()
+<span class="lineno" id=line15></span>      | _ =&gt; None[<span class="library" title="Type with one values (), the empty tuple">unit</span>]
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="membership operator, function mem">in</span> token t
+<span class="lineno" id=line17></span>  ;
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="comment">//Semi-colon</span>
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Define a mutable variable">var</span> semi : parsa[token_t, <span class="library" title="Type with one values (), the empty tuple">unit</span>] =
+<span class="lineno" id=line21></span>    <span class="small_keyword" title="let binder">let</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> t (tok : token_t) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="Type with one values (), the empty tuple">unit</span>] =&gt;
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="match statement or expression">match</span> tok <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line23></span>      | #T_semicolon =&gt; Some ()
+<span class="lineno" id=line24></span>      | _ =&gt; None[<span class="library" title="Type with one values (), the empty tuple">unit</span>]
+<span class="lineno" id=line25></span>    <span class="small_keyword" title="membership operator, function mem">in</span> token t
+<span class="lineno" id=line26></span>  ;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>  <span class="comment">//Equals sign</span>
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a mutable variable">var</span> equals : parsa[token_t, <span class="library" title="Type with one values (), the empty tuple">unit</span>] =
+<span class="lineno" id=line30></span>    <span class="small_keyword" title="let binder">let</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> t (tok : token_t) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="Type with one values (), the empty tuple">unit</span>] =&gt;
+<span class="lineno" id=line31></span>      <span class="small_keyword" title="match statement or expression">match</span> tok <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line32></span>      | #T_equal =&gt; Some ()
+<span class="lineno" id=line33></span>      | _ =&gt; None[<span class="library" title="Type with one values (), the empty tuple">unit</span>]
+<span class="lineno" id=line34></span>    <span class="small_keyword" title="membership operator, function mem">in</span> token t
+<span class="lineno" id=line35></span>  ;
+</pre></p></div><h2 id='The_"parsa"_h'><img src='/share/src/web/images/minus.gif' id='The "parsa"' onclick='toggle(this,"The_"parsa"_d")' alt='+'/> 4.2 The "parsa"</h2><div id='The_"parsa"_d' style='display:block'>
+<p>The language of arithmetic expressions will be defined by the
+following grammar:
+</p><p><pre class="prefmtbg">expr_list :=
+  | expr (';' expr)*
+  ;
+expr :=
+  | identifier '=' expr
+  | term (['+'|'-'] term)*
+  ;
+term :=
+  | fact (['*'|'/'] fact)*
+  ;
+fact :=
+  | num
+  | identifier
+  | '( expr ')
+  ;
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//expr_list := expr (';' expr)*</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> expr_list : parsa[token_t, <span class="library" title="functional, singly linked list">list</span>[ast_t]] = 
+<span class="lineno" id=line3></span>    ((expr &amp;~ *((semi &amp;~ expr) &gt;=~ snd[<span class="library" title="Type with one values (), the empty tuple">unit</span>, ast_t])
+<span class="lineno" id=line4></span>       &gt;=~ Cons[ast_t]))
+<span class="lineno" id=line5></span>     |~empty[token_t, <span class="library" title="functional, singly linked list">list</span>[ast_t]] (<span class="library" title="functional, singly linked list">list</span>[ast_t]())
+<span class="lineno" id=line6></span>    ;
+</pre></p><p>For simplicity, we write the expression rule this way:
+</p><p><pre class="prefmtbg">expr :=
+| bind
+| term (['+'|'-'] term)*
+;
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> expr (toks : <span class="library" title="functional, singly linked list">list</span>[token_t]) : parsed[token_t, ast_t] =&gt;
+<span class="lineno" id=line2></span>    (bind |~ left_assoc[token_t, ast_t] term addop) toks
+<span class="lineno" id=line3></span>    ;
+</pre></p><p>where,
+</p><p><pre class="prefmtbg">bind := identifier '=' expr
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> bind : parsa[token_t, ast_t] =
+<span class="lineno" id=line2></span>     (((xident &amp;~ equals) &gt;=~ fst[ast_t, <span class="library" title="Type with one values (), the empty tuple">unit</span>]) &amp;~ expr) &gt;=~ 
+<span class="lineno" id=line3></span>     (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (p : ast_t * ast_t) : ast_t =&gt; 
+<span class="lineno" id=line4></span>        <span class="small_keyword" title="match statement or expression">match</span> p.0 <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>        | E_var e =&gt; E_let (e, p.1)
+<span class="lineno" id=line6></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>)
+<span class="lineno" id=line7></span>    ;
+</pre></p><p>The rule for terms:
+</p><p><pre class="prefmtbg">term := fact (['*'|'/'] fact)*
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> term : parsa[token_t, ast_t] = left_assoc[token_t, ast_t] fact mulop ;
+</pre></p><p>The fule for factors:
+</p><p><pre class="prefmtbg">fact :=
+ | num
+ | identifier
+ | '( expr ')
+ ;
+</pre></p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> fact (toks : <span class="library" title="functional, singly linked list">list</span>[token_t]) : parsed[token_t, ast_t] =&gt;
+<span class="lineno" id=line2></span>    (num |~ xident |~ 
+<span class="lineno" id=line3></span>      ((open_paren &amp;~ expr &amp;~ close_paren) &gt;=~ 
+<span class="lineno" id=line4></span>          (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (p:(<span class="library" title="Type with one values (), the empty tuple">unit</span> * ast_t), u:<span class="library" title="Type with one values (), the empty tuple">unit</span>) : ast_t =&gt; p.1))
+<span class="lineno" id=line5></span>     ) toks
+<span class="lineno" id=line6></span>    ;
+</pre></p></div><h2 id='Parser_interface_h'><img src='/share/src/web/images/minus.gif' id='Parser interface' onclick='toggle(this,"Parser_interface_d")' alt='+'/> 4.3 Parser interface</h2><div id='Parser_interface_d' style='display:block'>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//A function to extract the result of a parse</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> accept[A, B] (<span class="small_keyword" title="value of function return used in post condition">result</span> : parsed[A, B]) : <span class="library" title="option type: Some x or None">opt</span>[B] =&gt;
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="match statement or expression">match</span> <span class="small_keyword" title="value of function return used in post condition">result</span> <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line4></span>    | Returns (b, #Empty) =&gt; Some[B] (b)
+<span class="lineno" id=line5></span>    | #Parse_failed =&gt; None[B]
+<span class="lineno" id=line6></span>    | _ =&gt; None[B] <span class="comment">//meaning, not all chars consumed</span>
+<span class="lineno" id=line7></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>    ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="comment">//A function to produce a list of tokens from a string</span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> tokenize (s : <span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[token_t]] =&gt; 
+<span class="lineno" id=line12></span>    accept (lex (explode (s))) 
+<span class="lineno" id=line13></span>    ;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  <span class="comment">//A function to produce an AST from a list of tokens</span>
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_expr (s : <span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="option type: Some x or None">opt</span>[ast_t] =&gt;
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="match statement or expression">match</span> tokenize s <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line18></span>      | Some toks =&gt; accept (expr toks)
+<span class="lineno" id=line19></span>      | #None =&gt; None[ast_t]
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line21></span>    ;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  <span class="comment">//A function to produce a list of ASTs from a list of tokens</span>
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_expr_list (s : <span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[ast_t]] =&gt;
+<span class="lineno" id=line25></span>    <span class="small_keyword" title="match statement or expression">match</span> tokenize s <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line26></span>    | Some toks =&gt; accept (expr_list toks)
+<span class="lineno" id=line27></span>    | #None =&gt; None[<span class="library" title="functional, singly linked list">list</span>[ast_t]]
+<span class="lineno" id=line28></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line29></span>    ;
+</pre></p><p>This is an implementation detail that will be called on later. It's
+a lookup function on associative lists.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//'assoc a l' returns the value associated with key 'a in the list of</span>
+<span class="lineno" id=line2></span>  <span class="comment">//pairs 'l'.  That is, 'assoc a [ ...; (a,b); ...] = b' if '(a,b)' is</span>
+<span class="lineno" id=line3></span>  <span class="comment">//the leftmost binding of 'a' in list 'l'</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> assoc[A, B <span class="small_keyword" title="type-class constraint">with</span> Eq[A]] (x : A) (l : <span class="library" title="functional, singly linked list">list</span>[(A * B)]) : <span class="library" title="option type: Some x or None">opt</span>[B] =&gt;
+<span class="lineno" id=line5></span>    <span class="small_keyword" title="match statement or expression">match</span> l <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>      | #Empty =&gt; None[B]
+<span class="lineno" id=line7></span>      | Cons ((a, b), t) =&gt; <span class="small_keyword" title="conditional">if</span> a == x <span class="small_keyword" title="conditional">then</span> Some b <span class="small_keyword" title="conditional">else</span> assoc x t
+<span class="lineno" id=line8></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line9></span>      ;
+</pre></p></div></div><h1 id='Evaluation_h'><img src='/share/src/web/images/minus.gif' id='Evaluation' onclick='toggle(this,"Evaluation_d")' alt='+'/> 5 Evaluation</h1><div id='Evaluation_d' style='display:block'>
+<p>Here's is how the success or failure of parsing and evaluation will be
+represented.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  variant <span class="small_keyword" title="value of function return used in post condition">result</span>[A, B] =  Ok of A | Error of B ;
+</pre></p><p>For our interpreter, in the above <code>A</code> will be fixed to <code>double</code> (the
+only "values" admitted by our language of arithmetic expressions will
+be real numbers) and <code>B</code> to <code>error_t</code> defined by the following.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  variant error_t =
+<span class="lineno" id=line2></span>    | Syntax_error
+<span class="lineno" id=line3></span>    | Unbound_variable of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line4></span>    | Division_by_zero
+<span class="lineno" id=line5></span>    ;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (err : error_t) : <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line8></span>    <span class="small_keyword" title="match statement or expression">match</span> err <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line9></span>      | Unbound_variable s =&gt; <span class="fstring">"Unbound variable '"</span> + s + <span class="fstring">"'"</span>
+<span class="lineno" id=line10></span>      | #Syntax_error =&gt; <span class="fstring">"Syntax error"</span>
+<span class="lineno" id=line11></span>      | #Division_by_zero =&gt; <span class="fstring">"Attempted division by zero"</span>
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line13></span>    ;
+</pre></p><p>We 'evaluate' expressions (instances of type <code>ast_t</code>) using the
+method of environments. The environment is necessarily mutable.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Evaluate an expression in an environment</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> eval 
+<span class="lineno" id=line3></span>     (env:&amp;<span class="library" title="functional, singly linked list">list</span>[(<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C double float type">double</span>)]) 
+<span class="lineno" id=line4></span>     (ast:ast_t) 
+<span class="lineno" id=line5></span>     : <span class="small_keyword" title="value of function return used in post condition">result</span>[<span class="library" title="binding of C double float type">double</span>, error_t] =&gt;
+<span class="lineno" id=line6></span>    (
+<span class="lineno" id=line7></span>    <span class="small_keyword" title="match statement or expression">match</span> ast <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line8></span>      | E_const f =&gt; Ok[<span class="library" title="binding of C double float type">double</span>, error_t] f
+<span class="lineno" id=line9></span>      | E_let (tag, e) =&gt; 
+<span class="lineno" id=line10></span>         <span class="small_keyword" title="let binder">let</span> v = eval env e <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line11></span>         <span class="small_keyword" title="match statement or expression">match</span> v <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line12></span>           | Ok f =&gt; ( env &lt;- (tag, f) ! (deref env);  v)
+<span class="lineno" id=line13></span>           | _ =&gt; v
+<span class="lineno" id=line14></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line15></span>     | E_var s =&gt; 
+<span class="lineno" id=line16></span>        <span class="small_keyword" title="let binder">let</span> v  = assoc s (deref env) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line17></span>        <span class="small_keyword" title="match statement or expression">match</span> v <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line18></span>          | Some f =&gt; Ok[<span class="library" title="binding of C double float type">double</span>, error_t] f
+<span class="lineno" id=line19></span>          | #None =&gt; Error[<span class="library" title="binding of C double float type">double</span>, error_t] (Unbound_variable s)
+<span class="lineno" id=line20></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line21></span>     | E_add (l, r) =&gt; 
+<span class="lineno" id=line22></span>       <span class="small_keyword" title="let binder">let</span> lhs = eval env l <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line23></span>       <span class="small_keyword" title="match statement or expression">match</span> lhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line24></span>          | Ok x =&gt;
+<span class="lineno" id=line25></span>            <span class="small_keyword" title="let binder">let</span> rhs = eval env r <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line26></span>            <span class="small_keyword" title="match statement or expression">match</span> rhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line27></span>              | Ok y =&gt; Ok[<span class="library" title="binding of C double float type">double</span>, error_t] (x + y)
+<span class="lineno" id=line28></span>              | _ as error =&gt; error
+<span class="lineno" id=line29></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line30></span>          | _ as error =&gt; error
+<span class="lineno" id=line31></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>          
+<span class="lineno" id=line32></span>     | E_sub (l, r) =&gt; 
+<span class="lineno" id=line33></span>       <span class="small_keyword" title="let binder">let</span> lhs = eval env l <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line34></span>       <span class="small_keyword" title="match statement or expression">match</span> lhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line35></span>          | Ok x =&gt;
+<span class="lineno" id=line36></span>            <span class="small_keyword" title="let binder">let</span> rhs = eval env r <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line37></span>            <span class="small_keyword" title="match statement or expression">match</span> rhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line38></span>              | Ok y =&gt; Ok[<span class="library" title="binding of C double float type">double</span>, error_t] (x - y)
+<span class="lineno" id=line39></span>              | _ as error =&gt; error
+<span class="lineno" id=line40></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line41></span>          | _ as error =&gt; error
+<span class="lineno" id=line42></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>          
+<span class="lineno" id=line43></span>     | E_mul (l, r) =&gt; 
+<span class="lineno" id=line44></span>       <span class="small_keyword" title="let binder">let</span> lhs = eval env l <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line45></span>       <span class="small_keyword" title="match statement or expression">match</span> lhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line46></span>          | Ok x =&gt;
+<span class="lineno" id=line47></span>            <span class="small_keyword" title="let binder">let</span> rhs = eval env r <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line48></span>            <span class="small_keyword" title="match statement or expression">match</span> rhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line49></span>              | Ok y =&gt; Ok[<span class="library" title="binding of C double float type">double</span>, error_t] (x * y)
+<span class="lineno" id=line50></span>              | _ as error =&gt; error
+<span class="lineno" id=line51></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line52></span>          | _ as error =&gt; error
+<span class="lineno" id=line53></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>          
+<span class="lineno" id=line54></span>     | E_div (l, r) =&gt; 
+<span class="lineno" id=line55></span>       <span class="small_keyword" title="let binder">let</span> lhs = eval env l <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line56></span>       <span class="small_keyword" title="match statement or expression">match</span> lhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line57></span>          | Ok x =&gt;
+<span class="lineno" id=line58></span>            <span class="small_keyword" title="let binder">let</span> rhs = eval env r <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line59></span>            <span class="small_keyword" title="match statement or expression">match</span> rhs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line60></span>              | Ok y =&gt; 
+<span class="lineno" id=line61></span>                   <span class="small_keyword" title="conditional">if</span> y != 0.0 <span class="small_keyword" title="conditional">then</span> 
+<span class="lineno" id=line62></span>                     Ok[<span class="library" title="binding of C double float type">double</span>, error_t] (x / y)
+<span class="lineno" id=line63></span>                   <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line64></span>                     Error[<span class="library" title="binding of C double float type">double</span>, error_t] (Division_by_zero)
+<span class="lineno" id=line65></span>              | _ as error =&gt; error
+<span class="lineno" id=line66></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line67></span>          | _ as error =&gt; error
+<span class="lineno" id=line68></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>          
+<span class="lineno" id=line69></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>)
+<span class="lineno" id=line70></span>    ;
+</pre></p><p>With <code>eval</code> at our disposal, we can write a function that tokenizes,
+parses and evaluates an expression in one shot.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> parse_eval_expr
+<span class="lineno" id=line2></span>    (env:&amp;<span class="library" title="functional, singly linked list">list</span>[(<span class="library" title="binding of C++ string type">string</span>*<span class="library" title="binding of C double float type">double</span>)]) (s:<span class="library" title="binding of C++ string type">string</span>) : <span class="small_keyword" title="value of function return used in post condition">result</span>[<span class="library" title="binding of C double float type">double</span>, error_t] =
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define an immutable value">val</span> expr : <span class="library" title="option type: Some x or None">opt</span>[ast_t] = parse_expr s;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="conditional">if</span> (is_defined expr) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line7></span>      <span class="small_keyword" title="return">return</span> eval env (get expr);
+<span class="lineno" id=line8></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="return">return</span> Error[<span class="library" title="binding of C double float type">double</span>, error_t](Syntax_error);
+<span class="lineno" id=line11></span>  }
+</pre></p><p>An analogous function to do the same for a sequence of expressions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> parse_eval_exprs 
+<span class="lineno" id=line2></span>    (env:&amp;<span class="library" title="functional, singly linked list">list</span>[(<span class="library" title="binding of C++ string type">string</span>*<span class="library" title="binding of C double float type">double</span>)]) (s:<span class="library" title="binding of C++ string type">string</span>) : <span class="small_keyword" title="value of function return used in post condition">result</span>[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t] =
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> f 
+<span class="lineno" id=line5></span>        (acc : <span class="small_keyword" title="value of function return used in post condition">result</span>[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t]) 
+<span class="lineno" id=line6></span>                (e : <span class="small_keyword" title="value of function return used in post condition">result</span>[<span class="library" title="binding of C double float type">double</span>, error_t]) : 
+<span class="lineno" id=line7></span>                <span class="small_keyword" title="value of function return used in post condition">result</span>[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t] =&gt;
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="match statement or expression">match</span> acc <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line9></span>        | Ok l =&gt;
+<span class="lineno" id=line10></span>            <span class="small_keyword" title="match statement or expression">match</span> e <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line11></span>              | Ok v =&gt; Ok[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t] (l + v)<span class="comment">//slow</span>
+<span class="lineno" id=line12></span>              | Error error =&gt; Error[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t](error)
+<span class="lineno" id=line13></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line14></span>        | Error error =&gt; Error[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t] (error)
+<span class="lineno" id=line15></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line16></span>    ;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define an immutable value">val</span> exprs : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[ast_t]] = parse_expr_list s;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="conditional">if</span> (is_defined exprs) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line21></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> 
+<span class="lineno" id=line22></span>               f (Ok[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t](<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>]())) 
+<span class="lineno" id=line23></span>               (<span class="library" title="return data structure with function applied to each value">map</span> (eval env) (get exprs));
+<span class="lineno" id=line24></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>    <span class="small_keyword" title="return">return</span> Error[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t](Syntax_error);
+<span class="lineno" id=line27></span>  }  
+</pre></p><h2 id='The_"repl"_h'><img src='/share/src/web/images/minus.gif' id='The "repl"' onclick='toggle(this,"The_"repl"_d")' alt='+'/> 5.1 The "repl"</h2><div id='The_"repl"_d' style='display:block'>
+<p>So, all that remains now is to put an interactive "front end" on the
+interpreter (a read-eval-print-loop).
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> prompt (continuing:bool) {
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="conditional">if</span> (<span class="small_keyword" title="logical negation">not</span> continuing) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line3></span>      <span class="library" title="Print a string to a stream">write</span>$ stdout, <span class="fstring">"? "</span>;
+<span class="lineno" id=line4></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line5></span>      <span class="library" title="Print a string to a stream">write</span>$ stdout, <span class="fstring">"... "</span>;
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line7></span>    fflush stdout;
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> read (continuing:bool) : <span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line11></span>    prompt (continuing);
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define an immutable value">val</span> l = stdin.<span class="library" title="Read a string from a stream including trailing newline">readln</span>.strip;
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="return">return</span> l;
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="comment">//Read-eval-print-loop</span>
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> repl () {
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>    <span class="comment">//oh hai!</span>
+<span class="lineno" id=line20></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">""</span>;
+<span class="lineno" id=line21></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Interpreter of arithmetic expressions (with variables)"</span>;
+<span class="lineno" id=line22></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Type ^D to quit."</span>;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a mutable variable">var</span> env = <span class="library" title="functional, singly linked list">list</span> [(<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C double float type">double</span>)]();
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>    <span class="comment">//A buffer</span>
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a mutable variable">var</span> buf:<span class="library" title="binding of C++ string type">string</span> =<span class="fstring">""</span>;
+<span class="lineno" id=line28></span>    reserve (&amp;buf, 1048); <span class="comment">//initial capacity</span>
+<span class="lineno" id=line29></span>    
+<span class="lineno" id=line30></span>  repl_loop : <span class="comment">//iz in ur loop!</span>
+<span class="lineno" id=line31></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>      <span class="big_keyword" title="Define a mutable variable">var</span> l:<span class="library" title="binding of C++ string type">string</span> = read (<span class="library" title="number of elements in data structure">len</span> buf != 0uz);
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="Define a mutable variable">var</span> n:<span class="library" title="binding of C size_t type">size</span> = <span class="library" title="number of elements in data structure">len</span> l;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>      <span class="small_keyword" title="conditional">if</span> n == 0uz 
+<span class="lineno" id=line37></span>        break repl_loop; <span class="comment">//kthxbai!</span>
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>      <span class="small_keyword" title="conditional">if</span> n &gt; 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line40></span>        <span class="small_keyword" title="conditional">if</span> (l.[0] == <span class="library" title="binding of C char type">char</span> <span class="fstring">'%'</span>) <span class="comment">//Comment line. Discard</span>
+<span class="lineno" id=line41></span>          continue repl_loop;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>        <span class="small_keyword" title="conditional">if</span> l.[n - 1] == <span class="library" title="binding of C char type">char</span> <span class="fstring">'\\'</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">//Line continuation; append and keep reading</span>
+<span class="lineno" id=line44></span>          buf += substring (l, 0, n - 1);
+<span class="lineno" id=line45></span>          continue repl_loop;
+<span class="lineno" id=line46></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>        <span class="small_keyword" title="conditional">if</span> l.[n - 1] == <span class="library" title="binding of C char type">char</span> 7 <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">//Discard partial statements with ^G</span>
+<span class="lineno" id=line49></span>          buf = <span class="fstring">""</span>;
+<span class="lineno" id=line50></span>          continue repl_loop;
+<span class="lineno" id=line51></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>        <span class="comment">//We think we got a phrase. Evaluate</span>
+<span class="lineno" id=line54></span>        buf += l;
+<span class="lineno" id=line55></span>        <span class="big_keyword" title="Define a mutable variable">var</span> res : <span class="small_keyword" title="value of function return used in post condition">result</span>[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C double float type">double</span>], error_t] = parse_eval_exprs (&amp;env) buf;
+<span class="lineno" id=line56></span>        buf = <span class="fstring">""</span>; <span class="comment">//reset buf</span>
+<span class="lineno" id=line57></span>        <span class="big_keyword" title="Define a mutable variable">var</span> response : <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line58></span>          <span class="small_keyword" title="match statement or expression">match</span> res <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line59></span>           | Ok a =&gt; <span class="library" title="Convert a value to a string">str</span> (head (drop (<span class="library" title="binding of C int type">int</span> (<span class="library" title="number of elements in data structure">len</span> a) - 1) a))
+<span class="lineno" id=line60></span>           | Error err =&gt; <span class="library" title="Convert a value to a string">str</span> err
+<span class="lineno" id=line61></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line62></span>         <span class="library" title="Print a string to standard output with newline appended">println</span>$ response;
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line65></span>    <span class="small_keyword" title="end of body">done</span> <span class="comment">//repl_loop</span>
+<span class="lineno" id=line66></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">""</span>;
+<span class="lineno" id=line67></span>  }
+</pre></p><p>When the program is executed, we go into the repl "loop"!
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  repl () ;
+</pre></p><p>Here's some test input for the repl emulating what a user might write.
+</p><p><pre class="input">x=1
+y=2
+x+y
+x+(x*y)+43-y/1
+</pre></p><p>Given the above test input, this is the expected output from the
+interpreter.
+</p><p><pre class="expected">
+Interpreter of arithmetic expressions (with variables)
+Type ^D to quit.
+? x=1
+1
+? y=2
+2
+? x+y
+3
+? x+(x*y)+43-y/1
+44
+? 
+</pre></p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

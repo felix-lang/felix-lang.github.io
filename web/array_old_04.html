@@ -1,0 +1,551 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.jsconfig=TeX-AMS-MML_HTMLorMML">
+</script>
+<title>/Users/skaller/felix/src/web/tut/array_old_04.html</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Array Types",
+"Array Value",
+"Array"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='array_old_03.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('prev')"
+  onmouseout="mouseout('prev')"
+  onclick="nop('prev')"
+  ><span id="prev"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span><span id="prev_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span></span></a> <a href='array_old_05.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='array_old_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>     <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Array Types_h')"> <a href="#Array_Types_h">Array Types</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Array_Value_h">Array Value</a></div>
+      <div class=m2><a href="#Array_h">Array</a></div>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Array_Types_h'><img src='/share/src/web/images/minus.gif' id='Array Types' onclick='toggle(this,"Array_Types_d")' alt='+'/> 4.1 Array Types</h1><div id='Array_Types_d' style='display:block'>
+<p>Felix currently provides several array like types.
+These are:
+<ul>
+<li>carray: an incrementable pointer</li>
+<li>array: a tuple with components all the same type</li>
+<li>varray: a bounded variable length array object</li>
+<li>darray: an unbounded variable length array object</li>
+<li>sarray: a sparse array object without a length</li>
+<li>bsarray: a bounded sparse array object</li>
+<li>strdict: a string indexed associative store</li>
+<li>Judy Array: high performance integer to integer map</li>
+</ul>
+Their properties can be classified as follows.
+</p><h2 id='Array_Value_h'><img src='/share/src/web/images/minus.gif' id='Array Value' onclick='toggle(this,"Array_Value_d")' alt='+'/> 4.1.1 Array Value</h2><div id='Array_Value_d' style='display:block'>
+<p>An array value is a readonly indexable store with amortised O(1) access times.
+It has two defining properties:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>  <span class="library" title="number of elements in data structure">len</span>: A -&gt; <span class="library" title="binding of C size_t type">size</span>
+<span class="lineno" id=line2></span>  unsafe_get: A * <span class="library" title="binding of C size_t type">size</span> -&gt; T
+</pre></p><p>and several derived properties:
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>    <span class="doccomment"> Checked common indexing.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> apply [I <span class="small_keyword" title="membership operator, function mem">in</span> ints] (i:I, x:t) =&gt; get (x,i.<span class="library" title="binding of C size_t type">size</span>);
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    <span class="doccomment">Checked common indexing.</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get[I <span class="small_keyword" title="membership operator, function mem">in</span> ints] (x:t, i:I) = { 
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Callback based value iterator.</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="call procedure on each element of data structure">iter</span> (_f:v-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) (x:t) {
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Callback based index and value iterator.</span>
+<span class="lineno" id=line11></span>    <span class="doccomment">Callback f index value.</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> iiter (_f:<span class="library" title="binding of C size_t type">size</span> -&gt; v-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) (x:t) {
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>      <span class="doccomment">Stream  value iterator.</span>
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator(xs:t) () : <span class="library" title="option type: Some x or None">opt</span>[v] = 
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="doccomment">Traditional left fold.</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span>[u] (_f:u-&gt;v-&gt;u) (init:u) (x:t): u = {
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="doccomment">Traditional right fold.</span>
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="accumulated values of data structure from right into initial value using function">fold_right</span>[u] (_f:v-&gt;u-&gt;u) (x:t) (init:u): u = {
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="comment">// map: can't be implemented easily because constructor required for result</span>
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="doccomment">Membership by predicate.</span>
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem(pred:v-&gt;bool) (x:t): bool 
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    <span class="doccomment">Membership by relation to given value. </span>
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem[u] (rel:v*u-&gt;bool) (x:t) (e:u): bool =&gt;
+<span class="lineno" id=line30></span>      mem (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (i:v) =&gt; rel(i, e)) x
+<span class="lineno" id=line31></span>    ;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="doccomment">Array as Set:</span>
+<span class="lineno" id=line34></span>    <span class="doccomment">Membership by equality of value type.</span>
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[<span class="small_keyword" title="type-class constraint">with</span> Eq[v]] Set[t,v] {
+<span class="lineno" id=line36></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\in">\(\in\)</span> (elt:v, a:t) =&gt; mem eq of (v * v) a elt;
+<span class="lineno" id=line37></span>    }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="doccomment">Searching for value satisfying relation to given value.</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find (rel:v*v-&gt;bool) (x:t) (e:v): <span class="library" title="option type: Some x or None">opt</span>[v] = {
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="doccomment">Searching for value satisfying predicate.</span>
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find(pred:v-&gt;bool) (x:t): <span class="library" title="option type: Some x or None">opt</span>[v] 
+</pre></p></div><h2 id='Array_h'><img src='/share/src/web/images/minus.gif' id='Array' onclick='toggle(this,"Array_d")' alt='+'/> 4.1.2 Array</h2><div id='Array_d' style='display:block'>
+<p>The built-in array type is a fixed length first class value
+which is a special case of a tuple with all elements the same
+type. For example
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> a = 1,2,3,4;
+</pre></p><p>has type
+</p><p><pre class='uncheckedflxbg'><span class="lineno" id=line1></span>  <span class="library" title="binding of C int type">int</span>^4 = <span class="library" title="array type, a tuple of all components the same type">array</span>[<span class="library" title="binding of C int type">int</span>,4]
+</pre></p><p>A component of an array can be fetched using an value of the
+index type as a projection function. Such indexes cannot
+exceed array bounds.  Unlike tuples, the projection index can be an 
+expression.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ (<span class="small_keyword" title="Sum type selector">case</span> 1 of 4) a;
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ a . (<span class="small_keyword" title="Sum type selector">case</span> 1 of 4);
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define an immutable value">val</span> k = <span class="small_keyword" title="Sum type selector">case</span> 1 of 4;
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ a . k;
+</pre></p><p><pre class="expected">2
+2
+2
+</pre></p><p>For your convenience you may also index an array with 
+any integer type. The value is converted to the array's
+actual index type, so again array bounds cannot be exceeded,
+however the conversion may fail.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ a . 1;  <span class="comment">// converted to case 1 of 4</span>
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ a . 1uz;  <span class="comment">// converted to case 1 of 4</span>
+<span class="lineno" id=line3></span>  <span class="comment">//println$ a . 22; // fails at compile time</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a mutable variable">var</span> one = 1;
+<span class="lineno" id=line5></span>  <span class="comment">//printn$ a . (one + 22); // assertion failure at run time</span>
+</pre></p><p><pre class="expected">2
+2
+</pre></p><p>If you use an integral literal or simple constant expression
+and the value is out of bounds, Felix may trap the error
+at compile time. If the expression is too complex,
+it will instead be checked at run time. If the expression
+is simple enough and the compiler can determine it is
+in bounds, the check may be optimised away.
+</p><p>If the proper index type is used, no check is required
+and none will be generated. Note again these are technically
+not array bounds checks, but a checked type conversion.
+Therefore instead of this code:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> a1 = 1,2,3,4;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an immutable value">val</span> a2 = 5,6,7,8;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> j = 1;
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ a1 . j, a2 . j;
+</pre></p><p><pre class="expected">(2, 6)
+</pre></p><p>it is better to write:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> i : 4 = 1 :&gt;&gt; 4;
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ a1 . i, a2 . i;
+</pre></p><p><pre class="expected">(2, 6)
+</pre></p><p>to reduce the number of checked conversions from 2 to 1. 
+</p><p>The length of an array may be obtained at run time with
+the <code>len</code> method:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ a.<span class="library" title="number of elements in data structure">len</span>;
+</pre></p><p><pre class="expected">4
+</pre></p><p>which returns a value of type <code>size</code>.
+</p><p>Felix also provides the method <code>get</code> and <code>unsafe_get</code>:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ unsafe_get (a, 1.<span class="library" title="binding of C size_t type">size</span>), get (a, 1.<span class="library" title="binding of C size_t type">size</span>);
+</pre></p><p><pre class="expected">(2, 2)
+</pre></p><p>which are standard for all arrays. The <code>get</code> method
+does a bounds check then calls the <code>unsafe_get</code> method.
+Integer indexing maps to the <code>get</code> method. 
+</p><p>Caveat: Unfortunately the <code>unsafe_get</code> method does a conversion to the 
+proper index type which is also checked, so bounds checks are performed twice.
+The conversion cannot be avoided by using a C primitive because builtin fixed
+array type supports multi-indices of compact linear type.
+See the separate tutorial section on generalised arrays for details.
+</p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

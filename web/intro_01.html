@@ -1,0 +1,556 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>/Users/skaller/felix/src/web/tut/intro_01.html</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Fundamentals",
+"Lifting types",
+"Defining values.",
+"Defining functional operators",
+"Defining commands",
+"Overloading",
+"A test program"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='intro_02.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='intro_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Fundamentals_h')"> <a href="#Fundamentals_h">Fundamentals</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Lifting_types_h">Lifting types</a></div>
+      <div class=m2><a href="#Defining_values._h">Defining values.</a></div>
+      <div class=m2><a href="#Defining_functional_operators_h">Defining functional operators</a></div>
+      <div class=m2><a href="#Defining_commands_h">Defining commands</a></div>
+      <div class=m2><a href="#Overloading_h">Overloading</a></div>
+      <div class=m2><a href="#A_test_program_h">A test program</a></div>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Fundamentals_h'><img src='/share/src/web/images/minus.gif' id='Fundamentals' onclick='toggle(this,"Fundamentals_d")' alt='+'/> 1.1 Fundamentals</h1><div id='Fundamentals_d' style='display:block'>
+<p>This tutorial will take you through the Felix system from
+the ground up. To proceed you will need to know some C and C++.
+Felix is a C++ code generator and our viewpoint here will
+be to explain how it generates C++ code.
+</p><p>In the examples below some of the names used seem a little
+strange: that's because we wish to avoid creating a clash
+with the library code.
+</p><p>So lets get started. Most languages which can interface
+to C have a thing called an FFI or Foreign Function Interface.
+</p><p>Felix is tightly integrated with C++ and does not requires
+such a crude mechanism. Lets see how it works!
+</p><h2 id='Lifting_types_h'><img src='/share/src/web/images/minus.gif' id='Lifting types' onclick='toggle(this,"Lifting_types_d")' alt='+'/> 1.1.1 Lifting types</h2><div id='Lifting_types_d' style='display:block'>
+<p>The first thing we need to do is to lift some types
+out of C:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// A bool type.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mybool = <span class="fstring">"bool"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// An integer type.</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> myint = <span class="fstring">"int"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="comment">// A string type.</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mystring = <span class="fstring">"::std::string"</span> 
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span></span>"
+<span class="lineno" id=line10></span>  ;
+</pre></p><p>In the first two cases we're defining the Felix
+types <code>mybool</code> and <code>myint</code> to be the C++ types <code>bool</code> and <code>int</code>
+respectively. That's pretty easy!
+</p><p>In the third case we're defining the Felix
+type <code>mystring</code> to be the C++ string 
+type {::std::string}. However to make sure
+that <code>string</code> is defined in the generated C++
+code we have to emit
+</p><p><pre class="prefmtbg">#include &lt;string&gt;
+</pre></p><p>in the header file Felix generates. The <code>requires</code>
+clause given with the type says to do this if,
+and only if, the <code>mystring</code> type is actually used.
+If it's used we need the header, if it isn't we don't
+want to slow the C++ compilation down by making
+it process a header that's not needed.
+</p></div><h2 id='Defining_values._h'><img src='/share/src/web/images/minus.gif' id='Defining values.' onclick='toggle(this,"Defining_values._d")' alt='+'/> 1.1.2 Defining values.</h2><div id='Defining_values._d' style='display:block'>
+<p>So we now have some types, and we need to say how
+get some values. We can do this like so:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> myfalse : mybool = <span class="fstring">"false"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> mytrue : mybool = <span class="fstring">"true"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> zero : myint = <span class="fstring">"0"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> one : myint = <span class="fstring">"1"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> two : myint = <span class="fstring">"2"</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> empty : mystring = <span class="fstring">'::std::string("")'</span>; 
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> white : mystring = <span class="fstring">'::std::string(" ")'</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> hello : mystring = <span class="fstring">'::std::string("hello")'</span>;
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> world : mystring = <span class="fstring">'::std::string("world")'</span>;
+</pre></p><p>You will note that for the strings we have to put
+the double quotes {"} expected by C++, so for the
+specification we use single quotes {'}, Felix 
+accepts both.
+</p></div><h2 id='Defining_functional_operators_h'><img src='/share/src/web/images/minus.gif' id='Defining functional operators' onclick='toggle(this,"Defining_functional_operators_d")' alt='+'/> 1.1.3 Defining functional operators</h2><div id='Defining_functional_operators_d' style='display:block'>
+<p>Now to get anywhere we need to do calculations.
+So we will define a few simple calculations.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> myand : mybool * mybool -&gt; mybool = <span class="fstring">"$1&amp;&amp;$2"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> myor : mybool * mybool -&gt; mybool = <span class="fstring">"$1||$2"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> mynot : mybool -&gt; mybool = <span class="fstring">"!$1"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> myadd : myint * myint -&gt; myint = <span class="fstring">"$1+$2"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> mymul : myint * myint -&gt; myint = <span class="fstring">"$1*$2"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> myeq : myint * myint -&gt; mybool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> mycat : mystring * mystring -&gt; mystring = <span class="fstring">"$1+$2"</span>;
+</pre></p><p>It should be clear that {$1} refers to the first argument
+and {$2} refers to the second argument, and that 
+the infix type operator {*} is used to separate the
+arguments, and the infix arrow {->} is used to specify
+the result type of the function. A specification like:
+</p><p><pre class="prefmtbg">  f: R * R -&gt; R
+</pre></p><p>is standard mathematics except that we use {*} instead of <code>x</code>
+for cartesian products.
+</p></div><h2 id='Defining_commands_h'><img src='/share/src/web/images/minus.gif' id='Defining commands' onclick='toggle(this,"Defining_commands_d")' alt='+'/> 1.1.4 Defining commands</h2><div id='Defining_commands_d' style='display:block'>
+<p>It's ok to do calculations but we need to have some 
+way to at least output the results.  We will use
+<em>procedures</em> to implement some commands.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> myprint : myint = <span class="fstring">"::std::cout&lt;&lt;$1;"</span> 
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span></span>"
+<span class="lineno" id=line3></span>  ;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> myendl : 1 = <span class="fstring">"::std::cout&lt;&lt;::std::endl;"</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span></span>"
+<span class="lineno" id=line6></span>  ;
+</pre></p><p>It should be clear how these procedures work.
+You should note that a procedure must be
+one or more C++ statements, so the trailing 
+semicolon {;} within the quotes is required here.
+Procedure bindings don't specify a return
+type like functions because procedures don't
+return any values.
+</p><p>There is one piece of magic here: <code>myendl</code>
+appears to accept an argument of type <code>1</code>.
+This type is also called <em>unit</em> and
+is built in to Felix. There is only one value
+of this type:
+</p><p><pre class="prefmtbg">  ()
+</pre></p><p>which is why the type is called <code>1</code>.
+In Felix, all functions and procedures
+have one argument, and {()} is the argument
+we have to use where the corresponding C++
+function or procedure has no arguments.
+</p></div><h2 id='Overloading_h'><img src='/share/src/web/images/minus.gif' id='Overloading' onclick='toggle(this,"Overloading_d")' alt='+'/> 1.1.5 Overloading</h2><div id='Overloading_d' style='display:block'>
+<p>You probably know you can do overloading in C++,
+and you can do it in Felix too. Here's an example:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> myprint : mystring = <span class="fstring">"::std::cout&lt;&lt;$1;"</span> 
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span></span>"
+<span class="lineno" id=line3></span>  ;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> myprint : mybool= <span class="fstring">'::std::cout&lt;&lt;($1??"mytrue":"myfalse");'</span> 
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span></span>"
+<span class="lineno" id=line6></span>  ;
+</pre></p><p>Here, we defined two more overloads of <code>myprint</code> so we can now
+print values of type <code>mybool</code>, <code>myint</code> and <code>mystring</code> with
+the same command.
+</p><p>You will also note that the <code>requires</code> clause is used here
+on these commands to ensure that we get the include file
+required to define {::std::cout} and {::std::endl} as well
+as {::std::operator <<}.
+</p><p>Finally, note the trick notation for the C++ conditional
+using {??} instead of {?}. This is because {?} has a special
+meaning which we'll learn later.
+</p></div><h2 id='A_test_program_h'><img src='/share/src/web/images/minus.gif' id='A test program' onclick='toggle(this,"A_test_program_d")' alt='+'/> 1.1.6 A test program</h2><div id='A_test_program_d' style='display:block'>
+<p>Now we have enough tools to do some testing.
+So lets get going!
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// Say "hello world"</span>
+<span class="lineno" id=line2></span>  myprint (mycat (mycat (hello, white), world)); myendl ();
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// show 1 + 2, should be 3</span>
+<span class="lineno" id=line5></span>  myprint (myadd (one, two)); myendl();
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="comment">// basic axiom check</span>
+<span class="lineno" id=line8></span>  myprint (myeq (myadd (one, two), myadd (two, one))); myendl ();
+</pre></p><p>Of course we expect these results:
+</p><p><pre class="expected">hello world
+3
+mytrue
+</pre></p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

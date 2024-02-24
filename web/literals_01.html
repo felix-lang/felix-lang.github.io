@@ -1,0 +1,685 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>/Users/skaller/felix/src/web/tut/literals_01.html</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Integers",
+"Integer types and literal suffix",
+"Integer literal radix",
+"Underscore separators",
+"Exact rule for literals",
+"Example literals",
+"Functions",
+"Mixed mode integer operations",
+"Procedures"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='literals_02.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='literals_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Integers_h')"> <a href="#Integers_h">Integers</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Integer_types_and_literal_suffix_h">Integer types and literal suffix</a></div>
+      <div class=m2><a href="#Integer_literal_radix_h">Integer literal radix</a></div>
+      <div class=m2><a href="#Underscore_separators_h">Underscore separators</a></div>
+      <div class=m2><a href="#Exact_rule_for_literals_h">Exact rule for literals</a></div>
+      <div class=m2><a href="#Example_literals_h">Example literals</a></div>
+      <div class=m2><a href="#Functions_h">Functions</a></div>
+      <div class=m2><a href="#Procedures_h">Procedures</a></div>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Integers_h'><img src='/share/src/web/images/minus.gif' id='Integers' onclick='toggle(this,"Integers_d")' alt='+'/> 1.1 Integers</h1><div id='Integers_d' style='display:block'>
+<p>Integers are not builtin types, but are in fact
+defined in the standard library by binding to
+their C equivalents.
+</p><h2 id='Integer_types_and_literal_suffix_h'><img src='/share/src/web/images/minus.gif' id='Integer types and literal suffix' onclick='toggle(this,"Integer_types_and_literal_suffix_d")' alt='+'/> 1.1.1 Integer types and literal suffix</h2><div id='Integer_types_and_literal_suffix_d' style='display:block'>
+<p>In the following table, the Felix names of the basic integer
+types are given, along with the corresponding C names.
+</p><p>The table also lists the lower case versions of the type suffices allowed
+for literals of that type. Either or both the unsigned designator 'u'
+or the other part may be upper case instead (however lL is not permitted
+for long long, both letters must be either lower or upper case).
+</p><p><pre class="prefmtbg">  Felix name  C name              Suffix
+  -------------------------------------------------
+  tiny        signed char         t
+  utiny       unsigned char       ut, tu
+  short       signed short int    s
+  ushort      unsigned short int  us, su
+  int         signed int          i (none) 
+  uint        unsigned int        u
+  long        signed long int     l
+  ulong       unsigned long int   lu, ul
+  vlong       signed long long    ll, v
+  uvlong      unsigned long long  ull, llu, uv, vu
+</pre></p><p>The following aliases for exact integers are also provided:
+</p><p><pre>
+  Felix name  C name     Suffix
+  -----------------------------
+  int8        int8_t     i8
+  uint8       uint8_t    u8
+  int16       int16_t    i16
+  uint16      uint16_t   u16
+  int32       int32_t    i32
+  uint32      uint32_t   u32
+  int64       int64_t    i64/Users/johnskaller/felix/tut/func_01.expect
+  uint64      uint64_t   u64
+</pre>
+</p><p>The following special aliases are also provided
+to use in low level code related to address calculations:
+</p><p><pre>
+  Felix name    C name      Suffix
+  --------------------------------
+  size          size_t          uz
+  ssize         ssize_t          z
+  ptrdiff       ptrdiff_t        d
+  uptrdiff      ptrdiff_t       ud
+  intptr        intptr_t         p 
+  uintptr       uintptr_t       up
+  intmax        intmax_t         j
+  uintmax       uintmax_t       uj
+</pre>
+</p><p>Felix guarantees all the addressing and exact integer aliases exist,
+even if the C89, C++ or C99 counterparts do not. When the C/C++ counterparts
+do exist, Felix binds to the same integer type, otherwise it binds to
+the largest appropriate integer type (for example, if both long
+and long long exist and are the same size as a pointer, and
+intptr_t is not defined by C or C++, then Felix choses long long
+as the alias).
+</p><p>Note that there are no suffices for the special address calculating
+integer aliases. It is best to use a literal with a long enough type
+and cast it as required.
+</p><p>Note also that unlike modern C and C++ very long integers without
+a suffix are still type <code>int</code>. This is because Felix has no idea
+of the limits of integer types.
+</p></div><h2 id='Integer_literal_radix_h'><img src='/share/src/web/images/minus.gif' id='Integer literal radix' onclick='toggle(this,"Integer_literal_radix_d")' alt='+'/> 1.1.2 Integer literal radix</h2><div id='Integer_literal_radix_d' style='display:block'>
+<p>An integer literal consists of a prefix, numeric form and suffix.
+The suffix is noted in the tables above.
+Either the size indicator or signedness indicator 'u' or 'i'
+can be wholly capitalised (but note that lL is not allowed).
+</p><p>The prefix denotes the radix as in the table below:
+<pre>
+  Prefix      Radix    name         Allowed digits
+  --------------------------------------------------------
+  0b 0B       2        binary       01
+  0o 0O       8        octal        01234567
+  0d 0D none  10       decimal      0123456789
+  0x 0X       16       hexadecimal  0123456789ABCDEFabcdef
+</pre>
+</p><p>Hexadecimal digits which are letters may also be capitalised.
+Please note that unlike C <code>077</code> is decimal 77, it is not octal,
+you must use <code>0o77</code> to get octal!
+</p></div><h2 id='Underscore_separators_h'><img src='/share/src/web/images/minus.gif' id='Underscore separators' onclick='toggle(this,"Underscore_separators_d")' alt='+'/> 1.1.3 Underscore separators</h2><div id='Underscore_separators_d' style='display:block'>
+<p>The numeric form consists of digits from the table above,
+with optional underscores inserted for layout purposes.
+Two underscores in a row are not permitted, one is allowed
+between digits, or a digit and the prefix or suffix.
+</p></div><h2 id='Exact_rule_for_literals_h'><img src='/share/src/web/images/minus.gif' id='Exact rule for literals' onclick='toggle(this,"Exact_rule_for_literals_d")' alt='+'/> 1.1.4 Exact rule for literals</h2><div id='Exact_rule_for_literals_d' style='display:block'>
+<p><pre class='flxbg'><span class=small_keyword>let</span> bindigit = ['0'-'1']
+<span class=small_keyword>let</span> octdigit = ['0'-'7']
+<span class=small_keyword>let</span> digit = ['0'-'9']
+<span class=small_keyword>let</span> hexdigit = digit | ['<span class=ctor>A'</span>-'<span class=ctor>F'</span>] | ['a'-'f']
+<span class=small_keyword>let</span> underscore = '_'
+
+<span class=small_keyword>let</span> bin_lit  = '0' ('b' | '<span class=ctor>B'</span>) (underscore? bindigit) +
+<span class=small_keyword>let</span> oct_lit  = '0' ('o' | '<span class=ctor>O'</span>) (underscore? octdigit) +
+<span class=small_keyword>let</span> dec_lit  = ('0' ('d' | '<span class=ctor>D'</span>| <span class=fstring>"d_"</span> | <span class=fstring>"D_"</span>))? digit (underscore? digit) *
+<span class=small_keyword>let</span> hex_lit  = '0' ('x' | '<span class=ctor>X'</span>) (underscore? hexdigit)  +
+<span class=small_keyword>let</span> fastint_type_suffix = 't'|'<span class=ctor>T'</span>|'s'|'<span class=ctor>S'</span>|'i'|'<span class=ctor>I'</span>|'l'|'<span class=ctor>L'</span>|'v'|'<span class=ctor>V'</span>|<span class=fstring>"ll"</span>|<span class=fstring>"LL"</span>
+<span class=small_keyword>let</span> exactint_type_suffix =
+    <span class=fstring>"i8"</span> | <span class=fstring>"i16"</span> | <span class=fstring>"i32"</span> | <span class=fstring>"i64"</span>
+  | <span class=fstring>"u8"</span> | <span class=fstring>"u16"</span> | <span class=fstring>"u32"</span> | <span class=fstring>"u64"</span>
+  | <span class=fstring>"I8"</span> | <span class=fstring>"I16"</span> | <span class=fstring>"I32"</span> | <span class=fstring>"I64"</span>
+  | <span class=fstring>"U8"</span> | <span class=fstring>"U16"</span> | <span class=fstring>"U32"</span> | <span class=fstring>"U64"</span>
+
+<span class=small_keyword>let</span> signind = 'u' | '<span class=ctor>U'</span>
+
+<span class=small_keyword>let</span> suffix =
+    '_'? exactint_type_suffix
+  | ('_'? fastint_type_suffix)? ('_'? signind)?
+  | ('_'? signind)? ('_'? fastint_type_suffix)?
+
+<span class=small_keyword>let</span> int_lit = (bin_lit | oct_lit | dec_lit | hex_lit) suffix
+</pre></p></div><h2 id='Example_literals_h'><img src='/share/src/web/images/minus.gif' id='Example literals' onclick='toggle(this,"Example_literals_d")' alt='+'/> 1.1.5 Example literals</h2><div id='Example_literals_d' style='display:block'>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// radix</span>
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define an immutable value">val</span> i1 = 999;      <span class="comment">// decimal</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define an immutable value">val</span> i2 = 0b1111;   <span class="comment">// binary</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define an immutable value">val</span> i3 = 0o7777;   <span class="comment">// octal</span>
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define an immutable value">val</span> i4 = 0d9999;   <span class="comment">// decimal</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define an immutable value">val</span> i5 = 0xF1_F2;  <span class="comment">// hex</span>
+<span class="lineno" id=line8></span>  };
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="comment">// underscores</span>
+<span class="lineno" id=line11></span>  {
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define an immutable value">val</span> i1 = 123_456;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define an immutable value">val</span> i2 = 0x_FF_FFu;
+<span class="lineno" id=line14></span>  };
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="comment">// normal signed integers</span>
+<span class="lineno" id=line17></span>  {
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define an immutable value">val</span> i1 : <span class="library" title="binding of C signed char type">tiny</span> = 1t;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define an immutable value">val</span> i2 : <span class="library" title="binding of C short type">short</span> = 1s;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define an immutable value">val</span> i3 : <span class="library" title="binding of C int type">int</span> = 1; <span class="comment">// default</span>
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define an immutable value">val</span> i4 : <span class="library" title="binding of C int type">int</span> = 1i;
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define an immutable value">val</span> i5 : <span class="library" title="binding of C long type">long</span> = 1l;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define an immutable value">val</span> i6 : <span class="library" title="binding of C long long type">vlong</span> = 1ll;
+<span class="lineno" id=line24></span>  };
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  <span class="comment">// normal unsigned integers</span>
+<span class="lineno" id=line27></span>  {
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define an immutable value">val</span> i1 : <span class="library" title="binding of C unsigned char type">utiny</span> = 1tu;
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define an immutable value">val</span> i2 : <span class="library" title="binding of C unsigned char type">utiny</span> = 1ut; <span class="comment">// u may be first or last</span>
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define an immutable value">val</span> i3 : <span class="library" title="binding of C unsigned short type">ushort</span> = 1su;
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define an immutable value">val</span> i4 : <span class="library" title="binding of C unsigned int type">uint</span> = 1u; <span class="comment">// default</span>
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Define an immutable value">val</span> i5 : <span class="library" title="binding of C unsigned int type">uint</span> = 1iu;
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define an immutable value">val</span> i6 : <span class="library" title="binding of C unsigned long type">ulong</span> = 1lu;
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define an immutable value">val</span> i7 : <span class="library" title="binding of C unsigned long long type">uvlong</span> = 1vu;
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define an immutable value">val</span> i8 : <span class="library" title="binding of C unsigned long long type">uvlong</span> = 1llu; <span class="comment">// alternate</span>
+<span class="lineno" id=line36></span>  };
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>  <span class="comment">// exact signed integers</span>
+<span class="lineno" id=line39></span>  {
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define an immutable value">val</span> i1 : <span class="library" title="binding of C int8_t type">int8</span> = 1i8;
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define an immutable value">val</span> i2 : <span class="library" title="binding of C int16_t type">int16</span> = 1i16;
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define an immutable value">val</span> i3 : <span class="library" title="binding of C int32_t type">int32</span> = 1i32;
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define an immutable value">val</span> i4 : <span class="library" title="binding of C int64 type">int64</span> = 1i64;
+<span class="lineno" id=line44></span>  };
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  <span class="comment">// exact unsigned integers</span>
+<span class="lineno" id=line47></span>  {
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define an immutable value">val</span> i1 : <span class="library" title="binding of C uint8_t type">uint8</span> = 1u8; <span class="comment">// 1iu8 not allowed</span>
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define an immutable value">val</span> i2 : <span class="library" title="binding of C uint16_t type">uint16</span> = 1u16;
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define an immutable value">val</span> i3 : <span class="library" title="binding of C uint32_t type">uint32</span> = 1u32;
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Define an immutable value">val</span> i4 : <span class="library" title="binding of C uint64 type">uint64</span> = 1u64;
+<span class="lineno" id=line52></span>  };
+</pre></p></div><h2 id='Functions_h'><img src='/share/src/web/images/minus.gif' id='Functions' onclick='toggle(this,"Functions_d")' alt='+'/> 1.1.6 Functions</h2><div id='Functions_d' style='display:block'>
+<p>Arithmetic types support the same operations as ISO C99,
+except that Felix does not support bitwise operations on
+signed integers (shifts are supported, they're multiplications
+by powers of two).
+</p><p>Note also, Felix does not provide automatic conversions.
+All standard integer operations of two arguments require
+both argument to be the same type, all operations return
+a value of that type. 
+</p><p>Overflow of operations on signed types is undefined
+behaviour. Operations on unsigned types cannot overflow
+because they are defined as the modular residual of the
+underlying mathematical operation on integers.
+</p><p>Thus, operations on exact unsigned integral types are fully
+deterministic, and operations on signed integral types
+are also deterministic when they do not overflow.
+</p><p>In the table below the most tightly binding operation
+groups are given first (with one exception, power).
+Please note that all operator expressions are transformed
+by the parser into function calls.
+</p><p><pre class="prefmtbg">  operator parsing function     meaning
+  ------------------------------------------------------------------
+                   abs i        absolute value         (signed only)
+                   sgn i        sign       (returns int -1, 0 or +1)
+                                                       (signed only)
+                   succ i       successor
+                   pred i       predecessor
+                   max(i,j)     maximum
+                   min(i,j)     minimum
+                   gcd(i,j)     greatest common divisor
+                   lcm(i,j)     lowest common multiple
+  ------------------------------------------------------------------
+  +i       special plus i       identity
+  -i       special neg i        negation
+  ~i       special bnot i       bitwise compliment   (unsigned only)
+  i**j     special pow (i,j)    power
+  ------------------------------------------------------------------
+  i/j      left    div (i,j)    integer division
+  i%j      left    mod (i,j)    modular remainder
+  ------------------------------------------------------------------
+  i*j      unassoc mul (i,j)    multiplication
+  ------------------------------------------------------------------
+  i-j      left    sub (i,j)    subtraction
+  ------------------------------------------------------------------
+  i+j      unassoc add (i,j)    addition
+  ------------------------------------------------------------------
+  i&amp;lt;&amp;lt;j     left    shl (i,j)    multiply by power of 2
+  i&amp;gt;&amp;gt;j     left    shr (i,j)    divide by power of 2
+  -----------------------------------------------------------------
+  i\&amp;amp;j     left    band (i,j)   bitwise and          (unsigned only)
+  ------------------------------------------------------------------
+  i\^j     left    bxor (i,j)   bitwise exclusive or (unsigned only)
+  ------------------------------------------------------------------
+  i\|j     left    bor (i,j)    bitwise or           (unsigned only)
+  ------------------------------------------------------------------
+  i&amp;lt;j              lt (i,j)     less than             (returns bool)
+  i&amp;lt;=j             le (i,j)     less than or equal    (returns bool)
+  i&amp;gt;=j             ge (i,j)     greater than or equal (returns bool)
+  i&amp;gt;j              gt (i,j)     greater than          (returns bool)
+  i==j             eq (i,j)     equal                 (returns bool)
+  i!=j             neq (i,j)    not equal             (returns bool)
+</pre></p><p>There two very important and unusual things to note.
+The first is the weird special grammar of the power operator.
+Whilst {- a**b} means {-(a**b)}, weirdly {a**-b} means 
+{a^(-b)}. This special grammar supports common mathematical
+usage.
+</p><p>The second thing to note is that division has a higher precedence
+than multiplication, and subtraction has a higher precedence than addition.
+This has no effect on non-overflowing signed integer operations,
+but it does make a difference for unsigned integer operations and
+also floating point (which isn't associative).
+</p><p>The reason for this quirk is that Felix uses the same grammar for
+types as run time expressions, and we require tuple types {a * b * c}
+to be distinct from {a * (b * c)} and {(a * b) * c} and similarly for {a + b + c}.
+Because of this operator {*} is not left or right associative, and in particular
+can't associate with operator {/} so they have to have different precedences.
+</p><p>For a complete and precise understanding of the grammar you must
+consult the grammar file {lib/grammar/expressions.flxh}.
+</p><p>For a precise understanding of the standard operations on integers you
+must consult the typeclass specifications in {lib/std/algebraic.flx}.
+</p><h3 id='Mixed_mode_integer_operations_h'><img src='/share/src/web/images/minus.gif' id='Mixed mode integer operations' onclick='toggle(this,"Mixed_mode_integer_operations_d")' alt='+'/> 1.1.6.1 Mixed mode integer operations</h3><div id='Mixed_mode_integer_operations_d' style='display:block'>
+<p>Felix by default only supports arithmetic on integers
+of exactly the same type. To enable mixed mode arithmetic
+open the MixedInt module.
+</p></div></div><h2 id='Procedures_h'><img src='/share/src/web/images/minus.gif' id='Procedures' onclick='toggle(this,"Procedures_d")' alt='+'/> 1.1.7 Procedures</h2><div id='Procedures_d' style='display:block'>
+<p>Felix supports the following procedures on integers:
+</p><p><pre class="prefmtbg">  operator     procedure
+  -----------------------------
+  ++i;         pre_incr (&amp;amp;i)
+  i++;         post_incr (&amp;amp;i)
+  --i;         pre_decr (&amp;amp;i)
+  i--;         post_decr (&amp;amp;i)
+  i+=j;        plus_eq  (&amp;amp;i,j)
+  i-=j;        minus_eq (&amp;amp;i,j)
+  i*=j;        mul_eq (&amp;amp;i,j)
+  i/=j;        div_eq (&amp;amp;i,j)
+  i%=j;        mod_eq (&amp;amp;i,j)
+  i|=j;        bor_eq (&amp;amp;i,j)
+  i^=j;        bxor_eq (&amp;amp;i,j)
+  i&amp;amp;=j;        band_eq (&amp;amp;i,j)
+</pre></p><p>Note that the first argument of the procedure is a pointer to the store to
+be modified.
+</p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

@@ -1,0 +1,576 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>/Users/skaller/felix/src/web/tut/intro_12.html</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Precedence in Bindings"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='intro_11.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('prev')"
+  onmouseout="mouseout('prev')"
+  onclick="nop('prev')"
+  ><span id="prev"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span><span id="prev_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span></span></a> <a href='intro_13.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='intro_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>     <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Precedence in Bindings_h')"> <a href="#Precedence_in_Bindings_h">Precedence in Bindings</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Precedence_in_Bindings_h'><img src='/share/src/web/images/minus.gif' id='Precedence in Bindings' onclick='toggle(this,"Precedence_in_Bindings_d")' alt='+'/> 12.1 Precedence in Bindings</h1><div id='Precedence_in_Bindings_d' style='display:block'>
+<p>In chapter 1 we introduces the basics for binding to C functions.
+We wrote code like this:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mybool = <span class="fstring">"bool"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> myfalse : mybool = <span class="fstring">"false"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> mytrue : mybool = <span class="fstring">"true"</span>;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> myand : mybool * mybool -&gt; mybool = <span class="fstring">"$1&amp;&amp;$2"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> myor : mybool * mybool -&gt; mybool = <span class="fstring">"$1||$2"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> mynot : mybool -&gt; mybool = <span class="fstring">"!$1"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> myprint : mybool= <span class="fstring">'::std::cout&lt;&lt;($1??"mytrue":"myfalse")&lt;&lt;::std::endl;'</span> 
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span></span>"
+<span class="lineno" id=line12></span>  ;
+</pre></p><p>but we glossed over an important issue. We understand intuitively
+how Felix generates calculations by substitution.
+For example we understand that this works:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> calc(x:mybool, y:mybool, z:mybool) =&gt;
+<span class="lineno" id=line2></span>    myand (myor (mynot x, myor (y, mynot z)), myand (x,y));
+<span class="lineno" id=line3></span>  ;
+<span class="lineno" id=line4></span>  myprint (calc (mytrue, myfalse, mytrue));
+</pre></p><p><pre class="expected">myfalse
+</pre></p><p>but what does the generated code look like?
+Roughly we expect this:
+</p><p><pre class="prefmtbg">  ((!(x))||((y)||(!(z))))&amp;&amp;((x)&amp;&amp;(y))
+</pre></p><p>We expect Felix to generate
+</p><p><pre class="prefmtbg">  $1&amp;&amp;$2 --&gt; ($1)||($2)
+</pre></p><p>to get the precedence right: we have to put parens around
+the arguments, because we don't know what they are.
+We're tempted to make it even worse by emitting parens
+around the whole expression as well (just in case .. :)
+</p><p>But this is not what you get. Instead you will see:
+</p><p><pre class="prefmtbg">  (!x||y||!z)&amp;&amp;x&amp;&amp;y
+</pre></p><p>or something similar. Only the necessary parens are emitted.
+How does Felix do this?
+</p><p>Well, you would be right that it does some kind of micro parsing.
+First, Felix has the followin built-in precedence names:
+</p><p><pre class="prefmtbg">let precedence = [
+  "atom";
+  "primary";
+  "postfix";
+  "unary";
+  "cast";
+  "pm";
+  "mult";
+  "add";
+  "shift";
+  "rel";
+  "eq";
+  "band";
+  "bxor";
+  "bor";
+  "and";
+  "xor";
+  "or";
+  "cond";
+  "assign";
+  "comma";
+  "expr";
+]
+</pre></p><p>These names related to the ISO C++ Standard grammar.
+Next, we extend the syntax for a binding as so:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> someand : mybool * mybool -&gt; mybool =
+<span class="lineno" id=line2></span>    <span class="fstring">"$1:band  &amp;&amp;  $2:bor"</span> is band
+<span class="lineno" id=line3></span>  ;
+</pre></p><p>Here, we have provided a grammar production by specifying the
+nonterminal for argument 1 as <code>band</code>, for argument 2 as <code>bor</code>
+and the whole expression as <code>band</code>. This is like writing:
+</p><p><pre class="prefmtbg">  band = band "&amp;&amp;" bor
+</pre></p><p>in some grammar. It tells the precedence of the arguments and resulting
+expression. If Felix has this information on every C function binding,
+it can calculate when parentheses are required to keep the grouping
+correct, and when then can be omitted.
+</p><p>This is the general form of a function binding. Procedure
+bindings also allow the precedence specification on arguments
+but have no need for one on the return value because there isn't one.
+</p><p>But we did not put this information into our bindings!
+Why did it work? The answer is a bit simplistic: there's
+a lookup table for common cases and Felix just remaps your string
+if it matches:
+</p><p><pre class="prefmtbg">let remaps = [
+  "$1++",("$1:postfix ++ ","postfix");
+  "$1--",("$1:postfix -- ","postfix");
+  "$1($2)",("$1:postfix($2:assign)","postfix");
+  "$1[$2]",("$1:postfix[$2:expr]","postfix");
+  "$1-&gt;$2",("$1:postfix-&gt;$2:atom","postfix");
+
+  "$1.*$2",("$1:pm.*$2:cast","pm");
+  "$1-&gt;*$2",("$1:pm-&gt;*$2:cast","pm");
+
+  "~$1",("~$1:unary","unary");
+  "+$1",("+ $1:unary","unary");
+  "-$1",("- $1:unary","unary");
+  "!$1",("!$1:unary","unary");
+  "&amp;$1",("&amp; $1:unary","unary");
+  "*$1",("*$1:unary","unary");
+  "++$1",("++ $1:unary","unary");
+  "--$1",("-- $1:unary","unary");
+
+  "$1*$2",("$1:mult * $2:pm","mult");
+  "$1/$2",("$1:mult / $2:pm","mult");
+  "$1%$2",("$1:mult % $2:pm","mult");
+
+  "$1+$2",("$1:add + $2:mult","add");
+  "$1-$2",("$1:add - $2:mult","add");
+
+  "$1&lt;&lt;$2",("$1:shift &lt;&lt; $2:add","shift");
+  "$1&gt;&gt;$2",("$1:shift &gt;&gt; $2:add","shift");
+
+  "$1&lt;$2",("($1:rel &lt; $2:shift)","rel");
+  "$1&gt;$2",("($1:rel &gt; $2:shift)","rel");
+  "$1&gt;=$2",("($1:rel &gt;= $2:shift)","rel");
+  "$1&lt;=$2",("($1:rel &lt;= $2:shift)","rel");
+
+  "$1==$2",("($1:eq == $2:rel)","eq");
+  "$1!=$2",("($1:eq != $2:rel)","eq");
+
+  "$1&amp;$2",("$1:band &amp; $2:eq","band");
+  "$1|$2",("$1:bor | $2:band","bor");
+  "$1^$2",("$1:bxor ^ $2:bor","bxor");
+
+  "$1&amp;&amp;$2",("$1:and &amp;&amp; $2:bxor","and");
+  "$1||$2",("$1:or || $2:and","or");
+
+
+  "$1+=$2",("$1:cond += $2:assign","assign");
+  "$1-=$2",("$1:cond -= $2:assign","assign");
+  "$1*=$2",("$1:cond *= $2:assign","assign");
+  "$1/=$2",("$1:cond /= $2:assign","assign");
+  "$1%=$2",("$1:cond %= $2:assign","assign");
+  "$1&lt;&lt;=$2",("$1:cond &lt;&lt;= $2:assign","assign");
+  "$1&gt;&gt;=$2",("$1:cond &gt;&gt;= $2:assign","assign");
+  "$1&amp;=$2",("$1:cond &amp;= $2:assign","assign");
+  "$1|=$2",("$1:cond |= $2:assign","assign");
+  "$1^=$2",("$1:cond ^= $2:assign","assign");
+  "$1:comma,$2:comma",("$1,$2","comma");
+
+  (* common library stuff: a hack but safe, prolly should fix in library*)
+  "&amp;::std::cout",("&amp;::std::cout","unary");
+  "&amp;::std::cerr",("&amp;::std::cerr","unary");
+  "$1.size()",("$1:postfix.size()","postfix");
+  "$1.data[$2]",("$1:postfix.data[$2:expr]","postfix");
+
+  "::flx::rtl::strutil::str&lt;int&gt;($1)",("::flx::rtl::strutil::str&lt;int&gt;($1:assign)","postfix");
+  "::flx::rtl::strutil::str&lt;#1&gt;($1)",("::flx::rtl::strutil::str&lt;#1&gt;($1:assign)","postfix");
+  "static_cast&lt;#0&gt;($1)",("static_cast&lt;#0&gt;($1:assign)","postfix");
+  "reinterpret&lt;?1&gt;($1)",("reinterpret&lt;?1&gt;($1:assign)","postfix");
+]
+</pre></p><p>There's also a rather lame micro parser that checks for function applications like:
+</p><p><pre class="prefmtbg">"func(...)"
+</pre></p><p>where <code>func</code> is an identifier, and gives such an expression 
+the <code>postfix</code> precedence, and the most trivial case:
+</p><p><pre class="prefmtbg">"identifier"
+</pre></p><p>is known to be an <code>atom</code>.
+</p><p>The micro parser might do extra work in future, but for now, if you are not
+sure that Felix recognizes your binding expression you have two choices:
+you can put the precedence codes in, or you can let Felix insert parentheses
+unconditionally. The micro parsing is conservative, if Felix isn't sure
+it always puts in parentheses.
+</p><p>You may wonder what the purpose of all this is. The answer is:
+sometimes you may need to actually read the generated C++.
+For debugging, for example.
+This is hard to do if it is littered with gratuitous parentheses!
+Can you parse this?
+</p><p><pre class="prefmtbg">  ((!(x))||((y)||(!(z))))&amp;&amp;((x)&amp;&amp;(y))
+</pre></p><p>No? I couldn't either. I got it wrong several times.
+In fact I don't even know if its right now!
+</p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

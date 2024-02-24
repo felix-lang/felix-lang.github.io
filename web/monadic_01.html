@@ -1,0 +1,587 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>/Users/skaller/felix/src/web/tut/monadic_01.html</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Felix for monadic programming",
+"The maybe monad"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='monadic_02.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='monadic_index.html'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Felix for monadic programming_h')"> <a href="#Felix_for_monadic_programming_h">Felix for monadic programming</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#The_maybe_monad_h">The maybe monad</a></div>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Felix_for_monadic_programming_h'><img src='/share/src/web/images/minus.gif' id='Felix for monadic programming' onclick='toggle(this,"Felix_for_monadic_programming_d")' alt='+'/> 1.1 Felix for monadic programming</h1><div id='Felix_for_monadic_programming_d' style='display:block'>
+<p>"In plain terms, a monad is a set of rules that enforce regular
+behavior but broad enough to allow most computational processes to be
+expressed as a monad."
+<em>--http://c2.com/cgi/wikiMonadicProgramming"</em>
+</p><h2 id='The_maybe_monad_h'><img src='/share/src/web/images/minus.gif' id='The maybe monad' onclick='toggle(this,"The_maybe_monad_d")' alt='+'/> 1.1.1 The maybe monad</h2><div id='The_maybe_monad_d' style='display:block'>
+<p>If <code>a</code> is a type variable and <code>M a</code> is a type,
+then the characteristic property of <code>M</code> if it is a monad,
+is that, there exists a function <code>bind</code> of type <code>M a
+-> (a -> M b) -> M b</code> for <code>b</code> another type variable
+(perhaps but not at all neccessarily the same as <code>a</code>). I
+suggest that perhaps a helpful interpretation of <code>M a</code> is
+that of <code>M</code> as a type function <code></code> applied to a
+type <code>a</code>.
+</p><p>It seems that one of the easier monads to start with in the study of
+monadic programming is the "maybe" monad built over something like the
+Felix <code>opt[T]</code> types (see
+http://felix-lang.org/lib/std/option.flx and
+http://felix-lang.org/test/regress/monad-01.flx). Here's something
+equivalent applied to the problem of "safe integer arithmetic". By
+"safe" we simply mean trying to evaluate expressions while watching
+out for division by zero and overflow.
+</p><p>To get going first define the sum <code>success[T]</code> to which
+later will be imbued monadic properties.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  variant success[T] = 
+<span class="lineno" id=line2></span>    | Success of T
+<span class="lineno" id=line3></span>    | Failure of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line4></span>    ;
+</pre></p><p>Instances of <code>success[T]</code> are values. There are two
+possibile patterns against which to match a given value :
+<code>Success a</code> and <code>Failure[a] s</code> (in the
+nomenclature of Haskell and Ocaml, <code>Success</code> and
+<code>Failure</code> are "data constructors", <code>success[T]</code>
+is a <em>type constructor</em>.). Consider for example the function
+<code>str</code> for any <code>x:success[T]</code>:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Str[T]] Str[success[T]]
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="comment">//success[T] satisfies the requirements of the typeclass Str (if the</span>
+<span class="lineno" id=line4></span>    <span class="comment">//same can be said of T)</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x:success[T]):<span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line7></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line8></span>        | Success t =&gt; <span class="fstring">"Success "</span> + (<span class="library" title="Convert a value to a string">str</span> t)
+<span class="lineno" id=line9></span>        | Failure s =&gt; <span class="fstring">"Failure "</span> + s
+<span class="lineno" id=line10></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line11></span>      ;
+<span class="lineno" id=line12></span>  }
+</pre></p><p>Here is where things get interesting:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  typefun Fallible (t:TYPE) : TYPE =&gt; success[t] ;
+</pre></p><p>This is a type function. <code>Fallible</code> is a function in one
+type argument with domain and codomain both <code>TYPE</code>. The
+type this computation results in specifically is
+<code>success[t]</code>.
+</p><p>The following syntax declares the intent to make a monad out of
+<code>Fallible</code>:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Monad[Fallible]
+<span class="lineno" id=line2></span>  {
+</pre></p><p>Now, the crucial definition for <code>bind</code><em> (pay particular
+attention to <code>bind</code>'s type and compare it with the type
+spelled out in the introduction!)</em>
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> bind[a, b] (x:Fallible a, f: a -&gt; Fallible b):Fallible b =&gt;
+<span class="lineno" id=line2></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line3></span>        | Success a =&gt; f a
+<span class="lineno" id=line4></span>        | Failure s =&gt; Failure[b] s
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line6></span>      ;
+</pre></p><p>One last ingredient is needed to make this (almost) monad useful.  We
+need a function to "lift" values of type <code>a</code> into the monad
+<code>Fallible a</code>. The usual name for this function is
+<code>return</code> and is obliged to have type <code>a -> M
+a</code>. In Felix, the convention is to denote this function
+<code>ret[T]</code>:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ret[a](x:a):Fallible a =&gt; Success x ;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  }<span class="comment">//instance Monad[Fallible]</span>
+</pre></p><p>That's it for defining the monad. The functions implementing safe
+arithmetic read as follows.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Safe arithmetic. </span>
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> INT_MAX:<span class="library" title="binding of C int type">int</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib ;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> INT_MIN:<span class="library" title="binding of C int type">int</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib ;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> madd (x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C int type">int</span>) : success[<span class="library" title="binding of C int type">int</span>] =&gt; 
+<span class="lineno" id=line7></span>    <span class="small_keyword" title="conditional">if</span> (x &gt; 0 <span class="small_keyword" title="logical conjunction">and</span> y &gt; (INT_MAX - x)) <span class="small_keyword" title="logical disjunction">or</span> 
+<span class="lineno" id=line8></span>       (x &lt; 0 <span class="small_keyword" title="logical conjunction">and</span> y &lt; (INT_MIN - x))
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line10></span>        Failure[<span class="library" title="binding of C int type">int</span>] <span class="fstring">"overflow"</span>
+<span class="lineno" id=line11></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line12></span>      Success (y + x)
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line14></span>    ;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> msub (x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C int type">int</span>) : success[<span class="library" title="binding of C int type">int</span>] =&gt; 
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="conditional">if</span> (x &gt; 0 <span class="small_keyword" title="logical conjunction">and</span> y &lt; (INT_MIN + x)) <span class="small_keyword" title="logical disjunction">or</span>
+<span class="lineno" id=line18></span>       (x &lt; 0 <span class="small_keyword" title="logical conjunction">and</span> y &gt; (INT_MAX + x))
+<span class="lineno" id=line19></span>    <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line20></span>      Failure[<span class="library" title="binding of C int type">int</span>] <span class="fstring">"overflow"</span>
+<span class="lineno" id=line21></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line22></span>      Success (y - x)
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line24></span>    ;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> mmul (x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C int type">int</span>) : success[<span class="library" title="binding of C int type">int</span>] =&gt; 
+<span class="lineno" id=line27></span>    <span class="small_keyword" title="conditional">if</span> y &gt; 0 <span class="small_keyword" title="logical conjunction">and</span> x &gt; 0 <span class="small_keyword" title="logical conjunction">and</span> y &gt; (INT_MAX / y) <span class="small_keyword" title="logical disjunction">or</span>
+<span class="lineno" id=line28></span>       y &gt; 0 <span class="small_keyword" title="logical conjunction">and</span> x &lt;= 0 <span class="small_keyword" title="logical conjunction">and</span> x &lt; (INT_MIN / y) <span class="small_keyword" title="logical disjunction">or</span>
+<span class="lineno" id=line29></span>       y &lt;= 0 <span class="small_keyword" title="logical conjunction">and</span> x &gt; 0 <span class="small_keyword" title="logical conjunction">and</span> y &lt; (INT_MIN / x) <span class="small_keyword" title="logical disjunction">or</span>
+<span class="lineno" id=line30></span>       y &lt;= 0 <span class="small_keyword" title="logical conjunction">and</span> y != 0 <span class="small_keyword" title="logical conjunction">and</span> x &lt;= 0 <span class="small_keyword" title="logical conjunction">and</span> x &lt; (INT_MAX / y) <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line31></span>          Failure[<span class="library" title="binding of C int type">int</span>] <span class="fstring">"overflow"</span>
+<span class="lineno" id=line32></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line33></span>      Success (y * x) 
+<span class="lineno" id=line34></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line35></span>    ;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> mdiv (x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C int type">int</span>) : success[<span class="library" title="binding of C int type">int</span>] =&gt; 
+<span class="lineno" id=line38></span>      <span class="small_keyword" title="conditional">if</span> (x == 0) <span class="small_keyword" title="conditional">then</span> 
+<span class="lineno" id=line39></span>          Failure[<span class="library" title="binding of C int type">int</span>] <span class="fstring">"attempted division by zero"</span> 
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line41></span>        <span class="small_keyword" title="conditional">if</span> y == INT_MIN <span class="small_keyword" title="logical conjunction">and</span> x == -1 <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line42></span>          Failure[<span class="library" title="binding of C int type">int</span>] <span class="fstring">"overflow"</span>
+<span class="lineno" id=line43></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line44></span>          Success (y / x) 
+<span class="lineno" id=line45></span>      <span class="small_keyword" title="conditional">endif</span> 
+<span class="lineno" id=line46></span>      ;
+</pre></p><p>Hopefully the syntax of the functions
+</p><p>fun madd (x:int) (y:int) : success[int] => 
+  //...
+  ;
+</p><p>didn't confuse you? <code>madd</code> above is a function in its
+"curried" form. A function like <code>fun f (x:a)(y:b)</code> is a
+shorthand for <code>fun f (x:a) => fun (y:b)</code>. Looked at this
+way it's clear that there really isn't any such thing as a
+multi-argument function in mathematics or Felix. Functions take (at
+<em>most</em>) one argument!  If you find that confusing don't worry -
+most everyone needs a while to get that idea.
+</p><p>Enabling the monadic interpertation of <code>success[T]</code> is
+achieved with the directive
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> Monad[Fallible] ;
+</pre></p><p>... and now we're ready to to build and evaluate arithmetic
+expressions.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//Evalue some simple expressions.</span>
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define an immutable value">val</span> zero = ret 0 ;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define an immutable value">val</span> zero_over_one = bind ((Success 0), (mdiv 1)) ;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define an immutable value">val</span> undefined = bind ((Success 1),(mdiv 0)) ;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define an immutable value">val</span> two = bind((ret 1), (madd 1)) ;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define an immutable value">val</span> two_by_one_plus_one = bind (two , (mmul 2)) ;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"zero = "</span> + <span class="library" title="Convert a value to a string">str</span> zero ;
+<span class="lineno" id=line10></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"1 / 0 = "</span> + <span class="library" title="Convert a value to a string">str</span> undefined ;
+<span class="lineno" id=line11></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"0 / 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> zero_over_one ;
+<span class="lineno" id=line12></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"1 + 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> two ;
+<span class="lineno" id=line13></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"2 * (1 + 1) = "</span> + <span class="library" title="Convert a value to a string">str</span> (bind (bind((ret 1), (madd 1)) , (mmul 2))) ;
+<span class="lineno" id=line14></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MAX - 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (bind ((ret INT_MAX), (msub 1))) ;
+<span class="lineno" id=line15></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MAX + 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (bind ((ret INT_MAX), (madd 1))) ;
+<span class="lineno" id=line16></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MIN - 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (bind ((ret INT_MIN), (msub 1))) ;
+<span class="lineno" id=line17></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MIN + 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (bind ((ret INT_MIN), (madd 1))) ;
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"--"</span> ;
+</pre></p><p>It's suprising what looking at things a different way can bring.
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define domain specific sublanguage module">syntax</span> monad <span class="comment">//Override the right shift assignment operator.</span>
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    x[ssetunion_pri] := x[ssetunion_pri] <span class="fstring">"&gt;&gt;="</span> x[&gt;ssetunion_pri] =&gt;# <span class="fstring">"`(ast_apply ,_sr (bind (ast_tuple ,_sr (,_1 ,_3))))"</span>;
+<span class="lineno" id=line4></span>  }
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="define domain specific sublanguage module">syntax</span> monad;
+</pre></p><p>Here the traditional rshift-assign operator is substituted for
+<code>bind</code> (I won't pretend to tell you that I understand the
+details of how!). Now safe arithmetic expressions are so naturally
+represented as computation chains!
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"zero = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret 0) ;
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"1 / 0 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret 1 &gt;&gt;= mdiv 0) ;
+<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"0 / 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret 0 &gt;&gt;= mdiv 1) ;
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"1 + 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret 1 &gt;&gt;= madd 1) ;
+<span class="lineno" id=line5></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"2 * (1 + 1) = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret 1 &gt;&gt;= madd 1 &gt;&gt;= mmul 2) ;
+<span class="lineno" id=line6></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MAX = "</span> + <span class="library" title="Convert a value to a string">str</span> (INT_MAX) ;
+<span class="lineno" id=line7></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MAX - 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret INT_MAX &gt;&gt;= msub 1) ;
+<span class="lineno" id=line8></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MAX + 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret INT_MAX &gt;&gt;= madd 1) ;
+<span class="lineno" id=line9></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MIN = "</span> + <span class="library" title="Convert a value to a string">str</span> (INT_MIN) ;
+<span class="lineno" id=line10></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MIN - 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret INT_MIN &gt;&gt;= msub 1) ;
+<span class="lineno" id=line11></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"INT_MIN + 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret INT_MIN &gt;&gt;= madd 1) ;
+<span class="lineno" id=line12></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"2 * (INT_MAX/2) + 1 = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret INT_MAX &gt;&gt;= mdiv 2 &gt;&gt;= mmul 2 &gt;&gt;= madd 1) ; <span class="comment">//The last one since we know INT_MAX is odd and that division will truncate.</span>
+<span class="lineno" id=line13></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"2 * (INT_MAX/2 + 1) = "</span> + <span class="library" title="Convert a value to a string">str</span> (ret INT_MAX &gt;&gt;= mdiv 2 &gt;&gt;= madd 1 &gt;&gt;= mmul 2) ;
+</pre></p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+
