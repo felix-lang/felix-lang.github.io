@@ -7,6 +7,8 @@ tut:
 	for file in /Users/skaller/felix/src/web/tut/*.fdoc; do \
 	  env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web "$${file}"; \
 	  done
+	for file in web/*.html; do sed -i -e s/fdoc/html/g ${file}; done
+	rm web/*.html-e
 
 extract:
 	flx_iscr embedc.fdoc
