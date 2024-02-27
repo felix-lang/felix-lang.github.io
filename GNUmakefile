@@ -1,6 +1,7 @@
 pretty: 
 	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web embedc.fdoc
 	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web corout.fdoc
+	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web views.fdoc
 	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web ../felix/src/packages/lists.fdoc
 
 tut:
