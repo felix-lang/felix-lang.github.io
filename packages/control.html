@@ -1,0 +1,534 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Control Basics</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Control Synopsis",
+"Misc Control Flow"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Control Synopsis_h')"> <a href="#Control_Synopsis_h">Control Synopsis</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Misc Control Flow_h')"> <a href="#Misc_Control_Flow_h">Misc Control Flow</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Control_Synopsis_h'><img src='/share/src/web/images/minus.gif' id='Control Synopsis' onclick='toggle(this,"Control_Synopsis_d")' alt='+'/> 1 Control Synopsis</h1><div id='Control_Synopsis_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/control/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// stream is part of datatype, included in std/datatype/__init__</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/svc"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/control"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/unique"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/iterator"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/schannels"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/fibres"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/spipes"</span>;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/chips"</span>;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  <span class="comment">//include "std/control/mux";</span>
+<span class="lineno" id=line12></span>  
+</pre></p></div><h1 id='Misc_Control_Flow_h'><img src='/share/src/web/images/minus.gif' id='Misc Control Flow' onclick='toggle(this,"Misc_Control_Flow_d")' alt='+'/> 2 Misc Control Flow</h1><div id='Misc_Control_Flow_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/control/control.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Control
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Open a module or class">open</span> <span class="hack">C_hack</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="comment">// FIXPOINT OPERATORS</span>
+<span class="lineno" id=line6></span>    <span class="comment">// For functions</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> fix[D,C] (f:(D-&gt;C)-&gt;D-&gt;C) (x:D) : C =&gt; f (fix f) x;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="comment">// for functors TYPE-&gt;K only, the K *must* be specified</span>
+<span class="lineno" id=line10></span>    typefun tfix&lt;K&gt; (f: K -&gt;K):K =&gt; f x as x:K;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="comment">/* Example use: factorial function
+<span class="lineno" id=line14></span>    fun flat_fact (g:int-&gt;int) (x:int):int =&gt;
+<span class="lineno" id=line15></span>      if x == 0 then 1 
+<span class="lineno" id=line16></span>      else x * g (x - 1)
+<span class="lineno" id=line17></span>    ;
+<span class="lineno" id=line18></span>    var fact = fix flat_fact;
+<span class="lineno" id=line19></span>    println$ fact 5;
+<span class="lineno" id=line20></span>    */</span>
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _swap[t] (a:&amp;t,b:&amp;t) =
+<span class="lineno" id=line23></span>    {
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a mutable variable">var</span> tmp = *a;
+<span class="lineno" id=line25></span>      a &lt;- *b;
+<span class="lineno" id=line26></span>      b &lt;- tmp;
+<span class="lineno" id=line27></span>    }
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> swap[t] (a:&amp;t,b:&amp;t) =&gt; _swap(a,b);
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>    <span class="doccomment">infinite loop</span>
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> forever (bdy:unit-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>)
+<span class="lineno" id=line32></span>    {
+<span class="lineno" id=line33></span>      rpeat:&gt;
+<span class="lineno" id=line34></span>        bdy();
+<span class="lineno" id=line35></span>        <span class="small_keyword" title="jump to label">goto</span> rpeat;
+<span class="lineno" id=line36></span>      dummy:&gt; <span class="comment">// fool reachability checker</span>
+<span class="lineno" id=line37></span>    }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    publish <span class="fstring">"do nothing [the name pass comes from Python]"</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pass(){}
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="doccomment">C style for loop</span>
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> for_each
+<span class="lineno" id=line44></span>      (init:unit-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>)
+<span class="lineno" id=line45></span>      (cond:unit-&gt;bool)
+<span class="lineno" id=line46></span>      (incr:unit-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>)
+<span class="lineno" id=line47></span>      (bdy:unit-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>)
+<span class="lineno" id=line48></span>    {
+<span class="lineno" id=line49></span>      init();
+<span class="lineno" id=line50></span>      rpeat:&gt;
+<span class="lineno" id=line51></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> (cond()) <span class="small_keyword" title="jump to label">goto</span> finish;
+<span class="lineno" id=line52></span>        bdy();
+<span class="lineno" id=line53></span>        incr();
+<span class="lineno" id=line54></span>        <span class="small_keyword" title="jump to label">goto</span> rpeat;
+<span class="lineno" id=line55></span>      finish:&gt;
+<span class="lineno" id=line56></span>    }
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="small_keyword" title="low level exchange of control">branch-and-link</span> (target:&amp;LABEL, save:&amp;LABEL)
+<span class="lineno" id=line59></span>    {
+<span class="lineno" id=line60></span>       save &lt;- next;
+<span class="lineno" id=line61></span>       <span class="small_keyword" title="jump to label">goto</span> *target;
+<span class="lineno" id=line62></span>       next:&gt;
+<span class="lineno" id=line63></span>    }
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>    <span class="doccomment">throw[ret, exn] throw exception of type exn</span>
+<span class="lineno" id=line66></span>    <span class="doccomment">in a context expecting type ret. </span>
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> throw[ret,exn] : exn -&gt; ret = <span class="fstring">"(throw $1,*(?1*)0)"</span>;
+<span class="lineno" id=line68></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> raise[exn] : exn = <span class="fstring">"(throw $1);"</span>;
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> proc_fail:<span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'throw ::std::runtime_error($1);'</span> 
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::stdexcept;
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>    <span class="comment">// Note: must be a fun not a gen to avoid lifting.</span>
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> fun_fail[ret]:<span class="library" title="binding of C++ string type">string</span> -&gt; ret = <span class="fstring">'(throw ::std::runtime_error($1),*(?1*)0)'</span> 
+<span class="lineno" id=line74></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::stdexcept;
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    <span class="doccomment">This is the type of a Felix procedural</span>
+<span class="lineno" id=line77></span>    <span class="doccomment">continuations in C++ lifted into Felix.</span>
+<span class="lineno" id=line78></span>    <span class="doccomment">Do not confuse this with the Felix type of the procedure.</span>
+<span class="lineno" id=line79></span>    _gc_pointer <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cont = <span class="fstring">"::flx::rtl::con_t*"</span>;
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> entry_label : cont -&gt; LABEL = <span class="fstring">"::flx::rtl::jump_address_t($1)"</span>;
+<span class="lineno" id=line82></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> current_position : cont -&gt; LABEL = <span class="fstring">"::flx::rtl::jump_address_t($1,$1-&gt;pc)"</span>;
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> entry_label[T] (p:T-&gt;0):LABEL =&gt; entry_label (<span class="hack">C_hack</span>::cast[cont] p);
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>    <span class="doccomment">This is a hack to get the procedural continuation</span>
+<span class="lineno" id=line86></span>    <span class="doccomment">currently executing, it is just the procedures</span>
+<span class="lineno" id=line87></span>    <span class="doccomment">C++ this pointer.</span>
+<span class="lineno" id=line88></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> current_continuation: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; cont = <span class="fstring">"this"</span>;
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>    <span class="doccomment">The type of a Felix fthread or fibre, which is</span>
+<span class="lineno" id=line91></span>    <span class="doccomment">a container which holds a procedural continuation.</span>
+<span class="lineno" id=line92></span>    _gc_pointer <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> fthread = <span class="fstring">"::flx::rtl::fthread_t*"</span>;
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>    <span class="doccomment"> Throw a continuation. This is unsafe. It should</span>
+<span class="lineno" id=line96></span>    <span class="doccomment"> work from a top level procedure, or any function</span>
+<span class="lineno" id=line97></span>    <span class="doccomment"> called by such a procedure, but may fail</span>
+<span class="lineno" id=line98></span>    <span class="doccomment"> if thrown from a procedure called by a function.</span>
+<span class="lineno" id=line99></span>    <span class="doccomment"> The library run and driver will catch the</span>
+<span class="lineno" id=line100></span>    <span class="doccomment"> continuation and execute it instead of the</span>
+<span class="lineno" id=line101></span>    <span class="doccomment"> current continuation. If the library run is used</span>
+<span class="lineno" id=line102></span>    <span class="doccomment"> and the continuation being executed is down the</span>
+<span class="lineno" id=line103></span>    <span class="doccomment"> C stack, the C stack will not have been correctly</span>
+<span class="lineno" id=line104></span>    <span class="doccomment"> popped. Crudely, nested drivers should rethrow</span>
+<span class="lineno" id=line105></span>    <span class="doccomment"> the exception until the C stack is in the correct</span>
+<span class="lineno" id=line106></span>    <span class="doccomment"> state to execute the continuation, but there is no</span>
+<span class="lineno" id=line107></span>    <span class="doccomment"> way to determine that at the moment.</span>
+<span class="lineno" id=line108></span>    <span class="doccomment">  //$  Compiler generated runs ignore the exception,</span>
+<span class="lineno" id=line109></span>    <span class="doccomment"> the library run catches it. Exceptions typically</span>
+<span class="lineno" id=line110></span>    <span class="doccomment"> use a non-local goto, and they cannot pass across</span>
+<span class="lineno" id=line111></span>    <span class="doccomment"> a function boundary.</span>
+<span class="lineno" id=line112></span>  
+<span class="lineno" id=line113></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> throw_continuation(x: unit-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) : <span class="library" title="Type a non-returning function returns">any</span> { _throw (<span class="hack">C_hack</span>::cast[cont] x); }
+<span class="lineno" id=line114></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _throw: cont = <span class="fstring">"throw $1;"</span>;
+<span class="lineno" id=line115></span>  
+<span class="lineno" id=line116></span>   }
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

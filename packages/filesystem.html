@@ -1,0 +1,1611 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>File System</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Filename",
+"Filestat",
+"Posix FileStat",
+"Win32 FileStat",
+"File Syetem",
+"Posix File Syetem",
+"Win32 File Syetem",
+"Directory",
+"Posix Directory Services",
+"Win32 Directory Services"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Filename_h')"> <a href="#Filename_h">Filename</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Filestat_h')"> <a href="#Filestat_h">Filestat</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Posix FileStat_h')"> <a href="#Posix_FileStat_h">Posix FileStat</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Win32 FileStat_h')"> <a href="#Win32_FileStat_h">Win32 FileStat</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#File Syetem_h')"> <a href="#File_Syetem_h">File Syetem</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Posix File Syetem_h')"> <a href="#Posix_File_Syetem_h">Posix File Syetem</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Win32 File Syetem_h')"> <a href="#Win32_File_Syetem_h">Win32 File Syetem</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Directory_h')"> <a href="#Directory_h">Directory</a></div>
+      <div class=sm id=menu8>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#Posix Directory Services_h')"> <a href="#Posix_Directory_Services_h">Posix Directory Services</a></div>
+      <div class=sm id=menu9>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#Win32 Directory Services_h')"> <a href="#Win32_Directory_Services_h">Win32 Directory Services</a></div>
+      <div class=sm id=menu10>
+      </div>
+    <script>counter_max=10;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Filename_h'><img src='/share/src/web/images/minus.gif' id='Filename' onclick='toggle(this,"Filename_d")' alt='+'/> 1 Filename</h1><div id='Filename_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/io/filename.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Operations on filenames.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Filename_class[os] {
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="doccomment">The path separator.</span>
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sep: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_absolute_filename : <span class="library" title="binding of C++ string type">string</span> -&gt; bool;
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> root_subdir : <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> executable_extension : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line11></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_object_extension: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line12></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_object_extension: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_library_extension: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_library_extension: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="doccomment">split1 returns a pair consisting of a directory name and basename</span>
+<span class="lineno" id=line19></span>    <span class="doccomment">with the separator between them lost except in the special case</span>
+<span class="lineno" id=line20></span>    <span class="doccomment">"/x" where the "/" is kept as the directory name.</span>
+<span class="lineno" id=line21></span>    <span class="doccomment">If there is no separator, the path is the basename and</span>
+<span class="lineno" id=line22></span>    <span class="doccomment">the directory name is the empty string (NOT . !!!)</span>
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> split1(s:<span class="library" title="binding of C++ string type">string</span>)=&gt; <span class="small_keyword" title="match statement or expression">match</span> find_last_of(s,#sep) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line25></span>      | Some pos =&gt; 
+<span class="lineno" id=line26></span>        <span class="small_keyword" title="conditional">if</span> pos==0uz <span class="small_keyword" title="conditional">then</span> #sep <span class="small_keyword" title="conditional">else</span> s.[<span class="small_keyword" title="substring range separator">to</span> pos] <span class="small_keyword" title="conditional">endif</span>,
+<span class="lineno" id=line27></span>        s.[pos+#sep.<span class="library" title="number of elements in data structure">len</span> <span class="small_keyword" title="substring range separator">to</span>]
+<span class="lineno" id=line28></span>      | #None =&gt; <span class="fstring">""</span>,s
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line30></span>    ;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> split(s:<span class="library" title="binding of C++ string type">string</span>, acc:List::<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]):List::<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]=&gt;
+<span class="lineno" id=line33></span>      <span class="small_keyword" title="let binder">let</span> d,b = split1 s <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line34></span>      <span class="small_keyword" title="conditional">if</span> d == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> List::Cons(b,acc) 
+<span class="lineno" id=line35></span>      <span class="small_keyword" title="conditional">elif</span> d == #sep <span class="small_keyword" title="conditional">then</span> List::Cons(d, List::Cons(b,acc))
+<span class="lineno" id=line36></span>      <span class="small_keyword" title="conditional">else</span> split (d, List::Cons (b, acc)) 
+<span class="lineno" id=line37></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line38></span>    ;
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>    <span class="doccomment">split a filename into a list of components.</span>
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> split(s:<span class="library" title="binding of C++ string type">string</span>)=&gt; split (s, List::Empty[<span class="library" title="binding of C++ string type">string</span>]);
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="doccomment">Join two pathnames into a single pathname.</span>
+<span class="lineno" id=line44></span>    <span class="doccomment">split and join are logical inverses, however join is not</span>
+<span class="lineno" id=line45></span>    <span class="doccomment">not associative: join("x", join("","y")) = "x/y"</span>
+<span class="lineno" id=line46></span>    <span class="doccomment">whereas join(join("x",""),"y") = "x//y"</span>
+<span class="lineno" id=line47></span>    <span class="doccomment">since split pulls components off from the RHS we have to</span>
+<span class="lineno" id=line48></span>    <span class="doccomment">fold them back from the left</span>
+<span class="lineno" id=line49></span>  
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> join(p:<span class="library" title="binding of C++ string type">string</span>, b:<span class="library" title="binding of C++ string type">string</span>)=&gt; 
+<span class="lineno" id=line51></span>      <span class="small_keyword" title="conditional">if</span> p == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> b
+<span class="lineno" id=line52></span>      <span class="small_keyword" title="conditional">elif</span> p == #sep <span class="small_keyword" title="conditional">then</span> p+b 
+<span class="lineno" id=line53></span>      <span class="small_keyword" title="conditional">elif</span> p.[-1] == #sep.[0] <span class="small_keyword" title="conditional">then</span> p+b 
+<span class="lineno" id=line54></span>      <span class="small_keyword" title="conditional">else</span> p+#sep+b 
+<span class="lineno" id=line55></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line56></span>    ; 
+<span class="lineno" id=line57></span>    
+<span class="lineno" id=line58></span>    <span class="doccomment">Get the basename of a path (last component).</span>
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> basename(s:<span class="library" title="binding of C++ string type">string</span>)=&gt; <span class="small_keyword" title="match statement or expression">match</span> split1(s) <span class="small_keyword" title="type-class constraint">with</span> | _,b =&gt; b <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>    <span class="doccomment">Get the directory name of a path (all but the last component).</span>
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> dirname(s:<span class="library" title="binding of C++ string type">string</span>)=&gt; <span class="small_keyword" title="match statement or expression">match</span> split1(s) <span class="small_keyword" title="type-class constraint">with</span> | d,_ =&gt; d <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line63></span>    
+<span class="lineno" id=line64></span>    <span class="doccomment">Return a list of all the directory names in a path.</span>
+<span class="lineno" id=line65></span>    <span class="doccomment">For example a/b/c gives "a", "a/b"</span>
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> directories (s:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line67></span>       <span class="small_keyword" title="let binder">let</span> d,b = split1 s <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line68></span>       <span class="small_keyword" title="conditional">if</span> d == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line69></span>       <span class="small_keyword" title="conditional">elif</span> d == #sep <span class="small_keyword" title="conditional">then</span> Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line70></span>       <span class="small_keyword" title="conditional">else</span> directories d + d
+<span class="lineno" id=line71></span>    ;
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="doccomment">Join 3 and 4 strings into a pathname.</span>
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> join(a:<span class="library" title="binding of C++ string type">string</span>, b:<span class="library" title="binding of C++ string type">string</span>, c:<span class="library" title="binding of C++ string type">string</span>)=&gt; join(join(a,b),c);
+<span class="lineno" id=line75></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> join(a:<span class="library" title="binding of C++ string type">string</span>, b:<span class="library" title="binding of C++ string type">string</span>, c:<span class="library" title="binding of C++ string type">string</span>,d:<span class="library" title="binding of C++ string type">string</span>)=&gt; join(join(join(a,b),c),d);
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>    <span class="doccomment">Join 2 strings into a pathname (curried form).</span>
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> join(x:<span class="library" title="binding of C++ string type">string</span>) (y:<span class="library" title="binding of C++ string type">string</span>) =&gt; join(x,y);
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>    <span class="doccomment">Join all the strings in a list into a pathname.</span>
+<span class="lineno" id=line81></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> join(ps: List::<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])=&gt; List::<span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> Filename::join of (<span class="library" title="binding of C++ string type">string</span>) <span class="fstring">""</span> ps;
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>    <span class="doccomment">Split off extension. Includes the dot. </span>
+<span class="lineno" id=line84></span>    <span class="doccomment">Invariant: input = basename + extension.</span>
+<span class="lineno" id=line85></span>    <span class="doccomment">Works backwards until it hits a dot, path separator,</span>
+<span class="lineno" id=line86></span>    <span class="doccomment">or end of data. If a dot, strip it and the tail of the string,</span>
+<span class="lineno" id=line87></span>    <span class="doccomment">otherwise return the original string.</span>
+<span class="lineno" id=line88></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> split_extension (s:<span class="library" title="binding of C++ string type">string</span>): <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line89></span>       <span class="big_keyword" title="Define a mutable variable">var</span> n = s.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line90></span>       <span class="small_keyword" title="conditional">if</span> n &gt; 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line91></span>         <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> s.<span class="library" title="number of elements in data structure">len</span> - 1uz <span class="small_keyword" title="downwards counting for loop">downto</span> 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line92></span>           <span class="big_keyword" title="Define a mutable variable">var</span> ch = s.[i];
+<span class="lineno" id=line93></span>           <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"."</span> <span class="small_keyword" title="return">return</span> s.[<span class="small_keyword" title="substring range separator">to</span> i],s.[i <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line94></span>           <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> #sep <span class="small_keyword" title="return">return</span> s,<span class="fstring">""</span>; 
+<span class="lineno" id=line95></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line96></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line97></span>       <span class="small_keyword" title="return">return</span> s,<span class="fstring">""</span>;
+<span class="lineno" id=line98></span>    }
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>    <span class="doccomment">Remove an extension from a filename if there is one.</span>
+<span class="lineno" id=line101></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> strip_extension (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; s.split_extension.0;
+<span class="lineno" id=line102></span>  
+<span class="lineno" id=line103></span>    <span class="doccomment">Get extension if there is one. Includes the dot.</span>
+<span class="lineno" id=line104></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_extension (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; s.split_extension.1;
+<span class="lineno" id=line105></span>  
+<span class="lineno" id=line106></span>  }
+<span class="lineno" id=line107></span>  
+<span class="lineno" id=line108></span>  <span class="doccomment">Windows Filenames</span>
+<span class="lineno" id=line109></span>  <span class="big_keyword" title="Define a type class">class</span> Win32Filename 
+<span class="lineno" id=line110></span>  {
+<span class="lineno" id=line111></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Filename_class[Win32];
+<span class="lineno" id=line112></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Filename_class[Win32] {
+<span class="lineno" id=line113></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> sep() =&gt; <span class="fstring">"\\"</span>;
+<span class="lineno" id=line114></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> executable_extension ()=&gt; <span class="fstring">".exe"</span>;
+<span class="lineno" id=line115></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_object_extension() =&gt; <span class="fstring">".obj"</span>;
+<span class="lineno" id=line116></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_object_extension() =&gt; <span class="fstring">".obj"</span>;
+<span class="lineno" id=line117></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_library_extension() =&gt; <span class="fstring">".lib"</span>;
+<span class="lineno" id=line118></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_library_extension() =&gt; <span class="fstring">".dll"</span>;
+<span class="lineno" id=line119></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_absolute_filename (f:<span class="library" title="binding of C++ string type">string</span>) =&gt; 
+<span class="lineno" id=line120></span>        f.[0] == <span class="fstring">"\\"</span>.<span class="library" title="binding of C char type">char</span> <span class="small_keyword" title="logical disjunction">or</span> <span class="comment">// no drive letter</span>
+<span class="lineno" id=line121></span>        f.[1] == <span class="fstring">":"</span>.<span class="library" title="binding of C char type">char</span> <span class="small_keyword" title="logical conjunction">and</span> f.[2] == <span class="fstring">"\\"</span>.<span class="library" title="binding of C char type">char</span> <span class="comment">// with drive letter</span>
+<span class="lineno" id=line122></span>      ;
+<span class="lineno" id=line123></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> root_subdir (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="fstring">"C:\\"</span>+s;
+<span class="lineno" id=line124></span>  
+<span class="lineno" id=line125></span>    }
+<span class="lineno" id=line126></span>  }
+<span class="lineno" id=line127></span>  
+<span class="lineno" id=line128></span>  <span class="doccomment">OSX Filenames</span>
+<span class="lineno" id=line129></span>  <span class="big_keyword" title="Define a type class">class</span> OsxFilename 
+<span class="lineno" id=line130></span>  {
+<span class="lineno" id=line131></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Filename_class[Osx];
+<span class="lineno" id=line132></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Filename_class[Osx] {
+<span class="lineno" id=line133></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> sep() =&gt; <span class="fstring">"/"</span>;
+<span class="lineno" id=line134></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> executable_extension ()=&gt; <span class="fstring">""</span>;
+<span class="lineno" id=line135></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_object_extension() =&gt; <span class="fstring">".o"</span>;
+<span class="lineno" id=line136></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_object_extension() =&gt; <span class="fstring">".os"</span>;
+<span class="lineno" id=line137></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_library_extension() =&gt; <span class="fstring">".a"</span>;
+<span class="lineno" id=line138></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_library_extension() =&gt; <span class="fstring">".dylib"</span>;
+<span class="lineno" id=line139></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_absolute_filename (f:<span class="library" title="binding of C++ string type">string</span>) =&gt; f.[0] == <span class="fstring">"/"</span>;
+<span class="lineno" id=line140></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> root_subdir (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="fstring">"/"</span>+s;
+<span class="lineno" id=line141></span>  
+<span class="lineno" id=line142></span>    }
+<span class="lineno" id=line143></span>  }
+<span class="lineno" id=line144></span>  
+<span class="lineno" id=line145></span>  <span class="doccomment">Posix Filenames</span>
+<span class="lineno" id=line146></span>  <span class="big_keyword" title="Define a type class">class</span> PosixFilename 
+<span class="lineno" id=line147></span>  {
+<span class="lineno" id=line148></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Filename_class[Posix];
+<span class="lineno" id=line149></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Filename_class[Posix] {
+<span class="lineno" id=line150></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> sep() =&gt; <span class="fstring">"/"</span>;
+<span class="lineno" id=line151></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> executable_extension ()=&gt; <span class="fstring">""</span>;
+<span class="lineno" id=line152></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_object_extension() =&gt; <span class="fstring">".o"</span>;
+<span class="lineno" id=line153></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_object_extension() =&gt; <span class="fstring">".os"</span>;
+<span class="lineno" id=line154></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_library_extension() =&gt; <span class="fstring">".a"</span>;
+<span class="lineno" id=line155></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_library_extension() =&gt; <span class="fstring">".so"</span>;
+<span class="lineno" id=line156></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_absolute_filename (f:<span class="library" title="binding of C++ string type">string</span>) =&gt; f.[0] == <span class="fstring">"/"</span>;
+<span class="lineno" id=line157></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> root_subdir (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="fstring">"/"</span>+s;
+<span class="lineno" id=line158></span>    }
+<span class="lineno" id=line159></span>  }
+<span class="lineno" id=line160></span>  
+<span class="lineno" id=line161></span>  <span class="doccomment">Host Filenames.</span>
+<span class="lineno" id=line162></span>  <span class="big_keyword" title="Define a type class">class</span> Filename
+<span class="lineno" id=line163></span>  {
+<span class="lineno" id=line164></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line165></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Win32Filename;
+<span class="lineno" id=line166></span>  <span class="small_keyword" title="conditional">elif</span> PLAT_MACOSX <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line167></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> OsxFilename;
+<span class="lineno" id=line168></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line169></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> PosixFilename;
+<span class="lineno" id=line170></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line171></span>  }
+</pre></p></div><h1 id='Filestat_h'><img src='/share/src/web/images/minus.gif' id='Filestat' onclick='toggle(this,"Filestat_d")' alt='+'/> 2 Filestat</h1><div id='Filestat_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/io/filestat.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Filesystem file kind query functions parametrised</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">by operating system, status type and mode type.</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a type class">class</span> FileStat_class[OS,stat_t, mode_t]
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="doccomment">Get information about a file into a status buffer.</span>
+<span class="lineno" id=line7></span>    <span class="doccomment">Sets error code at argument 3 pointer.</span>
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> stat: <span class="library" title="binding of C++ string type">string</span> * &amp;stat_t * &amp;<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">set access and modification time of a file.</span>
+<span class="lineno" id=line11></span>    <span class="doccomment">Sets error code at argument 4 pointer.</span>
+<span class="lineno" id=line12></span>    <span class="doccomment">Times are in seconds, nominally from Epoch (Jan 1 1970).</span>
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> utime: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C double float type">double</span> * <span class="library" title="binding of C double float type">double</span> * &amp;<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="doccomment">Change read,write permissions for group, owner etc.</span>
+<span class="lineno" id=line16></span>    <span class="doccomment">Return 0 on success.</span>
+<span class="lineno" id=line17></span>    <span class="doccomment">On Windows this function may silently fail to obey</span>
+<span class="lineno" id=line18></span>    <span class="doccomment">unsupported operations.</span>
+<span class="lineno" id=line19></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> chmod: <span class="library" title="binding of C++ string type">string</span> * mode_t -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="doccomment">set mask for subsequent permissions.</span>
+<span class="lineno" id=line22></span>    <span class="doccomment">On Windows this function may silently fail to obey</span>
+<span class="lineno" id=line23></span>    <span class="doccomment">unsupported operations.</span>
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> umask: mode_t -&gt; mode_t;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>    <span class="doccomment">Abstracted platform independent file type taxonomy.</span>
+<span class="lineno" id=line27></span>    variant file_type_t = 
+<span class="lineno" id=line28></span>      | PIPE 
+<span class="lineno" id=line29></span>      | STREAM 
+<span class="lineno" id=line30></span>      | DIRECTORY 
+<span class="lineno" id=line31></span>      | BLOCK 
+<span class="lineno" id=line32></span>      | REGULAR 
+<span class="lineno" id=line33></span>      | SYMLINK 
+<span class="lineno" id=line34></span>      | SOCKET 
+<span class="lineno" id=line35></span>      | INDETERMINATE
+<span class="lineno" id=line36></span>      | NONEXISTANT
+<span class="lineno" id=line37></span>      | NOPERMISSION
+<span class="lineno" id=line38></span>    ;
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>    <span class="doccomment">Get the file type from a file stat buffer.</span>
+<span class="lineno" id=line41></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> file_type: &amp;stat_t -&gt; file_type_t;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="doccomment">Fill a stat buffer with information about a file.</span>
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> stat(file: <span class="library" title="binding of C++ string type">string</span>, statbuf:&amp;stat_t) = { 
+<span class="lineno" id=line45></span>      <span class="big_keyword" title="Define a mutable variable">var</span> res: <span class="library" title="binding of C int type">int</span>; 
+<span class="lineno" id=line46></span>      stat(file, statbuf, &amp;res); 
+<span class="lineno" id=line47></span>      <span class="small_keyword" title="return">return</span> res == 0;
+<span class="lineno" id=line48></span>    }
+<span class="lineno" id=line49></span>  
+<span class="lineno" id=line50></span>    <span class="doccomment">Get a file last modification time from a stat buffer.</span>
+<span class="lineno" id=line51></span>    <span class="doccomment">Time is in seconds.</span>
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mtime: &amp;stat_t -&gt; <span class="library" title="binding of C double float type">double</span> = <span class="fstring">"(double)($1-&gt;st_mtime)"</span>;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>    <span class="doccomment">Get a file creation time from a stat buffer.</span>
+<span class="lineno" id=line55></span>    <span class="doccomment">Note: not available on Unix.</span>
+<span class="lineno" id=line56></span>    <span class="doccomment">Time is in seconds.</span>
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ctime: &amp;stat_t -&gt; <span class="library" title="binding of C double float type">double</span> = <span class="fstring">"(double)($1-&gt;st_ctime)"</span>;
+<span class="lineno" id=line58></span>  
+<span class="lineno" id=line59></span>    <span class="doccomment">Get modification time of a file by name.</span>
+<span class="lineno" id=line60></span>    <span class="doccomment">Time is in seconds.</span>
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filetime(f:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C double float type">double</span> =
+<span class="lineno" id=line62></span>    {
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a mutable variable">var</span> b: stat_t;
+<span class="lineno" id=line64></span>      <span class="big_keyword" title="Define a mutable variable">var</span> err:<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line65></span>      stat(f,&amp;b,&amp;err);
+<span class="lineno" id=line66></span>      <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="conditional">if</span> err == 0 <span class="small_keyword" title="conditional">then</span> mtime (&amp;b) <span class="small_keyword" title="conditional">else</span> 0.0 <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line67></span>    }
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>    <span class="doccomment">Set the last access and modification time of a file by name.</span>
+<span class="lineno" id=line70></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> utime(f:<span class="library" title="binding of C++ string type">string</span>, a:<span class="library" title="binding of C double float type">double</span>, m:<span class="library" title="binding of C double float type">double</span>): bool = {
+<span class="lineno" id=line71></span>      <span class="big_keyword" title="Define a mutable variable">var</span> r:<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line72></span>      utime(f,a,m,&amp;r);
+<span class="lineno" id=line73></span>      <span class="small_keyword" title="return">return</span> r == 0;
+<span class="lineno" id=line74></span>    }
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    <span class="doccomment">Set the last access and modification time of a file by name,</span>
+<span class="lineno" id=line77></span>    <span class="doccomment">where the two times are given by a single argument.</span>
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> utime(f:<span class="library" title="binding of C++ string type">string</span>, t:<span class="library" title="binding of C double float type">double</span>) =&gt; utime(f,t,t);
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>    <span class="doccomment">Check if a file exists.</span>
+<span class="lineno" id=line81></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> fileexists(f:<span class="library" title="binding of C++ string type">string</span>):bool=&gt; filetime f != 0.0;
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>    <span class="doccomment">Find the type of a file.</span>
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filetype(f:<span class="library" title="binding of C++ string type">string</span>):file_type_t = 
+<span class="lineno" id=line85></span>    {
+<span class="lineno" id=line86></span>      <span class="big_keyword" title="Define a mutable variable">var</span> b:stat_t;
+<span class="lineno" id=line87></span>      <span class="big_keyword" title="Define a mutable variable">var</span> err:<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line88></span>      stat(f,&amp;b,&amp;err);
+<span class="lineno" id=line89></span>      <span class="small_keyword" title="return">return</span> 
+<span class="lineno" id=line90></span>        <span class="small_keyword" title="conditional">if</span> err == 0 <span class="small_keyword" title="conditional">then</span> file_type (&amp;b)
+<span class="lineno" id=line91></span>        <span class="small_keyword" title="conditional">elif</span> errno == EACCES <span class="small_keyword" title="conditional">then</span> NOPERMISSION
+<span class="lineno" id=line92></span>        <span class="small_keyword" title="conditional">elif</span> errno == ENOENT <span class="small_keyword" title="conditional">then</span> NONEXISTANT  
+<span class="lineno" id=line93></span>        <span class="small_keyword" title="conditional">else</span> INDETERMINATE
+<span class="lineno" id=line94></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line95></span>      ;
+<span class="lineno" id=line96></span>    }
+<span class="lineno" id=line97></span>  
+<span class="lineno" id=line98></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> past_time () =&gt; -1.0;
+<span class="lineno" id=line99></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> future_time () =&gt; <span class="library" title="binding of C double float type">double</span>(<span class="library" title="binding of C unsigned long type">ulong</span>(-1)); <span class="comment">// a hacky way to get a big number</span>
+<span class="lineno" id=line100></span>  
+<span class="lineno" id=line101></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> strfiletime0 (x:<span class="library" title="binding of C double float type">double</span>) = {
+<span class="lineno" id=line102></span>      <span class="small_keyword" title="return">return</span>
+<span class="lineno" id=line103></span>        <span class="small_keyword" title="conditional">if</span> x == #past_time <span class="small_keyword" title="conditional">then</span> <span class="fstring">"BIG BANG"</span>
+<span class="lineno" id=line104></span>        <span class="small_keyword" title="conditional">elif</span> x == #future_time <span class="small_keyword" title="conditional">then</span> <span class="fstring">"BIG CRUNCH"</span>
+<span class="lineno" id=line105></span>        <span class="small_keyword" title="conditional">else</span> fmt (x, fixed (0,3))
+<span class="lineno" id=line106></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line107></span>      ;
+<span class="lineno" id=line108></span>    }
+<span class="lineno" id=line109></span>  
+<span class="lineno" id=line110></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> strfiletime (x:<span class="library" title="binding of C double float type">double</span>) = {
+<span class="lineno" id=line111></span>      <span class="big_keyword" title="Run time assertion">assert</span> x != 0.0;
+<span class="lineno" id=line112></span>      <span class="small_keyword" title="return">return</span> strfiletime0 x;
+<span class="lineno" id=line113></span>    }
+<span class="lineno" id=line114></span>  
+<span class="lineno" id=line115></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> dfiletime(<span class="big_keyword" title="Define a mutable variable">var</span> f:<span class="library" title="binding of C++ string type">string</span>, dflt:<span class="library" title="binding of C double float type">double</span>)=
+<span class="lineno" id=line116></span>    {
+<span class="lineno" id=line117></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = FileStat::filetime (f);
+<span class="lineno" id=line118></span>      x = <span class="small_keyword" title="conditional">if</span> x == 0.0 <span class="small_keyword" title="conditional">then</span> dflt <span class="small_keyword" title="conditional">else</span> x <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line119></span>      <span class="comment">//debugln$ "Time of file '" + f + "' is " + strfiletime x; </span>
+<span class="lineno" id=line120></span>      <span class="small_keyword" title="return">return</span> x;
+<span class="lineno" id=line121></span>    }
+<span class="lineno" id=line122></span>  
+<span class="lineno" id=line123></span>  
+<span class="lineno" id=line124></span>  }
+<span class="lineno" id=line125></span>  
+<span class="lineno" id=line126></span>  <span class="doccomment">Platform dependent operations for host file system.</span>
+<span class="lineno" id=line127></span>  <span class="big_keyword" title="Define a type class">class</span> FileStat {
+<span class="lineno" id=line128></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line129></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Win32FileStat;
+<span class="lineno" id=line130></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line131></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> PosixFileStat;
+<span class="lineno" id=line132></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line133></span>  }
+<span class="lineno" id=line134></span>  
+</pre></p></div><h1 id='Posix_FileStat_h'><img src='/share/src/web/images/minus.gif' id='Posix FileStat' onclick='toggle(this,"Posix_FileStat_d")' alt='+'/> 3 Posix FileStat</h1><div id='Posix_FileStat_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/posix/filestat.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> PosixFileStat
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stat_t = <span class="fstring">"struct stat"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_stat_h;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mode_t = <span class="fstring">"mode_t"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_types_h;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bits[mode_t] {} <span class="comment">// defaults to C operators</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[mode_t] { <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : mode_t * mode_t -&gt; bool = <span class="fstring">"$1==$2"</span>; }
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Open a module or class">open</span> Eq[mode_t]; 
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Open a module or class">open</span> Bits[mode_t];
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line13></span>    <span class="comment">// file mode: type and permissions</span>
+<span class="lineno" id=line14></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line15></span>    <span class="comment">// file types</span>
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFMT  : mode_t; <span class="comment">// file type mask</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFIFO : mode_t;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFCHR : mode_t;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFDIR : mode_t;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFBLK : mode_t;
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFREG : mode_t;
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFLNK : mode_t;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IFSOCK: mode_t;
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="comment">// permissions</span>
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IRWXU : mode_t; <span class="comment">// RWX mask: owner</span>
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IRUSR : mode_t;
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IWUSR : mode_t;
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IXUSR : mode_t;
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IRWXG : mode_t; <span class="comment">// RWX mask: group</span>
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IRGRP : mode_t;
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IWGRP : mode_t;
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IXGRP : mode_t;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IRWXO : mode_t; <span class="comment">// RWX mask: other</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IROTH : mode_t;
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IWOTH : mode_t;
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_IXOTH : mode_t;
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_ISUID : mode_t; <span class="comment">// set user id on execute</span>
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_ISGID : mode_t; <span class="comment">// set group id on execute</span>
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> S_ISVXT : mode_t; <span class="comment">// sticky bit</span>
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define an immutable value">val</span> access_mask = S_IXOTH \| S_IXGRP \| S_IXUSR;
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> raw_mode: &amp;stat_t -&gt; mode_t = <span class="fstring">"$1-&gt;st_mode"</span>;
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> file_type(m:mode_t)=&gt;m \&amp; S_IFMT;
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> file_perm(m:mode_t)=&gt;m \&amp; ~S_IFMT;
+<span class="lineno" id=line50></span>  
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned int type">uint</span>: mode_t = <span class="fstring">"(unsigned int)$1"</span>;
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FileStat_class[Posix, stat_t, mode_t];
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> FileStat_class[Posix, stat_t, mode_t]
+<span class="lineno" id=line57></span>    {
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> stat: <span class="library" title="binding of C++ string type">string</span> * &amp;stat_t * &amp;<span class="library" title="binding of C int type">int</span> = <span class="fstring">"*$3=stat($1.c_str(),$2);"</span>;
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> utime: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C double float type">double</span> * <span class="library" title="binding of C double float type">double</span> * &amp;<span class="library" title="binding of C int type">int</span> = 
+<span class="lineno" id=line61></span>      <span class="fstring">"""
+<span class="lineno" id=line62></span>        {
+<span class="lineno" id=line63></span>        utimbuf u; 
+<span class="lineno" id=line64></span>        u.actime=(time_t)$2;
+<span class="lineno" id=line65></span>        u.modtime=(time_t)$3;
+<span class="lineno" id=line66></span>        *$4 = utime($1.c_str(),&amp;u); 
+<span class="lineno" id=line67></span>        }
+<span class="lineno" id=line68></span>      """</span>
+<span class="lineno" id=line69></span>  
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::utime_h;
+<span class="lineno" id=line71></span>   
+<span class="lineno" id=line72></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> chmod: <span class="library" title="binding of C++ string type">string</span> * mode_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"chmod($1.c_str(),$2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_stat_h;
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> umask: mode_t -&gt; mode_t = <span class="fstring">"umask($1)"</span>;
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> file_type (s:&amp;stat_t): file_type_t =&gt;
+<span class="lineno" id=line76></span>        <span class="small_keyword" title="let binder">let</span> m = file_type$ raw_mode s <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line77></span>        <span class="small_keyword" title="conditional">if</span> m == S_IFIFO <span class="small_keyword" title="conditional">then</span> PIPE
+<span class="lineno" id=line78></span>        <span class="small_keyword" title="conditional">elif</span> m == S_IFCHR <span class="small_keyword" title="conditional">then</span> STREAM
+<span class="lineno" id=line79></span>        <span class="small_keyword" title="conditional">elif</span> m == S_IFDIR <span class="small_keyword" title="conditional">then</span> DIRECTORY
+<span class="lineno" id=line80></span>        <span class="small_keyword" title="conditional">elif</span> m == S_IFBLK <span class="small_keyword" title="conditional">then</span> BLOCK
+<span class="lineno" id=line81></span>        <span class="small_keyword" title="conditional">elif</span> m == S_IFREG <span class="small_keyword" title="conditional">then</span> REGULAR
+<span class="lineno" id=line82></span>        <span class="small_keyword" title="conditional">elif</span> m == S_IFLNK <span class="small_keyword" title="conditional">then</span> SYMLINK
+<span class="lineno" id=line83></span>        <span class="small_keyword" title="conditional">elif</span> m == S_IFSOCK <span class="small_keyword" title="conditional">then</span> SOCKET
+<span class="lineno" id=line84></span>        <span class="small_keyword" title="conditional">else</span> INDETERMINATE
+<span class="lineno" id=line85></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line86></span>      ;
+<span class="lineno" id=line87></span>  
+<span class="lineno" id=line88></span>    } <span class="comment">// instance</span>
+<span class="lineno" id=line89></span>  }
+<span class="lineno" id=line90></span>  
+</pre></p></div><h1 id='Win32_FileStat_h'><img src='/share/src/web/images/minus.gif' id='Win32 FileStat' onclick='toggle(this,"Win32_FileStat_d")' alt='+'/> 4 Win32 FileStat</h1><div id='Win32_FileStat_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/win32/filestat.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Win32FileStat
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="comment">//2 things:</span>
+<span class="lineno" id=line5></span>    <span class="comment">//</span>
+<span class="lineno" id=line6></span>    <span class="comment">// (1) AFAICT, Windows doesn't define mode_t and uses unsigned int.</span>
+<span class="lineno" id=line7></span>    <span class="comment">// (2) We still pull in sys/types.h because sys/stat.h uses it (and</span>
+<span class="lineno" id=line8></span>    <span class="comment">//     it must come first).</span>
+<span class="lineno" id=line9></span>    <span class="comment">//</span>
+<span class="lineno" id=line10></span>    <span class="comment">//(source http://msdn.microsoft.com/en-US/library/14h5k7ff(v=vs.80)).</span>
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="comment">//pod type mode_t = "mode_t" requires Posix_headers::sys_types_h;</span>
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mode_t = <span class="fstring">"int"</span>;
+<span class="lineno" id=line15></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stat_t = <span class="fstring">"struct __stat64"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_stat_h;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bits[mode_t] {} <span class="comment">// defaults to C operators</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[mode_t] { <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : mode_t * mode_t -&gt; bool = <span class="fstring">"$1==$2"</span>; }
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Open a module or class">open</span> Eq[mode_t]; 
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Open a module or class">open</span> Bits[mode_t];
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="comment">// file types</span>
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _S_IFMT  : mode_t; <span class="comment">// file type mask</span>
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _S_IFDIR : mode_t;
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _S_IFREG : mode_t;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="comment">// permissions</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _S_IWRITE: mode_t; <span class="comment">// RWX mask: owner</span>
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _S_IREAD  : mode_t;
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define an immutable value">val</span> access_mask = _S_IREAD \| _S_IWRITE;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> raw_mode: &amp;stat_t -&gt; mode_t = <span class="fstring">"$1-&gt;st_mode"</span>;
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> file_type(m:mode_t)=&gt;m \&amp; _S_IFMT;
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> file_perm(m:mode_t)=&gt;m \&amp; ~_S_IFMT;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned int type">uint</span>: mode_t = <span class="fstring">"(unsigned int)$1"</span>;
+<span class="lineno" id=line38></span>   
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FileStat_class[Win32, stat_t, mode_t];
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> FileStat_class[Win32, stat_t, mode_t] 
+<span class="lineno" id=line43></span>    {
+<span class="lineno" id=line44></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> stat: <span class="library" title="binding of C++ string type">string</span> * &amp;stat_t * &amp;<span class="library" title="binding of C int type">int</span> = <span class="fstring">"*$3=_stat64($1.c_str(),$2);"</span>;
+<span class="lineno" id=line45></span>      <span class="comment">// set access and modification time of a file</span>
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> utime: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C double float type">double</span> * <span class="library" title="binding of C double float type">double</span> * &amp;<span class="library" title="binding of C int type">int</span> = 
+<span class="lineno" id=line47></span>      <span class="fstring">"""
+<span class="lineno" id=line48></span>        {
+<span class="lineno" id=line49></span>        __utimbuf64 u; 
+<span class="lineno" id=line50></span>        u.actime=(time_t)$2;
+<span class="lineno" id=line51></span>        u.modtime=(time_t)$3;
+<span class="lineno" id=line52></span>        *$4 = _utime64($1.c_str(),&amp;u); 
+<span class="lineno" id=line53></span>        }
+<span class="lineno" id=line54></span>      """</span>
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>      <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::sys_utime_h;
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> chmod: <span class="library" title="binding of C++ string type">string</span> * mode_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"_chmod($1.c_str(),$2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h;
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> umask: mode_t -&gt; mode_t = <span class="fstring">"_umask($1)"</span>;
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> file_type (s:&amp;stat_t): file_type_t =&gt;
+<span class="lineno" id=line62></span>        <span class="small_keyword" title="let binder">let</span> m = file_type$ raw_mode s <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line63></span>        <span class="small_keyword" title="conditional">if</span> m == _S_IFDIR <span class="small_keyword" title="conditional">then</span> DIRECTORY
+<span class="lineno" id=line64></span>        <span class="small_keyword" title="conditional">elif</span> m == _S_IFREG <span class="small_keyword" title="conditional">then</span> REGULAR
+<span class="lineno" id=line65></span>        <span class="small_keyword" title="conditional">else</span> INDETERMINATE
+<span class="lineno" id=line66></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line67></span>      ;
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>    } <span class="comment">// instance</span>
+<span class="lineno" id=line70></span>  }
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>  
+</pre></p></div><h1 id='File_Syetem_h'><img src='/share/src/web/images/minus.gif' id='File Syetem' onclick='toggle(this,"File_Syetem_d")' alt='+'/> 5 File Syetem</h1><div id='File_Syetem_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/io/filesystem.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Filesystem operations parametrised by operating system.</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">YET TO BE DONE.</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a type class">class</span> FileSystem_class[os]
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>  }
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="doccomment">Platform dependent filesystem operations for host file system.</span>
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a type class">class</span> FileSystem {
+<span class="lineno" id=line10></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Win32FileSystem;
+<span class="lineno" id=line12></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> PosixFileSystem;
+<span class="lineno" id=line14></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> unlink(f:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line17></span>    {
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> aux (d:<span class="library" title="binding of C++ string type">string</span>) (b:<span class="library" title="binding of C++ string type">string</span>) 
+<span class="lineno" id=line19></span>      {
+<span class="lineno" id=line20></span>        <span class="small_keyword" title="conditional">if</span> b == <span class="fstring">"."</span> <span class="small_keyword" title="logical disjunction">or</span> b == <span class="fstring">".."</span> <span class="small_keyword" title="return">return</span>;
+<span class="lineno" id=line21></span>        <span class="big_keyword" title="Define a mutable variable">var</span> f = <span class="small_keyword" title="conditional">if</span> d == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> b <span class="small_keyword" title="conditional">else</span> Filename::join (d,b);
+<span class="lineno" id=line22></span>        <span class="small_keyword" title="match statement or expression">match</span> FileStat::filetype f <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line23></span>        | #PIPE =&gt; ;
+<span class="lineno" id=line24></span>        | #STREAM =&gt; ;
+<span class="lineno" id=line25></span>        | #DIRECTORY =&gt;
+<span class="lineno" id=line26></span>          <span class="small_keyword" title="match statement or expression">match</span> Directory::filesin f <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line27></span>          | #None =&gt; ;
+<span class="lineno" id=line28></span>          | Some files =&gt; 
+<span class="lineno" id=line29></span>            <span class="small_keyword" title="for loop">for</span> file <span class="small_keyword" title="membership operator, function mem">in</span> files <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line30></span>              aux f file;
+<span class="lineno" id=line31></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line32></span>            <span class="hack">C_hack</span>::ignore$ Directory::unlink_empty_dir f;
+<span class="lineno" id=line33></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line34></span>        | #BLOCK =&gt; ;
+<span class="lineno" id=line35></span>        | #REGULAR =&gt; <span class="hack">C_hack</span>::ignore$ unlink_file f; 
+<span class="lineno" id=line36></span>        | #SYMLINK =&gt; <span class="hack">C_hack</span>::ignore$ unlink_file f;
+<span class="lineno" id=line37></span>        | #SOCKET =&gt; ;
+<span class="lineno" id=line38></span>        | #INDETERMINATE =&gt; ;
+<span class="lineno" id=line39></span>        | #NONEXISTANT =&gt; ;
+<span class="lineno" id=line40></span>        | #NOPERMISSION =&gt; ;
+<span class="lineno" id=line41></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line42></span>      }
+<span class="lineno" id=line43></span>      aux <span class="fstring">""</span> f;
+<span class="lineno" id=line44></span>    }
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> rm (f:<span class="library" title="binding of C++ string type">string</span>) =&gt; unlink f;
+<span class="lineno" id=line47></span>   
+<span class="lineno" id=line48></span>    <span class="doccomment">Find a file in a list of directories.</span>
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find_in_path(x:<span class="library" title="binding of C++ string type">string</span>, path:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]):<span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C++ string type">string</span>]=&gt;
+<span class="lineno" id=line50></span>      <span class="small_keyword" title="match statement or expression">match</span> path <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line51></span>      | #Empty =&gt; None[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line52></span>      | Cons (d,t) =&gt; 
+<span class="lineno" id=line53></span>        <span class="small_keyword" title="let binder">let</span> p =  Filename::join(d,x) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line54></span>        <span class="small_keyword" title="match statement or expression">match</span> FileStat::fileexists p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line55></span>        | <span class="library" title="truth value">true</span> =&gt; Some p
+<span class="lineno" id=line56></span>        | <span class="library" title="false value">false</span> =&gt; find_in_path (x,t)
+<span class="lineno" id=line57></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line58></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line59></span>    ;
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>    <span class="doccomment">Find all the files matching an RE2-regular expression</span>
+<span class="lineno" id=line62></span>    <span class="doccomment">in a given directory. </span>
+<span class="lineno" id=line63></span>    <span class="doccomment">NOTE: this search finds files in descendant directories too.</span>
+<span class="lineno" id=line64></span>    <span class="doccomment">The search is recursive, but the whole pathname within</span>
+<span class="lineno" id=line65></span>    <span class="doccomment">the specified directory must match the regexp.</span>
+<span class="lineno" id=line66></span>    <span class="doccomment">For example to find all *.flx files in src use:</span>
+<span class="lineno" id=line67></span>    <span class="doccomment">  regfilesin("src", ".*[.]flx")</span>
+<span class="lineno" id=line68></span>    <span class="doccomment">To find the files only in the given directory, on Unix use instead</span>
+<span class="lineno" id=line69></span>    <span class="doccomment">  regfilesin("src", "[^/]*[.]flx")</span>
+<span class="lineno" id=line70></span>    <span class="doccomment">to exclude files in child directories.</span>
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> regfilesin(dname:<span class="library" title="binding of C++ string type">string</span>, re:<span class="library" title="binding of C++ string type">string</span>): <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt; regfilesin(dname, Re2::RE2 re);
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="doccomment">Find all the files matching a compiled RE2-regular expression.</span>
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> regfilesin(dname:<span class="library" title="binding of C++ string type">string</span>, re:RE2): <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line75></span>      <span class="comment">//eprintln$ "regfilesin " + dname+ " with some kind of regexp .. ";</span>
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>      <span class="big_keyword" title="Define a mutable variable">var</span> foundfiles = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line78></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> rfi(dname2: <span class="library" title="binding of C++ string type">string</span>) {
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>        <span class="comment">//eprintln$ "rf() : dname2=" +dname2;</span>
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>        <span class="small_keyword" title="conditional">if</span> dname2 == <span class="fstring">"."</span> <span class="small_keyword" title="logical disjunction">or</span> dname2 == <span class="fstring">".."</span> <span class="small_keyword" title="return">return</span>;
+<span class="lineno" id=line83></span>  
+<span class="lineno" id=line84></span>        <span class="big_keyword" title="Define a mutable variable">var</span> newpath = <span class="small_keyword" title="conditional">if</span> dname2 == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> dname <span class="small_keyword" title="conditional">else</span> Filename::join (dname,dname2);
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>        <span class="comment">//eprintln$ "newpath = "+newpath ;</span>
+<span class="lineno" id=line87></span>  
+<span class="lineno" id=line88></span>        <span class="big_keyword" title="Define a mutable variable">var</span> newfiles = Directory::filesin(newpath);
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>        <span class="comment">//eprintln$ "returned from filesin" ;</span>
+<span class="lineno" id=line91></span>  
+<span class="lineno" id=line92></span>        <span class="small_keyword" title="match statement or expression">match</span> newfiles <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line93></span>        | #None =&gt; <span class="small_keyword" title="return">return</span>;
+<span class="lineno" id=line94></span>        | Some files =&gt;
+<span class="lineno" id=line95></span>          <span class="comment">//eprintln$ "got files in " + newpath;</span>
+<span class="lineno" id=line96></span>          <span class="small_keyword" title="for loop">for</span> f <span class="small_keyword" title="membership operator, function mem">in</span> files <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line97></span>            <span class="small_keyword" title="conditional">if</span> f == <span class="fstring">"."</span> <span class="small_keyword" title="logical disjunction">or</span> f == <span class="fstring">".."</span> <span class="small_keyword" title="imperative code begins">do</span> ;
+<span class="lineno" id=line98></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line99></span>              <span class="comment">//eprintln$ "Processing file " + f;</span>
+<span class="lineno" id=line100></span>              <span class="big_keyword" title="Define a mutable variable">var</span> d = Filename::join (dname2,f);
+<span class="lineno" id=line101></span>              <span class="comment">//eprintln$ "Relpath " + d;</span>
+<span class="lineno" id=line102></span>              <span class="big_keyword" title="Define a mutable variable">var</span> fullpath = Filename::join (dname,d);
+<span class="lineno" id=line103></span>              <span class="comment">//eprintln$ "fullpath " + fullpath;</span>
+<span class="lineno" id=line104></span>              <span class="big_keyword" title="Define a mutable variable">var</span> t = FileStat::filetype fullpath;
+<span class="lineno" id=line105></span>              <span class="small_keyword" title="match statement or expression">match</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line106></span>                | #REGULAR =&gt; 
+<span class="lineno" id=line107></span>                  <span class="comment">//eprintln ("Regular file " + d);</span>
+<span class="lineno" id=line108></span>                  <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = d <span class="small_keyword" title="membership operator, function mem">in</span> re;
+<span class="lineno" id=line109></span>                  <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line110></span>  	                <span class="comment">//eprintln$ d + " Matches"; </span>
+<span class="lineno" id=line111></span>  		              foundfiles = Cons (d, foundfiles); 
+<span class="lineno" id=line112></span>                  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line113></span>                | #DIRECTORY =&gt; 
+<span class="lineno" id=line114></span>                  <span class="comment">//eprintln ("found directory " + d);</span>
+<span class="lineno" id=line115></span>                  rfi (d);
+<span class="lineno" id=line116></span>                | _ =&gt; ;
+<span class="lineno" id=line117></span>              <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line118></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line119></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line120></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line121></span>      }
+<span class="lineno" id=line122></span>      rfi (<span class="fstring">""</span>);
+<span class="lineno" id=line123></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> foundfiles;
+<span class="lineno" id=line124></span>    }
+<span class="lineno" id=line125></span>   
+<span class="lineno" id=line126></span>  }
+<span class="lineno" id=line127></span>  
+</pre></p></div><h1 id='Posix_File_Syetem_h'><img src='/share/src/web/images/minus.gif' id='Posix File Syetem' onclick='toggle(this,"Posix_File_Syetem_d")' alt='+'/> 6 Posix File Syetem</h1><div id='Posix_File_Syetem_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/posix/filesystem.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> PosixFileSystem 
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line5></span>    <span class="comment">// File access and create modes</span>
+<span class="lineno" id=line6></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line7></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> file_perm_t = <span class="fstring">"int"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::fcntl_h;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_RDONLY     : file_perm_t;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_WRONLY     : file_perm_t;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_RDWR       : file_perm_t;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_NONBLOCK   : file_perm_t;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_APPEND     : file_perm_t;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_CREAT      : file_perm_t;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_TRUNC      : file_perm_t;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_EXCL       : file_perm_t;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_SHLOCK     : file_perm_t;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_EXLOCK     : file_perm_t;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_NOFOLLOW   : file_perm_t;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_SYMLINK    : file_perm_t;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> O_EVTONLY    : file_perm_t;
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \&amp; : file_perm_t * file_perm_t -&gt; file_perm_t = <span class="fstring">"$1&amp;$2"</span>;
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \|  : file_perm_t * file_perm_t -&gt; file_perm_t = <span class="fstring">"$1|$2"</span>;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line25></span>    <span class="comment">// File I/O functions</span>
+<span class="lineno" id=line26></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line27></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> posix_file = <span class="fstring">"int"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> valid: posix_file -&gt; bool = <span class="fstring">"$1 != -1"</span>;
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span> : posix_file = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> fd0 : posix_file = <span class="fstring">"0"</span>;
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> fd1 : posix_file = <span class="fstring">"1"</span>;
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> fd2 : posix_file = <span class="fstring">"2"</span>;
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="big_keyword" title="Open a module or class">open</span>: <span class="library" title="binding of C++ string type">string</span> * file_perm_t * PosixFileStat::mode_t -&gt; posix_file = <span class="fstring">"::open($1.c_str(), $2, $3)"</span>;
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="big_keyword" title="Open a module or class">open</span>: <span class="library" title="binding of C++ string type">string</span> * file_perm_t -&gt; posix_file = <span class="fstring">"::open($1.c_str(), $2)"</span>;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> ropen: <span class="library" title="binding of C++ string type">string</span> -&gt; posix_file = <span class="fstring">'::open($1.c_str(), O_RDONLY,0)'</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::fcntl_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wopen: <span class="library" title="binding of C++ string type">string</span> -&gt; posix_file = <span class="fstring">'::open($1.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)'</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::fcntl_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> rwopen: <span class="library" title="binding of C++ string type">string</span> -&gt; posix_file = <span class="fstring">'::open($1.c_str(), O_RDWR,0)'</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::fcntl_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> creat: <span class="library" title="binding of C++ string type">string</span> * PosixFileStat::mode_t-&gt; posix_file = <span class="fstring">'::open($1.c_str(), O_WRONLY | O_CREAT | O_TRUNC, $2)'</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::fcntl_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> close: posix_file -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::close($1)"</span>;
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> read: posix_file * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C size_t type">size</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"::read($1, $2, $3)"</span>;
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="library" title="Print a string to a stream">write</span>: posix_file * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C size_t type">size</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"::write($1, (void*)$2, $3)/*posix write*/"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dup: posix_file -&gt; posix_file = <span class="fstring">"::dup($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dup2: posix_file * posix_file -&gt; posix_file = <span class="fstring">"::dup2($1,$2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> piper_def = """<span class="embedded_c">
+<span class="lineno" id=line49></span>      <span class="big_keyword">struct</span> _piper_hack { <span class="qualifier">int</span> i; <span class="qualifier">int</span> o; };
+<span class="lineno" id=line50></span>    </span>""";
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> piper_def = """<span class="embedded_c">
+<span class="lineno" id=line52></span>      _piper_hack _piper() {
+<span class="lineno" id=line53></span>        _piper_hack p;
+<span class="lineno" id=line54></span>        pipe((<span class="qualifier">int</span>*)(<span class="qualifier">void</span>*)&amp;p);
+<span class="lineno" id=line55></span>        <span class="small_keyword">return</span> p;
+<span class="lineno" id=line56></span>      }
+<span class="lineno" id=line57></span>    </span>""" <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line58></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Provide a model for an existing C struct">cstruct</span> _piper_hack { i:posix_file; o:posix_file; };
+<span class="lineno" id=line59></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> _piper: 1 -&gt; _piper_hack <span class="big_keyword" title="specify requirements">requires</span> piper_def;
+<span class="lineno" id=line60></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> _mkpair (x: _piper_hack) =&gt; x.i, x.o;
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pipe () =&gt; _mkpair #_piper;
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> fdopen_input: posix_file -&gt;  ifile = <span class="fstring">'::fdopen($1,"r")'</span>;
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> fdopen_output: posix_file -&gt;  ofile = <span class="fstring">'::fdopen($1,"w")'</span>;
+<span class="lineno" id=line65></span>  
+<span class="lineno" id=line66></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line67></span>    <span class="comment">// delete (unlink) a file</span>
+<span class="lineno" id=line68></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> unlink_file: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::unlink($1.c_str())"</span> 
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line73></span>    <span class="comment">// rename a file</span>
+<span class="lineno" id=line74></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line75></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> rename_file: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::rename($1.c_str(),$2.c_str())"</span>
+<span class="lineno" id=line76></span>      <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line77></span>  
+<span class="lineno" id=line78></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line79></span>    <span class="comment">// copy a file, preserving last access and modification times</span>
+<span class="lineno" id=line80></span>    <span class="comment">// owner, group, and permissions</span>
+<span class="lineno" id=line81></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line82></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> filecopy(src: <span class="library" title="binding of C++ string type">string</span>, dst: <span class="library" title="binding of C++ string type">string</span>) :  bool =
+<span class="lineno" id=line83></span>    {
+<span class="lineno" id=line84></span>      <span class="small_keyword" title="conditional">if</span> Env::getenv (<span class="fstring">"FLX_REPORT_FILECOPY"</span>) != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line85></span>        eprintln$ <span class="fstring">"[PosixFileSystem::filecopy] '"</span> + src + <span class="fstring">"' -&gt; '"</span> + dst+ <span class="fstring">"'"</span>;
+<span class="lineno" id=line86></span>      <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line87></span>      <span class="big_keyword" title="Define an immutable value">val</span> now = Time::time(); <span class="comment">// seconds</span>
+<span class="lineno" id=line88></span>      <span class="big_keyword" title="Define a mutable variable">var</span> stat_buf: PosixFileStat::stat_t;
+<span class="lineno" id=line89></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> PosixFileStat::stat (src, &amp;stat_buf) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line90></span>        eprintln$ <span class="fstring">"[PosixFileSystem::filecopy] Can't stat source file "</span> + src;
+<span class="lineno" id=line91></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line92></span>      <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line93></span>      <span class="big_keyword" title="Define an immutable value">val</span> permissions = PosixFileStat::file_perm$ PosixFileStat::raw_mode (&amp;stat_buf);
+<span class="lineno" id=line94></span>      <span class="big_keyword" title="Define an immutable value">val</span> last_modification = PosixFileStat::filetime(src);
+<span class="lineno" id=line95></span>      <span class="big_keyword" title="Define a mutable variable">var</span> fsrc = <span class="big_keyword" title="Open a module or class">open</span> (src,O_RDONLY );
+<span class="lineno" id=line96></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> valid fsrc <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line97></span>        eprintln$ <span class="fstring">"[PosixFileSystem::filecopy] Bad src file in Filesystem::filecopy "</span> + src;
+<span class="lineno" id=line98></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>; 
+<span class="lineno" id=line99></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line100></span>      <span class="big_keyword" title="Define a mutable variable">var</span> fdst = <span class="big_keyword" title="Open a module or class">open</span> (dst,O_WRONLY \| O_CREAT \| O_TRUNC, permissions);
+<span class="lineno" id=line101></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> valid fdst <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line102></span>        eprintln$ <span class="fstring">"[PosixFileSystem::filecopy] Bad dst file in Filesystem::filecopy "</span> + dst + <span class="fstring">", Error: "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">"="</span> + #strerror;
+<span class="lineno" id=line103></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>; 
+<span class="lineno" id=line104></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line105></span>      bsiz := <span class="library" title="binding of C size_t type">size</span> (4096 * 1024); <span class="comment">// 4 Meg</span>
+<span class="lineno" id=line106></span>      <span class="big_keyword" title="Define a mutable variable">var</span> buffer = <span class="hack">C_hack</span>::cast[&amp;<span class="library" title="binding of C char type">char</span>] (Memory::malloc(bsiz)); <span class="comment">// 4 MEG</span>
+<span class="lineno" id=line107></span>      <span class="big_keyword" title="Define a mutable variable">var</span> bread = read (fsrc, buffer, bsiz);
+<span class="lineno" id=line108></span>      <span class="small_keyword" title="while loop">while</span> bread &gt; <span class="library" title="binding of C size_t type">size</span> 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line109></span>        <span class="big_keyword" title="Define a mutable variable">var</span> bwrite = <span class="library" title="Print a string to a stream">write</span> (fdst,buffer,bread);
+<span class="lineno" id=line110></span>        <span class="small_keyword" title="conditional">if</span> bread != bwrite <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line111></span>          <span class="small_keyword" title="conditional">if</span> bwrite.<span class="library" title="binding of C int type">int</span> == -1 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line112></span>            eprintln$ 
+<span class="lineno" id=line113></span>              <span class="fstring">"[PosixFileSystem::filecopy] Dest des = "</span> + <span class="library" title="Convert a value to a string">str</span> fdst.<span class="library" title="binding of C int type">int</span>+ <span class="fstring">" "</span>+
+<span class="lineno" id=line114></span>              <span class="fstring">"Attempt to copy "</span> + <span class="library" title="Convert a value to a string">str</span> bread + <span class="fstring">" bytes from "</span> + src + <span class="fstring">" to "</span> + dst + 
+<span class="lineno" id=line115></span>              <span class="fstring">" failed with errno = "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">": "</span> + strerror() 
+<span class="lineno" id=line116></span>            ;
+<span class="lineno" id=line117></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line118></span>            eprintln$ 
+<span class="lineno" id=line119></span>              <span class="fstring">"[PosixFileSystem::filecopy] Attempt to copy "</span> + <span class="library" title="Convert a value to a string">str</span> bread + <span class="fstring">" bytes from "</span> + src + <span class="fstring">" to "</span> + dst + 
+<span class="lineno" id=line120></span>              <span class="fstring">" failed with "</span> +  <span class="library" title="Convert a value to a string">str</span> bwrite + <span class="fstring">" only copied!"</span>
+<span class="lineno" id=line121></span>            ;
+<span class="lineno" id=line122></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line123></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line124></span>        bread = read (fsrc, buffer, bsiz);
+<span class="lineno" id=line125></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line126></span>      <span class="big_keyword" title="Define a mutable variable">var</span> res = close fsrc;
+<span class="lineno" id=line127></span>      <span class="small_keyword" title="conditional">if</span> res != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line128></span>        eprintln$ <span class="fstring">"[PosixFileSystem::filecopy] close on src "</span> + src + <span class="fstring">" failed: "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">"="</span> + #strerror;
+<span class="lineno" id=line129></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line130></span>      res = close fdst;
+<span class="lineno" id=line131></span>      <span class="small_keyword" title="conditional">if</span> res != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line132></span>        eprintln$ <span class="fstring">"[PosixFileSystem::filecopy] close on dst "</span> + dst + <span class="fstring">" failed: "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">"="</span> + #strerror;
+<span class="lineno" id=line133></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line134></span>      <span class="hack">C_hack</span>::ignore(PosixFileStat::utime(dst,now,last_modification));
+<span class="lineno" id=line135></span>      Memory::free(<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] buffer);
+<span class="lineno" id=line136></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line137></span>    }
+<span class="lineno" id=line138></span>  
+<span class="lineno" id=line139></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line140></span>    <span class="comment">// generate temporary file name</span>
+<span class="lineno" id=line141></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line142></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> tmpnam = """<span class="embedded_c">
+<span class="lineno" id=line143></span>      <span class="small_keyword">std</span>::string flx_tmpnam() {
+<span class="lineno" id=line144></span>        <span class="qualifier">char</span> tmpn[] = <span class="fstring">"/tmp/flx_XXXXXX"</span>;
+<span class="lineno" id=line145></span>        close(mkstemp(tmpn));
+<span class="lineno" id=line146></span>        <span class="small_keyword">return</span> <span class="small_keyword">std</span>::string(tmpn);
+<span class="lineno" id=line147></span>       }
+<span class="lineno" id=line148></span>    </span>""" <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;unistd.h&gt;</span></span>';
+<span class="lineno" id=line149></span>  
+<span class="lineno" id=line150></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> tmp_filename: 1 -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"flx_tmpnam()"</span> <span class="big_keyword" title="specify requirements">requires</span> tmpnam;
+<span class="lineno" id=line151></span>      
+<span class="lineno" id=line152></span>  }
+<span class="lineno" id=line153></span>  
+</pre></p></div><h1 id='Win32_File_Syetem_h'><img src='/share/src/web/images/minus.gif' id='Win32 File Syetem' onclick='toggle(this,"Win32_File_Syetem_d")' alt='+'/> 7 Win32 File Syetem</h1><div id='Win32_File_Syetem_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/win32/filesystem.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Win32FileSystem 
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line5></span>    <span class="comment">// File access and create modes</span>
+<span class="lineno" id=line6></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line7></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> file_perm_t = <span class="fstring">"int"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::fcntl_h;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_BINARY     : file_perm_t;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_RDONLY     : file_perm_t;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_WRONLY     : file_perm_t;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_RDWR       : file_perm_t;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_NONBLOCK   : file_perm_t;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_APPEND     : file_perm_t;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_CREAT      : file_perm_t;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_TRUNC      : file_perm_t;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_EXCL       : file_perm_t;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_SHLOCK     : file_perm_t;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_EXLOCK     : file_perm_t;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_NOFOLLOW   : file_perm_t;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_SYMLINK    : file_perm_t;
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _O_EVTONLY    : file_perm_t;
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \&amp; : file_perm_t * file_perm_t -&gt; file_perm_t = <span class="fstring">"$1&amp;$2"</span>;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \|  : file_perm_t * file_perm_t -&gt; file_perm_t = <span class="fstring">"$1|$2"</span>;
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line26></span>    <span class="comment">// File I/O functions</span>
+<span class="lineno" id=line27></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line28></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> posix_file = <span class="fstring">"int"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h;
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> valid: posix_file -&gt; bool = <span class="fstring">"$1 != -1"</span>;
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span> : posix_file = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> fd0 : posix_file = <span class="fstring">"0"</span>;
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> fd1 : posix_file = <span class="fstring">"1"</span>;
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> fd2 : posix_file = <span class="fstring">"2"</span>;
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="big_keyword" title="Open a module or class">open</span>: <span class="library" title="binding of C++ string type">string</span> * file_perm_t * Win32FileStat::mode_t -&gt; posix_file = <span class="fstring">"::_open($1.c_str(), $2, $3)"</span>;
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="big_keyword" title="Open a module or class">open</span>: <span class="library" title="binding of C++ string type">string</span> * file_perm_t -&gt; posix_file = <span class="fstring">"::_open($1.c_str(), $2)"</span>;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> ropen: <span class="library" title="binding of C++ string type">string</span> -&gt; posix_file = <span class="fstring">'::open($1.c_str(), _O_RDONLY | _O_BINARY,0)'</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::fcntl_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wopen: <span class="library" title="binding of C++ string type">string</span> -&gt; posix_file = <span class="fstring">'::open($1.c_str(), _O_WRONLY  | _O_BINARY | _O_CREAT | _O_TRUNC, S_IRUSR | S_IWUSR)'</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> rwopen: <span class="library" title="binding of C++ string type">string</span> -&gt; posix_file = <span class="fstring">'::open($1.c_str(), _O_RDWR | _O_BINARY,0)'</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> creat: <span class="library" title="binding of C++ string type">string</span> * Win32FileStat::mode_t-&gt; posix_file = <span class="fstring">'open($1.c_str(), _O_WRONLY | _O_BINARY | _O_CREAT | _O_TRUNC, $2)'</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h, Posix_headers::sys_stat_h;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> close: posix_file -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::_close($1)"</span>;
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> read: posix_file * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C size_t type">size</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"::read($1, $2, $3)"</span>;
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="library" title="Print a string to a stream">write</span>: posix_file * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C size_t type">size</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"::write($1, $2, $3)"</span>;
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dup: posix_file -&gt; posix_file = <span class="fstring">"::dup($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h;
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dup2: posix_file * posix_file -&gt; posix_file = <span class="fstring">"::dup2($1,$2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h;
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> piper_def = """<span class="embedded_c">
+<span class="lineno" id=line50></span>      <span class="big_keyword">struct</span> _piper_hack { <span class="qualifier">int</span> i; <span class="qualifier">int</span> o; };
+<span class="lineno" id=line51></span>    </span>""";
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> piper_def = """<span class="embedded_c">
+<span class="lineno" id=line53></span>      _piper_hack _piper() {
+<span class="lineno" id=line54></span>        _piper_hack p;
+<span class="lineno" id=line55></span>        pipe((<span class="qualifier">int</span>*)(<span class="qualifier">void</span>*)&amp;p);
+<span class="lineno" id=line56></span>        <span class="small_keyword">return</span> p;
+<span class="lineno" id=line57></span>      }
+<span class="lineno" id=line58></span>    </span>""" <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line59></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Provide a model for an existing C struct">cstruct</span> _piper_hack { i:posix_file; o:posix_file; };
+<span class="lineno" id=line60></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> _piper: 1 -&gt; _piper_hack <span class="big_keyword" title="specify requirements">requires</span> piper_def;
+<span class="lineno" id=line61></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> _mkpair (x: _piper_hack) =&gt; x.i, x.o;
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pipe () =&gt; _mkpair #_piper;
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> fdopen_input: posix_file -&gt;  ifile = <span class="fstring">'::fdopen($1,"r")'</span>;
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> fdopen_output: posix_file -&gt;  ofile = <span class="fstring">'::fdopen($1,"w")'</span>;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line68></span>    <span class="comment">// delete (unlink) a file</span>
+<span class="lineno" id=line69></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line70></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> unlink_file: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::unlink($1.c_str())"</span>;
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line73></span>    <span class="comment">// rename a file</span>
+<span class="lineno" id=line74></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line75></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> rename_file: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::rename($1.c_str(),$2.c_str())"</span>;
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line78></span>    <span class="comment">// copy a file, preserving last access and modification times</span>
+<span class="lineno" id=line79></span>    <span class="comment">// owner, group, and permissions</span>
+<span class="lineno" id=line80></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line81></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> filecopy(src: <span class="library" title="binding of C++ string type">string</span>, dst: <span class="library" title="binding of C++ string type">string</span>) :  bool =
+<span class="lineno" id=line82></span>    {
+<span class="lineno" id=line83></span>      <span class="comment">//eprintln$ "Copy " + src + " -&gt; " + dst;</span>
+<span class="lineno" id=line84></span>      <span class="small_keyword" title="conditional">if</span> Env::getenv (<span class="fstring">"FLX_REPORT_FILECOPY"</span>) != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line85></span>        eprintln$ <span class="fstring">"[Win32FileSystem::filecopy] '"</span> + src + <span class="fstring">"' -&gt; '"</span> + dst+ <span class="fstring">"'"</span>;
+<span class="lineno" id=line86></span>      <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line87></span>  
+<span class="lineno" id=line88></span>      <span class="big_keyword" title="Define an immutable value">val</span> now = Time::time(); <span class="comment">// seconds</span>
+<span class="lineno" id=line89></span>      <span class="big_keyword" title="Define a mutable variable">var</span> stat_buf: Win32FileStat::stat_t;
+<span class="lineno" id=line90></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> Win32FileStat::stat (src, &amp;stat_buf) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line91></span>        eprintln$ <span class="fstring">"Can't stat source file "</span> + src;
+<span class="lineno" id=line92></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line93></span>      <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line94></span>      <span class="big_keyword" title="Define an immutable value">val</span> permissions = Win32FileStat::file_perm$ Win32FileStat::raw_mode (&amp;stat_buf);
+<span class="lineno" id=line95></span>      <span class="big_keyword" title="Define an immutable value">val</span> last_modification = Win32FileStat::filetime(src);
+<span class="lineno" id=line96></span>      <span class="big_keyword" title="Define a mutable variable">var</span> fsrc = <span class="big_keyword" title="Open a module or class">open</span> (src,_O_RDONLY \| _O_BINARY);
+<span class="lineno" id=line97></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> valid fsrc <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line98></span>        eprintln$ <span class="fstring">" Bad src file in Filesystem::filecopy "</span> + src;
+<span class="lineno" id=line99></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>; 
+<span class="lineno" id=line100></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line101></span>      <span class="big_keyword" title="Define a mutable variable">var</span> fdst = <span class="big_keyword" title="Open a module or class">open</span> (dst,_O_WRONLY \| _O_BINARY \| _O_CREAT \| _O_TRUNC, permissions);
+<span class="lineno" id=line102></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> valid fdst <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line103></span>        eprintln$ <span class="fstring">" Bad dst file in Filesystem::filecopy "</span> + dst + <span class="fstring">", Error: "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">"="</span> + #strerror;
+<span class="lineno" id=line104></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>; 
+<span class="lineno" id=line105></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line106></span>      bsiz := <span class="library" title="binding of C size_t type">size</span> (4096 * 1024); <span class="comment">// 4 Meg</span>
+<span class="lineno" id=line107></span>      <span class="big_keyword" title="Define a mutable variable">var</span> buffer = <span class="hack">C_hack</span>::cast[&amp;<span class="library" title="binding of C char type">char</span>] (Memory::malloc(bsiz)); <span class="comment">// 4 MEG</span>
+<span class="lineno" id=line108></span>      <span class="big_keyword" title="Define a mutable variable">var</span> bread = read (fsrc, buffer, bsiz);
+<span class="lineno" id=line109></span>      <span class="small_keyword" title="while loop">while</span> bread &gt; <span class="library" title="binding of C size_t type">size</span> 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line110></span>        <span class="big_keyword" title="Define a mutable variable">var</span> bwrite = <span class="library" title="Print a string to a stream">write</span> (fdst,buffer,bread);
+<span class="lineno" id=line111></span>        <span class="small_keyword" title="conditional">if</span> bread != bwrite <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line112></span>          <span class="small_keyword" title="conditional">if</span> bwrite.<span class="library" title="binding of C int type">int</span> == -1 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line113></span>            eprintln$ 
+<span class="lineno" id=line114></span>              <span class="fstring">"Dest des = "</span> + <span class="library" title="Convert a value to a string">str</span> fdst.<span class="library" title="binding of C int type">int</span>+ <span class="fstring">" "</span>+
+<span class="lineno" id=line115></span>              <span class="fstring">"Attempt to copy "</span> + <span class="library" title="Convert a value to a string">str</span> bread + <span class="fstring">" bytes from "</span> + src + <span class="fstring">" to "</span> + dst + 
+<span class="lineno" id=line116></span>              <span class="fstring">" failed with errno = "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">": "</span> + strerror() 
+<span class="lineno" id=line117></span>            ;
+<span class="lineno" id=line118></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line119></span>            eprintln$ 
+<span class="lineno" id=line120></span>              <span class="fstring">"Attempt to copy "</span> + <span class="library" title="Convert a value to a string">str</span> bread + <span class="fstring">" bytes from "</span> + src + <span class="fstring">" to "</span> + dst + 
+<span class="lineno" id=line121></span>              <span class="fstring">" failed with "</span> +  <span class="library" title="Convert a value to a string">str</span> bwrite + <span class="fstring">" only copied!"</span>
+<span class="lineno" id=line122></span>            ;
+<span class="lineno" id=line123></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line124></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line125></span>        bread = read (fsrc, buffer, bsiz);
+<span class="lineno" id=line126></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line127></span>      <span class="big_keyword" title="Define a mutable variable">var</span> res = close fsrc;
+<span class="lineno" id=line128></span>      <span class="small_keyword" title="conditional">if</span> res != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line129></span>        eprintln$ <span class="fstring">"In filesystem::filecopy close on src "</span> + src + <span class="fstring">" failed: "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">"="</span> + #strerror;
+<span class="lineno" id=line130></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line131></span>      res = close fdst;
+<span class="lineno" id=line132></span>      <span class="small_keyword" title="conditional">if</span> res != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line133></span>        eprintln$ <span class="fstring">"In filesystem::filecopy close on dst "</span> + dst + <span class="fstring">" failed: "</span> + <span class="library" title="Convert a value to a string">str</span> errno + <span class="fstring">"="</span> + #strerror;
+<span class="lineno" id=line134></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line135></span>      <span class="hack">C_hack</span>::ignore(Win32FileStat::utime(dst,now,last_modification));
+<span class="lineno" id=line136></span>      Memory::free(<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] buffer);
+<span class="lineno" id=line137></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line138></span>    }
+<span class="lineno" id=line139></span>    
+<span class="lineno" id=line140></span>   
+<span class="lineno" id=line141></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line142></span>    <span class="comment">// generate temporary file name</span>
+<span class="lineno" id=line143></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line144></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> tmpnam = """<span class="embedded_c">
+<span class="lineno" id=line145></span>      <span class="small_keyword">std</span>::string flx_tmpnam() {
+<span class="lineno" id=line146></span>        <span class="qualifier">char</span> tmpn[] = <span class="fstring">"/tmp/flx_XXXXXX"</span>;
+<span class="lineno" id=line147></span>        close(mkstemp(tmpn));
+<span class="lineno" id=line148></span>        <span class="small_keyword">return</span> <span class="small_keyword">std</span>::string(tmpn);
+<span class="lineno" id=line149></span>       }
+<span class="lineno" id=line150></span>    </span>""" <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;unistd.h&gt;</span></span>';
+<span class="lineno" id=line151></span>  
+<span class="lineno" id=line152></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> tmp_filename: 1 -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"flx_tmpnam()"</span> <span class="big_keyword" title="specify requirements">requires</span> tmpnam;
+<span class="lineno" id=line153></span>      
+<span class="lineno" id=line154></span>  }
+<span class="lineno" id=line155></span>  
+<span class="lineno" id=line156></span>  
+<span class="lineno" id=line157></span>  
+</pre></p></div><h1 id='Directory_h'><img src='/share/src/web/images/minus.gif' id='Directory' onclick='toggle(this,"Directory_d")' alt='+'/> 8 Directory</h1><div id='Directory_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/io/directory.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">File system directory services,</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">Parametrised  by operating system and mode type.</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a type class">class</span> Directory_class[os,mode_t]
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="doccomment">Create a directory with specified mode.</span>
+<span class="lineno" id=line7></span>    <span class="doccomment">Returns 0 if successful.</span>
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mkdir: <span class="library" title="binding of C++ string type">string</span> * mode_t -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Create a directory with default mode.</span>
+<span class="lineno" id=line11></span>    <span class="doccomment">Returns 0 if successful.</span>
+<span class="lineno" id=line12></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mkdir: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="doccomment">Try to ensure all the directories in a path exist.</span>
+<span class="lineno" id=line15></span>    <span class="doccomment">Does not return any error indication.</span>
+<span class="lineno" id=line16></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> mkdirs: <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> unlink_empty_dir: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="doccomment">Return an option list of all the regular files in a given directory.</span>
+<span class="lineno" id=line21></span>    <span class="doccomment">Returns None if the directory does not exist or isn't accessible.</span>
+<span class="lineno" id=line22></span>    <span class="doccomment">Returns Some files if the directory exists and is accessible.</span>
+<span class="lineno" id=line23></span>    <span class="doccomment">If the directory has no regular files, the list is Empty.</span>
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> filesin:<span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="option type: Some x or None">opt</span>[List::<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]];
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>    <span class="doccomment">Get the absolute pathname of the current working directory.</span>
+<span class="lineno" id=line27></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> getcwd: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>; 
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>    <span class="doccomment">Convert a relative filename to an absolute pathname. </span>
+<span class="lineno" id=line30></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> mk_absolute_filename: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>; 
+<span class="lineno" id=line31></span>  }
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="doccomment">Host file system directory services.</span>
+<span class="lineno" id=line34></span>  <span class="doccomment">Platform dependent.</span>
+<span class="lineno" id=line35></span>  <span class="big_keyword" title="Define a type class">class</span> Directory {
+<span class="lineno" id=line36></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Win32Directory;
+<span class="lineno" id=line38></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> PosixDirectory;
+<span class="lineno" id=line40></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line41></span>  }
+<span class="lineno" id=line42></span>  
+</pre></p></div><h1 id='Posix_Directory_Services_h'><img src='/share/src/web/images/minus.gif' id='Posix Directory Services' onclick='toggle(this,"Posix_Directory_Services_d")' alt='+'/> 9 Posix Directory Services</h1><div id='Posix_Directory_Services_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/posix/directory.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> PosixDirectory
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="comment">// Posix specific stuff.</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> dirent_t = <span class="fstring">"struct dirent*"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::dirent_h;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> DIR_t = <span class="fstring">"DIR*"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::dirent_h;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> opendir: <span class="library" title="binding of C++ string type">string</span> * &amp;DIR_t = <span class="fstring">"*$2=::opendir($1.c_str());"</span>;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> isNULL: DIR_t -&gt; bool = <span class="fstring">"$1==0"</span>;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> isNULL: dirent_t -&gt; bool = <span class="fstring">"$1==0"</span>;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> readdir: DIR_t * dirent_t * &amp;dirent_t * &amp;<span class="library" title="binding of C int type">int</span> = <span class="fstring">"*$4=readdir_r($1, $2, $3);"</span>;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> closedir: DIR_t = <span class="fstring">"::closedir($1);"</span>;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filename: dirent_t -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::std::string($1-&gt;d_name)"</span>;
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> getcwd: +<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C size_t type">size</span> -&gt; +<span class="library" title="binding of C char type">char</span> = <span class="fstring">"::getcwd($1,$2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="comment">// inherit generic stuff</span>
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Directory_class[Posix, PosixFileStat::mode_t];
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="comment">// instantiate generic stuff</span>
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Directory_class[Posix, PosixFileStat::mode_t] {
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mkdir: <span class="library" title="binding of C++ string type">string</span> * PosixFileStat::mode_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::mkdir($1.c_str(), $2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_stat_h;
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mkdir: <span class="library" title="binding of C++ string type">string</span>  -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::mkdir($1.c_str(), 0777)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_stat_h;
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> mkdirs (s:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line23></span>      {
+<span class="lineno" id=line24></span>        <span class="small_keyword" title="conditional">if</span> s == <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> s == <span class="fstring">"."</span> <span class="small_keyword" title="logical disjunction">or</span> s == <span class="fstring">".."</span> <span class="small_keyword" title="logical disjunction">or</span> s == <span class="fstring">"/"</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line25></span>           <span class="small_keyword" title="return">return</span>;
+<span class="lineno" id=line26></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line27></span>        mkdirs$ Filename::dirname s;
+<span class="lineno" id=line28></span>        <span class="hack">C_hack</span>::ignore$ mkdir s;
+<span class="lineno" id=line29></span>      }
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>      <span class="comment">// Delete an empty directory.</span>
+<span class="lineno" id=line32></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> unlink_empty_dir : <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::rmdir ($1.c_str())"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> getcwd():<span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line36></span>        <span class="big_keyword" title="Define a mutable variable">var</span> b: <span class="library" title="array type, a tuple of all components the same type">array</span>[<span class="library" title="binding of C char type">char</span>,1024]; 
+<span class="lineno" id=line37></span>        <span class="big_keyword" title="Define a mutable variable">var</span> p = getcwd((&amp;b).stl_begin,<span class="library" title="binding of C size_t type">size</span> 1024);
+<span class="lineno" id=line38></span>        <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="conditional">if</span> <span class="hack">C_hack</span>::isNULL p <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> <span class="library" title="binding of C++ string type">string</span> p <span class="small_keyword" title="conditional">endif</span>; 
+<span class="lineno" id=line39></span>      }
+<span class="lineno" id=line40></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> mk_absolute_filename(s:<span class="library" title="binding of C++ string type">string</span>) =&gt; 
+<span class="lineno" id=line41></span>         <span class="small_keyword" title="conditional">if</span> PosixFilename::is_absolute_filename s <span class="small_keyword" title="conditional">then</span> s <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line42></span>         #getcwd + <span class="fstring">"/"</span> + s
+<span class="lineno" id=line43></span>      ;
+<span class="lineno" id=line44></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> filesin(dname:<span class="library" title="binding of C++ string type">string</span>): <span class="library" title="option type: Some x or None">opt</span>[List::<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]] = {
+<span class="lineno" id=line45></span>        <span class="comment">//println$ "filesin " + dname;</span>
+<span class="lineno" id=line46></span>        <span class="big_keyword" title="Define a mutable variable">var</span> d:DIR_t;
+<span class="lineno" id=line47></span>        <span class="big_keyword" title="Define a mutable variable">var</span> e: dirent_t = <span class="hack">C_hack</span>::cast[dirent_t]$ Memory::malloc 5000;
+<span class="lineno" id=line48></span>        <span class="big_keyword" title="Define a mutable variable">var</span> eret = e;
+<span class="lineno" id=line49></span>        <span class="big_keyword" title="Define a mutable variable">var</span> err:<span class="library" title="binding of C int type">int</span> = 0;
+<span class="lineno" id=line50></span>        <span class="big_keyword" title="Define a mutable variable">var</span> files = List::Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line51></span>        opendir(dname,&amp;d);
+<span class="lineno" id=line52></span>        <span class="small_keyword" title="conditional">if</span> isNULL d <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line53></span>          <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Error opening dir"</span>; 
+<span class="lineno" id=line54></span>          Memory::free$ <span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] e; 
+<span class="lineno" id=line55></span>          <span class="small_keyword" title="return">return</span> None[List::<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]];
+<span class="lineno" id=line56></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line57></span>        <span class="comment">//println$ "Opened dir " + dname;</span>
+<span class="lineno" id=line58></span>    next:&gt;
+<span class="lineno" id=line59></span>          readdir(d,e,&amp;eret, &amp;err);
+<span class="lineno" id=line60></span>          <span class="small_keyword" title="conditional">if</span> err != 0 <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line61></span>            <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Error reading dir"</span>; fflush;
+<span class="lineno" id=line62></span>            closedir d; 
+<span class="lineno" id=line63></span>            Memory::free$ <span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] e; 
+<span class="lineno" id=line64></span>            <span class="small_keyword" title="return">return</span> None[List::<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]];
+<span class="lineno" id=line65></span>          <span class="small_keyword" title="conditional">elif</span> isNULL eret <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line66></span>            <span class="comment">//println "End of dir"; </span>
+<span class="lineno" id=line67></span>            closedir d; 
+<span class="lineno" id=line68></span>            Memory::free$ <span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] e; 
+<span class="lineno" id=line69></span>            <span class="small_keyword" title="return">return</span> Some files;
+<span class="lineno" id=line70></span>          <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line71></span>            <span class="comment">//println "Think we got a file?";</span>
+<span class="lineno" id=line72></span>            <span class="big_keyword" title="Run time assertion">assert</span> err == 0;
+<span class="lineno" id=line73></span>            <span class="comment">//println$ "Found a file " + filename e; </span>
+<span class="lineno" id=line74></span>            files += filename e; 
+<span class="lineno" id=line75></span>            <span class="small_keyword" title="jump to label">goto</span> next;
+<span class="lineno" id=line76></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line77></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line78></span>      }
+<span class="lineno" id=line79></span>    }
+<span class="lineno" id=line80></span>  }
+<span class="lineno" id=line81></span>  
+</pre></p></div><h1 id='Win32_Directory_Services_h'><img src='/share/src/web/images/minus.gif' id='Win32 Directory Services' onclick='toggle(this,"Win32_Directory_Services_d")' alt='+'/> 10 Win32 Directory Services</h1><div id='Win32_Directory_Services_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/win32/directory.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Win32Directory
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="comment">//Win32 specific stuff.</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> DIR_t = <span class="fstring">"intptr_t"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h ;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> FINDDATA_t = <span class="fstring">"struct _finddata_t"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::io_h ;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> findfirst: <span class="library" title="binding of C++ string type">string</span> * &amp;FINDDATA_t * &amp;DIR_t = <span class="fstring">"*$3=::_findfirst($1.c_str(), $2);"</span> ;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> findnext: DIR_t * &amp;FINDDATA_t * &amp;<span class="library" title="binding of C int type">int</span> = <span class="fstring">"*$3=::_findnext($1, $2);"</span> ;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> findclose : DIR_t = <span class="fstring">"::_findclose($1);"</span> ;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> findfailed : DIR_t -&gt; bool = <span class="fstring">"int($1) == -1"</span> ;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filename : FINDDATA_t -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::std::string($1.name)"</span> ;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> getcwd: +<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C size_t type">size</span> -&gt; +<span class="library" title="binding of C char type">char</span> = <span class="fstring">"::_getcwd($1,(int)$2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::direct_h;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="comment">// Generic stuff.</span>
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Directory_class[Win32, Win32FileStat::mode_t];
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="comment">// Instantiate generics.</span>
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Directory_class[Win32, Win32FileStat::mode_t] 
+<span class="lineno" id=line25></span>    {
+<span class="lineno" id=line26></span>      <span class="comment">//Make a directory.</span>
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>      <span class="comment">// warning: ignores the mode!</span>
+<span class="lineno" id=line29></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mkdir: <span class="library" title="binding of C++ string type">string</span> * Win32FileStat::mode_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::_mkdir($1.c_str())"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::direct_h;
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mkdir: <span class="library" title="binding of C++ string type">string</span>  -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::_mkdir($1.c_str())"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::direct_h;
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> mkdirs (s:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line32></span>      {
+<span class="lineno" id=line33></span>        <span class="small_keyword" title="conditional">if</span> s == <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> s == <span class="fstring">"."</span> <span class="small_keyword" title="logical disjunction">or</span> s == <span class="fstring">".."</span> <span class="small_keyword" title="logical disjunction">or</span> s.[-1] == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line34></span>           <span class="small_keyword" title="return">return</span>;
+<span class="lineno" id=line35></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line36></span>        mkdirs$ Win32Filename::dirname s;
+<span class="lineno" id=line37></span>        <span class="hack">C_hack</span>::ignore$ mkdir s;
+<span class="lineno" id=line38></span>      }
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> unlink_empty_dir: string-&gt;<span class="library" title="binding of C int type">int</span>=  <span class="fstring">"(int)RemoveDirectory($1.c_str())"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::windows_h;
+<span class="lineno" id=line41></span>   
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>      <span class="comment">//Get the current working directory.</span>
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> getcwd():<span class="library" title="binding of C++ string type">string</span> = 
+<span class="lineno" id=line46></span>      {
+<span class="lineno" id=line47></span>        <span class="big_keyword" title="Define a mutable variable">var</span> b: <span class="library" title="array type, a tuple of all components the same type">array</span>[<span class="library" title="binding of C char type">char</span>,1024]; 
+<span class="lineno" id=line48></span>        <span class="big_keyword" title="Define a mutable variable">var</span> p = getcwd((&amp;b).stl_begin,<span class="library" title="binding of C size_t type">size</span> 1024);
+<span class="lineno" id=line49></span>        <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="conditional">if</span> <span class="hack">C_hack</span>::isNULL p <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> <span class="library" title="binding of C++ string type">string</span> p <span class="small_keyword" title="conditional">endif</span>; 
+<span class="lineno" id=line50></span>      }
+<span class="lineno" id=line51></span>  
+<span class="lineno" id=line52></span>      <span class="comment">//Is the given path absolute?</span>
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>      <span class="comment">// this is wrong, because D:filename will have the</span>
+<span class="lineno" id=line55></span>      <span class="comment">// current directory prepended instead of the </span>
+<span class="lineno" id=line56></span>      <span class="comment">// current directory for drive D, so it could end up</span>
+<span class="lineno" id=line57></span>      <span class="comment">// referring to drive C instead .. </span>
+<span class="lineno" id=line58></span>      <span class="comment">// also none of this works with network names</span>
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> mk_absolute_filename(s:<span class="library" title="binding of C++ string type">string</span>) =&gt; 
+<span class="lineno" id=line60></span>         <span class="small_keyword" title="conditional">if</span> Win32Filename::is_absolute_filename s <span class="small_keyword" title="conditional">then</span> s <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line61></span>         #getcwd + <span class="fstring">"\\"</span> + s
+<span class="lineno" id=line62></span>      ;
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>      <span class="comment">//List the files in a directory.</span>
+<span class="lineno" id=line65></span>    
+<span class="lineno" id=line66></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> filesin(dname:<span class="library" title="binding of C++ string type">string</span>): <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]] = 
+<span class="lineno" id=line67></span>      {
+<span class="lineno" id=line68></span>        <span class="comment">//eprintln$ "hi in filesin dname=\""+dname+"\"" ;</span>
+<span class="lineno" id=line69></span>  
+<span class="lineno" id=line70></span>        <span class="big_keyword" title="Define a mutable variable">var</span> d : DIR_t ;
+<span class="lineno" id=line71></span>        <span class="big_keyword" title="Define a mutable variable">var</span> fileinfo : FINDDATA_t ;
+<span class="lineno" id=line72></span>        <span class="big_keyword" title="Define a mutable variable">var</span> files = Empty[<span class="library" title="binding of C++ string type">string</span>]; 
+<span class="lineno" id=line73></span>      
+<span class="lineno" id=line74></span>        <span class="comment">//eprintln$ "calling findfirst with expression = " + dname+"*";</span>
+<span class="lineno" id=line75></span>        findfirst (dname+<span class="fstring">"\\*"</span>, &amp;fileinfo, &amp;d) ;
+<span class="lineno" id=line76></span>        <span class="comment">//eprintln$ "returned from findfirst" ;</span>
+<span class="lineno" id=line77></span>  
+<span class="lineno" id=line78></span>        <span class="small_keyword" title="conditional">if</span> findfailed d  <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line79></span>          <span class="small_keyword" title="conditional">if</span> errno == ENOENT <span class="small_keyword" title="logical disjunction">or</span> errno == EINVAL <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line80></span>            <span class="comment">//eprintln$ "findfirst() failed with ENOENT or EINVAL" ;</span>
+<span class="lineno" id=line81></span>            <span class="small_keyword" title="return">return</span> None[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]] ;
+<span class="lineno" id=line82></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line83></span>          eprintln$ <span class="fstring">"findfirst() failed unexpectedly"</span> ;
+<span class="lineno" id=line84></span>          <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span> ;
+<span class="lineno" id=line85></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line86></span>      
+<span class="lineno" id=line87></span>        <span class="big_keyword" title="Define a mutable variable">var</span> stat : <span class="library" title="binding of C int type">int</span> ;
+<span class="lineno" id=line88></span>      
+<span class="lineno" id=line89></span>      harvestnext:&gt;
+<span class="lineno" id=line90></span>      
+<span class="lineno" id=line91></span>        <span class="big_keyword" title="Define a mutable variable">var</span> f : <span class="library" title="binding of C++ string type">string</span>  = filename fileinfo ;
+<span class="lineno" id=line92></span>        <span class="small_keyword" title="conditional">if</span> f != <span class="fstring">".."</span> <span class="small_keyword" title="logical conjunction">and</span> f != <span class="fstring">"."</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line93></span>          <span class="comment">//println$ "Adding file" + (filename fileinfo) ;</span>
+<span class="lineno" id=line94></span>          files += filename fileinfo ;
+<span class="lineno" id=line95></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>        findnext(d, &amp;fileinfo, &amp;stat) ;
+<span class="lineno" id=line98></span>        <span class="small_keyword" title="conditional">if</span> stat == 0 <span class="small_keyword" title="jump to label">goto</span> harvestnext ;
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>        <span class="small_keyword" title="conditional">if</span> stat == -1 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line101></span>          <span class="small_keyword" title="conditional">if</span> errno == ENOENT <span class="small_keyword" title="jump to label">goto</span> harvestexit ;
+<span class="lineno" id=line102></span>          <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span> ;
+<span class="lineno" id=line103></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line104></span>          <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Error reading dir"</span>; fflush;
+<span class="lineno" id=line105></span>          findclose d ;
+<span class="lineno" id=line106></span>          <span class="small_keyword" title="return">return</span> None[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]] ;
+<span class="lineno" id=line107></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line108></span>      
+<span class="lineno" id=line109></span>      harvestexit:&gt;
+<span class="lineno" id=line110></span>      
+<span class="lineno" id=line111></span>        <span class="comment">//eprintln$ "Leaving normally with some files" ;</span>
+<span class="lineno" id=line112></span>  
+<span class="lineno" id=line113></span>        findclose d ;
+<span class="lineno" id=line114></span>        <span class="small_keyword" title="return">return</span> Some files ;
+<span class="lineno" id=line115></span>      }
+<span class="lineno" id=line116></span>    }
+<span class="lineno" id=line117></span>  }
+<span class="lineno" id=line118></span>  
+<span class="lineno" id=line119></span>  
+<span class="lineno" id=line120></span>  
+<span class="lineno" id=line121></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

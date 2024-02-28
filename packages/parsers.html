@@ -1,0 +1,1041 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>/Users/skaller/felix/src/packages/parsers.fdoc</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Parsing"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Parsing_h')"> <a href="#Parsing_h">Parsing</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Parsing_h'><img src='/share/src/web/images/minus.gif' id='Parsing' onclick='toggle(this,"Parsing_d")' alt='+'/> 1 Parsing</h1><div id='Parsing_d' style='display:block'>
+<p>Chips to providing parsing functions.
+</p><pre class='inclusion'>
+share/lib/std/strings/parsers.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/chips"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/strings/recognisers"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/strings/parser_synlib"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a type class">class</span> Parsers 
+<span class="lineno" id=line6></span>  {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Open a module or class">open</span> Recognisers;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Open a module or class">open</span> Grammars[Recognisers::recog_t];
+<span class="lineno" id=line9></span>     
+<span class="lineno" id=line10></span>    variant action_t =  
+<span class="lineno" id=line11></span>    | Reduce of <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line12></span>    | Scroll of <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line13></span>    | Unscroll of <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line14></span>    | Pack of <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line15></span>    | Unpack
+<span class="lineno" id=line16></span>    | Drop of <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line17></span>    | Swap
+<span class="lineno" id=line18></span>    | Sequence of <span class="library" title="functional, singly linked list">list</span>[action_t]
+<span class="lineno" id=line19></span>    ;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[action_t] {
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: action_t -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line23></span>      | Reduce (s,n) =&gt; <span class="fstring">"Reduce("</span> + s + <span class="fstring">","</span>+n.<span class="library" title="Convert a value to a string">str</span>+<span class="fstring">")"</span>
+<span class="lineno" id=line24></span>      | Scroll n =&gt; <span class="fstring">"Scroll "</span> + n.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line25></span>      | Unscroll n =&gt; <span class="fstring">"Unscroll "</span> + n.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line26></span>      | Pack n =&gt; <span class="fstring">"Pack "</span> + n.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line27></span>      | Drop n =&gt; <span class="fstring">"Drop "</span> + n.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line28></span>      | Swap =&gt; <span class="fstring">"Swap"</span>
+<span class="lineno" id=line29></span>      | Sequence aa =&gt;
+<span class="lineno" id=line30></span>        <span class="fstring">"Seq("</span> + catmap <span class="fstring">","</span> (<span class="library" title="Convert a value to a string">str</span> of action_t) aa + <span class="fstring">")"</span>
+<span class="lineno" id=line31></span>      ;
+<span class="lineno" id=line32></span>    }
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_pgram_t[T] =
+<span class="lineno" id=line35></span>    ( 
+<span class="lineno" id=line36></span>      | `Action of action_t
+<span class="lineno" id=line37></span>      | open_prod_t[T]
+<span class="lineno" id=line38></span>    )
+<span class="lineno" id=line39></span>    ;
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Str[T]] Str[open_pgram_t[T]] 
+<span class="lineno" id=line42></span>    {
+<span class="lineno" id=line43></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: open_pgram_t[T] -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line44></span>      | `Action a =&gt; <span class="fstring">"{"</span> + a.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">"}"</span>
+<span class="lineno" id=line45></span>      | open_prod_t[T] :&gt;&gt; r =&gt; r.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line46></span>      ;
+<span class="lineno" id=line47></span>    }
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>      
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> pgram_t = open_pgram_t[pgram_t];
+<span class="lineno" id=line51></span>  
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_pgramentry_t[T] = <span class="library" title="binding of C++ string type">string</span> * open_pgram_t[T];
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_pgramlib_t[T] = <span class="library" title="functional, singly linked list">list</span>[open_pgramentry_t[T]];
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_pgrammar_t[T] = <span class="library" title="binding of C++ string type">string</span> * open_pgramlib_t[T];
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> pgramentry_t = open_pgramentry_t[pgram_t];
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> pgramlib_t = open_pgramlib_t[pgram_t];
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> pgrammar_t = open_pgrammar_t[pgram_t];
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> lexeme = (start:Buffer, finish:Buffer);
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>    variant stack_node_t = 
+<span class="lineno" id=line63></span>    | RTerminal of <span class="library" title="binding of C++ string type">string</span> * lexeme
+<span class="lineno" id=line64></span>    | RNonterminal of <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="functional, singly linked list">list</span>[stack_node_t]
+<span class="lineno" id=line65></span>    ;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[stack_node_t] {
+<span class="lineno" id=line68></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: stack_node_t -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line69></span>      | RTerminal (s,x) =&gt; s+<span class="fstring">"("</span>+<span class="library" title="binding of C++ string type">string</span> (x.start,x.finish)+<span class="fstring">")"</span>
+<span class="lineno" id=line70></span>      | RNonterminal (s,xs) =&gt; 
+<span class="lineno" id=line71></span>        s + <span class="fstring">"("</span> + catmap <span class="fstring">","</span> (<span class="library" title="Convert a value to a string">str</span> of stack_node_t) xs + <span class="fstring">")"</span>
+<span class="lineno" id=line72></span>      ;
+<span class="lineno" id=line73></span>    }
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> parser_stack_t = <span class="library" title="functional, singly linked list">list</span>[stack_node_t];
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[parser_stack_t] {
+<span class="lineno" id=line78></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x:parser_stack_t) =&gt; 
+<span class="lineno" id=line79></span>        catmap <span class="fstring">"; "</span> (<span class="library" title="Convert a value to a string">str</span> of stack_node_t) x
+<span class="lineno" id=line80></span>      ;
+<span class="lineno" id=line81></span>    }
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> parser_state_t =
+<span class="lineno" id=line84></span>    (
+<span class="lineno" id=line85></span>      pos: Buffer,
+<span class="lineno" id=line86></span>      stack: parser_stack_t
+<span class="lineno" id=line87></span>    );
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[parser_state_t] {
+<span class="lineno" id=line90></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x:parser_state_t) =&gt;
+<span class="lineno" id=line91></span>        x.pos.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">":  "</span> + x.stack.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line92></span>      ;
+<span class="lineno" id=line93></span>    }
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[pgramlib_t] {
+<span class="lineno" id=line96></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (lib: pgramlib_t) : <span class="library" title="binding of C++ string type">string</span> = 
+<span class="lineno" id=line97></span>      {
+<span class="lineno" id=line98></span>        <span class="big_keyword" title="Define a mutable variable">var</span> s = <span class="fstring">""</span>;
+<span class="lineno" id=line99></span>        <span class="small_keyword" title="match statement or expression">match</span> nt,ex <span class="small_keyword" title="membership operator, function mem">in</span> lib <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line100></span>          s += nt + <span class="fstring">":\n"</span>;
+<span class="lineno" id=line101></span>          s += <span class="fstring">"  "</span> + ex.<span class="library" title="Convert a value to a string">str</span>+<span class="fstring">"\n"</span>;
+<span class="lineno" id=line102></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line103></span>        <span class="small_keyword" title="return">return</span> s;
+<span class="lineno" id=line104></span>      }
+<span class="lineno" id=line105></span>    }
+<span class="lineno" id=line106></span>  
+<span class="lineno" id=line107></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> parser_t = BaseChips::iochip_t[parser_state_t,parser_state_t];
+<span class="lineno" id=line108></span>  
+<span class="lineno" id=line109></span>    <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> ActionShift (label:<span class="library" title="binding of C++ string type">string</span>) (r: recog_t)
+<span class="lineno" id=line110></span>      <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line111></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;parser_state_t
+<span class="lineno" id=line112></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;parser_state_t
+<span class="lineno" id=line113></span>     {
+<span class="lineno" id=line114></span>       <span class="comment">// We need to use a secondary chip so that if the recogniser</span>
+<span class="lineno" id=line115></span>       <span class="comment">// writes no output, this chip will block on it and die</span>
+<span class="lineno" id=line116></span>       <span class="comment">// without killing off the ActionShift chip.</span>
+<span class="lineno" id=line117></span>       <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> handler 
+<span class="lineno" id=line118></span>         <span class="small_keyword" title="the parameter of a chip">connector</span> inner
+<span class="lineno" id=line119></span>           <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;parser_state_t
+<span class="lineno" id=line120></span>       {
+<span class="lineno" id=line121></span>         <span class="big_keyword" title="Define a mutable variable">var</span> inp = read inner.inp;
+<span class="lineno" id=line122></span>  
+<span class="lineno" id=line123></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ri,wi = #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line124></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ro,wo = #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line125></span>         <span class="small_keyword" title="defines the topology of chip connections">circuit</span> 
+<span class="lineno" id=line126></span>           wire ri <span class="small_keyword" title="substring range separator">to</span> r.inp
+<span class="lineno" id=line127></span>           wire wo <span class="small_keyword" title="substring range separator">to</span> r.out
+<span class="lineno" id=line128></span>         <span class="small_keyword" title="defines the topology of chip connections">endcircuit</span>
+<span class="lineno" id=line129></span>  
+<span class="lineno" id=line130></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ipos = inp.pos;
+<span class="lineno" id=line131></span>         <span class="library" title="Print a string to a stream">write</span> (wi, ipos);
+<span class="lineno" id=line132></span>         <span class="big_keyword" title="Define a mutable variable">var</span> opos = read ro;
+<span class="lineno" id=line133></span>         <span class="big_keyword" title="Define a mutable variable">var</span> entry = RTerminal (label, (start = ipos, finish = opos));
+<span class="lineno" id=line134></span>         <span class="comment">//println$ "ActionShift " + label + " write " + io.out.address.str;</span>
+<span class="lineno" id=line135></span>         <span class="library" title="Print a string to a stream">write</span> (io.out, (pos = opos, stack = entry ! inp.stack));
+<span class="lineno" id=line136></span>       }
+<span class="lineno" id=line137></span>  
+<span class="lineno" id=line138></span>       <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line139></span>         <span class="big_keyword" title="Define a mutable variable">var</span> inp = read io.inp;
+<span class="lineno" id=line140></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ri,wi = #mk_ioschannel_pair[parser_state_t];
+<span class="lineno" id=line141></span>        <span class="small_keyword" title="defines the topology of chip connections">circuit</span>
+<span class="lineno" id=line142></span>           wire wi <span class="small_keyword" title="substring range separator">to</span> handler.inp
+<span class="lineno" id=line143></span>         <span class="small_keyword" title="defines the topology of chip connections">endcircuit</span>
+<span class="lineno" id=line144></span>         <span class="library" title="Print a string to a stream">write</span> (wi, inp);
+<span class="lineno" id=line145></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line146></span>     }
+<span class="lineno" id=line147></span>  
+<span class="lineno" id=line148></span>    <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> ActionSecond (label:<span class="library" title="binding of C++ string type">string</span>) (r1: recog_t) (r2: recog_t)
+<span class="lineno" id=line149></span>      <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line150></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;parser_state_t
+<span class="lineno" id=line151></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;parser_state_t
+<span class="lineno" id=line152></span>     {
+<span class="lineno" id=line153></span>  
+<span class="lineno" id=line154></span>       <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> handler 
+<span class="lineno" id=line155></span>         <span class="small_keyword" title="the parameter of a chip">connector</span> inner
+<span class="lineno" id=line156></span>           <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;parser_state_t
+<span class="lineno" id=line157></span>       {
+<span class="lineno" id=line158></span>         <span class="big_keyword" title="Define a mutable variable">var</span> inp = read inner.inp;
+<span class="lineno" id=line159></span>  
+<span class="lineno" id=line160></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ri1,wi1 = #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line161></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ro1,wo1 = #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line162></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ri2,wi2 = #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line163></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ro2,wo2 = #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line164></span>         <span class="small_keyword" title="defines the topology of chip connections">circuit</span> 
+<span class="lineno" id=line165></span>           wire ri1 <span class="small_keyword" title="substring range separator">to</span> r1.inp
+<span class="lineno" id=line166></span>           wire wo1 <span class="small_keyword" title="substring range separator">to</span> r1.out
+<span class="lineno" id=line167></span>           wire ri2 <span class="small_keyword" title="substring range separator">to</span> r2.inp
+<span class="lineno" id=line168></span>           wire wo2 <span class="small_keyword" title="substring range separator">to</span> r2.out
+<span class="lineno" id=line169></span>         <span class="small_keyword" title="defines the topology of chip connections">endcircuit</span>
+<span class="lineno" id=line170></span>  
+<span class="lineno" id=line171></span>         <span class="comment">// whitespace</span>
+<span class="lineno" id=line172></span>         <span class="big_keyword" title="Define a mutable variable">var</span> pos1 = inp.pos;
+<span class="lineno" id=line173></span>         <span class="library" title="Print a string to a stream">write</span> (wi1, pos1);
+<span class="lineno" id=line174></span>         <span class="big_keyword" title="Define a mutable variable">var</span> pos2 = read ro1;
+<span class="lineno" id=line175></span>  
+<span class="lineno" id=line176></span>         <span class="comment">// terminal</span>
+<span class="lineno" id=line177></span>         <span class="library" title="Print a string to a stream">write</span> (wi2, pos2);
+<span class="lineno" id=line178></span>         <span class="big_keyword" title="Define a mutable variable">var</span> pos3 = read ro2;
+<span class="lineno" id=line179></span>  
+<span class="lineno" id=line180></span>         <span class="big_keyword" title="Define a mutable variable">var</span> entry = RTerminal (label, (start = pos2, finish = pos3));
+<span class="lineno" id=line181></span>         <span class="comment">//println$ "ActionSecond " + label + " write " + io.out.address.str;</span>
+<span class="lineno" id=line182></span>         <span class="library" title="Print a string to a stream">write</span> (io.out, (pos = pos3, stack = entry ! inp.stack));
+<span class="lineno" id=line183></span>       }
+<span class="lineno" id=line184></span>  
+<span class="lineno" id=line185></span>       <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line186></span>         <span class="big_keyword" title="Define a mutable variable">var</span> inp = read io.inp;
+<span class="lineno" id=line187></span>         <span class="big_keyword" title="Define a mutable variable">var</span> ri,wi = #mk_ioschannel_pair[parser_state_t];
+<span class="lineno" id=line188></span>         <span class="small_keyword" title="defines the topology of chip connections">circuit</span>
+<span class="lineno" id=line189></span>           wire wi <span class="small_keyword" title="substring range separator">to</span> handler.inp
+<span class="lineno" id=line190></span>         <span class="small_keyword" title="defines the topology of chip connections">endcircuit</span>
+<span class="lineno" id=line191></span>         <span class="library" title="Print a string to a stream">write</span> (wi, inp);
+<span class="lineno" id=line192></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line193></span>     }
+<span class="lineno" id=line194></span>  
+<span class="lineno" id=line195></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> doaction (aux: parser_stack_t,s:parser_stack_t) (a:action_t) =&gt;
+<span class="lineno" id=line196></span>      <span class="small_keyword" title="match statement or expression">match</span> a <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line197></span>      | Reduce (label,n) =&gt; 
+<span class="lineno" id=line198></span>        <span class="small_keyword" title="let binder">let</span> revhead,tail = revsplit n s <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line199></span>        aux,RNonterminal (label,revhead) ! tail
+<span class="lineno" id=line200></span>  
+<span class="lineno" id=line201></span>      | Drop n =&gt; aux,drop n s
+<span class="lineno" id=line202></span>  
+<span class="lineno" id=line203></span>      | Swap =&gt; aux,
+<span class="lineno" id=line204></span>        <span class="small_keyword" title="match statement or expression">match</span> s <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line205></span>        | e1 ! e2 ! tail =&gt; e2 ! e1 ! tail 
+<span class="lineno" id=line206></span>        | _ =&gt; s
+<span class="lineno" id=line207></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line208></span>  
+<span class="lineno" id=line209></span>      | Scroll n =&gt; <span class="small_keyword" title="let binder">let</span> s,a = scroll (s,aux) n <span class="small_keyword" title="membership operator, function mem">in</span> a,s
+<span class="lineno" id=line210></span>      | Unscroll n =&gt; scroll (aux,s) n
+<span class="lineno" id=line211></span>  
+<span class="lineno" id=line212></span>      | Pack n =&gt; 
+<span class="lineno" id=line213></span>        <span class="small_keyword" title="let binder">let</span> revhead,tail = revsplit n s <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line214></span>        aux,RNonterminal (<span class="fstring">"_Tuple"</span>,revhead) ! tail
+<span class="lineno" id=line215></span>  
+<span class="lineno" id=line216></span>      | Unpack =&gt; 
+<span class="lineno" id=line217></span>        <span class="small_keyword" title="match statement or expression">match</span> s <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line218></span>        | RNonterminal (_,ss) ! tail =&gt; aux, ss + tail
+<span class="lineno" id=line219></span>        | _ =&gt; aux,s
+<span class="lineno" id=line220></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line221></span>   
+<span class="lineno" id=line222></span>      | Sequence actions =&gt;
+<span class="lineno" id=line223></span>        <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (aux:parser_stack_t,s:parser_stack_t) (a:action_t) =&gt; 
+<span class="lineno" id=line224></span>          doaction (aux,s) a) 
+<span class="lineno" id=line225></span>          (aux,s) 
+<span class="lineno" id=line226></span>          actions
+<span class="lineno" id=line227></span>  
+<span class="lineno" id=line228></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line229></span>    ;
+<span class="lineno" id=line230></span>  
+<span class="lineno" id=line231></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> doaction (s:parser_stack_t) (a:action_t) =&gt;
+<span class="lineno" id=line232></span>      <span class="small_keyword" title="let binder">let</span> _,s = doaction (Empty[stack_node_t], s) a <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line233></span>      s
+<span class="lineno" id=line234></span>    ;
+<span class="lineno" id=line235></span>  
+<span class="lineno" id=line236></span>    <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> ActionGeneral (a:action_t)
+<span class="lineno" id=line237></span>      <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line238></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;parser_state_t
+<span class="lineno" id=line239></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;parser_state_t
+<span class="lineno" id=line240></span>    {
+<span class="lineno" id=line241></span>      <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line242></span>        <span class="big_keyword" title="Define a mutable variable">var</span> i = read io.inp;
+<span class="lineno" id=line243></span>        <span class="big_keyword" title="Define a mutable variable">var</span> pos = i.pos;
+<span class="lineno" id=line244></span>        <span class="big_keyword" title="Define a mutable variable">var</span> stack = doaction i.stack a;
+<span class="lineno" id=line245></span>        <span class="comment">//println$ "ActionGeneral ["+a.str+"] write " + io.out.address.str;</span>
+<span class="lineno" id=line246></span>        <span class="library" title="Print a string to a stream">write</span> (io.out, (pos=pos, stack=stack)); 
+<span class="lineno" id=line247></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line248></span>    }
+<span class="lineno" id=line249></span>  
+<span class="lineno" id=line250></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> pntdef_t = <span class="library" title="binding of C++ string type">string</span> * parser_t;
+<span class="lineno" id=line251></span>  
+<span class="lineno" id=line252></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find (v:<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[pntdef_t]) (nt:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C size_t type">size</span> = 
+<span class="lineno" id=line253></span>    {
+<span class="lineno" id=line254></span>      <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0uz ..&lt; v.<span class="library" title="number of elements in data structure">len</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line255></span>        <span class="small_keyword" title="conditional">if</span> v.i.0 == nt <span class="small_keyword" title="return">return</span> i;
+<span class="lineno" id=line256></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line257></span>      <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line258></span>    }
+<span class="lineno" id=line259></span>  
+<span class="lineno" id=line260></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> render_pgram
+<span class="lineno" id=line261></span>      (lib:pgramlib_t,v:<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[pntdef_t])
+<span class="lineno" id=line262></span>      (white:recog_t)
+<span class="lineno" id=line263></span>      (p:pgram_t) 
+<span class="lineno" id=line264></span>    : parser_t =&gt;
+<span class="lineno" id=line265></span>      <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line266></span>      | `Terminal (s,r) =&gt; ActionSecond s white r 
+<span class="lineno" id=line267></span>      | `Epsilon =&gt; BaseChips::epsilon[parser_state_t] 
+<span class="lineno" id=line268></span>      | `Seq ps =&gt; BaseChips::pipeline_list (
+<span class="lineno" id=line269></span>            unbox (<span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (p:pgram_t) =&gt; render_pgram (lib,v) white p) ps))
+<span class="lineno" id=line270></span>      | `Alt ps =&gt;  BaseChips::tryall_list (
+<span class="lineno" id=line271></span>            unbox (<span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (p:pgram_t) =&gt; render_pgram (lib,v) white p) ps))
+<span class="lineno" id=line272></span>      | `Nonterminal nt =&gt; 
+<span class="lineno" id=line273></span>           <span class="small_keyword" title="let binder">let</span> idx : <span class="library" title="binding of C size_t type">size</span> = find v nt <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line274></span>           <span class="small_keyword" title="let binder">let</span> pslot : &amp;pntdef_t = -(v.stl_begin + idx) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line275></span>           <span class="small_keyword" title="let binder">let</span> pchip : &amp;parser_t = pslot . 1 <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line276></span>           BaseChips::deref_each_read pchip
+<span class="lineno" id=line277></span>      | `Action a =&gt; ActionGeneral a
+<span class="lineno" id=line278></span>    ;
+<span class="lineno" id=line279></span>  
+<span class="lineno" id=line280></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> open_add_pgram[T] 
+<span class="lineno" id=line281></span>      (aux: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] -&gt; T -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line282></span>      (acc:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (p: open_pgram_t[T]) 
+<span class="lineno" id=line283></span>    : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line284></span>      <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line285></span>      | `Action a =&gt; acc
+<span class="lineno" id=line286></span>      | open_prod_t[T] :&gt;&gt; r =&gt; open_add_prod[T] aux acc r
+<span class="lineno" id=line287></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line288></span>    ;
+<span class="lineno" id=line289></span>  
+<span class="lineno" id=line290></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> add_pgram (acc:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (p:pgram_t) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line291></span>      fix open_add_pgram[pgram_t] acc p
+<span class="lineno" id=line292></span>    ;
+<span class="lineno" id=line293></span>  
+<span class="lineno" id=line294></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> closure (g:pgrammar_t): <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line295></span>      generic_closure[pgram_t] add_pgram g
+<span class="lineno" id=line296></span>    ;
+<span class="lineno" id=line297></span>  
+<span class="lineno" id=line298></span>    <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> make_parser_from_grammar (white:recog_t)
+<span class="lineno" id=line299></span>      <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line300></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;pgrammar_t
+<span class="lineno" id=line301></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;parser_t
+<span class="lineno" id=line302></span>    {
+<span class="lineno" id=line303></span>  
+<span class="lineno" id=line304></span>      <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line305></span>        <span class="comment">// read in the grammar</span>
+<span class="lineno" id=line306></span>        <span class="big_keyword" title="Define a mutable variable">var</span> start, lib = read io.inp;
+<span class="lineno" id=line307></span>  
+<span class="lineno" id=line308></span>        <span class="comment">// calculate the transitive closure of nonterminals</span>
+<span class="lineno" id=line309></span>        <span class="comment">// from the start symbol</span>
+<span class="lineno" id=line310></span>        <span class="big_keyword" title="Define a mutable variable">var</span> cl = closure (start,lib);
+<span class="lineno" id=line311></span>  
+<span class="lineno" id=line312></span>        <span class="comment">// allocate a varray with a slot for each nonterminal</span>
+<span class="lineno" id=line313></span>        <span class="big_keyword" title="Define a mutable variable">var</span> n = cl.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line314></span>        <span class="big_keyword" title="Define a mutable variable">var</span> v = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span> * parser_t] n;
+<span class="lineno" id=line315></span>  
+<span class="lineno" id=line316></span>        <span class="comment">// populate the varray with the terminal names and a dummy chip</span>
+<span class="lineno" id=line317></span>        <span class="small_keyword" title="for loop">for</span> nt <span class="small_keyword" title="membership operator, function mem">in</span> cl <span class="small_keyword" title="call a procedure">call</span> <span class="comment">// initialise array</span>
+<span class="lineno" id=line318></span>          push_back (v,(nt,BaseChips::epsilon[parser_state_t]))
+<span class="lineno" id=line319></span>        ;
+<span class="lineno" id=line320></span>  
+<span class="lineno" id=line321></span>        <span class="comment">// now assign the real recognisers to the array</span>
+<span class="lineno" id=line322></span>        <span class="big_keyword" title="Define a mutable variable">var</span> index = 0uz;
+<span class="lineno" id=line323></span>        <span class="small_keyword" title="for loop">for</span> nt <span class="small_keyword" title="membership operator, function mem">in</span> cl <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line324></span>          <span class="small_keyword" title="match statement or expression">match</span> find lib nt <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line325></span>          | None =&gt; <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line326></span>          | Some prod =&gt;
+<span class="lineno" id=line327></span>            <span class="comment">// get wrapped parser </span>
+<span class="lineno" id=line328></span>            <span class="big_keyword" title="Define a mutable variable">var</span> entry = render_pgram (lib, v) white prod;
+<span class="lineno" id=line329></span>  
+<span class="lineno" id=line330></span>            <span class="comment">// address of the slot</span>
+<span class="lineno" id=line331></span>            <span class="big_keyword" title="Define a mutable variable">var</span> pentry : &amp;parser_t = (-(v.stl_begin+index)).1;
+<span class="lineno" id=line332></span>  
+<span class="lineno" id=line333></span>            <span class="comment">// overwrite dummy value</span>
+<span class="lineno" id=line334></span>            pentry &lt;- entry;
+<span class="lineno" id=line335></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line336></span>          ++index;
+<span class="lineno" id=line337></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line338></span>        <span class="library" title="Print a string to a stream">write</span> (io.out, (v.(find v start).1));
+<span class="lineno" id=line339></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line340></span>    }
+<span class="lineno" id=line341></span>  
+<span class="lineno" id=line342></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> make_parser_from_grammar (g:pgrammar_t) (white:recog_t) : parser_t =
+<span class="lineno" id=line343></span>    {
+<span class="lineno" id=line344></span>      <span class="big_keyword" title="Define a mutable variable">var</span> parsr: parser_t;
+<span class="lineno" id=line345></span>      <span class="big_keyword" title="Define a mutable variable">var</span> sched = #fibre_scheduler; 
+<span class="lineno" id=line346></span>      <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> sched {
+<span class="lineno" id=line347></span>        <span class="big_keyword" title="Define a mutable variable">var</span> gri,gwi = mk_ioschannel_pair[pgrammar_t]();
+<span class="lineno" id=line348></span>        <span class="big_keyword" title="Define a mutable variable">var</span> gro,gwo = mk_ioschannel_pair[parser_t]();
+<span class="lineno" id=line349></span>        <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> (make_parser_from_grammar white (inp=gri,out=gwo));
+<span class="lineno" id=line350></span>        <span class="library" title="Print a string to a stream">write</span> (gwi, g);
+<span class="lineno" id=line351></span>        parsr = read gro;
+<span class="lineno" id=line352></span>      };
+<span class="lineno" id=line353></span>      sched.run;
+<span class="lineno" id=line354></span>      <span class="hack">C_hack</span>::ignore(&amp;parsr); <span class="comment">// fool init before use</span>
+<span class="lineno" id=line355></span>      <span class="small_keyword" title="return">return</span> parsr;
+<span class="lineno" id=line356></span>    }
+<span class="lineno" id=line357></span>  
+<span class="lineno" id=line358></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> run_parser_on_string (parsr:parser_t) (s:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[parser_state_t] =
+<span class="lineno" id=line359></span>    {
+<span class="lineno" id=line360></span>      <span class="big_keyword" title="Define a mutable variable">var</span> results = Empty[parser_state_t]; 
+<span class="lineno" id=line361></span>      <span class="big_keyword" title="Define a mutable variable">var</span> b = Buffer s;
+<span class="lineno" id=line362></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ps : parser_state_t = (pos=b, stack=Empty[stack_node_t]);
+<span class="lineno" id=line363></span>      <span class="big_keyword" title="Define a mutable variable">var</span> sched = #fibre_scheduler; 
+<span class="lineno" id=line364></span>      <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> sched { 
+<span class="lineno" id=line365></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ri,wi = mk_ioschannel_pair[parser_state_t]();
+<span class="lineno" id=line366></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ro,wo = mk_ioschannel_pair[parser_state_t]();
+<span class="lineno" id=line367></span>        <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> (parsr (inp=ri, out=wo));
+<span class="lineno" id=line368></span>        <span class="library" title="Print a string to a stream">write</span> (wi,ps);
+<span class="lineno" id=line369></span>        <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line370></span>          <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = read ro;
+<span class="lineno" id=line371></span>          results = <span class="small_keyword" title="value of function return used in post condition">result</span> ! results;
+<span class="lineno" id=line372></span>          <span class="comment">//println$ "Test1: End pos (should be 14)=" + result.str;</span>
+<span class="lineno" id=line373></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line374></span>      };
+<span class="lineno" id=line375></span>      sched.run;
+<span class="lineno" id=line376></span>      <span class="small_keyword" title="return">return</span> results;
+<span class="lineno" id=line377></span>    }
+<span class="lineno" id=line378></span>  
+<span class="lineno" id=line379></span>    <span class="comment">// replace internal sub-expressions with fresh nonterminals</span>
+<span class="lineno" id=line380></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> unpack (fresh:1-&gt;<span class="library" title="binding of C++ string type">string</span>) (head:<span class="library" title="binding of C++ string type">string</span>, p:pgram_t) : pgramlib_t =
+<span class="lineno" id=line381></span>    {
+<span class="lineno" id=line382></span>     <span class="big_keyword" title="Define a mutable variable">var</span> out = Empty[pgramentry_t];
+<span class="lineno" id=line383></span>     <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line384></span>     | `Action a =&gt; out = ([head,p]); 
+<span class="lineno" id=line385></span>     | `Epsilon =&gt; out = ([head,p]);
+<span class="lineno" id=line386></span>     | `Terminal _ =&gt; out = ([head,(`Seq ([p]):&gt;&gt;pgram_t)]);
+<span class="lineno" id=line387></span>     | `Nonterminal s =&gt; out= ([head,(`Seq ([p]):&gt;&gt;pgram_t)]);
+<span class="lineno" id=line388></span>  
+<span class="lineno" id=line389></span>     | `Seq ps =&gt;
+<span class="lineno" id=line390></span>       <span class="big_keyword" title="Define a mutable variable">var</span> newseq = Empty[pgram_t];
+<span class="lineno" id=line391></span>       <span class="small_keyword" title="for loop">for</span> term <span class="small_keyword" title="membership operator, function mem">in</span> ps <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line392></span>         <span class="small_keyword" title="match statement or expression">match</span> term <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line393></span>         | `Action _ =&gt; newseq = term ! newseq;
+<span class="lineno" id=line394></span>         | `Epsilon =&gt; ;
+<span class="lineno" id=line395></span>         | `Nonterminal _ =&gt; newseq = term ! newseq;
+<span class="lineno" id=line396></span>         | `Terminal _ =&gt; newseq = term ! newseq;
+<span class="lineno" id=line397></span>         | _ =&gt;
+<span class="lineno" id=line398></span>           <span class="big_keyword" title="Define a mutable variable">var</span> newhead = fresh();
+<span class="lineno" id=line399></span>           newseq = (`Nonterminal newhead :&gt;&gt;pgram_t) ! newseq;
+<span class="lineno" id=line400></span>           out = unpack fresh (newhead,term);
+<span class="lineno" id=line401></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line402></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line403></span>  
+<span class="lineno" id=line404></span>       <span class="small_keyword" title="match statement or expression">match</span> newseq <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line405></span>       | Empty =&gt; out = (head,(#`Epsilon:&gt;&gt; pgram_t)) ! out;
+<span class="lineno" id=line406></span>       | _ =&gt; out = (head,(`Seq(unbox (<span class="library" title="return data structure with elements reversed">rev</span> newseq)):&gt;&gt;pgram_t)) ! out;
+<span class="lineno" id=line407></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line408></span>  
+<span class="lineno" id=line409></span>     | `Alt ps =&gt;
+<span class="lineno" id=line410></span>       <span class="library" title="call procedure on each element of data structure">iter</span> (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (p:pgram_t) { out = unpack fresh (head,p) + out; }) ps;
+<span class="lineno" id=line411></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line412></span>     <span class="small_keyword" title="return">return</span> out;
+<span class="lineno" id=line413></span>    }
+<span class="lineno" id=line414></span>  
+<span class="lineno" id=line415></span>    <span class="comment">// expand internal sub-expressions, return a list of symbol sequences</span>
+<span class="lineno" id=line416></span>    <span class="comment">// the outer list are the alternatives and the inner ones sequences</span>
+<span class="lineno" id=line417></span>    <span class="comment">// IN REVERSE ORDER! </span>
+<span class="lineno" id=line418></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> expand_aux (p:pgram_t) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="functional, singly linked list">list</span>[pgram_t]] =
+<span class="lineno" id=line419></span>    {
+<span class="lineno" id=line420></span>     <span class="big_keyword" title="Define a mutable variable">var</span> out = ([Empty[pgram_t]]);
+<span class="lineno" id=line421></span>     <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line422></span>     <span class="comment">// add symbol to each alternative</span>
+<span class="lineno" id=line423></span>     | `Epsilon =&gt; ;
+<span class="lineno" id=line424></span>     | `Action a  
+<span class="lineno" id=line425></span>     | `Terminal _
+<span class="lineno" id=line426></span>     | `Nonterminal s =&gt; 
+<span class="lineno" id=line427></span>       out = unbox (<span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (ss: <span class="library" title="functional, singly linked list">list</span>[pgram_t]) =&gt; Cons (p,ss)) out); 
+<span class="lineno" id=line428></span>  
+<span class="lineno" id=line429></span>     <span class="comment">// A sequence is unpacked by successively unpacking each</span>
+<span class="lineno" id=line430></span>     <span class="comment">// symbol. The result is then prepended to each alternative.</span>
+<span class="lineno" id=line431></span>     | `Seq ps =&gt;
+<span class="lineno" id=line432></span>       <span class="small_keyword" title="for loop">for</span> term <span class="small_keyword" title="membership operator, function mem">in</span> ps <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line433></span>         <span class="big_keyword" title="Define a mutable variable">var</span> tmp = expand_aux term;
+<span class="lineno" id=line434></span>         <span class="big_keyword" title="Define a mutable variable">var</span> out2 = Empty[<span class="library" title="functional, singly linked list">list</span>[pgram_t]];
+<span class="lineno" id=line435></span>         <span class="small_keyword" title="for loop">for</span> left <span class="small_keyword" title="membership operator, function mem">in</span> tmp perform 
+<span class="lineno" id=line436></span>           <span class="small_keyword" title="for loop">for</span> right <span class="small_keyword" title="membership operator, function mem">in</span> out perform
+<span class="lineno" id=line437></span>             out2 += left + right;
+<span class="lineno" id=line438></span>         out = out2;
+<span class="lineno" id=line439></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line440></span>   
+<span class="lineno" id=line441></span>     | `Alt ps =&gt;
+<span class="lineno" id=line442></span>       <span class="big_keyword" title="Define a mutable variable">var</span> alts = cat (unbox (<span class="library" title="return data structure with function applied to each value">map</span> expand_aux ps));
+<span class="lineno" id=line443></span>       out2 = Empty[<span class="library" title="functional, singly linked list">list</span>[pgram_t]];
+<span class="lineno" id=line444></span>       <span class="small_keyword" title="for loop">for</span> left <span class="small_keyword" title="membership operator, function mem">in</span> alts perform
+<span class="lineno" id=line445></span>         <span class="small_keyword" title="for loop">for</span> right <span class="small_keyword" title="membership operator, function mem">in</span> out perform
+<span class="lineno" id=line446></span>           out2 += left + right;
+<span class="lineno" id=line447></span>       out = out2;
+<span class="lineno" id=line448></span>  
+<span class="lineno" id=line449></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line450></span>     <span class="small_keyword" title="return">return</span> out;
+<span class="lineno" id=line451></span>    }
+<span class="lineno" id=line452></span>  
+<span class="lineno" id=line453></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> expand (p:pgram_t) : pgram_t =&gt;
+<span class="lineno" id=line454></span>      <span class="small_keyword" title="let binder">let</span> ps = expand_aux p <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line455></span>      (`Alt (unbox (<span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (seqs: <span class="library" title="functional, singly linked list">list</span>[pgram_t]) =&gt; `Seq(unbox (<span class="library" title="return data structure with elements reversed">rev</span> seqs)):&gt;&gt;pgram_t) ps))) :&gt;&gt; pgram_t
+<span class="lineno" id=line456></span>    ;
+<span class="lineno" id=line457></span>  
+<span class="lineno" id=line458></span>    <span class="comment">// in p replace nonterminal name with value (where q=name,value)</span>
+<span class="lineno" id=line459></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> substitute (q:pgramentry_t) (p:pgram_t)=&gt;
+<span class="lineno" id=line460></span>      <span class="small_keyword" title="let binder">let</span> name,value = q <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line461></span>      <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line462></span>      | `Nonterminal s <span class="small_keyword" title="predicative type constraint or precondition">when</span> name == s =&gt; value
+<span class="lineno" id=line463></span>      | `Seq ls =&gt; `Seq (unbox (<span class="library" title="return data structure with function applied to each value">map</span> (substitute q) ls)) :&gt;&gt; pgram_t
+<span class="lineno" id=line464></span>      | `Alt ls =&gt; `Alt (unbox (<span class="library" title="return data structure with function applied to each value">map</span> (substitute q) ls)) :&gt;&gt; pgram_t
+<span class="lineno" id=line465></span>      | _ =&gt; p
+<span class="lineno" id=line466></span>    ;
+<span class="lineno" id=line467></span>  
+<span class="lineno" id=line468></span>  <span class="comment">// direct left recursion eliminator</span>
+<span class="lineno" id=line469></span>  <span class="comment">// assumes A = A alpha | beta form</span>
+<span class="lineno" id=line470></span>  <span class="comment">// outputs</span>
+<span class="lineno" id=line471></span>  <span class="comment">// A = beta A'</span>
+<span class="lineno" id=line472></span>  <span class="comment">// A' = alpha A' | Eps</span>
+<span class="lineno" id=line473></span>  <span class="comment">//</span>
+<span class="lineno" id=line474></span>  <span class="comment">// BETTER</span>
+<span class="lineno" id=line475></span>  <span class="comment">//</span>
+<span class="lineno" id=line476></span>  <span class="comment">// A = beta | beta A'</span>
+<span class="lineno" id=line477></span>  <span class="comment">// A' = alpha A' | alpha</span>
+<span class="lineno" id=line478></span>  <span class="comment">//</span>
+<span class="lineno" id=line479></span>  <span class="comment">// since this is Epsilon free</span>
+<span class="lineno" id=line480></span>  
+<span class="lineno" id=line481></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> direct_left_recursion_elimination 
+<span class="lineno" id=line482></span>     (fresh:1-&gt;<span class="library" title="binding of C++ string type">string</span>) 
+<span class="lineno" id=line483></span>     (lib:pgramlib_t) 
+<span class="lineno" id=line484></span>    =
+<span class="lineno" id=line485></span>    {
+<span class="lineno" id=line486></span>     <span class="big_keyword" title="Define a mutable variable">var</span> outgram = Empty[pgramentry_t];
+<span class="lineno" id=line487></span>     <span class="small_keyword" title="for loop">for</span> ntdef <span class="small_keyword" title="membership operator, function mem">in</span> lib <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line488></span>       <span class="big_keyword" title="Define a mutable variable">var</span> nt,expr = ntdef;
+<span class="lineno" id=line489></span>       <span class="big_keyword" title="Define a mutable variable">var</span> alphas = Empty[<span class="library" title="functional, singly linked list">list</span>[pgram_t]];
+<span class="lineno" id=line490></span>       <span class="big_keyword" title="Define a mutable variable">var</span> betas = Empty[<span class="library" title="functional, singly linked list">list</span>[pgram_t]];
+<span class="lineno" id=line491></span>    <span class="comment">// where does Epsilon go??</span>
+<span class="lineno" id=line492></span>       <span class="small_keyword" title="match statement or expression">match</span> expr <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line493></span>       | `Alt alts =&gt;
+<span class="lineno" id=line494></span>         <span class="small_keyword" title="for loop">for</span> alt <span class="small_keyword" title="membership operator, function mem">in</span> alts <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line495></span>           <span class="small_keyword" title="match statement or expression">match</span> alt <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line496></span>           | (`Seq (Cons ((`Nonterminal $(nt)),tail))) =&gt; alphas = tail ! alphas;
+<span class="lineno" id=line497></span>           | (`Seq b) =&gt; betas = b ! betas;
+<span class="lineno" id=line498></span>           | x =&gt; betas = ([x]) ! betas;
+<span class="lineno" id=line499></span>  
+<span class="lineno" id=line500></span>           <span class="comment">//| x =&gt; println$ "EDLR, unexpected alternative " + x.str; assert false;</span>
+<span class="lineno" id=line501></span>           <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line502></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line503></span>       | x =&gt; betas = ([x]) ! betas;
+<span class="lineno" id=line504></span>  
+<span class="lineno" id=line505></span>       <span class="comment">//| x =&gt; println$ "EDLR, unexpected expr " + x.str; assert false;</span>
+<span class="lineno" id=line506></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line507></span>       <span class="small_keyword" title="conditional">if</span> alphas.<span class="library" title="number of elements in data structure">len</span> == 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line508></span>         outgram = (nt,expr) ! outgram;
+<span class="lineno" id=line509></span>       <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line510></span>         <span class="big_keyword" title="Define a mutable variable">var</span> newntname = fresh();
+<span class="lineno" id=line511></span>         <span class="big_keyword" title="Define a mutable variable">var</span> newnt = `Nonterminal newntname :&gt;&gt; pgram_t; 
+<span class="lineno" id=line512></span>         <span class="big_keyword" title="Define a mutable variable">var</span> alts = unbox (<span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (b:<span class="library" title="functional, singly linked list">list</span>[pgram_t]) =&gt; `Seq (b + newnt):&gt;&gt;pgram_t) betas);
+<span class="lineno" id=line513></span>         outgram =  (nt, (`Alt alts :&gt;&gt;pgram_t)) !  outgram ;
+<span class="lineno" id=line514></span>         alts = unbox (<span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (a:<span class="library" title="functional, singly linked list">list</span>[pgram_t]) =&gt; (`Seq (a + newnt):&gt;&gt;pgram_t)) alphas) + (#`Epsilon:&gt;&gt;pgram_t);
+<span class="lineno" id=line515></span>         outgram = (newntname, (`Alt alts:&gt;&gt;pgram_t)) ! outgram;
+<span class="lineno" id=line516></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line517></span>     <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line518></span>     <span class="small_keyword" title="return">return</span> outgram;
+<span class="lineno" id=line519></span>    }
+<span class="lineno" id=line520></span>  
+<span class="lineno" id=line521></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> fresh_sym () : <span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line522></span>      <span class="big_keyword" title="Define a mutable variable">var</span> n = 1;
+<span class="lineno" id=line523></span>    next:&gt;
+<span class="lineno" id=line524></span>      <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> <span class="fstring">"_"</span>+n.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line525></span>      ++n;
+<span class="lineno" id=line526></span>      <span class="small_keyword" title="jump to label">goto</span> next;
+<span class="lineno" id=line527></span>    }
+<span class="lineno" id=line528></span>    <span class="comment">// this needs to be global so the algo can be re-applied to the same</span>
+<span class="lineno" id=line529></span>    <span class="comment">// grammar library</span>
+<span class="lineno" id=line530></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fresh = fresh_sym;
+<span class="lineno" id=line531></span>  
+<span class="lineno" id=line532></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> direct_left_recursion_elimination (lib:pgramlib_t) = 
+<span class="lineno" id=line533></span>    {
+<span class="lineno" id=line534></span>      <span class="small_keyword" title="return">return</span> direct_left_recursion_elimination fresh lib;
+<span class="lineno" id=line535></span>    }
+<span class="lineno" id=line536></span>  
+<span class="lineno" id=line537></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> make_seq (a:pgram_t) (b:<span class="library" title="functional, singly linked list">list</span>[pgram_t]) =&gt;
+<span class="lineno" id=line538></span>      <span class="small_keyword" title="match statement or expression">match</span> a <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line539></span>      | (`Seq a) =&gt; `Seq (a + b) :&gt;&gt; pgram_t
+<span class="lineno" id=line540></span>      | _ =&gt; `Seq (a ! b) :&gt;&gt; pgram_t
+<span class="lineno" id=line541></span>    ; 
+<span class="lineno" id=line542></span>  
+<span class="lineno" id=line543></span>    <span class="comment">// requires one entry per non-terminal, sorted for performance</span>
+<span class="lineno" id=line544></span>    <span class="comment">// must be in form Alt (Seq (nt, ...)) or Seq (nt, ...) or sym</span>
+<span class="lineno" id=line545></span>    <span class="comment">// right is the original grammar which i scans thru</span>
+<span class="lineno" id=line546></span>    <span class="comment">// left is the modified grammar for j = 1 to n -1</span>
+<span class="lineno" id=line547></span>    <span class="comment">// each recursion advances i one step</span>
+<span class="lineno" id=line548></span>  
+<span class="lineno" id=line549></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> left_recursion_elimination_step 
+<span class="lineno" id=line550></span>      (fresh:1-&gt;<span class="library" title="binding of C++ string type">string</span>) 
+<span class="lineno" id=line551></span>      (<span class="big_keyword" title="Define a mutable variable">var</span> left:pgramlib_t)
+<span class="lineno" id=line552></span>      (<span class="big_keyword" title="Define a mutable variable">var</span> right:pgramlib_t)
+<span class="lineno" id=line553></span>    = 
+<span class="lineno" id=line554></span>    {
+<span class="lineno" id=line555></span>       <span class="small_keyword" title="match statement or expression">match</span> right <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line556></span>       | Empty =&gt; <span class="small_keyword" title="return">return</span> left;
+<span class="lineno" id=line557></span>       | (rnt,rdfn) ! tail =&gt; <span class="comment">// A_i</span>
+<span class="lineno" id=line558></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"left_recursion_elimination considering nonterminal A_i="</span> +rnt;
+<span class="lineno" id=line559></span>         <span class="big_keyword" title="Define a mutable variable">var</span> rprods = 
+<span class="lineno" id=line560></span>           <span class="small_keyword" title="match statement or expression">match</span> rdfn <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line561></span>           | `Alt alts =&gt; alts
+<span class="lineno" id=line562></span>           | _ =&gt; ([rdfn])
+<span class="lineno" id=line563></span>         ;
+<span class="lineno" id=line564></span>  
+<span class="lineno" id=line565></span>         <span class="big_keyword" title="Define a mutable variable">var</span> toremove = Empty[<span class="library" title="binding of C int type">int</span>];
+<span class="lineno" id=line566></span>         <span class="big_keyword" title="Define a mutable variable">var</span> toadd = Empty[pgram_t];
+<span class="lineno" id=line567></span>         <span class="small_keyword" title="match statement or expression">match</span> lnt,ldfn <span class="small_keyword" title="membership operator, function mem">in</span> left <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// A_j = 1 to i - 1</span>
+<span class="lineno" id=line568></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  left_recursion_elimination considering nonterminal A_j="</span> +lnt;
+<span class="lineno" id=line569></span>           <span class="big_keyword" title="Define a mutable variable">var</span> lprods = 
+<span class="lineno" id=line570></span>             <span class="small_keyword" title="match statement or expression">match</span> ldfn <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line571></span>             | `Alt alts =&gt; alts
+<span class="lineno" id=line572></span>             | _ =&gt; ([ldfn])
+<span class="lineno" id=line573></span>           ;
+<span class="lineno" id=line574></span>           <span class="big_keyword" title="Define a mutable variable">var</span> counter = -1;
+<span class="lineno" id=line575></span>           <span class="small_keyword" title="for loop">for</span> rprod <span class="small_keyword" title="membership operator, function mem">in</span> rprods <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// A_i = A_j alpha</span>
+<span class="lineno" id=line576></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"    checking if "</span> + rnt + <span class="fstring">" = "</span> + rprod.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" has left corner A_j="</span> + lnt;
+<span class="lineno" id=line577></span>             ++counter;
+<span class="lineno" id=line578></span>             <span class="small_keyword" title="match statement or expression">match</span> rprod <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line579></span>             | `Seq ((`Nonterminal s) ! alpha) =&gt;
+<span class="lineno" id=line580></span>               <span class="small_keyword" title="conditional">if</span> s == lnt <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line581></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"      YES: replace"</span>;
+<span class="lineno" id=line582></span>                 toremove = counter ! toremove;
+<span class="lineno" id=line583></span>                 <span class="small_keyword" title="for loop">for</span> beta <span class="small_keyword" title="membership operator, function mem">in</span> lprods perform 
+<span class="lineno" id=line584></span>                   toadd  = make_seq beta alpha ! toadd;
+<span class="lineno" id=line585></span>               <span class="small_keyword" title="conditional">else</span> <span class="comment">// not of form A_i = A_j alpha</span>
+<span class="lineno" id=line586></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"      NO: keep"</span>;
+<span class="lineno" id=line587></span>               <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line588></span>             | `Nonterminal s =&gt; <span class="comment">// alpha = Epsilon</span>
+<span class="lineno" id=line589></span>               <span class="small_keyword" title="conditional">if</span> s == lnt <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line590></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"      YES: replace"</span>;
+<span class="lineno" id=line591></span>                 toremove = counter ! toremove;
+<span class="lineno" id=line592></span>                 <span class="small_keyword" title="for loop">for</span> beta <span class="small_keyword" title="membership operator, function mem">in</span> lprods perform 
+<span class="lineno" id=line593></span>                   toadd  = beta ! toadd;
+<span class="lineno" id=line594></span>               <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line595></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"      NO: keep"</span>;
+<span class="lineno" id=line596></span>               <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line597></span>             | _ =&gt; 
+<span class="lineno" id=line598></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"      NO: keep"</span>;
+<span class="lineno" id=line599></span>             <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line600></span>           <span class="small_keyword" title="end of body">done</span> <span class="comment">// all A_i of form A_J alpha</span>
+<span class="lineno" id=line601></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line602></span>         <span class="comment">// strip replaced productions out, add the others</span>
+<span class="lineno" id=line603></span>         counter = -1;
+<span class="lineno" id=line604></span>         <span class="small_keyword" title="for loop">for</span> elt <span class="small_keyword" title="membership operator, function mem">in</span> rprods <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line605></span>           ++counter;
+<span class="lineno" id=line606></span>           <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> (counter <span class="small_keyword" title="membership operator, function mem">in</span> toremove) perform
+<span class="lineno" id=line607></span>             toadd = elt ! toadd;
+<span class="lineno" id=line608></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line609></span>         <span class="big_keyword" title="Define a mutable variable">var</span> newa_i = direct_left_recursion_elimination fresh ([rnt, (`Alt toadd :&gt;&gt; pgram_t)]);
+<span class="lineno" id=line610></span>         <span class="small_keyword" title="return">return</span> left_recursion_elimination_step fresh (newa_i + left) tail;
+<span class="lineno" id=line611></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line612></span>    }
+<span class="lineno" id=line613></span>  
+<span class="lineno" id=line614></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> left_recursion_elimination 
+<span class="lineno" id=line615></span>      (fresh:1-&gt;<span class="library" title="binding of C++ string type">string</span>) 
+<span class="lineno" id=line616></span>      (<span class="big_keyword" title="Define a mutable variable">var</span> right:pgramlib_t)
+<span class="lineno" id=line617></span>    =&gt; left_recursion_elimination_step fresh Empty[pgramentry_t] right;
+<span class="lineno" id=line618></span>  
+<span class="lineno" id=line619></span>  } <span class="comment">// class</span>
+</pre></p><pre class='inclusion'>
+share/lib/std/strings/parser_synlib.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/strings/parsers"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Parser_synlib
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Open a module or class">open</span> Parsers;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Open a module or class">open</span> Grammars;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> NT (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; `Nonterminal  s :&gt;&gt; pgram_t ;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> TERM (s:<span class="library" title="binding of C++ string type">string</span>, r:Recognisers::recog_t) =&gt; `Terminal (s,r) :&gt;&gt; pgram_t;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> STR (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; (`Terminal (s, (Recognisers::match_string s)));
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> REDUCE (s:<span class="library" title="binding of C++ string type">string</span>, n:<span class="library" title="binding of C int type">int</span>) =&gt; `Action (Reduce (s,n)) :&gt;&gt; pgram_t;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> BINOP(s:<span class="library" title="binding of C++ string type">string</span>) =&gt; `Action (Sequence ([Swap, Drop 1, (Reduce (s,2))])):&gt;&gt;pgram_t;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> SWAP () =&gt; `Action (Swap) :&gt;&gt; pgram_t;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> DROP (n:<span class="library" title="binding of C int type">int</span>) =&gt; `Action (Drop n) :&gt;&gt; pgram_t;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ALT (ls: <span class="library" title="functional, singly linked list">list</span>[pgram_t]) =&gt; `Alt ls :&gt;&gt; pgram_t;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> SEQ (ls: <span class="library" title="functional, singly linked list">list</span>[pgram_t]) =&gt; `Seq ls :&gt;&gt; pgram_t;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> EPS () =&gt; (#`Epsilon) :&gt;&gt; pgram_t;
+<span class="lineno" id=line17></span>  }
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

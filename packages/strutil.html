@@ -1,0 +1,804 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>String Support Utilities.</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"String utilities",
+"UTF codec.",
+"Config database entry"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#String utilities_h')"> <a href="#String_utilities_h">String utilities</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#UTF_codec._h">UTF codec.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Config database entry_h')"> <a href="#Config_database_entry_h">Config database entry</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='String_utilities_h'><img src='/share/src/web/images/minus.gif' id='String utilities' onclick='toggle(this,"String_utilities_d")' alt='+'/> 1 String utilities</h1><div id='String_utilities_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_strutil.hpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">ifndef</span> __FLX_STRUTIL_HPP_
+#<span class="preproc">define</span> __FLX_STRUTIL_HPP_
+
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;sstream&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;iomanip&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdarg&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstring&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;typeinfo&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"flx_strutil_config.hpp"</span>
+
+<span class="comment">//RF: was only to commented out to fix macosx problem,
+</span><span class="comment">//but lets see what happens to all the other builds.
+</span><span class="comment">//#ifndef MACOSX
+</span><span class="comment">//template class RTL_EXTERN std::basic_string<char>;
+</span><span class="comment">//#endif
+</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl { <span class="big_keyword">namespace</span> strutil {
+  using <span class="big_keyword">namespace</span> <span class="small_keyword">std</span>;
+  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  basic_string&lt;T&gt; mul(basic_string&lt;T&gt; s, <span class="qualifier">int</span> n) {
+    basic_string&lt;T&gt; r = <span class="fstring">""</span>;
+    <span class="small_keyword">while</span>(n--) r+=s;
+    <span class="small_keyword">return</span> r;
+  }
+
+  <span class="comment">// normalise string positions Python style
+</span>  <span class="comment">// note substr requires 0<=b<=size, 0<=n,
+</span>  <span class="comment">// however n>size is OK
+</span>  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  basic_string&lt;T&gt; substr(basic_string&lt;T&gt; <span class="qualifier">const</span> &amp;s, <span class="qualifier">int</span> b, <span class="qualifier">int</span> e)
+  {
+    <span class="qualifier">int</span> n = s.size();
+    <span class="small_keyword">if</span>(b&lt;0)  b=b+n;
+    <span class="small_keyword">if</span>(b&lt;0)  b=0;
+    <span class="small_keyword">if</span>(b&gt;=n) b=n;
+    <span class="small_keyword">if</span>(e&lt;0)  e=e+n;
+    <span class="small_keyword">if</span>(e&lt;0)  e=0;
+    <span class="small_keyword">if</span>(e&gt;=n) e=n;
+    <span class="qualifier">int</span> m =  e-b;
+    <span class="small_keyword">if</span>(m&lt;0)  m=0;
+    <span class="small_keyword">return</span> s.substr(b,m);
+  }
+
+  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  T subscript(basic_string&lt;T&gt; <span class="qualifier">const</span> &amp;s, <span class="qualifier">int</span> i)
+  {
+    <span class="qualifier">int</span> n = s.size();
+    <span class="small_keyword">if</span>(i&lt;0)  i=i+n;
+    <span class="small_keyword">return</span> i&lt;0 || i &gt;= n ? T(0) : s[i];
+  }
+
+  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  string str(T <span class="qualifier">const</span> &amp;t) {
+    <span class="small_keyword">std</span>::ostringstream x;
+    x &lt;&lt; t;
+    <span class="small_keyword">return</span> x.str();
+  }
+  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  string fmt_hex(T <span class="qualifier">const</span> &amp;t) {
+    <span class="small_keyword">std</span>::ostringstream x;
+    x &lt;&lt; <span class="fstring">"0x"</span> &lt;&lt; <span class="small_keyword">std</span>::hex &lt;&lt; t &lt;&lt; <span class="small_keyword">std</span>::dec;
+    <span class="small_keyword">return</span> x.str();
+  }
+
+
+  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  string fmt_default(T <span class="qualifier">const</span> &amp;t, <span class="qualifier">int</span> w, <span class="qualifier">int</span> p) {
+    <span class="small_keyword">std</span>::ostringstream x;
+    x &lt;&lt; <span class="small_keyword">std</span>::setw(w) &lt;&lt; <span class="small_keyword">std</span>::setprecision(p) &lt;&lt; t;
+    <span class="small_keyword">return</span> x.str();
+  }
+
+  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  string fmt_fixed(T <span class="qualifier">const</span> &amp;t, <span class="qualifier">int</span> w, <span class="qualifier">int</span> p) {
+    <span class="small_keyword">std</span>::ostringstream x;
+    x &lt;&lt; <span class="small_keyword">std</span>::fixed &lt;&lt; <span class="small_keyword">std</span>::setw(w) &lt;&lt; <span class="small_keyword">std</span>::setprecision(p) &lt;&lt; t;
+    <span class="small_keyword">return</span> x.str();
+  }
+
+  <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+  string fmt_scientific(T <span class="qualifier">const</span> &amp;t, <span class="qualifier">int</span> w, <span class="qualifier">int</span> p) {
+    <span class="small_keyword">std</span>::ostringstream x;
+    x &lt;&lt; <span class="small_keyword">std</span>::scientific &lt;&lt; <span class="small_keyword">std</span>::setw(w) &lt;&lt; <span class="small_keyword">std</span>::setprecision(p) &lt;&lt; t;
+    <span class="small_keyword">return</span> x.str();
+  }
+
+
+  STRUTIL_EXTERN string atostr(<span class="qualifier">char</span> <span class="qualifier">const</span> *a);
+  STRUTIL_EXTERN string flx_asprintf(<span class="qualifier">char</span> <span class="qualifier">const</span> *fmt,...);
+
+  STRUTIL_EXTERN string flxid_to_cid(string <span class="qualifier">const</span>&amp;);
+  STRUTIL_EXTERN string filename_to_modulename (string <span class="qualifier">const</span>&amp;);
+  STRUTIL_EXTERN size_t string_hash(string <span class="qualifier">const</span> &amp;s); 
+  STRUTIL_EXTERN <span class="qualifier">char</span> *flx_strdup(<span class="qualifier">char</span> <span class="qualifier">const</span> *); 
+  STRUTIL_EXTERN <span class="qualifier">char</span> *flx_cstr(::<span class="small_keyword">std</span>::basic_string&lt;<span class="qualifier">char</span>&gt; <span class="qualifier">const</span>&amp;); 
+
+}}}
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/strutil/flx_strutil.cpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdint&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstring&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"flx_strutil.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl { <span class="big_keyword">namespace</span> strutil {
+
+  <span class="qualifier">char</span> *flx_strdup(<span class="qualifier">char</span> <span class="qualifier">const</span> *p) {
+    <span class="small_keyword">if</span> (p==0) <span class="small_keyword">return</span> NULL; 
+    auto n = ::<span class="small_keyword">std</span>::strlen (p);
+    auto q = (<span class="qualifier">char</span>*) ::<span class="small_keyword">std</span>::malloc(n+1);
+    strcpy (q,p);
+    <span class="small_keyword">return</span> q;
+  }
+
+  <span class="qualifier">char</span> *flx_cstr(::<span class="small_keyword">std</span>::basic_string&lt;<span class="qualifier">char</span>&gt; <span class="qualifier">const</span>&amp; s) {
+    auto n = s.size();
+    auto q = (<span class="qualifier">char</span>*) ::<span class="small_keyword">std</span>::malloc(n+1);
+    auto p = s.c_str();
+    ::<span class="small_keyword">std</span>::memcpy(q,p,n);
+    q[n] = 0;
+    <span class="small_keyword">return</span> q; 
+  }
+
+  string atostr(<span class="qualifier">char</span> <span class="qualifier">const</span> *a) {
+    <span class="small_keyword">if</span>(a) <span class="small_keyword">return</span> a;
+    else <span class="small_keyword">return</span> <span class="fstring">""</span>;
+  }
+
+  size_t string_hash(string <span class="qualifier">const</span> &amp;s)
+  {
+    size_t hash = 5381;
+    <span class="qualifier">int</span> c;
+    <span class="qualifier">char</span> <span class="qualifier">const</span> *str = s.c_str();
+    <span class="small_keyword">while</span> (c = *str++)
+        hash = (hash * 33 + c) % (size_t)1073741823ll; <span class="comment">/* hash * 33 + c **</span>/
+    <span class="small_keyword">return</span> hash;
+  }
+ 
+  string flxid_to_cid (string <span class="qualifier">const</span> &amp;s)
+  {
+    string out = <span class="fstring">""</span>;
+    <span class="qualifier">int</span> n = s.size();
+    <span class="comment">// leading digit
+</span>    <span class="small_keyword">if</span> (n &gt; 1 &amp;&amp; s[0] &gt;= <span class="fstring">'0'</span> &amp;&amp; s[0] &lt;= <span class="fstring">'9'</span>) out += <span class="fstring">"_"</span>;
+    <span class="small_keyword">for</span> (<span class="qualifier">int</span> i = 0; i &lt; n; ++i)
+    {
+      <span class="qualifier">char</span> ch = s[i];
+      <span class="comment">/* from http://www.w3.org/TR/html4/sgml/entities.html **</span>/
+      switch (ch)
+      {
+        case <span class="fstring">' '</span>: out += <span class="fstring">"__sp_"</span>; break;
+        case <span class="fstring">'!'</span>: out += <span class="fstring">"__excl_"</span>; break;
+        case <span class="fstring">'"'</span>: out += <span class="fstring">"__quot_"</span>; break;
+        case <span class="fstring">'#'</span>: out += <span class="fstring">"__num_"</span>; break;
+        case <span class="fstring">'$'</span>: out += <span class="fstring">"__dollar_"</span>; break;
+        case <span class="fstring">'%'</span>: out += <span class="fstring">"__percnt_"</span>; break;
+        case <span class="fstring">'&amp;'</span>: out += <span class="fstring">"__amp_"</span>; break;
+        case <span class="fstring">'\'</span><span class="fstring">':  out +=  "__apos_"; break;
+        case '</span>(<span class="fstring">': out += "__lpar_"; break;
+        case '</span>)<span class="fstring">': out += "__rpar_"; break;
+        case '</span>*<span class="fstring">': out += "__ast_"; break;
+        case '</span>+<span class="fstring">': out += "__plus_"; break;
+        case '</span>,<span class="fstring">': out += "__comma_"; break;
+        case '</span>-<span class="fstring">': out += "__hyphen_"; break;
+        case '</span>.<span class="fstring">': out += "__period_"; break;
+        case '</span>/<span class="fstring">': out += "__sol_"; break;
+        case '</span>:<span class="fstring">': out += "__colon_"; break;
+        case '</span>;<span class="fstring">': out += "__semi_"; break;
+        case '</span>&lt;<span class="fstring">': out += "__lt_"; break;
+        case '</span>=<span class="fstring">': out += "__equals_"; break;
+        case '</span>&gt;<span class="fstring">': out += "__gt_"; break;
+        case '</span>?<span class="fstring">': out += "__quest_"; break;
+        case '</span>@<span class="fstring">': out += "__commat_"; break;
+        case '</span>[<span class="fstring">': out += "__lsqb_"; break;
+        case '</span>\\<span class="fstring">': out += "__bsol_"; break;
+        case '</span>]<span class="fstring">': out += "__rsqb_"; break;
+        case '</span>^<span class="fstring">': out += "__caret_"; break;
+        case '</span>`<span class="fstring">': out += "__grave_"; break;
+        case '</span>{<span class="fstring">': out += "__lcub_"; break;
+        case '</span>|<span class="fstring">': out += "__verbar_"; break;
+        case '</span>}<span class="fstring">': out += "__rcub_"; break;
+        case '</span>~<span class="fstring">': out += "__tilde_"; break;
+        default: out += string (1,ch);
+      }
+   }
+   if (out.size() &gt; 40) 
+     return out.substr(0,4) + flx_asprintf("_hash_%zu",string_hash(out));
+   else
+     return out;
+  }
+
+  string chop_extension (string const &amp;s)
+  {
+     int n = s.size();
+     for(int i = n - 1; i &gt;= 0; --i) 
+     {
+       if (s[i] == '</span>/<span class="fstring">') return s;
+       if (s[i] == '</span>\\<span class="fstring">') return s;
+       if (s[i] == '</span>.<span class="fstring">') return s.substr(0,i);
+     }
+     return s;
+  }
+
+  string basename (string const &amp;s) 
+  {
+     int n = s.size();
+     for(int i = n - 1; i &gt;= 0; --i) 
+     {
+       if (s[i] == '</span>/<span class="fstring">') return s.substr (i+1,n-i);
+       if (s[i] == '</span>\\<span class="fstring">') return s.substr (i+1,n-i);
+     }
+     return s;
+  }
+  string filename_to_modulename (string const &amp;s)
+  {
+     string a = basename (s);
+     a = chop_extension (a);
+     a = flxid_to_cid (a);
+     return a; 
+  }
+
+#ifdef FLX_HAVE_VSNPRINTF
+  string flx_asprintf(char const *fmt,...){
+    va_list ap;
+    va_start(ap,fmt);
+    //printf("vsnprintf TRIAL\n");
+    int n = vsnprintf(NULL,0,fmt,ap);
+    //printf("vsnprintf size=%d\n",n);
+    va_end(ap);
+    char *res = new char[n + 1];
+    va_start(ap,fmt);
+    vsnprintf(res,n+1,fmt,ap);
+    va_end(ap);
+    string s = string(res);
+    delete [] res;
+    return s;
+  }
+#else
+  // THIS IS UNSAFE .. but Windows sucks.
+  // It documents vsnprintf .. but doesn'</span>t provide it
+  string flx_asprintf(<span class="qualifier">char</span> <span class="qualifier">const</span> *fmt,...){
+    <span class="comment">//printf("vsnprintf EMULATION!\n");
+</span>    va_list ap;
+    <span class="qualifier">int</span> n = 10000; <span class="comment">// hack, WILL crash if not enough
+</span>    <span class="qualifier">char</span> *res = new <span class="qualifier">char</span>[n+1];
+    va_start(ap,fmt);
+    vsprintf(res,fmt,ap);
+    va_end(ap);
+    string s = string(res);
+    delete [] res;
+    <span class="small_keyword">return</span> s;
+  }
+#<span class="preproc">endif</span>
+
+}}}
+</pre></p><pre class='inclusion'>
+share/lib/rtl/flx_strutil_config.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_STRUTIL_CONFIG_H__
+#<span class="preproc">define</span> __FLX_STRUTIL_CONFIG_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">ifdef</span> BUILD_STRUTIL
+#<span class="preproc">define</span> STRUTIL_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> STRUTIL_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+$PWD/src/config/unix/flx_strutil.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_strutil
+Description: String utilities
+provides_dlib: -lflx_strutil_dynamic
+provides_slib: -lflx_strutil_static
+includes: '"flx_strutil.hpp"'
+macros: BUILD_STRUTIL
+library: flx_strutil
+srcdir: src/strutil
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/flx_strutil.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_strutil
+Description: String utilities
+provides_dlib: /DEFAULTLIB:flx_strutil_dynamic
+provides_slib: /DEFAULTLIB:flx_strutil_static
+includes: '"flx_strutil.hpp"'
+macros: BUILD_STRUTIL
+library: flx_strutil
+srcdir: src/strutil
+src: .*\.cpp
+</pre></p><h2 id='UTF_codec._h'><img src='/share/src/web/images/minus.gif' id='UTF codec.' onclick='toggle(this,"UTF_codec._d")' alt='+'/> 1.1 UTF codec.</h2><div id='UTF_codec._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_i18n.hpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">ifndef</span> __FLX_I18N_H__
+#<span class="preproc">define</span> __FLX_I18N_H__
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_strutil_config.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl { <span class="big_keyword">namespace</span> i18n {
+   STRUTIL_EXTERN <span class="small_keyword">std</span>::string utf8(<span class="qualifier">unsigned</span> <span class="qualifier">long</span>);
+}}}
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/strutil/flx_i18n.cpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">include</span> <span class="fstring">"flx_i18n.hpp"</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl { <span class="big_keyword">namespace</span> i18n {
+  <span class="small_keyword">std</span>::string utf8(<span class="qualifier">unsigned</span> <span class="qualifier">long</span> i)
+  {
+    <span class="qualifier">char</span> s[7];
+    <span class="small_keyword">if</span> (i &lt; 0x80UL )
+    {
+      s[0]= i;
+      s[1]= 0;
+    }
+    else <span class="small_keyword">if</span> (i &lt; 0x800UL )
+    {
+      s[0]=0xC0u | (i &gt;&gt; 6ul)  &amp; 0x1Fu;
+      s[1]=0x80u | i           &amp; 0x3Fu;
+      s[2]=0;
+    }
+    else <span class="small_keyword">if</span> (i &lt; 0x10000UL )
+    {
+      s[0]=0xE0u | (i &gt;&gt; 12ul) &amp; 0xFu;
+      s[1]=0x80u | (i &gt;&gt; 6ul)  &amp; 0x3Fu;
+      s[2]=0x80u | i           &amp; 0x3F;
+      s[3]=0;
+    }
+    else <span class="small_keyword">if</span> (i &lt; 0x200000UL )
+    {
+      s[0]=0xF0u | (i &gt;&gt; 18ul) &amp; 0x7u;
+      s[1]=0x80u | (i &gt;&gt; 12ul) &amp; 0x3Fu;
+      s[2]=0x80u | (i &gt;&gt; 6ul)  &amp; 0x3Fu;
+      s[3]=0x80u | i           &amp; 0x3F;
+      s[4]=0;
+    }
+    else <span class="small_keyword">if</span> (i &lt; 0x4000000UL )
+    {
+      s[0]=0xF8u | (i &gt;&gt; 24ul) &amp; 0x3u;
+      s[1]=0x80u | (i &gt;&gt; 18ul) &amp; 0x3Fu;
+      s[2]=0x80u | (i &gt;&gt; 12ul) &amp; 0x3Fu;
+      s[3]=0x80u | (i &gt;&gt; 6ul)  &amp; 0x3Fu;
+      s[4]=0x80u | i           &amp; 0x3Fu;
+      s[5]=0;
+    }
+    else
+    {
+      s[0]=0xFCu | (i &gt;&gt; 30ul) &amp; 0x1u;
+      s[1]=0x80u | (i &gt;&gt; 24ul) &amp; 0x3Fu;
+      s[2]=0x80u | (i &gt;&gt; 18ul) &amp; 0x3Fu;
+      s[3]=0x80u | (i &gt;&gt; 12ul) &amp; 0x3Fu;
+      s[4]=0x80u | (i &gt;&gt; 6ul)  &amp; 0x3Fu;
+      s[5]=0x80u | i           &amp; 0x3Fu;
+      s[6]=0;
+    }
+    <span class="small_keyword">return</span> s;
+  }
+}}}
+</pre></p></div></div><h1 id='Config_database_entry_h'><img src='/share/src/web/images/minus.gif' id='Config database entry' onclick='toggle(this,"Config_database_entry_d")' alt='+'/> 2 Config database entry</h1><div id='Config_database_entry_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/src/config/flx_i18n.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_i18n
+Description: Internationalisation support, Unicode, utf8
+Requires: flx_strutil
+includes: '"flx_i18n.hpp"'
+</pre></p><pre class='inclusion'>
+$PWD/buildsystem/flx_strutil.py</pre>
+<p><pre class="prefmtbg">import fbuild
+from fbuild.path import Path
+from fbuild.record import Record
+from fbuild.builders.file import copy
+
+import buildsystem
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    print('[fbuild] [rtl] build strutil')
+    path = Path(phase.ctx.buildroot/'share'/'src'/'strutil')
+    srcs = [f for f in Path.glob(path / '*.cpp')]
+    includes = [phase.ctx.buildroot / 'host/lib/rtl', phase.ctx.buildroot / 'share/lib/rtl']
+    macros = ['BUILD_STRUTIL']
+
+    dst = 'host/lib/rtl/flx_strutil'
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros))
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

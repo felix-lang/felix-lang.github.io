@@ -1,0 +1,597 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>programmer utilities</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+    <script>counter_max=0;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<pre class='inclusion'>
+$PWD/src/tools/flx_tangle.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">flx_tangle --inoutdir --indir=indir --outdir=outdir pattern ...</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">processes the file indir/basename.fdoc and generates</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">the files:</span>
+<span class="lineno" id=line4></span>  <span class="doccomment">//$   outdir/basename.flx by collating everything</span>
+<span class="lineno" id=line5></span>  <span class="doccomment">     between @felix and subsequent @ command.</span>
+<span class="lineno" id=line6></span>  <span class="doccomment">//$   outdir/basename.expect by collating everything</span>
+<span class="lineno" id=line7></span>  <span class="doccomment">     between @expect and subsequent @ command.</span>
+<span class="lineno" id=line8></span>  <span class="doccomment">//$   outdir/basename.input by collating everything</span>
+<span class="lineno" id=line9></span>  <span class="doccomment">     between @input and subsequent @ command.</span>
+<span class="lineno" id=line10></span>  <span class="doccomment">//$ If indidr is specified and outdir is not, the outdir</span>
+<span class="lineno" id=line11></span>  <span class="doccomment">remains the default current directory.</span>
+<span class="lineno" id=line12></span>  <span class="doccomment">//$ If inoutdir is specified, indir and outdir are set</span>
+<span class="lineno" id=line13></span>  <span class="doccomment">to it, and indir and outdir should not be specified.</span>
+<span class="lineno" id=line14></span>  <span class="doccomment">//$ If no patterns are specified '.*' is used, i.e. all fdoc files</span>
+<span class="lineno" id=line15></span>  <span class="doccomment">in the input directory (recursively).</span>
+<span class="lineno" id=line16></span>  <span class="doccomment"></span>
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/schannels"</span>;
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/chips"</span>;
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Open a module or class">open</span> BaseChips;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  <span class="comment">// --- COMMAND LINE PROCESSING --------------------------------</span>
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="Define an immutable value">val</span> cmdspec : cmdspec_t = 
+<span class="lineno" id=line24></span>    ( 
+<span class="lineno" id=line25></span>      split-key-value-spec= Empty[<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line26></span>      multi-valued-keys-spec= Empty[<span class="library" title="binding of C++ string type">string</span>], 
+<span class="lineno" id=line27></span>      single-valued-keys-spec= <span class="library" title="functional, singly linked list">list</span>(<span class="fstring">"--inoutdir"</span>,<span class="fstring">"--indir"</span>,<span class="fstring">"--outdir"</span>),
+<span class="lineno" id=line28></span>      switches-spec= <span class="library" title="functional, singly linked list">list</span>(<span class="fstring">"--help"</span>,<span class="fstring">"--linenos"</span>,<span class="fstring">"--verbose"</span>), 
+<span class="lineno" id=line29></span>      short-switch-map-spec = <span class="library" title="functional, singly linked list">list</span> [<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C++ string type">string</span>] (<span class="library" title="binding of C char type">char</span> <span class="fstring">"v"</span>,<span class="fstring">"--verbose"</span>)
+<span class="lineno" id=line30></span>    )
+<span class="lineno" id=line31></span>  ;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> print_help =&gt;
+<span class="lineno" id=line34></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Usage: flx_tangle [-v] [--indir=indir] [--outdir=outdir] [--inoutdir=inoutdir] [--linenos] [regexp1 ...]"</span>
+<span class="lineno" id=line35></span>  ;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="big_keyword" title="Define an immutable value">val</span> inargs = #System::args;
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  <span class="big_keyword" title="Define an immutable value">val</span> outargs = parse-cmdline cmdspec inargs;
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>  <span class="comment">// --- Check for option conflicts</span>
+<span class="lineno" id=line42></span>  <span class="big_keyword" title="Define a mutable variable">var</span> keys = outargs.single-valued-keys;
+<span class="lineno" id=line43></span>  <span class="small_keyword" title="conditional">if</span> 
+<span class="lineno" id=line44></span>    (<span class="fstring">"--inoutdir"</span> <span class="small_keyword" title="membership operator, function mem">in</span> keys) <span class="small_keyword" title="logical conjunction">and</span>
+<span class="lineno" id=line45></span>    (
+<span class="lineno" id=line46></span>      (<span class="fstring">"--indir"</span> <span class="small_keyword" title="membership operator, function mem">in</span> keys) <span class="small_keyword" title="logical disjunction">or</span>
+<span class="lineno" id=line47></span>      (<span class="fstring">"--outdir"</span> <span class="small_keyword" title="membership operator, function mem">in</span> keys) 
+<span class="lineno" id=line48></span>    )
+<span class="lineno" id=line49></span>  <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line50></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Cannot specify --inoutdir with --indir or --outdir"</span>;
+<span class="lineno" id=line51></span>    print_help;
+<span class="lineno" id=line52></span>    System::exit 1;
+<span class="lineno" id=line53></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>  <span class="comment">// --- Check for help command</span>
+<span class="lineno" id=line56></span>  <span class="small_keyword" title="conditional">if</span> <span class="fstring">"--help"</span> <span class="small_keyword" title="membership operator, function mem">in</span> outargs.switches <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line57></span>    print_help;
+<span class="lineno" id=line58></span>    System::exit 0;
+<span class="lineno" id=line59></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>  <span class="big_keyword" title="Define a mutable variable">var</span> verbose = <span class="fstring">"--verbose"</span> <span class="small_keyword" title="membership operator, function mem">in</span> outargs.switches;
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>  <span class="comment">// ----- SETUP CONTROL ARGUMENTS ------------------------</span>
+<span class="lineno" id=line64></span>  <span class="big_keyword" title="Define a mutable variable">var</span> patterns = 
+<span class="lineno" id=line65></span>    <span class="small_keyword" title="match statement or expression">match</span> outargs.positional <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line66></span>    | _ ! (_ ! _ as tail) =&gt; tail
+<span class="lineno" id=line67></span>    | _ ! Empty =&gt; <span class="library" title="functional, singly linked list">list</span> <span class="fstring">".*"</span>
+<span class="lineno" id=line68></span>  ;
+<span class="lineno" id=line69></span>  
+<span class="lineno" id=line70></span>  <span class="big_keyword" title="Define a mutable variable">var</span> indir = keys.get_dflt (<span class="fstring">"--indir"</span>, keys.get_dflt (<span class="fstring">"--inoutdir"</span>, <span class="fstring">"."</span>) );
+<span class="lineno" id=line71></span>  <span class="big_keyword" title="Define a mutable variable">var</span> outdir = keys.get_dflt (<span class="fstring">"--outdir"</span>,  keys.get_dflt (<span class="fstring">"--inoutdir"</span>, <span class="fstring">"."</span>));
+<span class="lineno" id=line72></span>  <span class="big_keyword" title="Define a mutable variable">var</span> linenos = <span class="fstring">"--linenos"</span> <span class="small_keyword" title="membership operator, function mem">in</span> outargs.switches;
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>  <span class="comment">// --- FILE SCAN --------------------------------</span>
+<span class="lineno" id=line75></span>  <span class="small_keyword" title="for loop">for</span> base <span class="small_keyword" title="membership operator, function mem">in</span> patterns <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a mutable variable">var</span> files = FileSystem::regfilesin(indir, base+<span class="fstring">"\\.fdoc"</span>);
+<span class="lineno" id=line77></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Base = "</span> + base + <span class="fstring">" : "</span> files.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" files"</span>;
+<span class="lineno" id=line78></span>    <span class="small_keyword" title="for loop">for</span> file <span class="small_keyword" title="membership operator, function mem">in</span> files <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line79></span>      <span class="big_keyword" title="Define a mutable variable">var</span> infile = Filename::join (indir, file);
+<span class="lineno" id=line80></span>      <span class="big_keyword" title="Define a mutable variable">var</span> outbase = Filename::join (outdir, Filename::strip_extension file);
+<span class="lineno" id=line81></span>      save_tangle (infile, outbase); 
+<span class="lineno" id=line82></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line83></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>  <span class="comment">// ---- PIPELINE ---------------------------------</span>
+<span class="lineno" id=line86></span>  <span class="comment">// Source device.</span>
+<span class="lineno" id=line87></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> filesrc (file:<span class="library" title="binding of C++ string type">string</span>) 
+<span class="lineno" id=line88></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line89></span>       <span class="small_keyword" title="a field of the chip parameter">pin</span> out:%&gt;<span class="library" title="binding of C++ string type">string</span> 
+<span class="lineno" id=line90></span>  {
+<span class="lineno" id=line91></span>    <span class="big_keyword" title="Define a mutable variable">var</span> data = load file;
+<span class="lineno" id=line92></span>    <span class="small_keyword" title="for loop">for</span> line <span class="small_keyword" title="membership operator, function mem">in</span> split(data,<span class="fstring">"\n"</span>) <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to a stream">write</span> (io.out, line+<span class="fstring">"\n"</span>); <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line93></span>    <span class="library" title="Print a string to a stream">write</span>(io.out,<span class="fstring">""</span>);
+<span class="lineno" id=line94></span>  }
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>  <span class="comment">// Tangling transducer.</span>
+<span class="lineno" id=line97></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> tangle (filename:<span class="library" title="binding of C++ string type">string</span>) (tag:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line98></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line99></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;<span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line100></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;<span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line101></span>  {
+<span class="lineno" id=line102></span>    <span class="big_keyword" title="Define a mutable variable">var</span> lineno=1;
+<span class="lineno" id=line103></span>  moredoc:&gt;
+<span class="lineno" id=line104></span>    <span class="big_keyword" title="Define a mutable variable">var</span> x = read io.inp;
+<span class="lineno" id=line105></span>    ++lineno;
+<span class="lineno" id=line106></span>    <span class="small_keyword" title="conditional">if</span> x == <span class="fstring">""</span> <span class="small_keyword" title="jump to label">goto</span> finish;
+<span class="lineno" id=line107></span>    <span class="small_keyword" title="conditional">if</span> strip x != <span class="fstring">"@"</span>+tag <span class="small_keyword" title="jump to label">goto</span> moredoc;
+<span class="lineno" id=line108></span>  
+<span class="lineno" id=line109></span>    <span class="small_keyword" title="conditional">if</span> tag == <span class="fstring">"felix"</span> <span class="small_keyword" title="logical conjunction">and</span> linenos <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line110></span>      <span class="library" title="Print a string to a stream">write</span>(io.out,<span class="fstring">"#line "</span> + lineno.<span class="library" title="Convert a value to a string">str</span>+ <span class="fstring">" "</span> + <span class="fstring">'"'</span>+filename+<span class="fstring">'"\n'</span>);
+<span class="lineno" id=line111></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line112></span>  morefelix:&gt;
+<span class="lineno" id=line113></span>    x = read io.inp;
+<span class="lineno" id=line114></span>    ++lineno;
+<span class="lineno" id=line115></span>    <span class="small_keyword" title="conditional">if</span> x == <span class="fstring">""</span> <span class="small_keyword" title="jump to label">goto</span> finish;
+<span class="lineno" id=line116></span>    <span class="small_keyword" title="conditional">if</span> x.[0] == <span class="library" title="binding of C char type">char</span> <span class="fstring">"@"</span> <span class="small_keyword" title="jump to label">goto</span> moredoc;
+<span class="lineno" id=line117></span>    <span class="library" title="Print a string to a stream">write</span>(io.out,x);
+<span class="lineno" id=line118></span>    <span class="small_keyword" title="jump to label">goto</span> morefelix;
+<span class="lineno" id=line119></span>  
+<span class="lineno" id=line120></span>  finish:&gt;
+<span class="lineno" id=line121></span>    <span class="library" title="Print a string to a stream">write</span> (io.out,<span class="fstring">""</span>);
+<span class="lineno" id=line122></span>  }
+<span class="lineno" id=line123></span>  
+<span class="lineno" id=line124></span>  <span class="comment">// Concentrating transducer.</span>
+<span class="lineno" id=line125></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> grab (out:%&gt;<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line126></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line127></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp:%&lt;<span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line128></span>  {
+<span class="lineno" id=line129></span>    <span class="big_keyword" title="Define a mutable variable">var</span> s = <span class="fstring">""</span>;
+<span class="lineno" id=line130></span>  morelines:&gt;
+<span class="lineno" id=line131></span>    <span class="big_keyword" title="Define a mutable variable">var</span> x = read io.inp;
+<span class="lineno" id=line132></span>    <span class="small_keyword" title="conditional">if</span> x == <span class="fstring">""</span> <span class="small_keyword" title="jump to label">goto</span> finish;
+<span class="lineno" id=line133></span>    s+=x;
+<span class="lineno" id=line134></span>    <span class="small_keyword" title="jump to label">goto</span> morelines;
+<span class="lineno" id=line135></span>  
+<span class="lineno" id=line136></span>  finish:&gt; 
+<span class="lineno" id=line137></span>    <span class="library" title="Print a string to a stream">write</span>(out,s);
+<span class="lineno" id=line138></span>  }
+<span class="lineno" id=line139></span>  
+<span class="lineno" id=line140></span>  <span class="comment">// Pipeline controller.</span>
+<span class="lineno" id=line141></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> save_tangle (infile:<span class="library" title="binding of C++ string type">string</span>, outbase:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line142></span>  {
+<span class="lineno" id=line143></span>    <span class="comment">// Check modification times of files to</span>
+<span class="lineno" id=line144></span>    <span class="comment">// see if we actually need to do anything.</span>
+<span class="lineno" id=line145></span>    <span class="big_keyword" title="Define a mutable variable">var</span> itime = FileStat::filetime infile;
+<span class="lineno" id=line146></span>    <span class="big_keyword" title="Define a mutable variable">var</span> flx-time = FileStat::filetime$ outbase+<span class="fstring">".flx"</span>; 
+<span class="lineno" id=line147></span>    <span class="big_keyword" title="Define a mutable variable">var</span> xpect-time = FileStat::filetime$ outbase+<span class="fstring">".expect"</span>; 
+<span class="lineno" id=line148></span>    <span class="big_keyword" title="Define a mutable variable">var</span> input-time = FileStat::filetime$ outbase+<span class="fstring">".input"</span>; 
+<span class="lineno" id=line149></span>    <span class="small_keyword" title="conditional">if</span> flx-time &lt;= itime <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line150></span>  
+<span class="lineno" id=line151></span>      <span class="comment">// Run processing pipeline.</span>
+<span class="lineno" id=line152></span>      <span class="big_keyword" title="Define a mutable variable">var</span> iflx,oflx = #mk_ioschannel_pair[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line153></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ixpect,oxpect = #mk_ioschannel_pair[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line154></span>      <span class="big_keyword" title="Define a mutable variable">var</span> iinput,oinput = #mk_ioschannel_pair[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line155></span>      #(filesrc infile |-&gt; tangle infile <span class="fstring">"felix"</span> |-&gt; grab oflx);
+<span class="lineno" id=line156></span>      #(filesrc infile |-&gt; tangle infile <span class="fstring">"expect"</span> |-&gt; grab oxpect);
+<span class="lineno" id=line157></span>      #(filesrc infile |-&gt; tangle infile <span class="fstring">"input"</span> |-&gt; grab oinput);
+<span class="lineno" id=line158></span>      <span class="big_keyword" title="Define a mutable variable">var</span> flx-result  = read iflx;
+<span class="lineno" id=line159></span>      <span class="big_keyword" title="Define a mutable variable">var</span> xpect-result  = read ixpect;
+<span class="lineno" id=line160></span>      <span class="big_keyword" title="Define a mutable variable">var</span> input-result  = read iinput;
+<span class="lineno" id=line161></span>  
+<span class="lineno" id=line162></span>      <span class="comment">// If there's a non-trivial result, generate output file.</span>
+<span class="lineno" id=line163></span>      <span class="small_keyword" title="conditional">if</span> flx-result != <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> xpect-result != <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> input-result != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line164></span>        <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="call a procedure">call</span>
+<span class="lineno" id=line165></span>           <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Tangle      : "</span> + infile + <span class="fstring">" -&gt; "</span> +outbase+ <span class="fstring">"(.flx,.expect,.input)"</span>;
+<span class="lineno" id=line166></span>  
+<span class="lineno" id=line167></span>        <span class="comment">// Make sure the directories in the path exist.</span>
+<span class="lineno" id=line168></span>        Directory::mkdirs$ Filename::dirname outbase;
+<span class="lineno" id=line169></span>  
+<span class="lineno" id=line170></span>        <span class="small_keyword" title="conditional">if</span> flx-result != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line171></span>          <span class="big_keyword" title="Define a mutable variable">var</span> ofile = fopen_output$ outbase+<span class="fstring">".flx"</span>;
+<span class="lineno" id=line172></span>          <span class="library" title="Print a string to a stream">write</span> (ofile,flx-result);
+<span class="lineno" id=line173></span>          fclose ofile;
+<span class="lineno" id=line174></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line175></span>  
+<span class="lineno" id=line176></span>        <span class="small_keyword" title="conditional">if</span> xpect-result != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line177></span>          ofile = fopen_output$ outbase+<span class="fstring">".expect"</span>;
+<span class="lineno" id=line178></span>          <span class="library" title="Print a string to a stream">write</span> (ofile,xpect-result);
+<span class="lineno" id=line179></span>          fclose ofile;
+<span class="lineno" id=line180></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line181></span>  
+<span class="lineno" id=line182></span>        <span class="small_keyword" title="conditional">if</span> input-result != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line183></span>          ofile = fopen_output$ outbase+<span class="fstring">".input"</span>;
+<span class="lineno" id=line184></span>          <span class="library" title="Print a string to a stream">write</span> (ofile,input-result);
+<span class="lineno" id=line185></span>          fclose ofile;
+<span class="lineno" id=line186></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line187></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line188></span>        <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="call a procedure">call</span> 
+<span class="lineno" id=line189></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"No Code    : "</span> + infile;
+<span class="lineno" id=line190></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line191></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line192></span>      <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="call a procedure">call</span> 
+<span class="lineno" id=line193></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$   <span class="fstring">"Up-to-date : "</span> + infile + <span class="fstring">" -&gt; "</span> +outbase +<span class="fstring">"(.flx,.expect,.input)"</span>;
+<span class="lineno" id=line194></span>    <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line195></span>  }
+<span class="lineno" id=line196></span>  
+<span class="lineno" id=line197></span>  
+</pre></p><pre class='inclusion'>
+$PWD/src/tools/flx_perror.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an immutable value">val</span> e = <span class="library" title="binding of C int type">int</span> (System::argv 1);
+<span class="lineno" id=line2></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Errno "</span> + <span class="library" title="Convert a value to a string">str</span> e + <span class="fstring">" "</span> + Errno::strerror e.Errno::errno_t;
+<span class="lineno" id=line3></span>  
+</pre></p><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

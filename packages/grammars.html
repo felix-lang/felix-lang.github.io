@@ -1,0 +1,690 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Grammars</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Grammar",
+"Grammar Operations",
+"Closure"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Grammar_h')"> <a href="#Grammar_h">Grammar</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Grammar Operations_h')"> <a href="#Grammar_Operations_h">Grammar Operations</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#Closure_h">Closure</a></div>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Grammar_h'><img src='/share/src/web/images/minus.gif' id='Grammar' onclick='toggle(this,"Grammar_d")' alt='+'/> 1 Grammar</h1><div id='Grammar_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/strings/grammars.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Grammars[Terminal_t] {
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> generic_gramentry_t[T] = <span class="library" title="binding of C++ string type">string</span> * T;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> generic_gramlib_t[T] = <span class="library" title="functional, singly linked list">list</span>[generic_gramentry_t[T]];
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> generic_grammar_t[T] = <span class="library" title="binding of C++ string type">string</span> * generic_gramlib_t[T];
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> generic_cls[T] 
+<span class="lineno" id=line9></span>    (generic_add: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] -&gt; T -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line10></span>    (lib:generic_gramlib_t[T]) 
+<span class="lineno" id=line11></span>    (unprocessed: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) 
+<span class="lineno" id=line12></span>    (processed:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line13></span>  : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] 
+<span class="lineno" id=line14></span>  =&gt;
+<span class="lineno" id=line15></span>    <span class="small_keyword" title="match statement or expression">match</span> unprocessed <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line16></span>    | Empty =&gt; processed
+<span class="lineno" id=line17></span>    | Cons (h,tail) =&gt;
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="conditional">if</span> h <span class="small_keyword" title="membership operator, function mem">in</span> processed <span class="small_keyword" title="conditional">then</span> generic_cls generic_add lib tail processed <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="match statement or expression">match</span> find lib h <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line20></span>      | Some p =&gt;
+<span class="lineno" id=line21></span>        <span class="small_keyword" title="let binder">let</span> unprocessed = generic_add tail p <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line22></span>        generic_cls generic_add lib unprocessed (Cons (h,processed))
+<span class="lineno" id=line23></span>      | None =&gt; 
+<span class="lineno" id=line24></span>        fun_fail[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]] (<span class="fstring">"MISSING NONTERMINAL "</span> + h)
+<span class="lineno" id=line25></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line26></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line27></span>  ;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> generic_closure[T] 
+<span class="lineno" id=line30></span>    (generic_add: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] -&gt; T -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line31></span>    (g:generic_grammar_t[T]) 
+<span class="lineno" id=line32></span>  : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line33></span>    <span class="small_keyword" title="match statement or expression">match</span> g <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line34></span>    | start, lib =&gt; generic_cls generic_add lib ([start]) Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line35></span>  ;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_prod_t[T] =
+<span class="lineno" id=line38></span>  ( 
+<span class="lineno" id=line39></span>    | `Terminal of <span class="library" title="binding of C++ string type">string</span> * Terminal_t
+<span class="lineno" id=line40></span>    | `Nonterminal of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line41></span>    | `Epsilon
+<span class="lineno" id=line42></span>    | `Seq of <span class="library" title="functional, singly linked list">list</span>[T]
+<span class="lineno" id=line43></span>    | `Alt of <span class="library" title="functional, singly linked list">list</span>[T]
+<span class="lineno" id=line44></span>  )
+<span class="lineno" id=line45></span>  ;
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> prod_t = open_prod_t[prod_t];
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Str[T]] Str[open_prod_t[T]] 
+<span class="lineno" id=line50></span>  {
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: open_prod_t[T] -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line52></span>    | `Terminal (s,r) =&gt; <span class="fstring">'"'</span> + s + <span class="fstring">'"'</span>
+<span class="lineno" id=line53></span>    | `Nonterminal name =&gt; name
+<span class="lineno" id=line54></span>    | `Epsilon =&gt; <span class="fstring">"Eps"</span>
+<span class="lineno" id=line55></span>    | `Seq ss =&gt; <span class="fstring">"("</span> + catmap <span class="fstring">" "</span> (<span class="library" title="Convert a value to a string">str</span> of T) ss + <span class="fstring">")"</span>
+<span class="lineno" id=line56></span>    | `Alt ss =&gt; <span class="fstring">"["</span> + catmap <span class="fstring">" | "</span> (<span class="library" title="Convert a value to a string">str</span> of T) ss + <span class="fstring">"]"</span>
+<span class="lineno" id=line57></span>    ;
+<span class="lineno" id=line58></span>  }
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_gramentry_t[T] = <span class="library" title="binding of C++ string type">string</span> * open_prod_t[T];
+<span class="lineno" id=line61></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_gramlib_t[T] = <span class="library" title="functional, singly linked list">list</span>[open_gramentry_t[T]];
+<span class="lineno" id=line62></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> open_grammar_t[T] = <span class="library" title="binding of C++ string type">string</span> * open_gramlib_t[T];
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> gramentry_t = open_gramentry_t[prod_t];
+<span class="lineno" id=line66></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> gramlib_t = open_gramlib_t[prod_t];
+<span class="lineno" id=line67></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> grammar_t = open_grammar_t[prod_t];
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[gramentry_t] {
+<span class="lineno" id=line70></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (nt: <span class="library" title="binding of C++ string type">string</span>, p: prod_t) =&gt; nt + <span class="fstring">" ::= "</span> + <span class="library" title="Convert a value to a string">str</span> p;
+<span class="lineno" id=line71></span>  }
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[grammar_t] {
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (name: <span class="library" title="binding of C++ string type">string</span>, gramlib: gramlib_t) =&gt; <span class="fstring">"Grammar "</span> + name + <span class="fstring">"\n  "</span> +
+<span class="lineno" id=line75></span>      List::strcat <span class="fstring">"\n  "</span> (List::<span class="library" title="return data structure with function applied to each value">map</span> (<span class="library" title="Convert a value to a string">str</span> of gramentry_t) gramlib) + <span class="fstring">"\n"</span>
+<span class="lineno" id=line76></span>    ;
+<span class="lineno" id=line77></span>  }
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>  
+</pre></p></div><h1 id='Grammar_Operations_h'><img src='/share/src/web/images/minus.gif' id='Grammar Operations' onclick='toggle(this,"Grammar_Operations_d")' alt='+'/> 2 Grammar Operations</h1><div id='Grammar_Operations_d' style='display:block'>
+<h2 id='Closure_h'><img src='/share/src/web/images/minus.gif' id='Closure' onclick='toggle(this,"Closure_d")' alt='+'/> 2.1 Closure</h2><div id='Closure_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/strings/grammars.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> add_unique (acc:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (elt:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="conditional">if</span> elt <span class="small_keyword" title="membership operator, function mem">in</span> acc <span class="small_keyword" title="conditional">then</span> acc <span class="small_keyword" title="conditional">else</span> Cons (elt,acc)
+<span class="lineno" id=line4></span>  ;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> open_add_prod[T] 
+<span class="lineno" id=line7></span>    (aux: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] -&gt; T -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line8></span>    (acc:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (p: open_prod_t[T]) 
+<span class="lineno" id=line9></span>  : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line11></span>    | `Terminal _ =&gt; acc
+<span class="lineno" id=line12></span>    | `Nonterminal name =&gt; Cons (name, acc) 
+<span class="lineno" id=line13></span>    | `Epsilon =&gt; acc
+<span class="lineno" id=line14></span>    | `Seq ps =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> aux acc ps
+<span class="lineno" id=line15></span>    | `Alt ps =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> aux acc ps
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line17></span>  ;
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> add_prod(acc:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (p:prod_t) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line20></span>    fix open_add_prod[prod_t] acc p
+<span class="lineno" id=line21></span>  ;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> closure (g:grammar_t): <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line24></span>    generic_closure[prod_t] add_prod g
+<span class="lineno" id=line25></span>  ;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> nullable_prod (lib:gramlib_t) (e:prod_t) (trail:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line28></span>    <span class="small_keyword" title="match statement or expression">match</span> e <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line29></span>    | `Terminal _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line30></span>    | `Seq es =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:bool) (sym:prod_t) =&gt; 
+<span class="lineno" id=line31></span>        acc <span class="small_keyword" title="logical conjunction">and</span> (nullable_prod lib sym trail)) <span class="library" title="truth value">true</span> es
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    | `Alt es =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:bool) (sym:prod_t) =&gt; 
+<span class="lineno" id=line34></span>        acc <span class="small_keyword" title="logical disjunction">or</span> (nullable_prod lib sym trail)) <span class="library" title="false value">false</span> es
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    | `Nonterminal nt =&gt; nullable_nt lib nt trail
+<span class="lineno" id=line37></span>    | `Epsilon =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line38></span>  ;
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> nullable_nt (lib: gramlib_t) (nt:<span class="library" title="binding of C++ string type">string</span>) (trail:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : bool =&gt;
+<span class="lineno" id=line41></span>    <span class="small_keyword" title="conditional">if</span> nt <span class="small_keyword" title="membership operator, function mem">in</span> trail <span class="small_keyword" title="conditional">then</span> <span class="library" title="false value">false</span> <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line42></span>    <span class="small_keyword" title="match statement or expression">match</span> find lib nt <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line43></span>    | None =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line44></span>    | Some e =&gt; nullable_prod lib e (nt ! trail)
+<span class="lineno" id=line45></span>  ;
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_nullable_prod (lib:gramlib_t) (e:prod_t) =&gt; 
+<span class="lineno" id=line48></span>    nullable_prod lib e Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line49></span>  ;
+<span class="lineno" id=line50></span>  
+<span class="lineno" id=line51></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_nullable_nt (lib:gramlib_t) (nt:<span class="library" title="binding of C++ string type">string</span>) =&gt; 
+<span class="lineno" id=line52></span>    nullable_nt lib nt Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line53></span>  ;
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> recursive_prod (lib:gramlib_t) (e:prod_t) (orig:<span class="library" title="binding of C++ string type">string</span>) (trail:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line56></span>    <span class="small_keyword" title="match statement or expression">match</span> e <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line57></span>    | `Terminal _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line58></span>    | `Seq es =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:bool) (sym:prod_t) =&gt; 
+<span class="lineno" id=line59></span>        acc <span class="small_keyword" title="logical disjunction">or</span> (recursive_prod lib sym orig trail)) <span class="library" title="false value">false</span> es
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>    | `Alt es =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:bool) (sym:prod_t) =&gt; 
+<span class="lineno" id=line62></span>        acc <span class="small_keyword" title="logical disjunction">or</span> (recursive_prod lib sym orig trail)) <span class="library" title="false value">false</span> es
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>    | `Nonterminal nt =&gt; <span class="small_keyword" title="conditional">if</span> nt == orig <span class="small_keyword" title="conditional">then</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="conditional">else</span> recursive_nt lib nt orig trail
+<span class="lineno" id=line65></span>    | `Epsilon =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line66></span>  ;
+<span class="lineno" id=line67></span>  
+<span class="lineno" id=line68></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> recursive_nt (lib: gramlib_t) (nt:<span class="library" title="binding of C++ string type">string</span>) (orig:<span class="library" title="binding of C++ string type">string</span>) (trail:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : bool =&gt;
+<span class="lineno" id=line69></span>    <span class="small_keyword" title="conditional">if</span> nt <span class="small_keyword" title="membership operator, function mem">in</span> trail <span class="small_keyword" title="conditional">then</span> <span class="library" title="false value">false</span> <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line70></span>    <span class="small_keyword" title="match statement or expression">match</span> find lib nt <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line71></span>    | None =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line72></span>    | Some e =&gt; recursive_prod lib e orig (nt ! trail)
+<span class="lineno" id=line73></span>  ;
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_recursive_nt (lib:gramlib_t) (nt:<span class="library" title="binding of C++ string type">string</span>) =&gt;
+<span class="lineno" id=line77></span>    recursive_nt lib nt nt Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line78></span>  ;
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> left_recursive_prod (lib:gramlib_t) (e:prod_t) (orig:<span class="library" title="binding of C++ string type">string</span>) (trail:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line81></span>    <span class="small_keyword" title="match statement or expression">match</span> e <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line82></span>    | `Terminal _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line83></span>  
+<span class="lineno" id=line84></span>    | `Seq es =&gt;
+<span class="lineno" id=line85></span>      <span class="small_keyword" title="let binder">let</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (es:<span class="library" title="functional, singly linked list">list</span>[prod_t]) =&gt;
+<span class="lineno" id=line86></span>        <span class="small_keyword" title="match statement or expression">match</span> es <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line87></span>        | Empty =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line88></span>        | Cons (head, tail) =&gt; 
+<span class="lineno" id=line89></span>          <span class="small_keyword" title="conditional">if</span> left_recursive_prod lib head orig trail <span class="small_keyword" title="conditional">then</span> <span class="library" title="truth value">true</span>
+<span class="lineno" id=line90></span>          <span class="small_keyword" title="conditional">elif</span> is_nullable_prod lib head <span class="small_keyword" title="conditional">then</span> aux tail
+<span class="lineno" id=line91></span>          <span class="small_keyword" title="conditional">else</span> <span class="library" title="false value">false</span>
+<span class="lineno" id=line92></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line93></span>      <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line94></span>      aux es
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>    | `Alt es =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:bool) (sym:prod_t) =&gt; 
+<span class="lineno" id=line97></span>        acc <span class="small_keyword" title="logical disjunction">or</span> (left_recursive_prod lib sym orig trail)) <span class="library" title="false value">false</span> es
+<span class="lineno" id=line98></span>  
+<span class="lineno" id=line99></span>    | `Nonterminal nt =&gt; 
+<span class="lineno" id=line100></span>      <span class="small_keyword" title="conditional">if</span> nt == orig <span class="small_keyword" title="conditional">then</span> <span class="library" title="truth value">true</span> 
+<span class="lineno" id=line101></span>      <span class="small_keyword" title="conditional">else</span> left_recursive_nt lib nt orig trail
+<span class="lineno" id=line102></span>  
+<span class="lineno" id=line103></span>    | `Epsilon =&gt; <span class="library" title="false value">false</span> 
+<span class="lineno" id=line104></span>  ;
+<span class="lineno" id=line105></span>  
+<span class="lineno" id=line106></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> left_recursive_nt (lib: gramlib_t) (nt:<span class="library" title="binding of C++ string type">string</span>) (orig:<span class="library" title="binding of C++ string type">string</span>) (trail:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : bool =&gt;
+<span class="lineno" id=line107></span>    <span class="small_keyword" title="conditional">if</span> nt <span class="small_keyword" title="membership operator, function mem">in</span> trail <span class="small_keyword" title="conditional">then</span> <span class="library" title="false value">false</span> <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line108></span>    <span class="small_keyword" title="match statement or expression">match</span> find lib nt <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line109></span>    | None =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line110></span>    | Some e =&gt; left_recursive_prod lib e orig (nt ! trail)
+<span class="lineno" id=line111></span>  ;
+<span class="lineno" id=line112></span>  
+<span class="lineno" id=line113></span>  
+<span class="lineno" id=line114></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_left_recursive_nt (lib:gramlib_t) (nt:<span class="library" title="binding of C++ string type">string</span>) =&gt;
+<span class="lineno" id=line115></span>    left_recursive_nt lib nt nt Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line116></span>  ;
+<span class="lineno" id=line117></span>  
+<span class="lineno" id=line118></span>  
+<span class="lineno" id=line119></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> unpack (fresh:1-&gt;<span class="library" title="binding of C++ string type">string</span>) (head:<span class="library" title="binding of C++ string type">string</span>, p:prod_t) : gramlib_t =
+<span class="lineno" id=line120></span>  {
+<span class="lineno" id=line121></span>   <span class="big_keyword" title="Define a mutable variable">var</span> out = Empty[gramentry_t];
+<span class="lineno" id=line122></span>   <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line123></span>   | `Epsilon =&gt; out = ([head,p]);
+<span class="lineno" id=line124></span>   | `Terminal _ =&gt; out = ([head,(`Seq ([p]) :&gt;&gt; prod_t)]);
+<span class="lineno" id=line125></span>   | `Nonterminal s =&gt; out= ([head,(`Seq ([p]) :&gt;&gt; prod_t)]);
+<span class="lineno" id=line126></span>  
+<span class="lineno" id=line127></span>   | `Seq ps =&gt;
+<span class="lineno" id=line128></span>     <span class="big_keyword" title="Define a mutable variable">var</span> newseq = Empty[prod_t];
+<span class="lineno" id=line129></span>     <span class="small_keyword" title="for loop">for</span> term <span class="small_keyword" title="membership operator, function mem">in</span> ps <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line130></span>       <span class="small_keyword" title="match statement or expression">match</span> term <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line131></span>       | `Epsilon =&gt; ;
+<span class="lineno" id=line132></span>       | `Nonterminal _ =&gt; newseq = term ! newseq;
+<span class="lineno" id=line133></span>       | `Terminal _ =&gt; newseq = term ! newseq;
+<span class="lineno" id=line134></span>       | _ =&gt;
+<span class="lineno" id=line135></span>         <span class="big_keyword" title="Define a mutable variable">var</span> newhead = fresh();
+<span class="lineno" id=line136></span>         newseq = (`Nonterminal newhead  :&gt;&gt; prod_t) ! newseq;
+<span class="lineno" id=line137></span>         out = unpack fresh (newhead,term);
+<span class="lineno" id=line138></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line139></span>     <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line140></span>  
+<span class="lineno" id=line141></span>     <span class="small_keyword" title="match statement or expression">match</span> newseq <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line142></span>     | Empty =&gt; out = (head,(#`Epsilon :&gt;&gt; prod_t)) ! out;
+<span class="lineno" id=line143></span>     | _ =&gt; out = (head,(`Seq (unbox (<span class="library" title="return data structure with elements reversed">rev</span> newseq)) :&gt;&gt; prod_t)) ! out;
+<span class="lineno" id=line144></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line145></span>  
+<span class="lineno" id=line146></span>   | `Alt ps =&gt;
+<span class="lineno" id=line147></span>     <span class="library" title="call procedure on each element of data structure">iter</span> (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (p:prod_t) { out = unpack fresh (head,p) + out; }) ps;
+<span class="lineno" id=line148></span>   <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line149></span>   <span class="small_keyword" title="return">return</span> out;
+<span class="lineno" id=line150></span>  }
+<span class="lineno" id=line151></span>  
+<span class="lineno" id=line152></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> normalise_lib (fresh:1-&gt;<span class="library" title="binding of C++ string type">string</span>) (lib:gramlib_t) = {
+<span class="lineno" id=line153></span>    <span class="big_keyword" title="Define a mutable variable">var</span> normalised = Empty[gramentry_t];
+<span class="lineno" id=line154></span>    <span class="small_keyword" title="for loop">for</span> p <span class="small_keyword" title="membership operator, function mem">in</span> lib perform
+<span class="lineno" id=line155></span>      normalised = unpack fresh p + normalised;
+<span class="lineno" id=line156></span>    <span class="small_keyword" title="return">return</span> normalised; 
+<span class="lineno" id=line157></span>  }
+<span class="lineno" id=line158></span>  
+<span class="lineno" id=line159></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> sort_merge (g:gramlib_t) : gramlib_t =&gt;
+<span class="lineno" id=line160></span>   <span class="small_keyword" title="let binder">let</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> enlt (a:gramentry_t, b:gramentry_t) : bool =&gt; a.0 &lt; b.0 <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line161></span>   merge (sort enlt g)
+<span class="lineno" id=line162></span>  ;
+<span class="lineno" id=line163></span>  
+<span class="lineno" id=line164></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> merge (<span class="big_keyword" title="Define a mutable variable">var</span> p:gramlib_t): gramlib_t =
+<span class="lineno" id=line165></span>  {
+<span class="lineno" id=line166></span>   <span class="small_keyword" title="conditional">if</span> p.<span class="library" title="number of elements in data structure">len</span> == 0uz <span class="small_keyword" title="return">return</span> p;
+<span class="lineno" id=line167></span>  
+<span class="lineno" id=line168></span>   <span class="big_keyword" title="Define a mutable variable">var</span> out: gramlib_t = Empty[gramentry_t];
+<span class="lineno" id=line169></span>  
+<span class="lineno" id=line170></span>   <span class="big_keyword" title="Define a mutable variable">var</span> key: <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line171></span>   <span class="big_keyword" title="Define a mutable variable">var</span> alts = Empty[prod_t];
+<span class="lineno" id=line172></span>   <span class="big_keyword" title="Define a mutable variable">var</span> cur: gramentry_t;
+<span class="lineno" id=line173></span>   <span class="hack">C_hack</span>::ignore(&amp;cur); <span class="comment">// fool use before init check</span>
+<span class="lineno" id=line174></span>  
+<span class="lineno" id=line175></span>   <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> fetch() { 
+<span class="lineno" id=line176></span>     <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line177></span>     | Cons (head,tail) =&gt; cur = head; p = tail; 
+<span class="lineno" id=line178></span>     | Empty =&gt; <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line179></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line180></span>   }
+<span class="lineno" id=line181></span>  
+<span class="lineno" id=line182></span>   <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dohead() { key = cur.0; alts = Empty[prod_t]; }
+<span class="lineno" id=line183></span>   <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dofoot() { out = (key,(`Alt alts :&gt;&gt; prod_t)) ! out;  }
+<span class="lineno" id=line184></span>   <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dobreak() { dofoot; dohead; }
+<span class="lineno" id=line185></span>   <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> check() { <span class="small_keyword" title="conditional">if</span> key != cur.0 <span class="small_keyword" title="call a procedure">call</span> dobreak; }
+<span class="lineno" id=line186></span>  
+<span class="lineno" id=line187></span>   fetch;
+<span class="lineno" id=line188></span>   dohead;
+<span class="lineno" id=line189></span>   <span class="small_keyword" title="while loop">while</span> p.<span class="library" title="number of elements in data structure">len</span> &gt; 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line190></span>     check;
+<span class="lineno" id=line191></span>     alts = cur.1 ! alts;
+<span class="lineno" id=line192></span>     fetch;
+<span class="lineno" id=line193></span>   <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line194></span>   check;
+<span class="lineno" id=line195></span>   alts = cur.1 ! alts;
+<span class="lineno" id=line196></span>   dofoot;
+<span class="lineno" id=line197></span>   <span class="small_keyword" title="return">return</span> out;
+<span class="lineno" id=line198></span>  }
+<span class="lineno" id=line199></span>  
+<span class="lineno" id=line200></span>  } <span class="comment">// class Grammar</span>
+<span class="lineno" id=line201></span>  
+<span class="lineno" id=line202></span>  
+</pre></p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

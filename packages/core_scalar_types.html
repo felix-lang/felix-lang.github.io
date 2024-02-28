@@ -1,0 +1,693 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Core Scalar Types</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Language features.",
+"Synopsis",
+"Character type",
+"Efficient Integer types",
+"Exact Integer types",
+"Raw Memory",
+"Integer literal constructors.",
+"Floating types",
+"Groupings of the types.",
+"Integers",
+"Floats",
+"All Scalars."
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Language features._h')"> <a href="#Language_features._h">Language features.</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Synopsis_h')"> <a href="#Synopsis_h">Synopsis</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Character type_h')"> <a href="#Character_type_h">Character type</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Efficient Integer types_h')"> <a href="#Efficient_Integer_types_h">Efficient Integer types</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Exact Integer types_h')"> <a href="#Exact_Integer_types_h">Exact Integer types</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Raw Memory_h')"> <a href="#Raw_Memory_h">Raw Memory</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Integer literal constructors._h')"> <a href="#Integer_literal_constructors._h">Integer literal constructors.</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Floating types_h')"> <a href="#Floating_types_h">Floating types</a></div>
+      <div class=sm id=menu8>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#Groupings of the types._h')"> <a href="#Groupings_of_the_types._h">Groupings of the types.</a></div>
+      <div class=sm id=menu9>
+      <div class=m2><a href="#Integers_h">Integers</a></div>
+      <div class=m2><a href="#Floats_h">Floats</a></div>
+      <div class=m2><a href="#All_Scalars._h">All Scalars.</a></div>
+      </div>
+    <script>counter_max=9;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Language_features._h'><img src='/share/src/web/images/minus.gif' id='Language features.' onclick='toggle(this,"Language_features._d")' alt='+'/> 1 Language features.</h1><div id='Language_features._d' style='display:block'>
+<p>In these definitions, we introduce basic types into Felix with
+bindings to C. These are expressed by the <code>type</code> statement,
+which gives the Felix name of the type, and then the C 
+name in quotes.
+</p><p>Note very particularly each type is distinct, type names
+such as <code>size_t</code> in C and C++ are merely aliases for
+some other integer type, in Felix these types are 
+completely distinct.
+</p><p>The adjective <code>pod</code> stands for <em>plain old datatype</em>
+and tells the system that the type has a trivial destructor
+and does not require finalisation.
+</p><p>The adjective <code>_gc_pointer</code> tells the system the abstract
+primitive is in fact a pointer and the garbage collector
+must follow it.
+</p><p>The <code>requires</code> clause, if specified, tells the system
+that the named floating insertion must be emitted into
+the generated C++ code.  We will use the names of code
+fragments specifying header files defined
+in the <strong>cheaders</strong> package.
+</p></div><h1 id='Synopsis_h'><img src='/share/src/web/images/minus.gif' id='Synopsis' onclick='toggle(this,"Synopsis_d")' alt='+'/> 2 Synopsis</h1><div id='Synopsis_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/ctypedefs"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/address"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/memory"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/bool"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/int"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/real"</span>;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/complex"</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/quaternion"</span>;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/char"</span>;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/float_format"</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/kind/staticbool"</span>;
+<span class="lineno" id=line17></span>  
+</pre></p></div><h1 id='Character_type_h'><img src='/share/src/web/images/minus.gif' id='Character type' onclick='toggle(this,"Character_type_d")' alt='+'/> 3 Character type</h1><div id='Character_type_d' style='display:block'>
+<p>A basic 8 bit character type.
+</p><pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C char type">char</span> = <span class="fstring">"char"</span>;
+<span class="lineno" id=line2></span>  
+</pre></p></div><h1 id='Efficient_Integer_types_h'><img src='/share/src/web/images/minus.gif' id='Efficient Integer types' onclick='toggle(this,"Efficient_Integer_types_d")' alt='+'/> 4 Efficient Integer types</h1><div id='Efficient_Integer_types_d' style='display:block'>
+<p>These types correspond to C99 integer types.
+Note that Felix mandates the existence of the long long types.
+</p><p>Note we also require the C99 <code>intmax_t</code> and <code>uintmax_t</code>
+types. These will usually be signed and unsigned
+long long, however they may be an even larger type if the
+C implementor desires.
+</p><p>We also map C89 <code>size_t</code> and the less useful C99 <code>ssize_t</code>,
+a signed variant of <code>size_t</code>. These are used for array
+lengths and in particular can span byte arrays as large
+as can be addressed.
+</p><pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C signed char type">tiny</span> = <span class="fstring">"signed char"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_tiny;
+<span class="lineno" id=line2></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C short type">short</span> = <span class="fstring">"short"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_short;
+<span class="lineno" id=line3></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C int type">int</span> = <span class="fstring">"int"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_int;
+<span class="lineno" id=line4></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C long type">long</span> = <span class="fstring">"long"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_long;
+<span class="lineno" id=line5></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C long long type">vlong</span> = <span class="fstring">"long long"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_vlong;
+<span class="lineno" id=line6></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C unsigned char type">utiny</span> = <span class="fstring">"unsigned char"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_utiny;
+<span class="lineno" id=line7></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C unsigned short type">ushort</span> = <span class="fstring">"unsigned short"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_ushort;
+<span class="lineno" id=line8></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C unsigned int type">uint</span> = <span class="fstring">"unsigned int"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_uint;
+<span class="lineno" id=line9></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C unsigned long type">ulong</span> = <span class="fstring">"unsigned long"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_ulong;
+<span class="lineno" id=line10></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C unsigned long long type">uvlong</span> = <span class="fstring">"unsigned long long"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_uvlong;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C intmax_t type">intmax</span> = <span class="fstring">"intmax_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_intmax;
+<span class="lineno" id=line13></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C uintmax_t type">uintmax</span> = <span class="fstring">"uintmax_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_uintmax;
+<span class="lineno" id=line14></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"size_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C89_headers::stddef_h, index TYPE_size;
+<span class="lineno" id=line15></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C signed type corresponding to size_t type">ssize</span> = <span class="fstring">"ssize_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C89_headers::stddef_h, index TYPE_ssize;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="comment">/* for concordance, required to generated loops */</span>
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Define a type class">class</span> PervasiveInts {
+<span class="lineno" id=line19></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> zero: <span class="library" title="binding of C int type">int</span> = <span class="fstring">"0"</span> <span class="big_keyword" title="specify requirements">requires</span> index CONST_zero;
+<span class="lineno" id=line20></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> isneg:  <span class="library" title="binding of C int type">int</span> -&gt; 2 = <span class="fstring">"$1&lt;0"</span> <span class="big_keyword" title="specify requirements">requires</span> index FUN_isneg;
+<span class="lineno" id=line21></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> isnonneg:  <span class="library" title="binding of C int type">int</span> -&gt; 2= <span class="fstring">"$1&gt;=0"</span> <span class="big_keyword" title="specify requirements">requires</span> index FUN_isnonneg;
+<span class="lineno" id=line22></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> decr:  &amp;<span class="library" title="binding of C int type">int</span> = <span class="fstring">"--*$1;"</span> <span class="big_keyword" title="specify requirements">requires</span> index PROC_decr;
+<span class="lineno" id=line23></span>  }
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  <span class="comment">// Shouldn't really be here!</span>
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Define a type class">class</span> PervasiveLogic {
+<span class="lineno" id=line27></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> land: bool * bool -&gt; bool = <span class="fstring">"$1&amp;&amp;$2"</span> <span class="big_keyword" title="specify requirements">requires</span> index FUN_land;
+<span class="lineno" id=line28></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> lor: bool * bool -&gt; bool = <span class="fstring">"$1||$2"</span> <span class="big_keyword" title="specify requirements">requires</span> index FUN_lor;
+<span class="lineno" id=line29></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> lnot: bool * bool -&gt; bool = <span class="fstring">"!$1"</span> <span class="big_keyword" title="specify requirements">requires</span> index FUN_lnot;
+<span class="lineno" id=line30></span>  }
+<span class="lineno" id=line31></span>  
+</pre></p></div><h1 id='Exact_Integer_types_h'><img src='/share/src/web/images/minus.gif' id='Exact Integer types' onclick='toggle(this,"Exact_Integer_types_d")' alt='+'/> 5 Exact Integer types</h1><div id='Exact_Integer_types_d' style='display:block'>
+<p>Here are the usual exact integer types.
+Note that Felix mandates the existence of the <code>stdint.h</code>
+header file from C99, and that all the exact types are
+defined. This includes 64 bit signed and unsigned integers,
+even on a 32 bit machine.
+</p><pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C int8_t type">int8</span> = <span class="fstring">"int8_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_int8;
+<span class="lineno" id=line2></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C int16_t type">int16</span> = <span class="fstring">"int16_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_int16;
+<span class="lineno" id=line3></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C int32_t type">int32</span> = <span class="fstring">"int32_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_int32;
+<span class="lineno" id=line4></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C int64 type">int64</span> = <span class="fstring">"int64_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_int64;
+<span class="lineno" id=line5></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C uint8_t type">uint8</span> = <span class="fstring">"uint8_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_uint8;
+<span class="lineno" id=line6></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C uint16_t type">uint16</span> = <span class="fstring">"uint16_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_uint16;
+<span class="lineno" id=line7></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C uint32_t type">uint32</span> = <span class="fstring">"uint32_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_uint32;
+<span class="lineno" id=line8></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C uint64 type">uint64</span> = <span class="fstring">"uint64_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_uint64;
+<span class="lineno" id=line9></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> uint128 = <span class="fstring">"uint128_t"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_uint256_t"</span>;
+<span class="lineno" id=line10></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> uint256 = <span class="fstring">"uint256_t"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_uint256_t"</span>;
+<span class="lineno" id=line11></span>  
+</pre></p></div><h1 id='Raw_Memory_h'><img src='/share/src/web/images/minus.gif' id='Raw Memory' onclick='toggle(this,"Raw_Memory_d")' alt='+'/> 6 Raw Memory</h1><div id='Raw_Memory_d' style='display:block'>
+<p>Raw memory operations provide an uninterpreted byte and
+two address types.
+ 
+We also provide a mapping of <code>ptrdiff_t</code> which is a signed
+type holding the result of subtracting two pointers or
+addresses of the same type.
+</p><p>Finally, we provide signed and unsigned integers of the same
+size as addresses and pointers which can be used to perform
+arbitrary integer operations.
+</p><pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="special binding of C unsigned char type">byte</span> = <span class="fstring">"unsigned char"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_byte;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> caddress = <span class="fstring">"void *"</span>;
+<span class="lineno" id=line3></span>  _gc_pointer <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"void *"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_address;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C ptrdiff_t type">ptrdiff</span> = <span class="fstring">"ptrdiff_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C89_headers::stddef_h, index TYPE_ptrdiff;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C intptr_t type">intptr</span> = <span class="fstring">"intptr_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_intptr;
+<span class="lineno" id=line8></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span> = <span class="fstring">"uintptr_t"</span> <span class="big_keyword" title="specify requirements">requires</span> C99_headers::stdint_h, index TYPE_uintptr;
+</pre></p></div><h1 id='Integer_literal_constructors._h'><img src='/share/src/web/images/minus.gif' id='Integer literal constructors.' onclick='toggle(this,"Integer_literal_constructors._d")' alt='+'/> 7 Integer literal constructors.</h1><div id='Integer_literal_constructors._d' style='display:block'>
+<p>In Felix, integer types are lifted from C in the library.
+Therefore, constructors for these types must also 
+be defined in the library, including literals.
+</p><p>In Felix, internally, all literals are represented opaquely.
+There are three components to a literal: the Felix type,
+the string value of the lexeme decoded by the parser,
+and a string representing the C++ value to be emitted
+by the compiler back end.
+</p><p>The grammar specification consists of regular definitions
+used to recognize the literal, and decoding routines
+written in Scheme used to produce the triple required
+by the compiler.
+</p></div><h1 id='Floating_types_h'><img src='/share/src/web/images/minus.gif' id='Floating types' onclick='toggle(this,"Floating_types_d")' alt='+'/> 8 Floating types</h1><div id='Floating_types_d' style='display:block'>
+<p>Note that Felix requires the long double type from C99.
+Also note that the complex types are taken from C++ and
+not C!
+</p><pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C float type">float</span> = <span class="fstring">"float"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_float;
+<span class="lineno" id=line2></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C double float type">double</span> = <span class="fstring">"double"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_double;
+<span class="lineno" id=line3></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C long double type">ldouble</span> = <span class="fstring">"long double"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_ldouble;
+<span class="lineno" id=line4></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C++ complex&lt;float&gt; type">fcomplex</span> = <span class="fstring">"::std::complex&lt;float&gt;"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::complex, index TYPE_fcomplex;
+<span class="lineno" id=line5></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C++ complex&lt;double&gt; type">dcomplex</span> = <span class="fstring">"::std::complex&lt;double&gt;"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::complex, index TYPE_dcomplex;
+<span class="lineno" id=line6></span>  <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> <span class="library" title="binding of C++ complex&lt;long double&gt; type">lcomplex</span> = <span class="fstring">"::std::complex&lt;long double&gt;"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::complex, index TYPE_lcomplex;
+<span class="lineno" id=line7></span>  
+</pre></p></div><h1 id='Groupings_of_the_types._h'><img src='/share/src/web/images/minus.gif' id='Groupings of the types.' onclick='toggle(this,"Groupings_of_the_types._d")' alt='+'/> 9 Groupings of the types.</h1><div id='Groupings_of_the_types._d' style='display:block'>
+<p>We can define sets of types so they may be used in
+in function bindings to avoid a lot of repetition.
+</p><p>The <code>typesetof</code> operator takes a comma separated list
+of parenthesised type names, and represents a finite
+set of types.
+</p><p>The \(\cup\) operator, spelled <code>\cup</code>, can be used to find the setwise
+union of two typesets.
+</p><pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Types associated with raw address calculations.</span>
+<span class="lineno" id=line2></span>  typeset addressing = { 
+<span class="lineno" id=line3></span>    <span class="library" title="special binding of C unsigned char type">byte</span>,
+<span class="lineno" id=line4></span>    <span class="library" title="special binding of C void* type">address</span>,
+<span class="lineno" id=line5></span>    caddress
+<span class="lineno" id=line6></span>  };
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="doccomment">Character types.</span>
+<span class="lineno" id=line9></span>  typeset chars = {<span class="library" title="binding of C char type">char</span>};
+<span class="lineno" id=line10></span>  
+</pre></p><h2 id='Integers_h'><img src='/share/src/web/images/minus.gif' id='Integers' onclick='toggle(this,"Integers_d")' alt='+'/> 9.1 Integers</h2><div id='Integers_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">"natural" sized signed integer types.</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">These correspond to C/C++ core types.</span>
+<span class="lineno" id=line3></span>  typeset fast_sints = {<span class="library" title="binding of C signed char type">tiny</span>, <span class="library" title="binding of C short type">short</span>, <span class="library" title="binding of C int type">int</span>, <span class="library" title="binding of C long type">long</span>, <span class="library" title="binding of C long long type">vlong</span>};
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="doccomment">Exact sized signed integer types.</span>
+<span class="lineno" id=line6></span>  <span class="doccomment">In C these are typedefs.</span>
+<span class="lineno" id=line7></span>  <span class="doccomment">In Felix they're distinct types.</span>
+<span class="lineno" id=line8></span>  typeset exact_sints = {<span class="library" title="binding of C int8_t type">int8</span>,<span class="library" title="binding of C int16_t type">int16</span>,<span class="library" title="binding of C int32_t type">int32</span>,<span class="library" title="binding of C int64 type">int64</span>};
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="doccomment">"natural" sized unsigned integer types.</span>
+<span class="lineno" id=line11></span>  <span class="doccomment">These correspond to C/C++ core types.</span>
+<span class="lineno" id=line12></span>  typeset fast_uints = {<span class="library" title="binding of C unsigned char type">utiny</span>, <span class="library" title="binding of C unsigned short type">ushort</span>, <span class="library" title="binding of C unsigned int type">uint</span>, <span class="library" title="binding of C unsigned long type">ulong</span>,<span class="library" title="binding of C unsigned long long type">uvlong</span>};
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  <span class="doccomment">Exact sized unsigned integer types.</span>
+<span class="lineno" id=line15></span>  <span class="doccomment">In C these are typedefs.</span>
+<span class="lineno" id=line16></span>  <span class="doccomment">In Felix they're distinct types.</span>
+<span class="lineno" id=line17></span>  typeset exact_uints = {<span class="library" title="binding of C uint8_t type">uint8</span>,<span class="library" title="binding of C uint16_t type">uint16</span>,<span class="library" title="binding of C uint32_t type">uint32</span>,<span class="library" title="binding of C uint64 type">uint64</span>,uint128,uint256};
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="doccomment">Weirdo signed integers types corresponding to</span>
+<span class="lineno" id=line20></span>  <span class="doccomment">typedefs in C.</span>
+<span class="lineno" id=line21></span>  typeset weird_sints = {<span class="library" title="binding of C ptrdiff_t type">ptrdiff</span>, <span class="library" title="binding of C signed type corresponding to size_t type">ssize</span>, <span class="library" title="binding of C intmax_t type">intmax</span>, <span class="library" title="binding of C intptr_t type">intptr</span>};
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  <span class="doccomment">Weirdo unsigned integers types corresponding to</span>
+<span class="lineno" id=line24></span>  <span class="doccomment">typedefs in C.</span>
+<span class="lineno" id=line25></span>  typeset weird_uints = {<span class="library" title="binding of C size_t type">size</span>, <span class="library" title="binding of C uintmax_t type">uintmax</span>, <span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>};
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  <span class="doccomment">All the signed integers.</span>
+<span class="lineno" id=line28></span>  typeset sints = fast_sints <span class="tex_symbol" title="\cup">\(\cup\)</span> exact_sints <span class="tex_symbol" title="\cup">\(\cup\)</span> weird_sints;
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>  <span class="doccomment">All the usigned integers.</span>
+<span class="lineno" id=line31></span>  typeset uints = fast_uints <span class="tex_symbol" title="\cup">\(\cup\)</span> exact_uints <span class="tex_symbol" title="\cup">\(\cup\)</span> weird_uints;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="doccomment">All the fast integers.</span>
+<span class="lineno" id=line34></span>  typeset fast_ints = fast_sints <span class="tex_symbol" title="\cup">\(\cup\)</span> fast_uints;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>  <span class="doccomment">All the exact integers.</span>
+<span class="lineno" id=line37></span>  typeset exact_ints = exact_sints <span class="tex_symbol" title="\cup">\(\cup\)</span> exact_uints;
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  <span class="doccomment">All the integers.</span>
+<span class="lineno" id=line40></span>  typeset ints = sints <span class="tex_symbol" title="\cup">\(\cup\)</span> uints;
+<span class="lineno" id=line41></span>  
+</pre></p></div><h2 id='Floats_h'><img src='/share/src/web/images/minus.gif' id='Floats' onclick='toggle(this,"Floats_d")' alt='+'/> 9.2 Floats</h2><div id='Floats_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">All the core floating point types.</span>
+<span class="lineno" id=line2></span>  typeset floats = {<span class="library" title="binding of C float type">float</span>, <span class="library" title="binding of C double float type">double</span>, <span class="library" title="binding of C long double type">ldouble</span>};
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="doccomment">All the core approximations to real types.</span>
+<span class="lineno" id=line5></span>  typeset reals = ints <span class="tex_symbol" title="\cup">\(\cup\)</span> floats;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="doccomment">All the core approximations to complex types.</span>
+<span class="lineno" id=line8></span>  typeset complexes = {<span class="library" title="binding of C++ complex&lt;float&gt; type">fcomplex</span>,<span class="library" title="binding of C++ complex&lt;double&gt; type">dcomplex</span>,<span class="library" title="binding of C++ complex&lt;long double&gt; type">lcomplex</span>};
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="doccomment">All the core approximations to numbers.</span>
+<span class="lineno" id=line11></span>  typeset numbers = reals <span class="tex_symbol" title="\cup">\(\cup\)</span> complexes;
+</pre></p></div><h2 id='All_Scalars._h'><img src='/share/src/web/images/minus.gif' id='All Scalars.' onclick='toggle(this,"All_Scalars._d")' alt='+'/> 9.3 All Scalars.</h2><div id='All_Scalars._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/ctypedefs.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">All the basic scalar types.</span>
+<span class="lineno" id=line2></span>  typeset basic_types = bool <span class="tex_symbol" title="\cup">\(\cup\)</span> numbers <span class="tex_symbol" title="\cup">\(\cup\)</span> chars <span class="tex_symbol" title="\cup">\(\cup\)</span> addressing;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// we define this now, we will open it later...</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> [t <span class="small_keyword" title="membership operator, function mem">in</span> basic_types] Eq[t] {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : t * t -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line7></span>  }
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="comment">// we open this now even though we haven't developed</span>
+<span class="lineno" id=line10></span>  <span class="comment">// the instances yet....</span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Open a module or class">open</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> basic_types] Show[T];
+<span class="lineno" id=line12></span>  
+</pre></p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

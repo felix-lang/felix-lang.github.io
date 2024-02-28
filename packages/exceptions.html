@@ -1,0 +1,998 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Felix RTL Exception Handling.</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Continuation",
+"Exceptions",
+"Handling Exceptions"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Continuation_h')"> <a href="#Continuation_h">Continuation</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Exceptions_h')"> <a href="#Exceptions_h">Exceptions</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Handling Exceptions_h')"> <a href="#Handling_Exceptions_h">Handling Exceptions</a></div>
+      <div class=sm id=menu3>
+      </div>
+    <script>counter_max=3;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Continuation_h'><img src='/share/src/web/images/minus.gif' id='Continuation' onclick='toggle(this,"Continuation_d")' alt='+'/> 1 Continuation</h1><div id='Continuation_d' style='display:block'>
+<p>Needed here in the exceptions library because it can be
+thrown as an exception.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_continuation.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> _FLX_CONTINUATION_HPP
+#<span class="preproc">define</span> _FLX_CONTINUATION_HPP
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_compiler_support_headers.hpp"</span>
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// CONTINUATION.
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">namespace</span> flx {<span class="big_keyword">namespace</span> rtl {
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN con_t <span class="comment">///< abstract base for mutable continuations
+</span>{
+  FLX_PC_DECL               <span class="comment">///< interior program counter
+</span>  <span class="big_keyword">union</span> svc_req_t *p_svc;           <span class="comment">///< pointer to service request
+</span>
+  con_t();                  <span class="comment">///< initialise pc, p_svc to 0
+</span>  <span class="qualifier">virtual</span> con_t *resume()=0;<span class="comment">///< method to perform a computational step
+</span>  <span class="qualifier">virtual</span> ~con_t();
+  con_t * _caller;          <span class="comment">///< callers continuation (return address)
+</span>};
+}} <span class="comment">//namespaces
+</span>#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/exceptions/flx_continuation.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_continuation.hpp"</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+<span class="comment">// ********************************************************
+</span><span class="comment">// con_t implementation
+</span><span class="comment">// ********************************************************
+</span>
+con_t::con_t() : pc(0), p_svc(0), _caller(0) {
+#<span class="small_keyword">if</span> FLX_DEBUG_CONT
+ fprintf(stderr,<span class="fstring">"Constructing %p\n"</span>,this);
+#<span class="preproc">endif</span>
+}
+con_t::~con_t(){
+#<span class="small_keyword">if</span> FLX_DEBUG_CONT
+  fprintf(stderr,<span class="fstring">"Destroying %p\n"</span>,this);
+#<span class="preproc">endif</span>
+}
+}} <span class="comment">// namespaces
+</span>
+</pre></p></div><h1 id='Exceptions_h'><img src='/share/src/web/images/minus.gif' id='Exceptions' onclick='toggle(this,"Exceptions_d")' alt='+'/> 2 Exceptions</h1><div id='Exceptions_d' style='display:block'>
+<p>Felix programs can throw a number of exceptions representing errors.
+Such exceptions cannot be handled. The Felix RTL catches
+these exceptions, displays a diagnostic, and then terminates
+the program.
+</p><p>Exceptions thrown in a thread should also terminate the
+program, that is, the whole containing process and any
+child processes if the OS supports that.
+</p><p>These exceptions are for fatal errors only.
+</p><p>Internally Felix may throw continuations to unwind the
+machine stack so that a long jump (non-local goto) can
+be executed in a top level procedure.
+</p><p>Exception handling is, however, supported in one very
+special case: it is allowed to directly wrap a C++ primitive
+function with a try/catch/entry construction. General Felix
+code can NOT be wrapped because procedures do not use
+the machine stack to retain continuations (return addresses).
+</p><p>In general C++ style dynamic exception handling is unsafe
+and should not be used.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_exceptions.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_EXCEPTIONS_HPP__
+#<span class="preproc">define</span> __FLX_EXCEPTIONS_HPP__
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+<span class="comment">// ********************************************************
+</span><span class="comment">// Standard C++ Exceptions
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_exception_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_out_of_memory_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_exec_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_range_srcref_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_match_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_assert_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_assert2_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_axiom_check_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_switch_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_dead_frame_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_dropthru_failure_t;
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_link_failure_t;
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: Felix exception base abstraction.
+</span><span class="comment">/// Mainly used to convert catches into subroutine
+</span><span class="comment">/// calls which then dispatch on RTTI manually.
+</span><span class="comment">// ********************************************************
+</span>
+
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_exception_t {
+  <span class="qualifier">virtual</span> ~flx_exception_t()=0;
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: Out of Memory.
+</span><span class="comment">/// Thrown when out of memory or memory bound exceeded.
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_out_of_memory_t : flx_exception_t {
+  flx_out_of_memory_t();
+  <span class="qualifier">virtual</span> ~flx_out_of_memory_t();
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: EXEC protocol failure.
+</span><span class="comment">/// Thrown when trying to run a dead procedure
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_exec_failure_t : flx_exception_t {
+  ::<span class="small_keyword">std</span>::string filename;  <span class="comment">///< dll filename
+</span>  ::<span class="small_keyword">std</span>::string operation; <span class="comment">///< faulty operation
+</span>  ::<span class="small_keyword">std</span>::string what;      <span class="comment">///< error description
+</span>  flx_exec_failure_t(::<span class="small_keyword">std</span>::string f, ::<span class="small_keyword">std</span>::string o, ::<span class="small_keyword">std</span>::string w);
+  <span class="qualifier">virtual</span> ~flx_exec_failure_t();
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// SOURCE REFERENCE: to track places in user source code.
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_range_srcref_t {
+  <span class="qualifier">char</span> <span class="qualifier">const</span> *filename;  <span class="comment">///< source file name
+</span>  <span class="qualifier">int</span> startline;   <span class="comment">///< first line (1 origin)
+</span>  <span class="qualifier">int</span> startcol;    <span class="comment">///< first column (1 origin)
+</span>  <span class="qualifier">int</span> endline;     <span class="comment">///< last line
+</span>  <span class="qualifier">int</span> endcol;      <span class="comment">///< last column
+</span>  flx_range_srcref_t(<span class="qualifier">char</span> <span class="qualifier">const</span> *f,<span class="qualifier">int</span> sl, <span class="qualifier">int</span> sc, <span class="qualifier">int</span> el, <span class="qualifier">int</span> ec);
+  flx_range_srcref_t();
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: HALT.
+</span><span class="comment">/// Thrown by halt command
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_halt_t : flx_exception_t {
+  ::<span class="small_keyword">std</span>::string reason;         <span class="comment">///< halt argument
+</span>  flx_range_srcref_t flx_loc; <span class="comment">///< location in Felix file
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file name
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< C++ line number
+</span>  flx_halt_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl, ::<span class="small_keyword">std</span>::string reason);
+  <span class="qualifier">virtual</span> ~flx_halt_t();
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: MATCH failure.
+</span><span class="comment">/// Thrown when no match cases match the argument of a match,
+</span><span class="comment">/// regmatch, or reglex
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_match_failure_t : flx_exception_t {
+  flx_range_srcref_t flx_loc; <span class="comment">///< location in Felix file
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file name
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< C++ line number
+</span>  flx_match_failure_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_match_failure_t();
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: DROPTHRU failure.
+</span><span class="comment">/// Thrown when function drops off end without returning value
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_dropthru_failure_t : flx_exception_t {
+  flx_range_srcref_t flx_loc; <span class="comment">///< location in Felix file
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file name
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< C++ line number
+</span>  flx_dropthru_failure_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_dropthru_failure_t();
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: ASSERT failure.
+</span><span class="comment">/// Thrown when user assertion fails
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_assert_failure_t : flx_exception_t {
+  flx_range_srcref_t flx_loc; <span class="comment">///< location in Felix file
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< __LINE__ macro
+</span>  flx_assert_failure_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_assert_failure_t();
+};
+
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_assert2_failure_t : flx_exception_t {
+  flx_range_srcref_t flx_loc; <span class="comment">///< location in Felix file
+</span>  flx_range_srcref_t flx_loc2; <span class="comment">///< second location in Felix file
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< __LINE__ macro
+</span>  flx_assert2_failure_t(flx_range_srcref_t ff, flx_range_srcref_t ff2, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_assert2_failure_t();
+};
+
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_axiom_check_failure_t : flx_exception_t {
+  flx_range_srcref_t flx_loc; <span class="comment">///< location in Felix file
+</span>  flx_range_srcref_t flx_loc2; <span class="comment">///< second location in Felix file
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< __LINE__ macro
+</span>  flx_axiom_check_failure_t (flx_range_srcref_t ff, flx_range_srcref_t ff2, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_axiom_check_failure_t ();
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: RANGE failure.
+</span><span class="comment">/// Thrown when a range check fails
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_range_failure_t : flx_exception_t {
+  <span class="qualifier">long</span> min; <span class="qualifier">long</span> v; <span class="qualifier">long</span> max;
+  flx_range_srcref_t flx_loc; <span class="comment">///< location in Felix file
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< __LINE__ macro
+</span>  flx_range_failure_t(<span class="qualifier">long</span>,<span class="qualifier">long</span>,<span class="qualifier">long</span>,flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_range_failure_t();
+};
+
+FLX_EXCEPTIONS_EXTERN <span class="qualifier">long</span> range_check (<span class="qualifier">long</span> l, <span class="qualifier">long</span> x, <span class="qualifier">long</span> h, flx_range_srcref_t sref, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+FLX_EXCEPTIONS_EXTERN <span class="qualifier">void</span> print_loc(FILE *ef,flx_range_srcref_t x,<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+FLX_EXCEPTIONS_EXTERN <span class="qualifier">void</span> print_cxxloc(FILE *ef,<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+FLX_EXCEPTIONS_EXTERN <span class="qualifier">void</span> print_srclines(FILE *ef,flx_range_srcref_t x);
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: SWITCH failure. this is a system failure!
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_switch_failure_t : flx_exception_t {
+  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< __LINE__ macro
+</span>  flx_switch_failure_t(<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_switch_failure_t();
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: DEAD FRAME failure. 
+</span><span class="comment">/// Thrown on attempt to resume already returned procedure frame.
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_dead_frame_failure_t : flx_exception_t {
+  <span class="qualifier">char</span> <span class="qualifier">const</span> *cxx_srcfile;          <span class="comment">///< C++ file
+</span>  <span class="qualifier">int</span> cxx_srcline;            <span class="comment">///< __LINE__ macro
+</span>  flx_dead_frame_failure_t(<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl);
+  <span class="qualifier">virtual</span> ~flx_dead_frame_failure_t();
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// EXCEPTION: DYNAMIC LINKAGE failure. this is a system failure!
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> FLX_EXCEPTIONS_EXTERN flx_link_failure_t : flx_exception_t {
+  ::<span class="small_keyword">std</span>::string filename;
+  ::<span class="small_keyword">std</span>::string operation;
+  ::<span class="small_keyword">std</span>::string what;
+  flx_link_failure_t(::<span class="small_keyword">std</span>::string f, ::<span class="small_keyword">std</span>::string o, ::<span class="small_keyword">std</span>::string w);
+  flx_link_failure_t(); <span class="comment">// unfortunately this one requires a default ctor.
+</span>  <span class="qualifier">virtual</span> ~flx_link_failure_t();
+};
+
+}}
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/exceptions/flx_exceptions.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+<span class="comment">// ********************************************************
+</span><span class="comment">// standard exceptions -- implementation
+</span><span class="comment">// ********************************************************
+</span>flx_exception_t::~flx_exception_t(){}
+
+flx_exec_failure_t::flx_exec_failure_t(::<span class="small_keyword">std</span>::string f, ::<span class="small_keyword">std</span>::string o, ::<span class="small_keyword">std</span>::string w) :
+  filename(f),
+  operation(o),
+  what(w)
+{}
+
+flx_out_of_memory_t::flx_out_of_memory_t(){}
+flx_out_of_memory_t::~flx_out_of_memory_t(){}
+flx_exec_failure_t::~flx_exec_failure_t(){}
+
+flx_range_srcref_t::flx_range_srcref_t() :
+    filename(<span class="fstring">""</span>),startline(0),startcol(0),endline(0),endcol(0){}
+flx_range_srcref_t::flx_range_srcref_t(<span class="qualifier">char</span> <span class="qualifier">const</span> *f,<span class="qualifier">int</span> sl, <span class="qualifier">int</span> sc, <span class="qualifier">int</span> el, <span class="qualifier">int</span> ec) :
+    filename(f),startline(sl),startcol(sc),endline(el),endcol(ec){}
+
+flx_halt_t::flx_halt_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl, ::<span class="small_keyword">std</span>::string r) :
+   reason(r), flx_loc(ff), cxx_srcfile(cf), cxx_srcline(cl) {}
+flx_halt_t::~flx_halt_t(){}
+
+flx_match_failure_t::flx_match_failure_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+   flx_loc(ff), cxx_srcfile(cf), cxx_srcline(cl) {}
+flx_match_failure_t::~flx_match_failure_t(){}
+
+flx_dropthru_failure_t::flx_dropthru_failure_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+   flx_loc(ff), cxx_srcfile(cf), cxx_srcline(cl) {}
+flx_dropthru_failure_t::~flx_dropthru_failure_t(){}
+
+flx_assert_failure_t::flx_assert_failure_t(flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+   flx_loc(ff), cxx_srcfile(cf), cxx_srcline(cl) {}
+flx_assert_failure_t::~flx_assert_failure_t(){}
+
+flx_assert2_failure_t::flx_assert2_failure_t(flx_range_srcref_t ff, flx_range_srcref_t ff2, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+   flx_loc(ff), flx_loc2(ff2), cxx_srcfile(cf), cxx_srcline(cl) {}
+flx_assert2_failure_t::~flx_assert2_failure_t(){}
+
+flx_axiom_check_failure_t::flx_axiom_check_failure_t(flx_range_srcref_t ff, flx_range_srcref_t ff2, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+   flx_loc(ff), flx_loc2(ff2), cxx_srcfile(cf), cxx_srcline(cl) {}
+flx_axiom_check_failure_t::~flx_axiom_check_failure_t(){}
+
+flx_range_failure_t::flx_range_failure_t(<span class="qualifier">long</span> l, <span class="qualifier">long</span> x, <span class="qualifier">long</span> h, flx_range_srcref_t ff, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+   min(l), v(x), max(h), flx_loc(ff), cxx_srcfile(cf), cxx_srcline(cl) {}
+flx_range_failure_t::~flx_range_failure_t(){}
+
+flx_switch_failure_t::~flx_switch_failure_t(){}
+flx_switch_failure_t::flx_switch_failure_t (<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+  cxx_srcfile(cf), cxx_srcline (cl) {}
+
+flx_dead_frame_failure_t::~flx_dead_frame_failure_t(){}
+flx_dead_frame_failure_t::flx_dead_frame_failure_t(<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl) :
+  cxx_srcfile(cf), cxx_srcline (cl) {}
+
+
+flx_link_failure_t::flx_link_failure_t(::<span class="small_keyword">std</span>::string f, ::<span class="small_keyword">std</span>::string o, ::<span class="small_keyword">std</span>::string w) :
+  filename(f),
+  operation(o),
+  what(w)
+{}
+
+flx_link_failure_t::~flx_link_failure_t(){}
+flx_link_failure_t::flx_link_failure_t(){}
+
+
+<span class="qualifier">long</span> range_check (<span class="qualifier">long</span> l, <span class="qualifier">long</span> x, <span class="qualifier">long</span> h, flx_range_srcref_t sref, <span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl)
+{
+  <span class="small_keyword">if</span> (x&gt;=l &amp;&amp; x&lt;h) <span class="small_keyword">return</span> x;
+  throw flx::rtl::flx_range_failure_t (l,x,h,sref,cf,cl);
+}
+
+<span class="qualifier">void</span> print_cxxloc(FILE *ef,<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl)
+{
+  fprintf(ef,<span class="fstring">"C++ location  : %s %d\n"</span>, cf, cl);
+}
+
+<span class="qualifier">void</span> print_loc(FILE *ef,flx_range_srcref_t x,<span class="qualifier">char</span> <span class="qualifier">const</span> *cf, <span class="qualifier">int</span> cl)
+{
+  fprintf(ef,<span class="fstring">"Felix location: %s %d[%d]-%d[%d]\n"</span>,
+    x.filename,
+    x.startline,
+    x.startcol,
+    x.endline,
+    x.endcol
+  );
+  fprintf(ef,<span class="fstring">"C++ location  : %s %d\n"</span>, cf, cl);
+}
+
+#<span class="preproc">define</span> SRC_LINE_SZ  512
+
+<span class="qualifier">void</span> print_srclines(FILE *ef,flx_range_srcref_t x)
+{
+  FILE* fp;
+  <span class="qualifier">char</span> buf[SRC_LINE_SZ];
+  <span class="qualifier">int</span> lnr = 0;
+  
+  <span class="small_keyword">if</span> ((fp = fopen(x.filename, <span class="fstring">"r"</span>)) != NULL)
+  {
+    <span class="comment">/* display code lines: startline-1 .. endline+1 **</span>/
+    buf[SRC_LINE_SZ-1] = <span class="fstring">'\0'</span>;
+    <span class="small_keyword">while</span> ((fgets(buf, sizeof(buf)-1, fp) != NULL) &amp;&amp; (++lnr &lt;= x.endline+1))
+    {
+      buf[strlen(buf)-1] = <span class="fstring">'\0'</span>;        <span class="comment">// eat the newline 
+</span>      <span class="small_keyword">if</span> ((lnr &gt;= x.startline-1) &amp;&amp; (lnr &lt;= x.endline+1))
+      {
+        <span class="small_keyword">if</span> (lnr == x.startline-1 || lnr == 1) {
+          fprintf(ef,<span class="fstring">"Felix code: %s\n"</span>, buf);
+        } 
+        else 
+        {
+          fprintf(ef,<span class="fstring">"            %s\n"</span>, buf);
+        }
+      }
+    }
+    fclose(fp);
+  }
+}
+
+}}
+</pre></p></div><h1 id='Handling_Exceptions_h'><img src='/share/src/web/images/minus.gif' id='Handling Exceptions' onclick='toggle(this,"Handling_Exceptions_d")' alt='+'/> 3 Handling Exceptions</h1><div id='Handling_Exceptions_d' style='display:block'>
+<p>These exception handlers are called with standard C++ exceptions
+or Felix exceptions, decoded as best as possible, an error
+message printed, and the program terminated.
+</p><p>Note that at the time of writing, exception decoding does not
+work when using clang 3.3 and the exception is thrown across
+a DLL boundary. This is a bug in clang handling dynamic_casts
+across DLL boundaries. Gcc does not have this bug.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_eh.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_EH_H__
+#<span class="preproc">define</span> __FLX_EH_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+<span class="qualifier">int</span> FLX_EXCEPTIONS_EXTERN <span class="small_keyword">std</span>_exception_handler (::<span class="small_keyword">std</span>::exception <span class="qualifier">const</span> *e);
+<span class="qualifier">int</span> FLX_EXCEPTIONS_EXTERN flx_exception_handler (::flx::rtl::flx_exception_t <span class="qualifier">const</span> *e);
+}}
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/exceptions/flx_eh.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_eh.hpp"</span>
+using <span class="big_keyword">namespace</span> ::flx::rtl;
+
+
+<span class="qualifier">int</span> ::flx::rtl::<span class="small_keyword">std</span>_exception_handler (::<span class="small_keyword">std</span>::exception <span class="qualifier">const</span> *e)
+{
+  fprintf(stderr,<span class="fstring">"C++ STANDARD EXCEPTION %s\n"</span>,e-&gt;what());
+  <span class="small_keyword">return</span> 4;
+}
+
+<span class="qualifier">int</span> ::flx::rtl::flx_exception_handler (flx_exception_t <span class="qualifier">const</span> *e)
+{
+fprintf(stderr, <span class="fstring">"Felix exception handler\n"</span>);
+  <span class="small_keyword">if</span> (flx_halt_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_halt_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Halt: %s \n"</span>,x-&gt;reason.data());
+    print_loc(stderr,x-&gt;flx_loc,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  <span class="small_keyword">if</span> (flx_link_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_link_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Dynamic linkage error\n"</span>);
+    fprintf(stderr,<span class="fstring">"filename: %s\n"</span>,x-&gt;filename.data());
+    fprintf(stderr,<span class="fstring">"operation: %s\n"</span>,x-&gt;operation.data());
+    fprintf(stderr,<span class="fstring">"what: %s\n"</span>,x-&gt;what.data());
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (flx_exec_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_exec_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Execution error\n"</span>);
+    fprintf(stderr,<span class="fstring">"filename: %s\n"</span>,x-&gt;filename.data());
+    fprintf(stderr,<span class="fstring">"operation: %s\n"</span>,x-&gt;operation.data());
+    fprintf(stderr,<span class="fstring">"what: %s\n"</span>,x-&gt;what.data());
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (flx_assert_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_assert_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Assertion Failure\n"</span>);
+    print_srclines(stderr,x-&gt;flx_loc);
+    print_loc(stderr,x-&gt;flx_loc,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (flx_assert2_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_assert2_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Assertion2 Failure\n"</span>);
+    print_loc(stderr,x-&gt;flx_loc,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    print_loc(stderr,x-&gt;flx_loc2,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  <span class="small_keyword">if</span> (flx_axiom_check_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_axiom_check_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Axiom Check Failure\n"</span>);
+    print_loc(stderr,x-&gt;flx_loc,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    print_loc(stderr,x-&gt;flx_loc2,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (flx_match_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_match_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Match Failure\n"</span>);
+    print_loc(stderr,x-&gt;flx_loc,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (flx_switch_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_switch_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Attempt to switch to non-existant case\n"</span>);
+    print_cxxloc(stderr,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  <span class="small_keyword">if</span> (flx_dead_frame_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_dead_frame_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Attempt to resume non-live procedure frame\n"</span>);
+    print_cxxloc(stderr,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (flx_dropthru_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_dropthru_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Function Drops Off End Failure\n"</span>);
+    print_loc(stderr,x-&gt;flx_loc,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (flx_range_failure_t <span class="qualifier">const</span> *x = dynamic_cast&lt;flx_range_failure_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Range Check Failure %ld &lt;= %ld &lt; %ld\n"</span>,x-&gt;min, x-&gt;v,x-&gt;max);
+    print_loc(stderr,x-&gt;flx_loc,x-&gt;cxx_srcfile, x-&gt;cxx_srcline);
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  <span class="small_keyword">if</span> (dynamic_cast&lt;flx_out_of_memory_t <span class="qualifier">const</span>*&gt;(e))
+  {
+    fprintf(stderr,<span class="fstring">"Felix Out of Malloc or Specified Max allocation Exceeded"</span>);
+    <span class="small_keyword">return</span> 3;
+  }
+  else
+  {
+    fprintf(stderr,<span class="fstring">"Unknown Felix EXCEPTION!\n"</span>);
+    <span class="small_keyword">return</span> 5;
+  }
+}
+</pre></p><pre class='inclusion'>
+share/lib/rtl/flx_exceptions_config.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_EXCEPTIONS_CONFIG_H__
+#<span class="preproc">define</span> __FLX_EXCEPTIONS_CONFIG_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">ifdef</span> BUILD_FLX_EXCEPTIONS
+#<span class="preproc">define</span> FLX_EXCEPTIONS_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> FLX_EXCEPTIONS_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+$PWD/src/config/unix/flx_exceptions.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_exceptions
+Description: Felix exceptions
+provides_dlib: -lflx_exceptions_dynamic
+provides_slib: -lflx_exceptions_static
+library: flx_exceptions
+macros: BUILD_FLX_EXCEPTIONS
+includes: '"flx_exceptions.hpp"'
+srcdir: src/exceptions
+src: .*\.cpp 
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/flx_exceptions.fpc</pre>
+<p><pre class="prefmtbg">Name: flx
+Description: Felix exceptions
+provides_dlib: /DEFAULTLIB:flx_exceptions_dynamic
+provides_slib: /DEFAULTLIB:flx_exceptions_static
+library: flx_exceptions
+macros: BUILD_FLX_EXCEPTIONS
+includes: '"flx_exceptions.hpp"'
+srcdir: src/exceptions
+src: .*\.cpp 
+</pre></p><pre class='inclusion'>
+$PWD/buildsystem/flx_exceptions.py</pre>
+<p><pre class="prefmtbg">import fbuild
+from fbuild.path import Path
+from fbuild.record import Record
+from fbuild.builders.file import copy
+
+import buildsystem
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    print('[fbuild] [rtl] build exceptions')
+    path = Path(phase.ctx.buildroot/'share'/'src/exceptions')
+
+    srcs = [
+     path / 'flx_continuation.cpp',
+     path / 'flx_exceptions.cpp',
+     path / 'flx_eh.cpp',
+     ]
+    includes = [phase.ctx.buildroot / 'host/lib/rtl', phase.ctx.buildroot / 'share/lib/rtl']
+    macros = ['BUILD_FLX_EXCEPTIONS']
+
+    dst = 'host/lib/rtl/flx_exceptions'
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros))
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

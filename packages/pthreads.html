@@ -1,0 +1,1224 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Preemptive Threading Support</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Pthread Synopsis",
+"Pthreads.",
+"Pchannels.",
+"Ppipes.",
+"Fork/Join.",
+"Mutual Exclusion Lock (Mutex)",
+"Semaphores.",
+"Condition Variables.",
+"Thread Safe Bound Queue.",
+"Atomic operations",
+"Thread Pool",
+"Thread Pool Demo"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Pthread Synopsis_h')"> <a href="#Pthread_Synopsis_h">Pthread Synopsis</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Pthreads._h')"> <a href="#Pthreads._h">Pthreads.</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Pchannels._h')"> <a href="#Pchannels._h">Pchannels.</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Ppipes._h')"> <a href="#Ppipes._h">Ppipes.</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Fork/Join._h')"> <a href="#Fork/Join._h">Fork/Join.</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Mutual Exclusion Lock (Mutex)_h')"> <a href="#Mutual_Exclusion_Lock_(Mutex)_h">Mutual Exclusion Lock (Mutex)</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Semaphores._h')"> <a href="#Semaphores._h">Semaphores.</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Condition Variables._h')"> <a href="#Condition_Variables._h">Condition Variables.</a></div>
+      <div class=sm id=menu8>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#Thread Safe Bound Queue._h')"> <a href="#Thread_Safe_Bound_Queue._h">Thread Safe Bound Queue.</a></div>
+      <div class=sm id=menu9>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#Atomic operations_h')"> <a href="#Atomic_operations_h">Atomic operations</a></div>
+      <div class=sm id=menu10>
+      </div>
+      <div class=m1 onclick="mshow('menu11','#Thread Pool_h')"> <a href="#Thread_Pool_h">Thread Pool</a></div>
+      <div class=sm id=menu11>
+      <div class=m2><a href="#Thread_Pool_Demo_h">Thread Pool Demo</a></div>
+      </div>
+    <script>counter_max=11;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Pthread_Synopsis_h'><img src='/share/src/web/images/minus.gif' id='Pthread Synopsis' onclick='toggle(this,"Pthread_Synopsis_d")' alt='+'/> 1 Pthread Synopsis</h1><div id='Pthread_Synopsis_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/pthread/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// pthreads (portable)</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/pthread"</span>;
+<span class="lineno" id=line4></span>  <span class="comment">//include "std/pthread/pchannels";</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/mutex"</span>;
+<span class="lineno" id=line6></span>  <span class="comment">//include "std/pthread/ts_bound_queue";</span>
+<span class="lineno" id=line7></span>  <span class="comment">//include "std/pthread/semaphore";</span>
+<span class="lineno" id=line8></span>  <span class="comment">//include "std/pthread/condition_variable";</span>
+<span class="lineno" id=line9></span>  <span class="comment">//include "std/pthread/ppipe";</span>
+<span class="lineno" id=line10></span>  <span class="comment">//include "std/pthread/forkjoin";</span>
+<span class="lineno" id=line11></span>  <span class="comment">//include "std/pthread/atomic";</span>
+<span class="lineno" id=line12></span>  <span class="comment">//include "std/pthread/threadpool";</span>
+<span class="lineno" id=line13></span>  
+</pre></p></div><h1 id='Pthreads._h'><img src='/share/src/web/images/minus.gif' id='Pthreads.' onclick='toggle(this,"Pthreads._d")' alt='+'/> 2 Pthreads.</h1><div id='Pthreads._d' style='display:block'>
+<p>General support for pre-emptive threading, aka shared 
+memory concurrency.  The core routines are based 
+on Posix C interface.  Emulations are provided for Windows.
+</p><p>The core support routines are written in C++.
+Adaption to the local platform operating system
+is done in C++ using configuration data provided
+by Felix configuration scripts.
+</p><p>Felix pthreads are always detached. It is not possible
+to directly wait on a pthread, kill a pthread, or join to a
+pthread. Pchannels or other devices such as mutex locks,
+semaphores or conditiona variables must be used for 
+synchronisation instead.
+</p><pre class='inclusion'>
+share/lib/std/pthread/pthread.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> pthread_hxx = '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"pthread_thread.hpp"</span></span>';
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> mutex_hxx = '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"pthread_mutex.hpp"</span></span>';
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> condv_hxx = '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"pthread_condv.hpp"</span></span>';
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> monitor_hxx = '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"pthread_monitor.hpp"</span></span>';
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> work_fifo_hxx = '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"pthread_work_fifo.hpp"</span></span>';
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="doccomment">This class provides access to the operating system's native</span>
+<span class="lineno" id=line9></span>  <span class="doccomment">threading routines. On systems with multiple cpus, this may</span>
+<span class="lineno" id=line10></span>  <span class="doccomment">increase performance as the operating system may schedule</span>
+<span class="lineno" id=line11></span>  <span class="doccomment">threads on different processors.</span>
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Pthread
+<span class="lineno" id=line13></span>  {
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_pthread"</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="doccomment">spawn a detached pthread.</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span>(p:1-&gt;0)
+<span class="lineno" id=line18></span>    {
+<span class="lineno" id=line19></span>        <span class="big_keyword" title="Define a mutable variable">var</span> con = start p;              <span class="comment">// get continuation of p</span>
+<span class="lineno" id=line20></span>        <span class="big_keyword" title="Define a mutable variable">var</span> fthr = mk_thread con;
+<span class="lineno" id=line21></span>        svc$ svc_spawn_pthread fthr;
+<span class="lineno" id=line22></span>    }
+<span class="lineno" id=line23></span>    <span class="doccomment">spawn a detached pthread sharing active list with spawner</span>
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> spawn_process(p:1-&gt;0)
+<span class="lineno" id=line25></span>    {
+<span class="lineno" id=line26></span>        <span class="big_keyword" title="Define a mutable variable">var</span> con = start p;              <span class="comment">// get continuation of p</span>
+<span class="lineno" id=line27></span>        <span class="big_keyword" title="Define a mutable variable">var</span> fthr = mk_thread con;
+<span class="lineno" id=line28></span>        svc$ svc_spawn_process fthr;
+<span class="lineno" id=line29></span>    }
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> thread_yield : 1 = <span class="fstring">"ptf-&gt;gcp-&gt;collector-&gt;get_thread_control()-&gt;yield();"</span>;
+<span class="lineno" id=line31></span>  }
+<span class="lineno" id=line32></span>  
+</pre></p></div><h1 id='Pchannels._h'><img src='/share/src/web/images/minus.gif' id='Pchannels.' onclick='toggle(this,"Pchannels._d")' alt='+'/> 3 Pchannels.</h1><div id='Pchannels._d' style='display:block'>
+<p>A <em>pchannel</em> is a <em>monitor</em> object, which is used to synchronise
+pthreads by use of read and write procedures which transfer a pointer
+to a heap allocated object. Ownership is transfered from the writer
+to the reader. 
+</p><p>After initial synchronisation the read gains control and takes
+possession of the data. The reader then signals that the writer
+may proceed. The control interlock ensures that the reader
+is able to capture the data from the writer without the 
+writer interfering. This may be necessary if the value
+needs to be deep copied, for example. The monitor data exchange
+protocol is designed to permit transfer of data on the writer's
+machine stack, or data which the writer may modify after regaining
+control. However the read/write operations on pchannels automatically
+copy the data onto the heap and perform the synchronisation.
+</p><p>Pchannels should be used carefully because they block the whole
+pthread, that is, all fibres. Unlike fibres, if a deadlock occurs
+it cannot be resolved and should generally be considered a programming
+error.
+</p><pre class='inclusion'>
+share/lib/std/pthread/pchannels.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Pchannels are unbuffered synchronisation points</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">for pre-emptive threads.</span>
+<span class="lineno" id=line4></span>  <span class="doccomment">//$ Similarly to schannels, paired reader-writer pthreads</span>
+<span class="lineno" id=line5></span>  <span class="doccomment">cannot proceed until both parties agree data exchange is complete.</span>
+<span class="lineno" id=line6></span>  <span class="doccomment">Unlike schannels, both reader and writer can subsequently</span>
+<span class="lineno" id=line7></span>  <span class="doccomment">continue concurrently after the exchange.</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Pchannel
+<span class="lineno" id=line9></span>  {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_pthread"</span>;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="doccomment">Pre-emptive thread channels (monitor).</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> pchannel[t] = <span class="fstring">"flx::pthread::monitor_t*"</span> <span class="big_keyword" title="specify requirements">requires</span> monitor_hxx;
+<span class="lineno" id=line14></span>    <span class="doccomment">Pre-emptive thread input channel.</span>
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> ipchannel[t] = <span class="fstring">"flx::pthread::monitor_t*"</span> <span class="big_keyword" title="specify requirements">requires</span> monitor_hxx;
+<span class="lineno" id=line16></span>    <span class="doccomment">Pre-emptive thread output channel.</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> opchannel[t] = <span class="fstring">"flx::pthread::monitor_t*"</span> <span class="big_keyword" title="specify requirements">requires</span> monitor_hxx;
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>    <span class="doccomment">Make bidirectional pchannel.</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mk_pchannel[t]: 1-&gt;pchannel[t] = <span class="fstring">"new flx::pthread::monitor_t(ptf-&gt;gcp-&gt;collector-&gt;get_thread_control())"</span>;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="doccomment">Safe cast from bidirectional to output pchannel.</span>
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[t] opchannel[t](x:pchannel[t]) =&gt; <span class="hack">C_hack</span>::cast[opchannel[t]] x;
+<span class="lineno" id=line24></span>    <span class="doccomment">Safe cast from bidirectional to input pchannel.</span>
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[t] ipchannel[t](x:pchannel[t]) =&gt; <span class="hack">C_hack</span>::cast[ipchannel[t]] x;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="doccomment">Make an input and an output pchannel out of a bidirectional channel.</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mk_iopchannel_pair[t](<span class="big_keyword" title="Define a mutable variable">var</span> ch:pchannel[t]) =&gt;
+<span class="lineno" id=line29></span>      ipchannel[t] ch, opchannel[t] ch
+<span class="lineno" id=line30></span>    ;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>    <span class="doccomment">Construct a connected input and output pchannel pair.</span>
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mk_iopchannel_pair[t]() =&gt;
+<span class="lineno" id=line34></span>      mk_iopchannel_pair[t]$ mk_pchannel[t] ()
+<span class="lineno" id=line35></span>    ;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="comment">// NOTE: read/write on pchannels uses suspend/resume</span>
+<span class="lineno" id=line39></span>    <span class="comment">// to tell any pending collector it is safe to proceed</span>
+<span class="lineno" id=line40></span>    <span class="comment">// whilst it is doing the I/O (which may block),</span>
+<span class="lineno" id=line41></span>    <span class="comment">// to block returning from the I/O during a collection</span>
+<span class="lineno" id=line42></span>    <span class="comment">// AND, if the I/O completed before the collection got</span>
+<span class="lineno" id=line43></span>    <span class="comment">// going, to yield at this point.</span>
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>    <span class="doccomment">Read from a pchannel.</span>
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _read[t]: pchannel[t] * &amp;&amp;t = <span class="fstring">"""
+<span class="lineno" id=line47></span>      {
+<span class="lineno" id=line48></span>      //fprintf(stderr,"READ:DQ\\n");
+<span class="lineno" id=line49></span>      *$2 = (?1*)($1-&gt;dequeue());
+<span class="lineno" id=line50></span>      ptf-&gt;gcp-&gt;collector-&gt;remove_root(*$2);
+<span class="lineno" id=line51></span>      //fprintf(stderr,"DONE READ:DQ\\n");
+<span class="lineno" id=line52></span>      }
+<span class="lineno" id=line53></span>    """</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>    <span class="doccomment">Write to a pchannel.</span>
+<span class="lineno" id=line56></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> read[t] (chan:pchannel[t]) = {
+<span class="lineno" id=line57></span>      <span class="big_keyword" title="Define a mutable variable">var</span> p : &amp;t;
+<span class="lineno" id=line58></span>      _read (chan,  &amp;p);
+<span class="lineno" id=line59></span>      <span class="small_keyword" title="return">return</span> *p;
+<span class="lineno" id=line60></span>    }
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> read[t] (chan:ipchannel[t]) =&gt; read$ <span class="hack">C_hack</span>::cast[pchannel[t]] chan;
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _<span class="library" title="Print a string to a stream">write</span>[t]: pchannel[t] * &amp;t = <span class="fstring">"""
+<span class="lineno" id=line64></span>      {
+<span class="lineno" id=line65></span>      //fprintf(stderr,"WRITE:NQ\\n");
+<span class="lineno" id=line66></span>      ptf-&gt;gcp-&gt;collector-&gt;add_root($2);
+<span class="lineno" id=line67></span>      $1-&gt;enqueue((void*)$2);
+<span class="lineno" id=line68></span>      //fprintf(stderr,"DONE WRITE:NQ\\n");
+<span class="lineno" id=line69></span>      }
+<span class="lineno" id=line70></span>    """</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="Print a string to a stream">write</span>[t](chan:pchannel[t], v:t) {
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ps = unbox$ new v;
+<span class="lineno" id=line74></span>      _<span class="library" title="Print a string to a stream">write</span> (chan,ps);
+<span class="lineno" id=line75></span>    }
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="Print a string to a stream">write</span>[t] (chan:opchannel[t], v:t) { <span class="library" title="Print a string to a stream">write</span>$ <span class="hack">C_hack</span>::cast[pchannel[t]] chan,v; }
+<span class="lineno" id=line77></span>  }
+<span class="lineno" id=line78></span>  
+</pre></p></div><h1 id='Ppipes._h'><img src='/share/src/web/images/minus.gif' id='Ppipes.' onclick='toggle(this,"Ppipes._d")' alt='+'/> 4 Ppipes.</h1><div id='Ppipes._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/pthread/ppipe.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Asynchronous Synchronous Pipe.</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">Used to link pthreads.</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Ppipe {
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="doccomment">Send an stream down a channel.</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> psource[T] (<span class="big_keyword" title="Define a mutable variable">var</span> it:1 -&gt; T) (out:opchannel[T]) 
+<span class="lineno" id=line8></span>    {
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to a stream">write</span> (out,#it); <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line10></span>    }
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="doccomment">isrc converts a streamable data structure</span>
+<span class="lineno" id=line13></span>    <span class="doccomment">such as an array into a source.</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pisrc[V,T <span class="small_keyword" title="type-class constraint">with</span> Streamable[T,V]] (dat:T) (out:opchannel[<span class="library" title="option type: Some x or None">opt</span>[V]])
+<span class="lineno" id=line15></span>    {
+<span class="lineno" id=line16></span>      psource[<span class="library" title="option type: Some x or None">opt</span>[V]] (dat.iterator) out;
+<span class="lineno" id=line17></span>    }
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="doccomment">Wire a source component to a sink.</span>
+<span class="lineno" id=line21></span>    <span class="doccomment">Return coupled fibre ready to run.</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pipe[T] 
+<span class="lineno" id=line23></span>      (w: opchannel[T] -&gt; 0,
+<span class="lineno" id=line24></span>      r: ipchannel[T] -&gt; 0)
+<span class="lineno" id=line25></span>    :
+<span class="lineno" id=line26></span>      1 -&gt; 0
+<span class="lineno" id=line27></span>    =&gt; 
+<span class="lineno" id=line28></span>      {
+<span class="lineno" id=line29></span>        <span class="big_keyword" title="Define a mutable variable">var</span> chi,cho = mk_iopchannel_pair[T] ();
+<span class="lineno" id=line30></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { (w cho); };
+<span class="lineno" id=line31></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { (r chi); };
+<span class="lineno" id=line32></span>      }
+<span class="lineno" id=line33></span>    ;
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>    <span class="doccomment">Wire a source component to a transducer.</span>
+<span class="lineno" id=line36></span>    <span class="doccomment">Return source.</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pipe[T,U]
+<span class="lineno" id=line38></span>      (w: opchannel[T] -&gt; 0,
+<span class="lineno" id=line39></span>      t: ipchannel[T] * opchannel[U] -&gt; 0)
+<span class="lineno" id=line40></span>    :
+<span class="lineno" id=line41></span>      opchannel[U] -&gt; 0 
+<span class="lineno" id=line42></span>    =&gt; 
+<span class="lineno" id=line43></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (out:opchannel[U])
+<span class="lineno" id=line44></span>      {
+<span class="lineno" id=line45></span>        <span class="big_keyword" title="Define a mutable variable">var</span> chi,cho = mk_iopchannel_pair[T] ();
+<span class="lineno" id=line46></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { (w cho); };
+<span class="lineno" id=line47></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { (t (chi, out)); };
+<span class="lineno" id=line48></span>      }
+<span class="lineno" id=line49></span>    ;
+<span class="lineno" id=line50></span>  
+<span class="lineno" id=line51></span>    <span class="doccomment">xpipe connects a streamable data structure</span>
+<span class="lineno" id=line52></span>    <span class="doccomment">such as an array directly into a transducer.</span>
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> xpipe[V,T,U <span class="small_keyword" title="type-class constraint">with</span> Streamable[T,V]] 
+<span class="lineno" id=line54></span>      (
+<span class="lineno" id=line55></span>        a:T,
+<span class="lineno" id=line56></span>        t: ipchannel[<span class="library" title="option type: Some x or None">opt</span>[V]] * opchannel[U] -&gt; 0
+<span class="lineno" id=line57></span>      )
+<span class="lineno" id=line58></span>      : opchannel[U] -&gt; 0 =&gt;
+<span class="lineno" id=line59></span>      pipe (a.pisrc[V],t)
+<span class="lineno" id=line60></span>    ;
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>    <span class="doccomment">Wire a transducer into a transducer.</span>
+<span class="lineno" id=line64></span>    <span class="doccomment">Return another transducer.</span>
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pipe[T,U,V]
+<span class="lineno" id=line66></span>      (a: ipchannel[T] * opchannel[U] -&gt; 0,
+<span class="lineno" id=line67></span>      b: ipchannel[U] * opchannel[V] -&gt; 0)
+<span class="lineno" id=line68></span>    :
+<span class="lineno" id=line69></span>      ipchannel[T] * opchannel[V] -&gt; 0 
+<span class="lineno" id=line70></span>    =&gt; 
+<span class="lineno" id=line71></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (inp:ipchannel[T], out:opchannel[V])
+<span class="lineno" id=line72></span>      {
+<span class="lineno" id=line73></span>        <span class="big_keyword" title="Define a mutable variable">var</span> chi,cho = mk_iopchannel_pair[U] ();
+<span class="lineno" id=line74></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { a (inp, cho); };
+<span class="lineno" id=line75></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { b (chi, out); };
+<span class="lineno" id=line76></span>      }
+<span class="lineno" id=line77></span>    ;
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>    <span class="doccomment">Wire a transducer into a sink.</span>
+<span class="lineno" id=line80></span>    <span class="doccomment">Return a sink.</span>
+<span class="lineno" id=line81></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pipe[T,U]
+<span class="lineno" id=line82></span>      (a: ipchannel[T] * opchannel[U] -&gt; 0,
+<span class="lineno" id=line83></span>      b: ipchannel[U] -&gt; 0)
+<span class="lineno" id=line84></span>    :
+<span class="lineno" id=line85></span>      ipchannel[T]  -&gt; 0 
+<span class="lineno" id=line86></span>    =&gt; 
+<span class="lineno" id=line87></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (inp:ipchannel[T])
+<span class="lineno" id=line88></span>      {
+<span class="lineno" id=line89></span>        <span class="big_keyword" title="Define a mutable variable">var</span> chi,cho = mk_iopchannel_pair[U] ();
+<span class="lineno" id=line90></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { a (inp, cho); };
+<span class="lineno" id=line91></span>        <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> { b (chi); };
+<span class="lineno" id=line92></span>      }
+<span class="lineno" id=line93></span>    ;
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>    <span class="doccomment">Stream sort using intermediate darray.</span>
+<span class="lineno" id=line97></span>    <span class="doccomment">Requires stream of option type.</span>
+<span class="lineno" id=line98></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> sort[T <span class="small_keyword" title="type-class constraint">with</span> Tord[T]] (r: ipchannel[<span class="library" title="option type: Some x or None">opt</span>[T]], w: opchannel[<span class="library" title="option type: Some x or None">opt</span>[T]])
+<span class="lineno" id=line99></span>    {
+<span class="lineno" id=line100></span>       <span class="big_keyword" title="Define a mutable variable">var</span> x = <span class="library" title="array with unbounded dynamically variable limit">darray</span>[T]();
+<span class="lineno" id=line101></span>       acquire:<span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line102></span>         <span class="small_keyword" title="match statement or expression">match</span> read r <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line103></span>         | Some v =&gt; x+=v;
+<span class="lineno" id=line104></span>         | #None =&gt; break acquire;
+<span class="lineno" id=line105></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line106></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line107></span>       x.sort;
+<span class="lineno" id=line108></span>       <span class="small_keyword" title="for loop">for</span> v <span class="small_keyword" title="membership operator, function mem">in</span> x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line109></span>         <span class="library" title="Print a string to a stream">write</span> (w, Some v);
+<span class="lineno" id=line110></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line111></span>       <span class="library" title="Print a string to a stream">write</span> (w,None[T]);
+<span class="lineno" id=line112></span>    }
+<span class="lineno" id=line113></span>  }
+<span class="lineno" id=line114></span>  
+</pre></p></div><h1 id='Fork/Join._h'><img src='/share/src/web/images/minus.gif' id='Fork/Join.' onclick='toggle(this,"Fork/Join._d")' alt='+'/> 5 Fork/Join.</h1><div id='Fork/Join._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/pthread/forkjoin.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/pchannels"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="doccomment">Implement fork/join protocol.</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> ForkJoin 
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="doccomment">Launch a set of pthreads and wait</span>
+<span class="lineno" id=line7></span>    <span class="doccomment">until all of them are finished.</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> concurrently_by_iterator (<span class="big_keyword" title="Define a mutable variable">var</span> it:1 -&gt; <span class="library" title="option type: Some x or None">opt</span>[1-&gt;0]) 
+<span class="lineno" id=line9></span>    {
+<span class="lineno" id=line10></span>       <span class="comment">// Make a channel to signal termination.</span>
+<span class="lineno" id=line11></span>       <span class="big_keyword" title="Define a mutable variable">var</span> iterm,oterm = mk_iopchannel_pair[<span class="library" title="binding of C int type">int</span>](); <span class="comment">// should be unit but that bugs out at the moment</span>
+<span class="lineno" id=line12></span>       <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> manager (<span class="big_keyword" title="Define a mutable variable">var</span> p: 1-&gt;0) () { p(); <span class="library" title="Print a string to a stream">write</span> (oterm, 1); }
+<span class="lineno" id=line13></span>       <span class="comment">// Count the number of pthreads.</span>
+<span class="lineno" id=line14></span>       <span class="big_keyword" title="Define a mutable variable">var</span> count = 0;
+<span class="lineno" id=line15></span>     again:&gt;
+<span class="lineno" id=line16></span>       <span class="small_keyword" title="match statement or expression">match</span> #it <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line17></span>       | Some p =&gt; 
+<span class="lineno" id=line18></span>         ++count; 
+<span class="lineno" id=line19></span>         <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span>$ manager p; 
+<span class="lineno" id=line20></span>        <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>       | #None =&gt;
+<span class="lineno" id=line23></span>         <span class="small_keyword" title="while loop">while</span> count &gt; 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line24></span>           <span class="hack">C_hack</span>::ignore (read iterm);
+<span class="lineno" id=line25></span>           --count;
+<span class="lineno" id=line26></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line27></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line28></span>    }
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> concurrently[T <span class="small_keyword" title="type-class constraint">with</span> Streamable[T,1-&gt;0]] (d:T) =&gt; concurrently_by_iterator d.iterator;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>  }
+</pre></p></div><h1 id='Mutual_Exclusion_Lock_(Mutex)_h'><img src='/share/src/web/images/minus.gif' id='Mutual Exclusion Lock (Mutex)' onclick='toggle(this,"Mutual_Exclusion_Lock_(Mutex)_d")' alt='+'/> 6 Mutual Exclusion Lock (Mutex)</h1><div id='Mutual_Exclusion_Lock_(Mutex)_d' style='display:block'>
+<p>Mutex may be used to protect some region of memomry
+associated with that mutex conceptually, by locking
+the mutex for a short period of time. The region may
+then be modified atomically.
+</p><p>A Felix mutex is created on the heap and must be destroyed
+after use manually, they're not garbage collected.
+</p><pre class='inclusion'>
+share/lib/std/pthread/mutex.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Mutex
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_pthread"</span>;
+<span class="lineno" id=line5></span>    <span class="comment">// this needs to be fixed to work with gc but at the</span>
+<span class="lineno" id=line6></span>    <span class="comment">// moment the uglier solution will suffice</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mutex = <span class="fstring">"::flx::pthread::flx_mutex_t*"</span> <span class="big_keyword" title="specify requirements">requires</span> mutex_hxx;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> mutex: <span class="library" title="Type with one values (), the empty tuple">unit</span> = <span class="fstring">"new ::flx::pthread::flx_mutex_t"</span>;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> lock: mutex = <span class="fstring">"$1-&gt;lock();"</span>;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> unlock: mutex = <span class="fstring">"$1-&gt;unlock();"</span>;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> destroy: mutex = <span class="fstring">"delete $1;"</span>;
+<span class="lineno" id=line12></span>  }
+</pre></p></div><h1 id='Semaphores._h'><img src='/share/src/web/images/minus.gif' id='Semaphores.' onclick='toggle(this,"Semaphores._d")' alt='+'/> 7 Semaphores.</h1><div id='Semaphores._d' style='display:block'>
+<p>A semaphore is a counted lock. The <code>sem_post</code> procedure
+increments the counter, and the <code>sem_wait</code> procedure decrements it.
+However, the counter may not become negative so instead, if it
+were to become negative, the <code>sem_wait</code> procedure blocks the current
+pthread, and the pthread joins a set of pthreads waiting on the
+semaphore. When the counter is finally incremented by a call
+from some pthread to <code>sem_post</code> one of the pthreads waiting
+with <code>sem_wait</code> is allowed to proceed, again decrementing 
+the counter to zero so the remaining pthreads waiting continue
+to do so.
+</p><p>The procedure <code>sem_trywait</code> instead returns a flag indicating
+whether it succeeded in decrementing the counter or not.
+</p><p>The term <em>post</em> is derived from the idea of posting a flag.
+</p><p>The counting feature of a semaphore is analogous to shoppers
+in a store. The <code>sem_post</code> function puts products on the shelf,
+whilst the <code>sem_wait</code> function represents an order on which
+the customer is waiting due to unavailable stock .. and <code>sem_trywait</code>
+is the customer that, seeing there is no available stock, decides
+to go elsewhere!
+</p></div><h1 id='Condition_Variables._h'><img src='/share/src/web/images/minus.gif' id='Condition Variables.' onclick='toggle(this,"Condition_Variables._d")' alt='+'/> 8 Condition Variables.</h1><div id='Condition_Variables._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/pthread/condition_variable.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Condition Variable for pthread synchronisation.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Condition_Variable
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_pthread"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">The type of a condition variable.</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> condition_variable = <span class="fstring">"::flx::pthread::flx_condv_t*"</span> <span class="big_keyword" title="specify requirements">requires</span> condv_hxx;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Condition variable constructor taking unit argument.</span>
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> condition_variable: 1 = <span class="fstring">"new ::flx::pthread::flx_condv_t(ptf-&gt;gcp-&gt;collector-&gt;get_thread_control())"</span>;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="doccomment">Function to release a condition variable.</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> destroy: condition_variable = <span class="fstring">"delete $1;"</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="doccomment">lock/unlock associated mutex</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> lock : condition_variable = <span class="fstring">"$1-&gt;lock();"</span>;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> unlock : condition_variable = <span class="fstring">"$1-&gt;unlock();"</span>;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="doccomment">Function to wait until a signal is raised on</span>
+<span class="lineno" id=line21></span>    <span class="doccomment">the condition variable by another thread.</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> wait: condition_variable = <span class="fstring">"$1-&gt;wait();"</span>;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="doccomment">Function to raise a signal on a condition</span>
+<span class="lineno" id=line25></span>    <span class="doccomment">variable which will allow at most one thread</span>
+<span class="lineno" id=line26></span>    <span class="doccomment">waiting on it to proceed.</span>
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> signal: condition_variable = <span class="fstring">"$1-&gt;signal();"</span>;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>    <span class="doccomment">Function to broadcast a signal releasing all</span>
+<span class="lineno" id=line30></span>    <span class="doccomment">threads waiting on a conditiona variable.</span>
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> broadcast: condition_variable = <span class="fstring">"$1-&gt;broadcast();"</span>;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="doccomment">Timed wait for signal on condition variable.</span>
+<span class="lineno" id=line34></span>    <span class="doccomment">Time in seconds. Resolution nanoseconds.</span>
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> timedwait: condition_variable * <span class="library" title="binding of C double float type">double</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1-&gt;timedwait($3)"</span>;
+<span class="lineno" id=line36></span>  }
+<span class="lineno" id=line37></span>  
+</pre></p></div><h1 id='Thread_Safe_Bound_Queue._h'><img src='/share/src/web/images/minus.gif' id='Thread Safe Bound Queue.' onclick='toggle(this,"Thread_Safe_Bound_Queue._d")' alt='+'/> 9 Thread Safe Bound Queue.</h1><div id='Thread_Safe_Bound_Queue._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/pthread/ts_bound_queue.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> TS_Bound_Queue
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> uncopyable <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bQ_ = <span class="fstring">"::flx::pthread::bound_queue_t"</span>;
+<span class="lineno" id=line5></span>    _gc_pointer _gc_type bQ_ <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> ts_bound_queue_t[T] = <span class="fstring">"::flx::pthread::bound_queue_t*"</span> 
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="specify requirements">requires</span> 
+<span class="lineno" id=line7></span>       <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_bound_queue"</span>,
+<span class="lineno" id=line8></span>       <span class="qualifier" title="names C routine which scans a data structure for pointers">scanner</span> <span class="fstring">"::flx::pthread::bound_queue_scanner"</span>
+<span class="lineno" id=line9></span>    ;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] ts_bound_queue_t[T]: !ints = 
+<span class="lineno" id=line11></span>      <span class="fstring">"""
+<span class="lineno" id=line12></span>        new (*ptf-&gt;gcp, @0, false) ::flx::pthread::bound_queue_t(
+<span class="lineno" id=line13></span>        ptf-&gt;gcp-&gt;collector-&gt;get_thread_control(), (size_t)$1)
+<span class="lineno" id=line14></span>      """</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="comment">// NOTE: enqueue/dequeue on queues uses suspend/resume</span>
+<span class="lineno" id=line17></span>    <span class="comment">// to tell any pending collector it is safe to proceed</span>
+<span class="lineno" id=line18></span>    <span class="comment">// whilst it is doing the operations (which may block),</span>
+<span class="lineno" id=line19></span>    <span class="comment">// to block returning from the I/O during a collection</span>
+<span class="lineno" id=line20></span>    <span class="comment">// AND, if the I/O completed before the collection got</span>
+<span class="lineno" id=line21></span>    <span class="comment">// going, to yield at this point.</span>
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _enqueue[T]: ts_bound_queue_t[T] * &amp;T = <span class="fstring">"""
+<span class="lineno" id=line25></span>      FLX_SAVE_REGS;
+<span class="lineno" id=line26></span>  //fprintf(stderr,"enqueue to ts_bound_queue q=%p starts, item=%p\\n", $1, $2);
+<span class="lineno" id=line27></span>      //ptf-&gt; gcp-&gt;collector-&gt;get_thread_control()-&gt;suspend();
+<span class="lineno" id=line28></span>      $1-&gt;enqueue((void*)$2);
+<span class="lineno" id=line29></span>  //fprintf(stderr,"enqueue to ts_bound_queue q=%p done, item=%p\\n", $1, $2);
+<span class="lineno" id=line30></span>      //ptf-&gt; gcp-&gt;collector-&gt;get_thread_control()-&gt;resume();
+<span class="lineno" id=line31></span>    """</span>;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>    <span class="comment">// Duh .. what happens if $2 storage location is set by</span>
+<span class="lineno" id=line35></span>    <span class="comment">// the dequeue in the middle of a collection?</span>
+<span class="lineno" id=line36></span>    <span class="comment">// it might be NULL when scanned, but by the time the queue</span>
+<span class="lineno" id=line37></span>    <span class="comment">// is scanned the value will be lost from the queue and</span>
+<span class="lineno" id=line38></span>    <span class="comment">// in the variable instead!</span>
+<span class="lineno" id=line39></span>    <span class="comment">// The RACE is on!</span>
+<span class="lineno" id=line40></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _dequeue[T]: ts_bound_queue_t[T] * &amp;&amp;T = <span class="fstring">"""
+<span class="lineno" id=line41></span>      FLX_SAVE_REGS;
+<span class="lineno" id=line42></span>  //fprintf(stderr,"dequeue from ts_bound_queue %p starts\\n", $1);
+<span class="lineno" id=line43></span>      //ptf-&gt; gcp-&gt;collector-&gt;get_thread_control()-&gt;suspend();
+<span class="lineno" id=line44></span>      *$2=(?1*)$1-&gt;dequeue();
+<span class="lineno" id=line45></span>  //fprintf(stderr,"dequeue from ts_bound_queue done q=%p item=%p\\n",$1,*$2);
+<span class="lineno" id=line46></span>      //ptf-&gt; gcp-&gt;collector-&gt;get_thread_control()-&gt;resume();
+<span class="lineno" id=line47></span>    """</span>;
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> enqueue[T] (Q:ts_bound_queue_t[T])  (elt:T) {
+<span class="lineno" id=line50></span>       _enqueue(Q, new elt);
+<span class="lineno" id=line51></span>    }
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dequeue[T] (Q:ts_bound_queue_t[T]): T = {
+<span class="lineno" id=line54></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x:&amp;T;
+<span class="lineno" id=line55></span>      _dequeue (Q,&amp;x);
+<span class="lineno" id=line56></span>      <span class="small_keyword" title="return">return</span> *x;
+<span class="lineno" id=line57></span>    }
+<span class="lineno" id=line58></span>  
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> wait[T]: ts_bound_queue_t[T] = <span class="fstring">"""
+<span class="lineno" id=line61></span>      FLX_SAVE_REGS;
+<span class="lineno" id=line62></span>      //ptf-&gt; gcp-&gt;collector-&gt;get_thread_control()-&gt;suspend();
+<span class="lineno" id=line63></span>      $1-&gt;wait_until_empty();
+<span class="lineno" id=line64></span>      //ptf-&gt; gcp-&gt;collector-&gt;get_thread_control()-&gt;resume();
+<span class="lineno" id=line65></span>    """</span>;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> resize[T]: ts_bound_queue_t[T] * !ints = <span class="fstring">"$1-&gt;resize((size_t)$2);"</span>;
+<span class="lineno" id=line68></span>   
+<span class="lineno" id=line69></span>  }
+<span class="lineno" id=line70></span>  
+</pre></p></div><h1 id='Atomic_operations_h'><img src='/share/src/web/images/minus.gif' id='Atomic operations' onclick='toggle(this,"Atomic_operations_d")' alt='+'/> 10 Atomic operations</h1><div id='Atomic_operations_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/pthread/atomic.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Atomic
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="comment">// note: only works for some types: constraints need to be added.</span>
+<span class="lineno" id=line4></span>    <span class="comment">// We have to use a pointer because atomics aren't copyable</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> atomic[T]=<span class="fstring">"::std::atomic&lt;?1&gt;*"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx11_headers::atomic;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="comment">// FIXME: not managed by GC yet!</span>
+<span class="lineno" id=line9></span>    <span class="comment">// constructor</span>
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] atomic[T]: T = <span class="fstring">"(new ::std::atomic&lt;?1&gt;($1))"</span>; 
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> delete[T] : atomic[T] = <span class="fstring">"delete $1;"</span>;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="comment">// note: only works for even less types! Constraints needed.</span>
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr[T] : &amp;atomic[T] = <span class="fstring">"++**$1;"</span>;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr[T] : &amp;atomic[T] = <span class="fstring">"--**$1;"</span>;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> load[T] : atomic[T] -&gt; T = <span class="fstring">"$1-&gt;load()"</span>;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> store[T] : atomic[T] * T = <span class="fstring">"$1-&gt;store($2);"</span>;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> store[T] (a:atomic[T]) (v:T) { store (a,v); }
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Str[atomic[T]] {
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (<span class="big_keyword" title="Define a mutable variable">var</span> x:atomic[T]) =&gt; x.load.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line23></span>    }
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span>[T] Str[atomic[T]];
+<span class="lineno" id=line25></span>  }
+<span class="lineno" id=line26></span>  
+</pre></p></div><h1 id='Thread_Pool_h'><img src='/share/src/web/images/minus.gif' id='Thread Pool' onclick='toggle(this,"Thread_Pool_d")' alt='+'/> 11 Thread Pool</h1><div id='Thread_Pool_d' style='display:block'>
+<p>A thread pool is a global object containing set of running threads
+and a queue. Instead of spawning a new thread, the client just queues
+the job instead. Each thread grabs a job from the queue and runs it,
+on completion it grabs another job.
+</p><p>The primary advantage of a global thread pool is it prevent oversaturation
+of the set of processors and thus excess context switching. The main
+downside is monitoring the completed state of jobs.
+</p><p>Do not use the threadpool for quick jobs, there is a significant
+overhead posting a job.
+</p><pre class='inclusion'>
+share/lib/std/pthread/threadpool.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/ts_bound_queue"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/atomic"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/io/faio"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/condition_variable"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/pchannels"</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a type class">class</span> ThreadPool
+<span class="lineno" id=line9></span>  {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> job_t = 1 -&gt; 0;
+<span class="lineno" id=line11></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ThreadStop : job_t = <span class="fstring">"NULL"</span>;
+<span class="lineno" id=line12></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> isStop : job_t -&gt; bool = <span class="fstring">"$1==NULL"</span>;
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a mutable variable">var</span> clock = #Faio::mk_alarm_clock;
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a mutable variable">var</span> jobqueue = ts_bound_queue_t[job_t] 1024; <span class="comment">// queue up to 1K jobs</span>
+<span class="lineno" id=line15></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a mutable variable">var</span> nthreads = 8; <span class="comment">// great default for quad core i7 ?</span>
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="comment">// number of threads actually running</span>
+<span class="lineno" id=line18></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a mutable variable">var</span> running = atomic 0;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="comment">// number of threads blocked waiting on a barrier</span>
+<span class="lineno" id=line21></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a mutable variable">var</span> waiting = atomic 0;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="comment">// barrier lock</span>
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a mutable variable">var</span> block = #condition_variable;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_nthreads () =&gt; nthreads;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    <span class="comment">// This is a flag used to protect against nested pfor loops.</span>
+<span class="lineno" id=line29></span>    <span class="comment">// If there is a nested pfor loop, it will just execute serially</span>
+<span class="lineno" id=line30></span>    <span class="comment">// in the calling thread.</span>
+<span class="lineno" id=line31></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a mutable variable">var</span> pforrunning = atomic 0;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> barrier() {
+<span class="lineno" id=line34></span>  <span class="comment">//println$ "Barrier";</span>
+<span class="lineno" id=line35></span>      block.lock;
+<span class="lineno" id=line36></span>      ++waiting;
+<span class="lineno" id=line37></span>      <span class="small_keyword" title="conditional">if</span> waiting.load == nthreads <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line38></span>        waiting.store 0;
+<span class="lineno" id=line39></span>        block.broadcast;
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line41></span>      again:&gt;
+<span class="lineno" id=line42></span>        block.wait;
+<span class="lineno" id=line43></span>        <span class="small_keyword" title="conditional">if</span> waiting.load != 0 <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line44></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line45></span>      block.unlock; 
+<span class="lineno" id=line46></span>    }
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> start () { 
+<span class="lineno" id=line49></span>  <span class="comment">//println$ "Thread pool start()";</span>
+<span class="lineno" id=line50></span>       <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 1..nthreads <span class="small_keyword" title="call a procedure">call</span> <span class="big_keyword" title="Spawn a pre-emptive thread">spawn_pthread</span> jobhandler;
+<span class="lineno" id=line51></span>  <span class="comment">//println$ "Threads spawned";</span>
+<span class="lineno" id=line52></span>    }
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> start (n:<span class="library" title="binding of C int type">int</span>) {
+<span class="lineno" id=line55></span>       nthreads = n;
+<span class="lineno" id=line56></span>       #start;
+<span class="lineno" id=line57></span>    }
+<span class="lineno" id=line58></span>  
+<span class="lineno" id=line59></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> jobhandler () {
+<span class="lineno" id=line60></span>  <span class="comment">//println$ "Job handler thread #"+running.str+" started";</span>
+<span class="lineno" id=line61></span>       <span class="big_keyword" title="Define a mutable variable">var</span> id = running;
+<span class="lineno" id=line62></span>       ++running;
+<span class="lineno" id=line63></span>       rpt:<span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line64></span>  <span class="comment">//println$ "Trying to dequeue a job id=" + id.str;</span>
+<span class="lineno" id=line65></span>         <span class="big_keyword" title="Define a mutable variable">var</span> job = dequeue jobqueue;
+<span class="lineno" id=line66></span>  <span class="comment">//println$ "Job dequeued id="+id.str;</span>
+<span class="lineno" id=line67></span>         <span class="small_keyword" title="conditional">if</span> isStop job break rpt;
+<span class="lineno" id=line68></span>         job; 
+<span class="lineno" id=line69></span>         thread_yield();
+<span class="lineno" id=line70></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line71></span>       --running;
+<span class="lineno" id=line72></span>    }
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> queue_job (job:job_t) {
+<span class="lineno" id=line75></span>  <span class="comment">//println$ "Queuing job";</span>
+<span class="lineno" id=line76></span>      <span class="small_keyword" title="conditional">if</span> running.load == 0 <span class="small_keyword" title="call a procedure">call</span> start ();
+<span class="lineno" id=line77></span>      <span class="small_keyword" title="conditional">if</span> nthreads &gt; 0 <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line78></span>        <span class="small_keyword" title="call a procedure">call</span> enqueue jobqueue job;
+<span class="lineno" id=line79></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line80></span>        <span class="small_keyword" title="call a procedure">call</span> job;
+<span class="lineno" id=line81></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line82></span>    }
+<span class="lineno" id=line83></span>  
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> stop () {
+<span class="lineno" id=line85></span>      <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 1..nthreads 
+<span class="lineno" id=line86></span>        <span class="small_keyword" title="call a procedure">call</span> enqueue jobqueue ThreadStop;
+<span class="lineno" id=line87></span>      <span class="small_keyword" title="while loop">while</span> running.load != 0 
+<span class="lineno" id=line88></span>        <span class="small_keyword" title="call a procedure">call</span> Faio::sleep(clock,0.001);
+<span class="lineno" id=line89></span>    }
+<span class="lineno" id=line90></span>  
+<span class="lineno" id=line91></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_barrier() {
+<span class="lineno" id=line92></span>      <span class="small_keyword" title="conditional">if</span> nthreads &gt; 0
+<span class="lineno" id=line93></span>        <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 1..nthreads <span class="small_keyword" title="call a procedure">call</span> queue_job barrier;
+<span class="lineno" id=line94></span>    }
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> notify (chan:opchannel[<span class="library" title="binding of C int type">int</span>]) () {
+<span class="lineno" id=line97></span>      <span class="library" title="Print a string to a stream">write</span> (chan,1);
+<span class="lineno" id=line98></span>    }
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> join () {
+<span class="lineno" id=line101></span>      <span class="small_keyword" title="conditional">if</span> nthreads &gt; 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line102></span>        post_barrier;
+<span class="lineno" id=line103></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ip,op = #mk_iopchannel_pair[<span class="library" title="binding of C int type">int</span>];
+<span class="lineno" id=line104></span>        queue_job$ notify op;
+<span class="lineno" id=line105></span>        <span class="big_keyword" title="Define a mutable variable">var</span> x = read ip;
+<span class="lineno" id=line106></span>        <span class="hack">C_hack</span>::ignore(x);
+<span class="lineno" id=line107></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line108></span>    }
+<span class="lineno" id=line109></span>  
+<span class="lineno" id=line110></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pfor_segment (first:<span class="library" title="binding of C int type">int</span>, last:<span class="library" title="binding of C int type">int</span>) (lbody: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; 1 -&gt; 0)
+<span class="lineno" id=line111></span>    {
+<span class="lineno" id=line112></span>  <span class="comment">//println$ "Pfor segment " + first.str + "," last.str;</span>
+<span class="lineno" id=line113></span>      <span class="big_keyword" title="Define a mutable variable">var</span> N = last - first + 1;
+<span class="lineno" id=line114></span>      <span class="big_keyword" title="Define a mutable variable">var</span> nt = nthreads + 1;
+<span class="lineno" id=line115></span>      <span class="small_keyword" title="conditional">if</span> pforrunning.load == 0 <span class="small_keyword" title="logical conjunction">and</span> N &gt;= nthreads <span class="small_keyword" title="logical conjunction">and</span> nthreads &gt; 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line116></span>        pforrunning.store 1;
+<span class="lineno" id=line117></span>        <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> counter <span class="small_keyword" title="membership operator, function mem">in</span> 0 <span class="small_keyword" title="upwards counting for loop">upto</span> nt - 2 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line118></span>          <span class="big_keyword" title="Define a mutable variable">var</span> sfirst = first + (N * counter) / nt;
+<span class="lineno" id=line119></span>          <span class="big_keyword" title="Define a mutable variable">var</span> slast = first + (N * (counter + 1)) / nt - 1;
+<span class="lineno" id=line120></span>  <span class="comment">//println$ "QUEUE JOB: Counter = " + counter.str + ", sfirst=" + sfirst.str + ", slast=" + slast.str;</span>
+<span class="lineno" id=line121></span>          ThreadPool::queue_job$ lbody (sfirst, slast);
+<span class="lineno" id=line122></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line123></span>        sfirst = first + (N * (nt - 1)) / nt;
+<span class="lineno" id=line124></span>        slast = last;
+<span class="lineno" id=line125></span>  <span class="comment">//println$ "UNQUEUED JOB: Counter = " + counter.str + ", sfirst=" + sfirst.str + ", slast=" + slast.str;</span>
+<span class="lineno" id=line126></span>        lbody (sfirst, slast) ();
+<span class="lineno" id=line127></span>        join;
+<span class="lineno" id=line128></span>        pforrunning.store 0;
+<span class="lineno" id=line129></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line130></span>        <span class="comment">// Run serially</span>
+<span class="lineno" id=line131></span>        lbody (first, last) ();
+<span class="lineno" id=line132></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line133></span>    }
+<span class="lineno" id=line134></span>  
+<span class="lineno" id=line135></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> forloop (lbody: <span class="library" title="binding of C int type">int</span> -&gt; 0) (first:<span class="library" title="binding of C int type">int</span>, last:<span class="library" title="binding of C int type">int</span>) ()
+<span class="lineno" id=line136></span>    {
+<span class="lineno" id=line137></span>  <span class="comment">//println$ "forloop " + first.str + "," + last.str;</span>
+<span class="lineno" id=line138></span>      <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> first <span class="small_keyword" title="upwards counting for loop">upto</span> last <span class="small_keyword" title="call a procedure">call</span> lbody i; 
+<span class="lineno" id=line139></span>    }
+<span class="lineno" id=line140></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pforloop (first: <span class="library" title="binding of C int type">int</span>) (last:<span class="library" title="binding of C int type">int</span>) (lbody: <span class="library" title="binding of C int type">int</span> -&gt; 0)
+<span class="lineno" id=line141></span>    {
+<span class="lineno" id=line142></span>  <span class="comment">//println$ "Pfor segment " + first.str + "," last.str;</span>
+<span class="lineno" id=line143></span>      pfor_segment (first, last)  (forloop lbody);
+<span class="lineno" id=line144></span>    }
+<span class="lineno" id=line145></span>    <span class="qualifier" title="Function or procedure which should be inlined if possible">inline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> tpfor (first:<span class="library" title="binding of C int type">int</span>, last:<span class="library" title="binding of C int type">int</span>, lbody: int-&gt; 0)
+<span class="lineno" id=line146></span>    {
+<span class="lineno" id=line147></span>       pforloop first last lbody;
+<span class="lineno" id=line148></span>    }
+<span class="lineno" id=line149></span>   
+<span class="lineno" id=line150></span>  }
+</pre></p><h2 id='Thread_Pool_Demo_h'><img src='/share/src/web/images/minus.gif' id='Thread Pool Demo' onclick='toggle(this,"Thread_Pool_Demo_d")' alt='+'/> 11.1 Thread Pool Demo</h2><div id='Thread_Pool_Demo_d' style='display:block'>
+<pre class='inclusion'>
+share/demo/threadpoolex1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/threadpool"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> ThreadPool;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// Matrix multiply</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="prefix for macro definitions">macro</span> <span class="big_keyword" title="Define an immutable value">val</span> N = 1000;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> N = 1000;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> vec_t = <span class="library" title="array type, a tuple of all components the same type">array</span>[<span class="library" title="binding of C double float type">double</span>, N];
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> mx_t = <span class="library" title="array type, a tuple of all components the same type">array</span>[vec_t,N];
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a mutable variable">var</span> a : mx_t;
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a mutable variable">var</span> b : mx_t;
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a mutable variable">var</span> r : mx_t;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Define a mutable variable">var</span> s : mx_t;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear (mx:&amp;mx_t) {
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N 
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="for loop">for</span> j <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N 
+<span class="lineno" id=line18></span>      perform mx . i . j &lt;- 0.0;
+<span class="lineno" id=line19></span>  }
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> rinit (mx:&amp;mx_t) {
+<span class="lineno" id=line22></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="for loop">for</span> j <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N
+<span class="lineno" id=line24></span>      perform mx . i . j &lt;- #rand.<span class="library" title="binding of C double float type">double</span> / RAND_MAX.<span class="library" title="binding of C double float type">double</span>;
+<span class="lineno" id=line25></span>  }
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> check() = {
+<span class="lineno" id=line28></span>  <span class="comment">//println$ "Verification check";</span>
+<span class="lineno" id=line29></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N
+<span class="lineno" id=line30></span>    <span class="small_keyword" title="for loop">for</span> j <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N
+<span class="lineno" id=line31></span>      <span class="small_keyword" title="conditional">if</span> r.i.j != s.i.j <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line32></span>    <span class="small_keyword" title="return">return</span> <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line33></span>  }
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> verify() {
+<span class="lineno" id=line36></span>  <span class="comment">//println$ "Running verify";</span>
+<span class="lineno" id=line37></span>    <span class="small_keyword" title="conditional">if</span> #check <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line38></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Verified"</span>;
+<span class="lineno" id=line39></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line40></span>      <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Wrong!"</span>;
+<span class="lineno" id=line41></span>    <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line42></span>  <span class="comment">//println$ "Verify ran";</span>
+<span class="lineno" id=line43></span>  }
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>  clear &amp;r;
+<span class="lineno" id=line46></span>  clear &amp;s;
+<span class="lineno" id=line47></span>  rinit &amp;a;
+<span class="lineno" id=line48></span>  rinit &amp;b;
+<span class="lineno" id=line49></span>  
+<span class="lineno" id=line50></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> inner_product (pr: &amp;vec_t, pc: &amp;vec_t) = 
+<span class="lineno" id=line51></span>  {
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a mutable variable">var</span> sum = 0.0;
+<span class="lineno" id=line53></span>    <span class="small_keyword" title="for loop">for</span> (<span class="big_keyword" title="Define a mutable variable">var</span> k=0; k&lt;N; ++k;)
+<span class="lineno" id=line54></span>      perform sum = sum + *(pr.k) * *(pc.k);
+<span class="lineno" id=line55></span>    <span class="small_keyword" title="return">return</span> sum;
+<span class="lineno" id=line56></span>  }
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>  <span class="comment">// naive multiply</span>
+<span class="lineno" id=line59></span>  <span class="big_keyword" title="Define a mutable variable">var</span> start = #time;
+<span class="lineno" id=line60></span>  <span class="small_keyword" title="end of extension">begin</span>
+<span class="lineno" id=line61></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N 
+<span class="lineno" id=line62></span>    <span class="small_keyword" title="for loop">for</span> (<span class="big_keyword" title="Define a mutable variable">var</span> j=0; j&lt;N; ++j;)
+<span class="lineno" id=line63></span>      perform &amp;r . i . j &lt;- inner_product (&amp;a.i, &amp;b.j);
+<span class="lineno" id=line64></span>    s = r;
+<span class="lineno" id=line65></span>  <span class="small_keyword" title="end of extension">end</span>
+<span class="lineno" id=line66></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fin = #time;
+<span class="lineno" id=line67></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Naive mul elapsed "</span> + (fin - start).<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" seconds"</span>;
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>  <span class="comment">//println$ "Starting thread pool";</span>
+<span class="lineno" id=line70></span>  ThreadPool::start 8;
+<span class="lineno" id=line71></span>  <span class="comment">//println$ "Thread pool started";</span>
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>  <span class="comment">// naive parallel multiply</span>
+<span class="lineno" id=line74></span>  <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> inner_products_proc (<span class="big_keyword" title="Define a mutable variable">var</span> i:<span class="library" title="binding of C int type">int</span>)
+<span class="lineno" id=line75></span>  {
+<span class="lineno" id=line76></span>    <span class="small_keyword" title="for loop">for</span> (<span class="big_keyword" title="Define a mutable variable">var</span> j=0; j&lt;N; ++j;) 
+<span class="lineno" id=line77></span>      perform &amp;r . i . j &lt;- inner_product (&amp;a.i, &amp;b.j);
+<span class="lineno" id=line78></span>  }
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>  <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> inner_products_job (<span class="big_keyword" title="Define a mutable variable">var</span> i:<span class="library" title="binding of C int type">int</span>) () {
+<span class="lineno" id=line81></span>    <span class="small_keyword" title="for loop">for</span> (<span class="big_keyword" title="Define a mutable variable">var</span> j=0; j&lt;N; ++j;) 
+<span class="lineno" id=line82></span>      perform &amp;r . i . j &lt;- inner_product (&amp;a.i, &amp;b.j);
+<span class="lineno" id=line83></span>  }
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>  clear &amp;r;
+<span class="lineno" id=line86></span>  start = #time;
+<span class="lineno" id=line87></span>  <span class="small_keyword" title="end of extension">begin</span>
+<span class="lineno" id=line88></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt;N
+<span class="lineno" id=line89></span>      <span class="small_keyword" title="call a procedure">call</span> ThreadPool::queue_job$ inner_products_job (i);
+<span class="lineno" id=line90></span>    ThreadPool::join;
+<span class="lineno" id=line91></span>  <span class="small_keyword" title="end of extension">end</span>
+<span class="lineno" id=line92></span>  fin = #time;
+<span class="lineno" id=line93></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Naive Parallel mul elapsed "</span> + (fin - start).<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" seconds"</span>;
+<span class="lineno" id=line94></span>  verify;
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>  <span class="comment">// smart parallel multiply</span>
+<span class="lineno" id=line97></span>  clear &amp;r;
+<span class="lineno" id=line98></span>  start = #time;
+<span class="lineno" id=line99></span>  <span class="small_keyword" title="end of extension">begin</span>
+<span class="lineno" id=line100></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Using thread pool's pforloop"</span>;
+<span class="lineno" id=line101></span>    ThreadPool::pforloop 0 (N - 1) inner_products_proc;
+<span class="lineno" id=line102></span>  <span class="small_keyword" title="end of extension">end</span>
+<span class="lineno" id=line103></span>  fin = #time;
+<span class="lineno" id=line104></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Smart Parallel mul elapsed "</span> + (fin - start).<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" seconds"</span>;
+<span class="lineno" id=line105></span>  verify;
+<span class="lineno" id=line106></span>  
+<span class="lineno" id=line107></span>  <span class="comment">// smart parallel multiply with syntax</span>
+<span class="lineno" id=line108></span>  clear &amp;r;
+<span class="lineno" id=line109></span>  start = #time;
+<span class="lineno" id=line110></span>  <span class="small_keyword" title="end of extension">begin</span>
+<span class="lineno" id=line111></span>    pfor i <span class="small_keyword" title="membership operator, function mem">in</span> 0 <span class="small_keyword" title="upwards counting for loop">upto</span> (N - 1) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line112></span>    <span class="small_keyword" title="for loop">for</span> (<span class="big_keyword" title="Define a mutable variable">var</span> j=0; j&lt;N; ++j;) 
+<span class="lineno" id=line113></span>      perform &amp;r . i . j &lt;- inner_product (&amp;a.i, &amp;b.j);
+<span class="lineno" id=line114></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line115></span>  <span class="small_keyword" title="end of extension">end</span>
+<span class="lineno" id=line116></span>  fin = #time;
+<span class="lineno" id=line117></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"pfor mul elapsed "</span> + (fin - start).<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" seconds"</span>;
+<span class="lineno" id=line118></span>  verify;
+<span class="lineno" id=line119></span>  
+<span class="lineno" id=line120></span>  
+<span class="lineno" id=line121></span>  ThreadPool::stop;
+<span class="lineno" id=line122></span>  
+<span class="lineno" id=line123></span>  
+<span class="lineno" id=line124></span>  
+</pre></p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

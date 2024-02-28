@@ -1,0 +1,609 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Bound Queue</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Bound Queue"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Bound Queue_h')"> <a href="#Bound_Queue_h">Bound Queue</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Bound_Queue_h'><img src='/share/src/web/images/minus.gif' id='Bound Queue' onclick='toggle(this,"Bound_Queue_d")' alt='+'/> 1 Bound Queue</h1><div id='Bound_Queue_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/pthread_bound_queue.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_PTHREAD_BOUND_QUEUE_H__
+#<span class="preproc">define</span> __FLX_PTHREAD_BOUND_QUEUE_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_pthread_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;thread&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;mutex&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;condition_variable&gt;</span>
+
+<span class="comment">// interface for a consumer/producer queue. threads requesting a resource
+</span><span class="comment">// that isn't there block until one is available. push/pop re-entrant
+</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// Thread safe bounded queue.
+</span><span class="comment">///
+</span><span class="comment">/// The queue can be locked by setting bound=0.
+</span><span class="comment">/// In this state it can only be unlocked by setting a non-zero bound.
+</span><span class="comment">///
+</span><span class="comment">/// If the bound is set to 1 (the default),
+</span><span class="comment">/// then the queue is always either empty or full.
+</span><span class="comment">/// An empty queue blocks readers until a writer sends some data.
+</span><span class="comment">/// A full queue blocks writers, until a reader reads the data.
+</span><span class="comment">/// Note that when the queue is empty a writer can write data
+</span><span class="comment">/// and continues without waiting for the data to be read.
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">class</span> PTHREAD_EXTERN bound_queue_t :<span class="qualifier">public</span> world_stop_notifier_t {
+  thread_control_base_t *tc;
+  ::<span class="small_keyword">std</span>::condition_variable_any size_changed;
+  ::<span class="small_keyword">std</span>::mutex member_lock;
+  size_t bound;
+  <span class="qualifier">void</span> notify_world_stop() override;
+  <span class="qualifier">void</span> wait();
+  <span class="qualifier">void</span> wait_no_world_stop_check(); <span class="comment">// used by async system
+</span><span class="qualifier">public</span>:
+  <span class="qualifier">void</span> *lame_opaque; <span class="comment">// has to be public for the scanner to find it
+</span>  bound_queue_t(thread_control_base_t *tc_, size_t);
+  ~bound_queue_t();
+  <span class="qualifier">void</span> enqueue(<span class="qualifier">void</span>*);
+  <span class="qualifier">void</span> enqueue_no_world_stop_check(<span class="qualifier">void</span>*); <span class="comment">// used by async system
+</span>  <span class="qualifier">void</span>* dequeue();
+  <span class="qualifier">void</span>* maybe_dequeue();
+  <span class="qualifier">void</span> resize(size_t);
+  <span class="qualifier">void</span> wait_<span class="small_keyword">until</span>_empty();
+  size_t len();
+};
+
+PTHREAD_EXTERN ::flx::gc::generic::scanner_t bound_queue_scanner;
+
+}} <span class="comment">// namespace pthread, flx
+</span>#<span class="preproc">endif</span>
+
+</pre></p><pre class='inclusion'>
+share/src/pthread/pthread_bound_queue.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"pthread_bound_queue.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;queue&gt;</span>        <span class="comment">// stl to the bloated rescue
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>      <span class="comment">// debugging in scanner
+</span>
+using <span class="big_keyword">namespace</span> <span class="small_keyword">std</span>;
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+<span class="big_keyword">typedef</span> deque&lt;<span class="qualifier">void</span>*&gt; <span class="qualifier">void</span>_queue;
+
+#<span class="preproc">define</span> ELTQ ((<span class="qualifier">void</span>_queue*)lame_opaque)
+
+<span class="qualifier">void</span> bound_queue_t::notify_world_stop() 
+{
+  size_changed.notify_all();
+}
+
+bound_queue_t::bound_queue_t(thread_control_base_t *tc_, size_t n) : bound(n), tc(tc_)
+{
+<span class="comment">//fprintf(stderr, "Creating bound queue %p, thread_control base=%p\n", this,tc);
+</span>  lame_opaque = new <span class="qualifier">void</span>_queue;
+  tc-&gt;register_world_stop_notifier(this);
+}
+
+<span class="comment">// Much care is needed deleting a queue.
+</span><span class="comment">// A safe method is possible .. but not provided here
+</span>bound_queue_t::~bound_queue_t()
+{
+<span class="comment">//fprintf(stderr,"Deleting bound queue %p\n",this);
+</span>  tc-&gt;unregister_world_stop_notifier(this);
+  delete ELTQ;
+}
+
+<span class="qualifier">void</span> bound_queue_t::wait() {
+<span class="comment">//fprintf(stderr, "Bound queue waiting.. %p\n", this);
+</span>  member_lock.unlock();
+<span class="comment">//fprintf(stderr, "Unocked mutex, now doing a tc yield q=%p, tc=%p\n", this,tc);
+</span>  tc-&gt;yield();
+<span class="comment">//fprintf(stderr, "tc yield done, relocking mutex q=%p\n", this);
+</span>  member_lock.lock();
+<span class="comment">//fprintf(stderr, "locked mutex again, waiting on possible size change in queue %p\n",this);
+</span>  size_changed.wait_<span class="small_keyword">for</span>(member_lock, ::<span class="small_keyword">std</span>::chrono::duration&lt;<span class="qualifier">int</span>&gt;(1)); <span class="comment">// 1second
+</span><span class="comment">//fprintf(stderr, "possible size change in queue detected %p\n", this);
+</span>}
+
+<span class="qualifier">void</span> bound_queue_t::wait_no_world_stop_check() {
+  size_changed.wait_<span class="small_keyword">for</span>(member_lock, ::<span class="small_keyword">std</span>::chrono::duration&lt;<span class="qualifier">int</span>&gt;(1)); <span class="comment">// 1second
+</span>}
+
+
+<span class="comment">// get the number of element in the queue
+</span><span class="comment">// (NOT the bound!)
+</span>size_t bound_queue_t::len() {
+  ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt;   l(member_lock);
+  <span class="small_keyword">return</span> ELTQ-&gt;size();
+}
+
+<span class="qualifier">void</span> bound_queue_t::wait_<span class="small_keyword">until</span>_empty() {
+  ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt;   l(member_lock);
+  <span class="small_keyword">while</span>(!ELTQ-&gt;empty()) wait();
+}
+
+<span class="qualifier">void</span>
+bound_queue_t::enqueue(<span class="qualifier">void</span>* elt)
+{
+  ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt;   l(member_lock);
+  <span class="small_keyword">while</span>(ELTQ-&gt;size() &gt;= bound) wait(); <span class="comment">// guard against spurious wakeups!
+</span>  ELTQ-&gt;push_back(elt);
+  size_changed.notify_all(); <span class="comment">// cannot return an error
+</span>}
+
+<span class="qualifier">void</span>
+bound_queue_t::enqueue_no_world_stop_check(<span class="qualifier">void</span>* elt)
+{
+  ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt;   l(member_lock);
+  <span class="small_keyword">while</span>(ELTQ-&gt;size() &gt;= bound) wait_no_world_stop_check(); <span class="comment">// guard against spurious wakeups!
+</span>  ELTQ-&gt;push_back(elt);
+  size_changed.notify_all(); <span class="comment">// cannot return an error
+</span>}
+
+
+<span class="qualifier">void</span>*
+bound_queue_t::dequeue()
+{
+<span class="comment">//fprintf(stderr, "Trying to dequeue from bound queue\n");
+</span>  ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt;   l(member_lock);
+  <span class="small_keyword">while</span>(ELTQ-&gt;empty())  wait(); <span class="comment">// guard against spurious wakeups!
+</span>  <span class="qualifier">void</span> *elt = ELTQ-&gt;front();
+  ELTQ-&gt;pop_front();
+  size_changed.notify_all();
+  <span class="small_keyword">return</span> elt;
+}
+
+<span class="qualifier">void</span>*
+bound_queue_t::maybe_dequeue()
+{
+  ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt;   l(member_lock);
+  <span class="qualifier">void</span> *elt = NULL;
+  <span class="small_keyword">if</span> (ELTQ-&gt;size() &gt; 0)
+  {
+    elt = ELTQ-&gt;front();
+    ELTQ-&gt;pop_front();
+    size_changed.notify_all();
+  }
+  <span class="small_keyword">return</span> elt;
+}
+
+
+<span class="qualifier">void</span>
+bound_queue_t::resize(size_t n)
+{
+  ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt;   l(member_lock);
+  bound = n;
+  <span class="comment">// get things rolling again
+</span>  size_changed.notify_all();
+}
+
+using <span class="big_keyword">namespace</span> flx;;
+using <span class="big_keyword">namespace</span> gc;
+using <span class="big_keyword">namespace</span> generic;
+
+<span class="qualifier">void</span> *bound_queue_scanner(
+  collector_t *collector, 
+  gc_shape_t *shape, <span class="qualifier">void</span> *pp, 
+  size_t dyncount, 
+  <span class="qualifier">int</span> reclimit
+)
+{
+  <span class="comment">// input is a pointer to a pointer to a bound queue object
+</span>  <span class="qualifier">void</span> *p = *(<span class="qualifier">void</span>**)pp;
+  bound_queue_t *bq = (bound_queue_t*)p;
+  <span class="qualifier">void</span>_queue *pq = (<span class="qualifier">void</span>_queue*) bq-&gt;lame_opaque;
+  printf(<span class="fstring">"Scanning bound queue %p-&gt;%p\n"</span>, pp, p);
+  
+  ::<span class="small_keyword">std</span>::deque&lt;<span class="qualifier">void</span>*&gt;::<span class="qualifier">const</span>_iterator stl_end = pq-&gt;end();
+  <span class="small_keyword">for</span>(
+    ::<span class="small_keyword">std</span>::deque&lt;<span class="qualifier">void</span>*&gt;::<span class="qualifier">const</span>_iterator iter= pq-&gt;begin(); 
+    iter &lt; stl_end;
+    ++iter
+  ) {
+    <span class="qualifier">void</span> *value = *iter;
+    printf(<span class="fstring">"bound_queue scanning p=%p\n"</span>,value); 
+    collector-&gt;register_pointer(value,reclimit);
+  }
+  <span class="small_keyword">return</span> 0;
+}
+
+
+}}
+
+
+</pre></p><pre class='inclusion'>
+$PWD/src/config/flx_bound_queue.fpc</pre>
+<p><pre class="prefmtbg">Name: Pthread Bound Queue
+Requires: flx_pthread flx_gc
+includes: '"pthread_bound_queue.hpp"'
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

@@ -1,0 +1,1138 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Faio: Felix Async I/O support</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Faio Driver",
+"Faio I/O",
+"Faio Timer"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Faio Driver_h')"> <a href="#Faio_Driver_h">Faio Driver</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Faio I/O_h')"> <a href="#Faio_I/O_h">Faio I/O</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Faio Timer_h')"> <a href="#Faio_Timer_h">Faio Timer</a></div>
+      <div class=sm id=menu3>
+      </div>
+    <script>counter_max=3;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Faio_Driver_h'><img src='/share/src/web/images/minus.gif' id='Faio Driver' onclick='toggle(this,"Faio_Driver_d")' alt='+'/> 1 Faio Driver</h1><div id='Faio_Driver_d' style='display:block'>
+<pre class='inclusion'>
+share/src/faio/faio_drv.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_FAIO_DRV_H__
+#<span class="preproc">define</span> __FLX_FAIO_DRV_H__
+#<span class="preproc">include</span> <span class="fstring">&lt;flx_faio_config.hpp&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"pthread_bound_queue.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"demux_timer_queue.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"demux_demuxer.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> faio {
+
+<span class="comment">// this may be needed but I've lost track of where
+</span><span class="comment">// we get SIGPIPE, SIG_IGN from ..
+</span>
+#<span class="small_keyword">if</span> 0
+<span class="qualifier">void</span> FAIO_EXTERN sigpipe_ignorer()
+{
+    <span class="qualifier">void</span> (*prev_handler)(<span class="qualifier">int</span>);  <span class="comment">// solaris is FUN.
+</span>    prev_handler = signal(SIGPIPE, SIG_IGN);
+
+    <span class="small_keyword">if</span>(SIG_ERR == prev_handler)
+    {
+        fprintf(stderr, <span class="fstring">"failed to install SIGPIPE ignorer\n"</span>);
+        throw -1;
+    }
+    else <span class="small_keyword">if</span>(prev_handler != SIG_IGN &amp;&amp; prev_handler != SIG_DFL)
+    {
+        fprintf(stderr,<span class="fstring">"warning: blew away prev SIGPIPE handler: %p\n"</span>,
+            prev_handler);
+    }
+}
+#<span class="preproc">endif</span>
+
+}}
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Faio_I/O_h'><img src='/share/src/web/images/minus.gif' id='Faio I/O' onclick='toggle(this,"Faio_I/O_d")' alt='+'/> 2 Faio I/O</h1><div id='Faio_I/O_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/faio_posixio.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_FAIO_POSIXIO_H__
+#<span class="preproc">define</span> __FLX_FAIO_POSIXIO_H__
+#<span class="preproc">include</span> <span class="fstring">&lt;flx_faio_config.hpp&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"flx_async.hpp"</span>
+
+<span class="comment">// we don't need to piggyback much data at all. for now just the demuxer,
+</span><span class="comment">// so that we can be woken up, and the buffer info (this replaces the
+</span><span class="comment">// felix "socket" thread type, which was ugly.
+</span>
+#<span class="preproc">include</span> <span class="fstring">"demux_posix_demuxer.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"demux_timer_queue.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> faio {
+
+<span class="big_keyword">class</span> FAIO_EXTERN socketio_wakeup : <span class="qualifier">public</span> demux::socket_wakeup {
+<span class="qualifier">public</span>:
+  demux::sel_param   pb;     <span class="comment">// in: what you want, out: what you get
+</span>  <span class="qualifier">int</span>       sio_flags;  <span class="comment">// either one of PDEMUX_{READ|WRITE}A
+</span>  <span class="big_keyword">class</span> socketio_request *request;
+
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> wakeup(demux::posix_demuxer&amp; demux);
+};
+
+<span class="comment">// this can handle most unix style io, that is, read & write on sockets,
+</span><span class="comment">// files & pipes. NICE. the fact that the socket is now in here may mean
+</span><span class="comment">// I can get rid of the epoll hack
+</span><span class="comment">// Not sure if this can be used for file fds.
+</span><span class="big_keyword">class</span> FAIO_EXTERN socketio_request : <span class="qualifier">public</span> ::flx::async::flx_driver_request_base {
+<span class="qualifier">public</span>:
+    socketio_wakeup sv;
+    demux::posix_demuxer *pd;
+    socketio_request() {}       <span class="comment">// Lord Felix demands it. Like STL.
+</span>    socketio_request(socketio_request <span class="qualifier">const</span>&amp;);
+    <span class="qualifier">void</span> operator = (socketio_request <span class="qualifier">const</span>&amp;);
+
+    socketio_request(demux::posix_demuxer *pd_a, <span class="qualifier">int</span> s, <span class="qualifier">char</span>* buf, <span class="qualifier">long</span> len, bool r);
+    bool start_async_op_impl();
+};
+
+<span class="comment">// client open
+</span><span class="big_keyword">class</span> FAIO_EXTERN connect_request
+  : <span class="qualifier">public</span> ::flx::async::flx_driver_request_base, <span class="qualifier">public</span> demux::connect_control_block {
+<span class="qualifier">public</span>:
+  demux::posix_demuxer *pd;
+  connect_request() {}      <span class="comment">// flx linkage
+</span>
+  connect_request(demux::posix_demuxer *pd_a,<span class="qualifier">const</span> <span class="qualifier">char</span>* addr, <span class="qualifier">int</span> port);
+  bool start_async_op_impl();
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> wakeup(demux::posix_demuxer&amp;);
+};
+
+<span class="comment">// server open
+</span><span class="big_keyword">class</span> FAIO_EXTERN accept_request
+  : <span class="qualifier">public</span> ::flx::async::flx_driver_request_base, <span class="qualifier">public</span> demux::accept_control_block {
+<span class="qualifier">public</span>:
+  <span class="comment">// we sometimes know that there'll be several connections to accept.
+</span>  <span class="comment">// this'll need a different wakeup - and a different interface between
+</span>  <span class="comment">// event source & wakeups
+</span>
+  demux::posix_demuxer *pd;
+  accept_request() {} <span class="comment">// flx linkage
+</span>
+  <span class="comment">// eeh, give that a better name
+</span>  accept_request(demux::posix_demuxer *pd_a, <span class="qualifier">int</span> listener) : pd(pd_a) { s = listener; }
+
+  <span class="comment">// from flx_driver_request_base
+</span>  bool start_async_op_impl();
+
+  <span class="comment">// from accept_control_block
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> wakeup(demux::posix_demuxer&amp; demux);
+};
+
+}}
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/faio/faio_posixio.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>      <span class="comment">// printf
+</span>#<span class="preproc">include</span> <span class="fstring">"faio_posixio.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"demux_sockety.hpp"</span>    <span class="comment">// async_connect
+</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;sys/types.h&gt;</span>  <span class="comment">// getsockopt & co
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;sys/socket.h&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;unistd.h&gt;</span>     <span class="comment">// close
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>     <span class="comment">// strerror - probably not portable
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;assert.h&gt;</span>
+
+using <span class="big_keyword">namespace</span> flx::demux;
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> faio {
+
+connect_request::connect_request(demux::posix_demuxer *pd_a,<span class="qualifier">const</span> <span class="qualifier">char</span>* addr, <span class="qualifier">int</span> port) :pd(pd_a) { addy = addr; p = port; s=-1; }
+
+socketio_request::socketio_request(demux::posix_demuxer *pd_a, <span class="qualifier">int</span> s, <span class="qualifier">char</span>* buf, <span class="qualifier">long</span> len, bool read)
+: pd(pd_a)
+{
+  <span class="comment">//fprintf(stderr,"socketio_request %p making socketio_wakeup for socket %d\n",this,s);
+</span>  sv.s = s;
+  sv.request = this;
+  <span class="comment">// demux supports reading AND writing. We don't. Yet.
+</span>  sv.sio_flags = ((read) ? PDEMUX_READ : PDEMUX_WRITE);
+
+  sv.pb.buffer = buf;
+  sv.pb.buffer_size = len;
+  sv.pb.bytes_written = 0;        <span class="comment">// really bytes_processed
+</span>}
+
+socketio_request::socketio_request(socketio_request <span class="qualifier">const</span> &amp;a) : pd(a.pd)
+{
+  <span class="comment">//fprintf(stderr, "copying socketio_request to %p\n",this);
+</span>  sv = a.sv;
+  sv.request = this;
+}
+
+<span class="comment">// EXTREME HACKERY!
+</span><span class="qualifier">void</span> socketio_request::operator=(socketio_request <span class="qualifier">const</span> &amp;a)
+{
+  <span class="comment">//fprintf(stderr, "assigning socketio_request to %p\n",this);
+</span>
+  flx_driver_request_base::operator=(a);
+  sv = a.sv;
+  sv.request = this;
+  pd = a.pd;
+}
+
+bool
+socketio_request::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"socketio_request: socket %d start async_op_impl %p\n",sv.s,this);
+</span>  <span class="comment">// fprintf(stderr, "adding wakeup: len %i, done %i\n",
+</span>  <span class="comment">//   sv.pb.buffer_size, sv.pb.bytes_written);
+</span>
+  <span class="small_keyword">if</span>(sv.s == -1) {
+    fprintf(stderr, <span class="fstring">"Attempt to start_async_op on socket -1\n"</span>);
+    exit(1);
+  }
+
+  <span class="comment">// wake thread if call failed
+</span>  bool failed = (pd-&gt;add_socket_wakeup(&amp;sv, sv.sio_flags) == -1);
+  <span class="small_keyword">if</span> (failed)
+    fprintf(stderr,<span class="fstring">"socketio_request FAILED %p, sock=%d, dir=%d\n"</span>,this, sv.s, sv.sio_flags);
+  <span class="comment">//else
+</span>  <span class="comment">//  fprintf(stderr,"socketio_request OK %p\n",this);
+</span>  <span class="small_keyword">return</span> failed;
+}
+
+
+<span class="qualifier">void</span>
+socketio_wakeup::wakeup(posix_demuxer&amp; demux)
+{
+  <span class="comment">//fprintf(stderr, "Wakeup, socket = %d\n",s); 
+</span>  <span class="comment">// handle read/write, return true if not finished.
+</span>  <span class="comment">// otherwise wakeup return false.
+</span>  bool  connection_closed;
+
+  <span class="comment">//fprintf(stderr, "making socketio_wakeup %p\n",this);
+</span>  <span class="comment">//fprintf(stderr,"prehandle wakeup, this: %p, read: %i, len: %i, done %i\n",
+</span>  <span class="comment">//  this, read, pb.buffer_size, pb.bytes_written);
+</span>
+  <span class="comment">// NOTE: this code does not handle the possibility of both read AND
+</span>  <span class="comment">// write being set. That would require thinking about the what
+</span>  <span class="comment">// the connect_closed return value meant. In any case, we don't
+</span>  <span class="comment">// do that stuff here yet.
+</span>
+  <span class="small_keyword">if</span>(wakeup_flags &amp; PDEMUX_ERROR)
+  {
+    connection_closed = true;
+    <span class="comment">//pb.bytes_written=0;
+</span>    fprintf(stderr,<span class="fstring">"posix faio wakeup PDEMUX_ERROR, connection closed = %d\n"</span>, connection_closed);
+  }
+
+  else <span class="small_keyword">if</span>(wakeup_flags &amp; PDEMUX_EOF)
+  {
+    connection_closed = true;
+    fprintf(stderr,<span class="fstring">"posix faio wakeup PDEMUX_EOF, connection closed = %d\n"</span>, connection_closed);
+    <span class="comment">//pb.bytes_written=0;
+</span>  }
+
+  else <span class="small_keyword">if</span>(wakeup_flags &amp; PDEMUX_READ)
+  {
+    <span class="comment">// just check that our above assumption hasn't been violated.
+</span>    assert(wakeup_flags == PDEMUX_READ);
+    <span class="comment">//fprintf(stderr,"posix faio wakeup PDEMUX_READ, reading..\n");
+</span>    connection_closed = posix_demuxer::socket_recv(s, &amp;pb);
+    <span class="comment">//fprintf(stderr,"posix faio wakeup PDEMUX_READ, connection closed = %d\n", connection_closed);
+</span>  }
+  else
+  {
+    <span class="comment">// never hurts to be paranoid.
+</span>    assert(wakeup_flags == PDEMUX_WRITE);
+    <span class="comment">//fprintf(stderr,"posix faio wakeup PDEMUX_WRITE, writing..\n");
+</span>    connection_closed = posix_demuxer::socket_send(s, &amp;pb);
+    <span class="comment">//if(connection_closed)
+</span>    <span class="comment">//  fprintf(stderr,"posix faio wakeup PDEMUX_WRITE, connection closed = %d\n", connection_closed);
+</span>  }
+
+  <span class="comment">// fprintf(stderr,"posthandle wakeup, this: %p, read: %i, len: %i, done %i\n",
+</span>  <span class="comment">//  this, read, pb.buffer_size, pb.bytes_written);
+</span>  <span class="comment">// fprintf(stderr,"wakeup of %p, closed = %i\n", this, connection_closed);
+</span>
+  <span class="comment">// wake up: time to process some data
+</span>  <span class="small_keyword">if</span>(connection_closed || pb.bytes_written == pb.buffer_size)
+  {
+    <span class="comment">// fprintf(stderr,"schedding %p, drv: %p, f: %p\n", this, drv, f);
+</span>    <span class="comment">// if the connection closed, this notify should tell the caller
+</span>    <span class="comment">// not to keep trying to write, but it doesn't .. why not?
+</span>    <span class="comment">// who called it anyhow?
+</span>    <span class="comment">// I think the writing code ignores error returns ..
+</span>    request-&gt;notify_finished();
+    <span class="small_keyword">return</span>;
+  }
+
+  <span class="comment">// fprintf(stderr,"not schedding %p\n", this);
+</span>  fprintf(stderr, <span class="fstring">"Incomplete request on %d, waiting for more I/O\n"</span>,s);
+  <span class="small_keyword">if</span>(demux.add_socket_wakeup(this, sio_flags) == -1)
+  fprintf(stderr,<span class="fstring">"failed to re-add_socket_wakeup\n"</span>);
+}
+
+<span class="comment">// asynchronous connect
+</span>bool
+connect_request::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"connect_request %p: start async_op_impl\n",this);
+</span>
+  <span class="comment">// call failed or finished (!), wake up thread as no wakeup coming
+</span>  <span class="small_keyword">if</span>(start(*pd) == -1) {
+    fprintf(stderr, <span class="fstring">"FAILED TO SPAWN CONNECT REQUEST\n"</span>);
+    <span class="small_keyword">return</span> true;
+  }
+
+  <span class="comment">// NONONONONO! Referring to this's variables after a successful start
+</span>  <span class="comment">// gives rise to a race condition, which is bad.
+</span>  <span class="comment">//fprintf(stderr, "CONNECT REQUEST SPAWNED\n");
+</span>  <span class="small_keyword">return</span> false;     <span class="comment">// do not reschedule after a successful start
+</span>
+<span class="comment">/*
+  // I've not seen this yet, don't know why.
+  if(0 == socket_err) fprintf(stderr, "WOW, instant CONNECT\n");
+
+  // call didn't fail, could be pending or finished.
+  // return socket_err != EINPROGRESS, the contrapositive, sort of
+  return 0 == socket_err;   // no err => finished immediately
+**</span>/
+}
+
+<span class="qualifier">void</span>
+connect_request::wakeup(posix_demuxer&amp; demux)
+{
+  <span class="comment">//fprintf(stderr, "connect_request::wakeup\n");
+</span>
+  <span class="comment">// fprintf(stderr,"connect woke up\n");
+</span>  connect_control_block::wakeup(demux);
+
+  <span class="comment">// felix thread can pick out error itself.
+</span>  notify_finished();
+}
+
+
+<span class="comment">// async accept
+</span>bool
+accept_request::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"accept_request %p: start async_op_impl\n",this);
+</span>  bool failed = (start(*pd) == -1);      <span class="comment">// accept_control_block function
+</span>  <span class="small_keyword">if</span>(failed)
+    fprintf(stderr, <span class="fstring">"FAILED TO SPAWN ACCEPT REQUEST\n"</span>);
+  <span class="comment">//else
+</span>  <span class="comment">//  fprintf(stderr, "ACCEPT REQUEST SPAWNED\n");
+</span>  <span class="small_keyword">return</span> failed;
+}
+
+<span class="qualifier">void</span>
+accept_request::wakeup(posix_demuxer&amp; demux)
+{
+  <span class="comment">// does the leg work.
+</span>  accept_control_block::wakeup(demux);
+  <span class="comment">//'fprintf(stderr, "faio_posix::accept_request::wakeup\n");
+</span>
+  <span class="small_keyword">if</span>(accepted == -1)
+  {
+    <span class="comment">// I don't know if this is a good idea...
+</span>    fprintf(stderr, <span class="fstring">"accept request failed (%i), retrying...\n"</span>,
+      socket_err);
+    <span class="comment">// didn't get it - go back to sleep
+</span>    <span class="small_keyword">if</span>(start(demux) == -1)
+      fprintf(stderr, <span class="fstring">"failed again... probably was a bad idea\n"</span>);
+    <span class="small_keyword">return</span>;
+  }
+
+  notify_finished();
+}
+
+}}
+</pre></p><pre class='inclusion'>
+share/lib/rtl/faio_winio.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_FAIO_WINIO_H__
+#<span class="preproc">define</span> __FLX_FAIO_WINIO_H__
+#<span class="preproc">include</span> <span class="fstring">&lt;flx_faio_config.hpp&gt;</span>
+
+<span class="comment">// visual studio is quite sensitve about how you do these includes.
+</span><span class="comment">// THIS is the way (WinSock2.h must include Windows.h).
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;WinSock2.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;MSWSock.h&gt;</span>        <span class="comment">// AcceptEx, TF_REUSE_SOCKET, etc
+</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_async.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"demux_overlapped.hpp"</span>   <span class="comment">// nicely wrapped async windows calls
+</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> faio {
+
+<span class="comment">// interestingly, because in windows the async objects are associated
+</span><span class="comment">// with an IOCP before their use, we don't actually need a demuxer here
+</span><span class="comment">// at all. That's kind of nice. (actually iocp_associator uses it now)
+</span>
+<span class="comment">// a flx driver request to the add socket s to the drivers iocp
+</span><span class="comment">// this is currently the only windows driver request that uses the demuxer.
+</span><span class="big_keyword">class</span> FAIO_EXTERN iocp_associator : <span class="qualifier">public</span> ::flx::async::flx_driver_request_base {
+  SOCKET  s;
+<span class="qualifier">public</span>:
+  demux::iocp_demuxer *iod;
+  <span class="comment">// should have result & errcode
+</span>  iocp_associator() : iod(0) {} <span class="comment">// shouldn't this also set s?
+</span>  iocp_associator(demux::iocp_demuxer *iod_a, SOCKET associatee)
+  : s(associatee), iod(iod_a) {}
+
+  bool start_async_op_impl();
+};
+
+<span class="comment">// flx <-> c++ stuff for async io (well, it was)
+</span>
+<span class="comment">// transition to new windows async control block
+</span><span class="big_keyword">class</span> FAIO_EXTERN waio_base : <span class="qualifier">public</span> ::flx::async::flx_driver_request_base {
+<span class="qualifier">protected</span>:
+  ::flx::async::finote_t *fn_a;
+<span class="qualifier">public</span>:
+  demux::iocp_demuxer *iod;
+  bool  success;          <span class="comment">// eh?
+</span>
+  waio_base() : iod(0), success(false) {}
+  waio_base(demux::iocp_demuxer *iod_a) : iod(iod_a), success(false) {}
+
+  <span class="comment">// actually wakes up thread
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+    LPOVERLAPPED olp, <span class="qualifier">int</span> err);
+};
+
+
+<span class="comment">// listener socket must be already associated with an IOCP
+</span><span class="comment">// in doing an AcceptEx, it might succeed immediately - do you still
+</span><span class="comment">// get the IOCP wakeup?
+</span><span class="big_keyword">class</span> FAIO_EXTERN wasync_accept
+  : <span class="qualifier">public</span> waio_base, <span class="qualifier">public</span> demux::acceptex_control_block
+{
+<span class="qualifier">public</span>:
+  wasync_accept() {}  <span class="comment">// felix linkage demands it
+</span>
+  wasync_accept(demux::iocp_demuxer *iod_a,SOCKET l, SOCKET a) : waio_base(iod_a) { listener = l; acceptor = a; }
+
+  bool start_async_op_impl();
+
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+    LPOVERLAPPED olp, <span class="qualifier">int</span> err);
+};
+
+<span class="big_keyword">class</span> FAIO_EXTERN connect_ex
+  : <span class="qualifier">public</span> waio_base, <span class="qualifier">public</span> demux::connectex_control_block
+{
+<span class="qualifier">public</span>:
+
+  connect_ex() {}     <span class="comment">// flx linkage
+</span>
+  connect_ex(demux::iocp_demuxer *iod_a,SOCKET soc, <span class="qualifier">const</span> <span class="qualifier">char</span>* addr, <span class="qualifier">int</span> port)
+    : waio_base(iod_a) { s = soc; addy = addr; p = port; }
+
+  bool start_async_op_impl();
+
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+    LPOVERLAPPED olp, <span class="qualifier">int</span> err);
+};
+
+<span class="comment">// TransmitFile here (requires file handle)
+</span><span class="big_keyword">class</span> FAIO_EXTERN wasync_transmit_file
+  : <span class="qualifier">public</span> waio_base, <span class="qualifier">public</span> demux::transmitfile_control_block
+{
+<span class="qualifier">public</span>:
+  wasync_transmit_file()
+    : waio_base(0), transmitfile_control_block(INVALID_SOCKET, NULL) {}   <span class="comment">// flx linkage
+</span>
+  wasync_transmit_file(demux::iocp_demuxer *iod_a,SOCKET dst)      <span class="comment">// for reuse of socket
+</span>    : waio_base(iod_a), transmitfile_control_block(dst) {}
+
+  wasync_transmit_file(demux::iocp_demuxer *iod_a,SOCKET dst, HANDLE src)  <span class="comment">// actual transmitfile
+</span>    : waio_base(iod_a), transmitfile_control_block(dst, src) {}
+
+  <span class="comment">// from flx_request_base
+</span>  bool start_async_op_impl();
+
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> iocp_op_finished(DWORD nbytes, ULONG_PTR udat,
+    LPOVERLAPPED olp, <span class="qualifier">int</span> err);
+};
+
+<span class="comment">// handles both WSASend & WSARecv
+</span><span class="big_keyword">class</span> FAIO_EXTERN wsa_socketio
+  : <span class="qualifier">public</span> waio_base, <span class="qualifier">public</span> demux::wsasocketio_control_block
+{
+<span class="qualifier">public</span>:
+  wsa_socketio()
+    : wsasocketio_control_block(INVALID_SOCKET, NULL, false) {}
+
+  wsa_socketio(demux::iocp_demuxer *iod_a,SOCKET src, demux::sel_param* ppb, bool read)
+    : waio_base(iod_a), wsasocketio_control_block(src, ppb, read) {}
+
+  bool start_async_op_impl();
+
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+    LPOVERLAPPED olp, <span class="qualifier">int</span> err);
+};
+
+
+}}
+#<span class="preproc">endif</span>  <span class="comment">// __DWINIO__
+</span></pre></p><pre class='inclusion'>
+share/src/faio/faio_winio.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"faio_winio.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>      <span class="comment">// printf
+</span>
+using <span class="big_keyword">namespace</span> flx::demux;
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> faio {
+
+<span class="comment">// way of adding sockets to the IOCP.
+</span>bool
+iocp_associator::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"iocp_associator: start async_op_impl\n");
+</span>
+  <span class="comment">// nasty: note how I'm making the user cookie constant (0).
+</span>  <span class="small_keyword">if</span>(iod-&gt;associate_with_iocp((HANDLE)s, 0) != 0)
+    fprintf(stderr,<span class="fstring">"associate request failed - get result here!\n"</span>);
+
+  <span class="small_keyword">return</span> true;      <span class="comment">// wake caller
+</span>}
+
+<span class="qualifier">void</span>
+waio_base::iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+  LPOVERLAPPED olp, <span class="qualifier">int</span> err)
+{
+  <span class="comment">// fprintf(stderr,"general wakeup thing - rescheduling\n");
+</span>  <span class="comment">//fprintf(stderr,"this: %p, q: %p, f: %p, err: %i\n", this, q, f, err);
+</span>
+  <span class="comment">// this tells us when things went wrong (store it)
+</span>  <span class="small_keyword">if</span>(NO_ERROR != err)
+    fprintf(stderr,<span class="fstring">"catchall wakeup got error: %i (should store it)\n"</span>, err);
+
+  success = (NO_ERROR == err);  <span class="comment">// this works pretty well
+</span>  notify_finished();
+}
+
+bool
+wasync_accept::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"wasync_accept: start async_op_impl\n");
+</span>  <span class="small_keyword">return</span> start_overlapped();
+}
+
+<span class="qualifier">void</span>
+wasync_accept::iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+  LPOVERLAPPED olp, <span class="qualifier">int</span> err)
+{
+  waio_base::iocp_op_finished(nbytes, udat, olp, err);
+}
+
+
+bool
+connect_ex::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"connect_ex: start async_op_impl\n");
+</span>  <span class="small_keyword">return</span> start_overlapped();
+}
+
+<span class="qualifier">void</span>
+connect_ex::iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+  LPOVERLAPPED olp, <span class="qualifier">int</span> err)
+{
+  waio_base::iocp_op_finished(nbytes, udat, olp, err);
+}
+
+
+bool
+wasync_transmit_file::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"wasync_transmit_file: start async_op_impl\n");
+</span>  <span class="small_keyword">return</span> start_overlapped();
+}
+
+<span class="qualifier">void</span>
+wasync_transmit_file::iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+  LPOVERLAPPED olp, <span class="qualifier">int</span> err)
+{
+  waio_base::iocp_op_finished(nbytes, udat, olp, err);
+}
+
+bool
+wsa_socketio::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"wsa_socketio: start async_op_impl\n");
+</span>  <span class="small_keyword">return</span> start_overlapped();    <span class="comment">// start overlapped op
+</span>}
+
+<span class="comment">// this could be factored into demux... or it might need
+</span><span class="comment">// to stay here... this is really a finished that isn't finished
+</span><span class="comment">// same goes for winfileio (I think)
+</span><span class="qualifier">void</span>
+wsa_socketio::iocp_op_finished( DWORD nbytes, ULONG_PTR udat,
+  LPOVERLAPPED olp, <span class="qualifier">int</span> err)
+{
+  <span class="comment">// fprintf(stderr,"wsa_socketio wakeup, nb: %li, err: %i\n", nbytes, err );
+</span><span class="comment">// Doing the handling myself - this can restart the op giving us
+</span><span class="comment">// a possible race condition... or not? It should be sync with this call.
+</span>  <span class="comment">// wsasocketio_control_block::iocp_op_finished(nbytes, udat, olp, err);
+</span>
+  ppb-&gt;bytes_written += nbytes;
+
+  <span class="comment">// if we're not finished, we have to reinstall our request
+</span>  <span class="comment">// zero bytes indicates shutdown/closure, right?
+</span>  <span class="comment">// might be using this for WSASend. Instead of broken pipes on win32,
+</span>  <span class="comment">// instead we get WSAECONNRESET (pretty sure) on write. On read?
+</span>  <span class="small_keyword">if</span>(0 == nbytes || ppb-&gt;finished())
+  {
+    <span class="comment">// this'll wake us up
+</span>    waio_base::iocp_op_finished(nbytes, udat, olp, err);
+  }
+  else
+  {
+    <span class="comment">// go back around again
+</span>    <span class="comment">// this returns a finished flag (bad idea). it can also fail.
+</span>    <span class="comment">// I think it would be better to know that.
+</span>    <span class="small_keyword">if</span>(start_overlapped())
+      fprintf(stderr, <span class="fstring">"socketio restart finished! WHAT TO DO!?!\n"</span>);
+  }
+}
+
+}}
+</pre></p></div><h1 id='Faio_Timer_h'><img src='/share/src/web/images/minus.gif' id='Faio Timer' onclick='toggle(this,"Faio_Timer_d")' alt='+'/> 3 Faio Timer</h1><div id='Faio_Timer_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/faio_timer.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_FAIO_TIMER_H__
+#<span class="preproc">define</span> __FLX_FAIO_TIMER_H__
+#<span class="preproc">include</span> <span class="fstring">&lt;flx_faio_config.hpp&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"demux_demuxer.hpp"</span>        <span class="comment">// sel_param, demuxer base
+</span>#<span class="preproc">include</span> <span class="fstring">"flx_async.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"demux_timer_queue.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> faio {
+
+
+<span class="comment">// sleeping
+</span><span class="big_keyword">class</span> FAIO_EXTERN sleep_request
+  : <span class="qualifier">public</span> ::flx::async::flx_driver_request_base, <span class="qualifier">public</span> demux::sleep_task
+{
+  demux::timer_queue *sleepers;
+  <span class="qualifier">double</span>      delta;
+<span class="qualifier">public</span>:
+  sleep_request() {}        <span class="comment">// flx linkage
+</span>
+  sleep_request(demux::timer_queue *sleepers_a, <span class="qualifier">double</span> d) :
+    sleepers(sleepers_a), delta(d)
+  {}
+
+  <span class="comment">// from driver request
+</span>  bool start_async_op_impl();
+
+  <span class="qualifier">void</span> fire();
+
+};
+
+}} <span class="comment">// namespace faio, flx
+</span>#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/faio/faio_timer.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"faio_timer.hpp"</span>
+
+using <span class="big_keyword">namespace</span> flx::demux;
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> faio {
+bool
+sleep_request::start_async_op_impl()
+{
+  <span class="comment">//fprintf(stderr,"Sleep: start async_op_impl %p\n",this);
+</span>  sleepers-&gt;add_sleep_request(this, delta);
+  <span class="small_keyword">return</span> false;   <span class="comment">// no wakeup
+</span>}
+
+<span class="qualifier">void</span> sleep_request::fire() {
+  <span class="comment">//fprintf (stderr,"FIRE req=%p\n",this);
+</span>  notify_finished();
+}
+
+}}
+</pre></p><pre class='inclusion'>
+$PWD/src/config/timer.fpc</pre>
+<p><pre class="prefmtbg">Name: Timer
+Description: Real time clock services
+Requires: faio
+includes:  '"faio_timer.hpp"'
+</pre></p><pre class='inclusion'>
+$PWD/src/config/unix/faio.fpc</pre>
+<p><pre class="prefmtbg">Name: faio
+Description: Asynchronous I/O support
+provides_dlib: -lfaio_dynamic
+provides_slib: -lfaio_static
+includes: '"faio_posixio.hpp"'
+Requires: flx_async flx_pthread demux flx flx_gc
+library: faio
+macros: BUILD_FAIO
+srcdir: src/faio
+src: faio_(timer|posixio)\.cpp
+headers: faio_(drv|timer|posixio)\.hpp
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/faio.fpc</pre>
+<p><pre class="prefmtbg">Name: faio
+Description: Asynchronous I/O support
+provides_dlib: /DEFAULTLIB:faio_dynamic
+provides_slib: /DEFAULTLIB:faio_static
+includes: '"faio_winio.hpp"'
+Requires: flx_async flx_pthread demux flx flx_gc
+library: faio
+macros: BUILD_FAIO
+srcdir: src/faio
+src: faio_(timer|winio)\.cpp
+headers: faio_(drv|timer|winio)\.hpp
+</pre></p><pre class='inclusion'>
+$PWD/buildsystem/faio.py</pre>
+<p><pre class="prefmtbg">import fbuild
+from fbuild.functools import call
+from fbuild.path import Path
+from fbuild.record import Record
+
+import buildsystem
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    print('[fbuild] [faio]')
+    path = Path(phase.ctx.buildroot/'share'/'src/faio')
+
+    dst = 'host/lib/rtl/faio'
+    srcs = [
+        path / 'faio_timer.cpp',
+    ]
+    includes = [
+        phase.ctx.buildroot / 'host/lib/rtl',
+        phase.ctx.buildroot / 'share/lib/rtl'
+    ]
+    macros = ['BUILD_FAIO']
+    libs=[
+        call('buildsystem.flx_pthread.build_runtime', phase),
+        call('buildsystem.flx_async.build_runtime', phase),
+        call('buildsystem.demux.build_runtime', phase),
+    ]
+
+    if 'win32' in phase.platform:
+        srcs.append(path / 'faio_winio.cpp')
+        includes.append(Path('src', 'demux', 'win'))
+
+    if 'posix' in phase.platform:
+        srcs.append(path / 'faio_posixio.cpp')
+        includes.append(Path('src', 'demux', 'posix'))
+
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.static for lib in libs]),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.shared for lib in libs]))
+
+def build_flx(phase):
+    return
+    #return buildsystem.copy_flxs_to_lib(phase.ctx,
+    #    Path('src/faio/*.flx').glob())
+</pre></p><pre class='inclusion'>
+share/lib/rtl/flx_faio_config.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_FAIO_CONFIG_H__
+#<span class="preproc">define</span> __FLX_FAIO_CONFIG_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">ifdef</span> BUILD_FAIO
+#<span class="preproc">define</span> FAIO_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> FAIO_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

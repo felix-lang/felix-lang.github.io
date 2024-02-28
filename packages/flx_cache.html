@@ -1,0 +1,618 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Felix Cache</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"The flx cache manager."
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#The flx cache manager._h')"> <a href="#The_flx_cache_manager._h">The flx cache manager.</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='The_flx_cache_manager._h'><img src='/share/src/web/images/minus.gif' id='The flx cache manager.' onclick='toggle(this,"The_flx_cache_manager._d")' alt='+'/> 1 The flx cache manager.</h1><div id='The_flx_cache_manager._d' style='display:block'>
+<p>Check if the flx cache is stale and deletes it if it is.
+</p><pre class='inclusion'>
+share/lib/std/felix/flx_cache.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> FlxCache
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> gramtime(debugln: <span class="library" title="binding of C++ string type">string</span> -&gt; 0) (path:<span class="library" title="binding of C++ string type">string</span>, s:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C double float type">double</span> = {
+<span class="lineno" id=line4></span>      <span class="comment">//println$ "Path=" + path + " file = " + s;</span>
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> maxtime (x:<span class="library" title="binding of C double float type">double</span>) (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; max (x, gramtime debugln (path, s));
+<span class="lineno" id=line6></span>      <span class="small_keyword" title="conditional">if</span> s.[0]==<span class="fstring">"@"</span>.<span class="library" title="binding of C char type">char</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line7></span>        <span class="big_keyword" title="Define a mutable variable">var</span> file = 
+<span class="lineno" id=line8></span>          <span class="small_keyword" title="let binder">let</span> f = s.[1 <span class="small_keyword" title="substring range separator">to</span>].strip <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line9></span>          <span class="small_keyword" title="conditional">if</span> Filename::is_absolute_filename f <span class="small_keyword" title="conditional">then</span> f 
+<span class="lineno" id=line10></span>          <span class="small_keyword" title="conditional">else</span> Directory::mk_absolute_filename (Filename::join$ path, f)
+<span class="lineno" id=line11></span>        ;
+<span class="lineno" id=line12></span>        <span class="big_keyword" title="Define a mutable variable">var</span> filetime = FileStat::dfiletime(file,0.0);
+<span class="lineno" id=line13></span>        <span class="small_keyword" title="conditional">if</span> filetime == 0.0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line14></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Grammar include file '"</span> + file <span class="fstring">"' doesn't exist, exiting"</span>;
+<span class="lineno" id=line15></span>          <span class="comment">// this one is pretty fatal :-)</span>
+<span class="lineno" id=line16></span>          System::exit 1;
+<span class="lineno" id=line17></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line18></span>        debugln$ <span class="fstring">"Grammar include file '"</span> + file + <span class="fstring">"' time="</span> + FileStat::strfiletime(filetime);
+<span class="lineno" id=line19></span>        <span class="big_keyword" title="Define a mutable variable">var</span> filetext = load file;
+<span class="lineno" id=line20></span>        <span class="big_keyword" title="Define a mutable variable">var</span> files = split (filetext, <span class="fstring">"\n"</span>);
+<span class="lineno" id=line21></span>        files = <span class="library" title="return data structure with function applied to each value">map</span> strip of (<span class="library" title="binding of C++ string type">string</span>) files;
+<span class="lineno" id=line22></span>        files = filter (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; s != <span class="fstring">""</span>) files;
+<span class="lineno" id=line23></span>        files = <span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; Filename::join (split(s,<span class="fstring">"/"</span>))) files;
+<span class="lineno" id=line24></span>        <span class="comment">//println$ "Files=" + files;</span>
+<span class="lineno" id=line25></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> maxtime filetime files;
+<span class="lineno" id=line26></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line27></span>        file = Filename::join$ path, s;
+<span class="lineno" id=line28></span>        filetime = FileStat::dfiletime(file,0.0);
+<span class="lineno" id=line29></span>        <span class="small_keyword" title="conditional">if</span> filetime == 0.0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line30></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Grammar file "</span> + file <span class="fstring">" doesn't exist, exiting"</span>;
+<span class="lineno" id=line31></span>          <span class="comment">// this one is pretty fatal :-)</span>
+<span class="lineno" id=line32></span>          System::exit 1;
+<span class="lineno" id=line33></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line34></span>        debugln$ <span class="fstring">"Grammar file "</span> + file + <span class="fstring">" time="</span> + FileStat::strfiletime(filetime);
+<span class="lineno" id=line35></span>        <span class="small_keyword" title="return">return</span> filetime;
+<span class="lineno" id=line36></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line37></span>    }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="comment">// FLX_INSTALL_DIR: root for finding standard grammar</span>
+<span class="lineno" id=line40></span>    <span class="comment">// STDGRAMMAR: root standard grammar key, within FLX_INSTALL_DIR</span>
+<span class="lineno" id=line41></span>    <span class="comment">//      usually "grammar/grammar.files"</span>
+<span class="lineno" id=line42></span>    <span class="comment">// FLXG: absolute filename of felix compiler executable</span>
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>    <span class="comment">// CACHE_DIR: absolute filename of binary cache</span>
+<span class="lineno" id=line45></span>    <span class="comment">// OUTPUT_DIR: absolute filename of text cache</span>
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>    <span class="comment">// DEFAULT_CACHE_DIR: default location of CACHE_DIR</span>
+<span class="lineno" id=line48></span>    <span class="comment">// DEFAULT_OUTPUT_DIR: default location of OUTPUT_DIR</span>
+<span class="lineno" id=line49></span>    <span class="comment">//    These defaults are used to determine if the</span>
+<span class="lineno" id=line50></span>    <span class="comment">//    the cache should be deleted automatically</span>
+<span class="lineno" id=line51></span>    <span class="comment">//    or a an interactive query used to verify.</span>
+<span class="lineno" id=line52></span>    <span class="comment">//    Automatic deletion requies the caches to be the default.</span>
+<span class="lineno" id=line53></span>    <span class="comment">// CLEAR_CACHE: switch to force clearing the cache</span>
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> cache_validation_spec_t = 
+<span class="lineno" id=line56></span>    (
+<span class="lineno" id=line57></span>       FLX_SHARE_DIR:<span class="library" title="binding of C++ string type">string</span>, 
+<span class="lineno" id=line58></span>       GRAMMAR_DIR:<span class="library" title="binding of C++ string type">string</span>, 
+<span class="lineno" id=line59></span>       STDGRAMMAR:<span class="library" title="binding of C++ string type">string</span>, 
+<span class="lineno" id=line60></span>       FLXG:<span class="library" title="binding of C++ string type">string</span>,    
+<span class="lineno" id=line61></span>       CACHE_DIR:<span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line62></span>       OUTPUT_DIR:<span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line63></span>       CLEAR_CACHE: <span class="library" title="binding of C int type">int</span>,
+<span class="lineno" id=line64></span>       AUTOMATON: <span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line65></span>       debugln : <span class="library" title="binding of C++ string type">string</span> -&gt; 0,
+<span class="lineno" id=line66></span>       xqt: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line67></span>       quote: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line68></span>    );
+<span class="lineno" id=line69></span>  
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>    <span class="comment">// CACHE VALIDATION</span>
+<span class="lineno" id=line72></span>    <span class="comment">// </span>
+<span class="lineno" id=line73></span>    <span class="comment">// This function validates the current cache, and if it is considered</span>
+<span class="lineno" id=line74></span>    <span class="comment">// stale may flush it. If the cache is the default one in the users</span>
+<span class="lineno" id=line75></span>    <span class="comment">// home directory the flush is done noisily but unconditionally.</span>
+<span class="lineno" id=line76></span>    <span class="comment">// Otherwise the user is prompted for permission.</span>
+<span class="lineno" id=line77></span>    <span class="comment">// The special cache locations / and . or "" are never deleted</span>
+<span class="lineno" id=line78></span>    <span class="comment">// in case it wipes out parts of the root, home, or current directory.</span>
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>    <span class="comment">// The validation checks the time of the flxg compiler used to build</span>
+<span class="lineno" id=line81></span>    <span class="comment">// it against the current flxg compiler, these must be exactly equal.</span>
+<span class="lineno" id=line82></span>    <span class="comment">//</span>
+<span class="lineno" id=line83></span>    <span class="comment">// It also checks that all the files defining the grammar are older</span>
+<span class="lineno" id=line84></span>    <span class="comment">// than the generated automaton.</span>
+<span class="lineno" id=line85></span>    <span class="comment">//</span>
+<span class="lineno" id=line86></span>    <span class="comment">// It does NOT check any RTL C++ libraries are up to date.</span>
+<span class="lineno" id=line87></span>    <span class="comment">// It does NOT check any Felix program files are up to date.</span>
+<span class="lineno" id=line88></span>    <span class="comment">// Therefore it does NOT guarrantee the contents of the cache are valid.</span>
+<span class="lineno" id=line89></span>    <span class="comment">// Rather it ensures only that the compiler and cached automaton are not stale.</span>
+<span class="lineno" id=line90></span>    <span class="comment">// However if they are stale the whole cache is invalidated.</span>
+<span class="lineno" id=line91></span>    <span class="comment">//</span>
+<span class="lineno" id=line92></span>    <span class="comment">// In effect this means this function ensures the parser is ready and valid</span>
+<span class="lineno" id=line93></span>    <span class="comment">// or non-existant. The compiler and automaton are locked together. If the compiler</span>
+<span class="lineno" id=line94></span>    <span class="comment">// changes the automaton must be rebuilt. </span>
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>    <span class="comment">// returns cache time</span>
+<span class="lineno" id=line97></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> validate_cache  (<span class="big_keyword" title="Define a mutable variable">var</span> spec: cache_validation_spec_t) : <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C double float type">double</span> =
+<span class="lineno" id=line98></span>    {
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>      <span class="comment">// ensure the cache directory exists</span>
+<span class="lineno" id=line101></span>      Directory::mkdirs(spec.CACHE_DIR);
+<span class="lineno" id=line102></span>  
+<span class="lineno" id=line103></span>      <span class="comment">// get the OS timestamp of the flxg compiler, +inf if not found</span>
+<span class="lineno" id=line104></span>      <span class="big_keyword" title="Define a mutable variable">var</span> flxg_time = FileStat::dfiletime(spec.FLXG, #FileStat::future_time);
+<span class="lineno" id=line105></span>      spec.debugln$ <span class="fstring">"Flxg="</span> + spec.FLXG;
+<span class="lineno" id=line106></span>      spec.debugln$ <span class="fstring">"Flxg_time="</span> + FileStat::strfiletime(flxg_time);
+<span class="lineno" id=line107></span>  
+<span class="lineno" id=line108></span>      <span class="comment">// get the OS timestamp of the file flxg_time.stamp</span>
+<span class="lineno" id=line109></span>      <span class="comment">// this file is created with the cache</span>
+<span class="lineno" id=line110></span>      <span class="big_keyword" title="Define a mutable variable">var</span> flxg_stamp = Filename::join spec.CACHE_DIR <span class="fstring">"flxg_time.stamp"</span>;
+<span class="lineno" id=line111></span>      <span class="big_keyword" title="Define a mutable variable">var</span> cache_time = FileStat::dfiletime(flxg_stamp,#FileStat::future_time);
+<span class="lineno" id=line112></span>      spec.debugln$ <span class="fstring">"cache_time="</span> + FileStat::strfiletime(cache_time);
+<span class="lineno" id=line113></span>  
+<span class="lineno" id=line114></span>      <span class="comment">// get the timestamp string recorded in flxg_time.stamp</span>
+<span class="lineno" id=line115></span>      <span class="big_keyword" title="Define a mutable variable">var</span> flxg_stamp_data = load flxg_stamp;
+<span class="lineno" id=line116></span>      <span class="comment">//println$ "Flxg_stamp_data=" + flxg_stamp_data; </span>
+<span class="lineno" id=line117></span>  
+<span class="lineno" id=line118></span>      <span class="comment">// convert the timestamp string to a double, if there is junk</span>
+<span class="lineno" id=line119></span>      <span class="comment">// there or the string is empty, 0.0 is returned by atof,</span>
+<span class="lineno" id=line120></span>      <span class="comment">// adjust that to -inf</span>
+<span class="lineno" id=line121></span>      <span class="big_keyword" title="Define a mutable variable">var</span> flxg_stamp_time = <span class="small_keyword" title="match statement or expression">match</span> flxg_stamp_data.atof <span class="small_keyword" title="type-class constraint">with</span> | 0.0 =&gt; #FileStat::past_time | x =&gt; x;
+<span class="lineno" id=line122></span>  
+<span class="lineno" id=line123></span>      spec.debugln$ <span class="fstring">"Flxg_stamp_data : "</span> + FileStat::strfiletime(flxg_stamp_time);
+<span class="lineno" id=line124></span>  
+<span class="lineno" id=line125></span>      <span class="comment">// Calculate the time of the newest text file defining the grammar</span>
+<span class="lineno" id=line126></span>      <span class="comment">// these are files in directory share/lib/grammar.</span>
+<span class="lineno" id=line127></span>      <span class="big_keyword" title="Define a mutable variable">var</span> grammar_time = gramtime spec.debugln (spec.GRAMMAR_DIR, <span class="fstring">"@"</span>+spec.STDGRAMMAR);
+<span class="lineno" id=line128></span>      spec.debugln$ <span class="fstring">"Grammar text time="</span> + FileStat::strfiletime (grammar_time);
+<span class="lineno" id=line129></span>  
+<span class="lineno" id=line130></span>      <span class="comment">// calculate the name of the compiled grammar automaton in the cache</span>
+<span class="lineno" id=line131></span>      <span class="big_keyword" title="Define a mutable variable">var</span> automaton_name = spec.AUTOMATON; 
+<span class="lineno" id=line132></span>  
+<span class="lineno" id=line133></span>      <span class="comment">// Get the timestamp of the grammar automaton or -inf if it doesn't exist.</span>
+<span class="lineno" id=line134></span>      <span class="big_keyword" title="Define a mutable variable">var</span> automaton_time = FileStat::dfiletime(automaton_name,#FileStat::past_time);
+<span class="lineno" id=line135></span>      spec.debugln$ <span class="fstring">"Automaton "</span> + automaton_name + <span class="fstring">" time="</span> + FileStat::strfiletime(automaton_time);
+<span class="lineno" id=line136></span>  
+<span class="lineno" id=line137></span>      <span class="comment">// If the cache exists and the recorded compiler time stamp is not equal</span>
+<span class="lineno" id=line138></span>      <span class="comment">// to the current compiler time stamp, then the cache is stale </span>
+<span class="lineno" id=line139></span>      <span class="comment">// and should be deleted.</span>
+<span class="lineno" id=line140></span>      <span class="small_keyword" title="conditional">if</span> cache_time != #FileStat::future_time <span class="small_keyword" title="logical conjunction">and</span> flxg_stamp_time != flxg_time <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line141></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Cache may be out of date due to compiler change!"</span>;
+<span class="lineno" id=line142></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Flxg compiler time stamp="</span> + FileStat::strfiletime(flxg_time);
+<span class="lineno" id=line143></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Cache time stamp        ="</span> + FileStat::strfiletime(cache_time);
+<span class="lineno" id=line144></span>  
+<span class="lineno" id=line145></span>        <span class="comment">// special safety check if the output dirs are root or current directory</span>
+<span class="lineno" id=line146></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> (
+<span class="lineno" id=line147></span>          (spec.OUTPUT_DIR == <span class="fstring">"/"</span> <span class="small_keyword" title="logical disjunction">or</span> spec.OUTPUT_DIR == <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> spec.OUTPUT_DIR == <span class="fstring">"."</span>) <span class="small_keyword" title="logical disjunction">or</span>
+<span class="lineno" id=line148></span>          (spec.CACHE_DIR == <span class="fstring">"/"</span> <span class="small_keyword" title="logical disjunction">or</span> spec.CACHE_DIR == <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> spec.CACHE_DIR == <span class="fstring">"."</span>)
+<span class="lineno" id=line149></span>        )
+<span class="lineno" id=line150></span>        <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line151></span>          spec&amp;.CLEAR_CACHE &lt;- 1;
+<span class="lineno" id=line152></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line153></span>  
+<span class="lineno" id=line154></span>      <span class="comment">// If the automaton exists and the grammar is newer than the automaton</span>
+<span class="lineno" id=line155></span>      <span class="comment">// then the cache is stale and should be deleted.</span>
+<span class="lineno" id=line156></span>      <span class="small_keyword" title="conditional">elif</span> grammar_time &gt; automaton_time <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line157></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Cache may be out of date due to grammar upgrade!"</span>;
+<span class="lineno" id=line158></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Grammar time stamp          ="</span> + FileStat::strfiletime(grammar_time);
+<span class="lineno" id=line159></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Automaton.syntax time stamp ="</span> + FileStat::strfiletime(automaton_time);
+<span class="lineno" id=line160></span>        spec&amp;.CLEAR_CACHE &lt;- 1;
+<span class="lineno" id=line161></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line162></span>  
+<span class="lineno" id=line163></span>      <span class="comment">// FFF BE CAREFUL! The value "/" for these caches is perfectly good</span>
+<span class="lineno" id=line164></span>      <span class="small_keyword" title="conditional">if</span> spec.CLEAR_CACHE != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line165></span>        <span class="comment">// refuse to delete "" or "/" or ".", basic safety check</span>
+<span class="lineno" id=line166></span>        <span class="small_keyword" title="conditional">if</span> 
+<span class="lineno" id=line167></span>          (spec.OUTPUT_DIR == <span class="fstring">"/"</span> <span class="small_keyword" title="logical disjunction">or</span> spec.OUTPUT_DIR == <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> spec.OUTPUT_DIR == <span class="fstring">"."</span>) <span class="small_keyword" title="logical disjunction">or</span>
+<span class="lineno" id=line168></span>          (spec.CACHE_DIR == <span class="fstring">"/"</span> <span class="small_keyword" title="logical disjunction">or</span> spec.CACHE_DIR == <span class="fstring">""</span> <span class="small_keyword" title="logical disjunction">or</span> spec.CACHE_DIR == <span class="fstring">"."</span>)
+<span class="lineno" id=line169></span>        <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line170></span>          <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"WILL NOT DELETE CACHES"</span>;
+<span class="lineno" id=line171></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"output cache "</span> + spec.OUTPUT_DIR;
+<span class="lineno" id=line172></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"binary cache "</span> + spec.CACHE_DIR;
+<span class="lineno" id=line173></span>          <span class="comment">// INTENTIONAL EXIT</span>
+<span class="lineno" id=line174></span>          System::exit(1);
+<span class="lineno" id=line175></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line176></span>  
+<span class="lineno" id=line177></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Delete cache "</span> + spec.OUTPUT_DIR;
+<span class="lineno" id=line178></span>        <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line179></span>            <span class="hack">C_hack</span>::ignore$ spec.xqt(<span class="fstring">"mkdir "</span>+spec.quote(spec.OUTPUT_DIR+<span class="fstring">"\\rubbish"</span>) +<span class="fstring">"&amp; rmdir /Q /S "</span> + spec.quote(spec.OUTPUT_DIR));
+<span class="lineno" id=line180></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line181></span>            <span class="hack">C_hack</span>::ignore$ spec.xqt(<span class="fstring">"rm -rf "</span> + spec.quote(spec.OUTPUT_DIR));
+<span class="lineno" id=line182></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line183></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Delete cache "</span> + spec.CACHE_DIR;
+<span class="lineno" id=line184></span>  
+<span class="lineno" id=line185></span>        <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line186></span>            <span class="hack">C_hack</span>::ignore$ spec.xqt(<span class="fstring">"mkdir "</span>+spec.quote(spec.CACHE_DIR+<span class="fstring">"\\rubbish"</span>)+<span class="fstring">"&amp; rd /Q /S "</span> + spec.quote(spec.CACHE_DIR));
+<span class="lineno" id=line187></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line188></span>            <span class="hack">C_hack</span>::ignore$ spec.xqt(<span class="fstring">"rm -rf "</span> + spec.quote(spec.CACHE_DIR));
+<span class="lineno" id=line189></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line190></span>  
+<span class="lineno" id=line191></span>        <span class="comment">// Make a new cache.</span>
+<span class="lineno" id=line192></span>        Directory::mkdirs(spec.CACHE_DIR);
+<span class="lineno" id=line193></span>  
+<span class="lineno" id=line194></span>        <span class="comment">// make the stamp file with the time of the current compiler.</span>
+<span class="lineno" id=line195></span>        <span class="big_keyword" title="Define a mutable variable">var</span> f = fopen_output flxg_stamp;
+<span class="lineno" id=line196></span>        <span class="library" title="Print a string to a stream">write</span>(f, fmt(flxg_time, fixed (0,3)));
+<span class="lineno" id=line197></span>        f.fclose;
+<span class="lineno" id=line198></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line199></span>      <span class="small_keyword" title="return">return</span> spec.CLEAR_CACHE, cache_time;
+<span class="lineno" id=line200></span>    }
+<span class="lineno" id=line201></span>  
+<span class="lineno" id=line202></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> cache_join (c:<span class="library" title="binding of C++ string type">string</span>, <span class="big_keyword" title="Define a mutable variable">var</span> f:<span class="library" title="binding of C++ string type">string</span>) = 
+<span class="lineno" id=line203></span>    {
+<span class="lineno" id=line204></span>      <span class="comment">//debugln$ "[cache_join] " + c + " with  " + f;</span>
+<span class="lineno" id=line205></span>      <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line206></span>        <span class="small_keyword" title="conditional">if</span> f.[1 <span class="small_keyword" title="substring range separator">to</span> 3] == <span class="fstring">":\\"</span> <span class="small_keyword" title="imperative code begins">do</span> f = f.[0 <span class="small_keyword" title="substring range separator">to</span> 1]+f.[2 <span class="small_keyword" title="substring range separator">to</span>]; 
+<span class="lineno" id=line207></span>        <span class="small_keyword" title="conditional">elif</span> f.[1] == <span class="library" title="binding of C char type">char</span> <span class="fstring">":"</span> <span class="small_keyword" title="imperative code begins">do</span> f = f.[0 <span class="small_keyword" title="substring range separator">to</span> 1]+<span class="fstring">"\\"</span>+f.[2 <span class="small_keyword" title="substring range separator">to</span>]; 
+<span class="lineno" id=line208></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line209></span>        <span class="small_keyword" title="conditional">if</span> f.[0] == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span> f = f.[1 <span class="small_keyword" title="substring range separator">to</span>]; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line210></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line211></span>        <span class="small_keyword" title="conditional">if</span> f.[0] == <span class="library" title="binding of C char type">char</span> <span class="fstring">"/"</span> <span class="small_keyword" title="imperative code begins">do</span> f = f.[1 <span class="small_keyword" title="substring range separator">to</span>]; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line212></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line213></span>        <span class="big_keyword" title="Define a mutable variable">var</span> k = Filename::join(c,f);
+<span class="lineno" id=line214></span>        <span class="comment">//debugln$ "[cache_join] result = " + k;</span>
+<span class="lineno" id=line215></span>        <span class="small_keyword" title="return">return</span> k;
+<span class="lineno" id=line216></span>    }
+<span class="lineno" id=line217></span>  
+<span class="lineno" id=line218></span>  }
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

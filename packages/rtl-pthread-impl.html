@@ -1,0 +1,955 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Pthread implementation</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Pthreads"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Pthreads_h')"> <a href="#Pthreads_h">Pthreads</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Pthreads_h'><img src='/share/src/web/images/minus.gif' id='Pthreads' onclick='toggle(this,"Pthreads_d")' alt='+'/> 1 Pthreads</h1><div id='Pthreads_d' style='display:block'>
+<p>The <code>pthread_thread.hpp</code> defines pthreads and the system 
+pthread control class. The control is implemented separately.
+</p><p>Felix pthreads are tightly integrated with the garbage
+collector via the pthread control class. This is necessary
+because the collector must stop all the pthreads before
+it can reliably sweep the thread stacks for roots.
+</p><p>Thread control also ensure Felix programs do not terminate
+until all managed pthreads have completed.
+</p><p>The Felix system uses detached threads. We provide joinable
+threads here too, but Felix programmers should use detached
+threads and pchannels for synchronisation.
+</p><pre class='inclusion'>
+share/lib/rtl/pthread_thread.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_PTHREAD_THREAD_H__
+#<span class="preproc">define</span> __FLX_PTHREAD_THREAD_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_pthread_config.hpp"</span>
+
+#<span class="small_keyword">if</span> FLX_WIN32
+#<span class="preproc">include</span> <span class="fstring">&lt;windows.h&gt;</span>
+#<span class="preproc">else</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;pthread.h&gt;</span>
+#<span class="preproc">endif</span>
+
+<span class="comment">// auto pthread, because I forget how to deallocate them nicely
+</span><span class="comment">// could init in the constructor, but ultimately you don't want the thread
+</span><span class="comment">// barging in before you've finished doing other stuff
+</span><span class="comment">// Addendum (20051128): doing stdio in turns out to be not very safe.
+</span><span class="comment">// I don't know if printf et al are supposed to be thread safe (most impls
+</span><span class="comment">// seem to try to be) but I sometimes get deadlocks in ppc64 os x 10.4.2
+</span><span class="comment">// with 4.0.1 when printfing to stdout. Nasty.
+</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_thread_control_base.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;utility&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;map&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;vector&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;functional&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;thread&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;mutex&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;condition_variable&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;memory&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// Posix Threads. This class simply wraps the creation
+</span><span class="comment">/// and joining of threads. It is not safe.
+</span><span class="comment">// ********************************************************
+</span>
+#<span class="preproc">ifdef</span> _WIN32
+<span class="big_keyword">typedef</span> HANDLE flx_native_thread_t;
+#<span class="preproc">else</span>
+<span class="big_keyword">typedef</span> pthread_t flx_native_thread_t;
+#<span class="preproc">endif</span>
+
+flx_native_thread_t PTHREAD_EXTERN get_current_native_thread();
+
+
+<span class="comment">// FELIX THREAD IDENTIFIER (native thread id cast to uintptr_t)
+</span>uintptr_t PTHREAD_EXTERN mythrid();
+
+<span class="comment">// THREAD REGISTRY: a map from the FELIX THREAD ID to thread data
+</span><span class="big_keyword">typedef</span> <span class="small_keyword">std</span>::map&lt;uintptr_t, ::<span class="small_keyword">std</span>::unique_ptr&lt;thread_data_t&gt;, <span class="small_keyword">std</span>::less&lt;uintptr_t&gt; &gt; thread_registry_t;
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// MASTER THREAD CONTROL OBJECT
+</span><span class="comment">// PROVIDES WORLD STOP SERVICES for the GARBAGE COLLECTOR
+</span><span class="comment">// 
+</span><span class="comment">// A singleton unmanaged object owned by the flx_world object
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">class</span> PTHREAD_EXTERN thread_control_t : <span class="qualifier">public</span> <span class="qualifier">virtual</span> thread_control_base_t
+{
+    thread_control_t (thread_control_t <span class="qualifier">const</span> &amp;) = delete; <span class="comment">// uncopyable
+</span>    <span class="qualifier">void</span> operator=(thread_control_t <span class="qualifier">const</span>&amp;) = delete; <span class="comment">// uncopyable
+</span>
+    <span class="comment">// THREAD CONTROL VARIABLES
+</span>    bool <span class="small_keyword">do</span>_world_stop;     <span class="comment">// flag to say we want to stop the world
+</span>    size_t thread_counter;  <span class="comment">// total Felix threads (not counting demux etc)
+</span>    size_t active_counter;  <span class="comment">// total active Felix threads (not suspended for world stop yet_
+</span>    size_t realtime_thread_counter;
+
+    ::<span class="small_keyword">std</span>::condition_variable_any stop_guard;
+    ::<span class="small_keyword">std</span>::mutex stop_mutex;
+    ::<span class="small_keyword">std</span>::mutex notification_registry_mutex;
+
+    <span class="comment">// WORLD STOP NOTIFICATION REGISTRY
+</span>    <span class="comment">// .. a set of condition variables that a thread could be waiting on
+</span>    <span class="comment">// .. the registry is used to wake them up so they notice the
+</span>    <span class="comment">// world stop flag
+</span>    world_stop_notifier_t **world_stop_notifier_array;
+    size_t world_stop_notifier_array_length;
+
+    <span class="comment">// THREAD REGISTRY
+</span>    thread_registry_t threads;
+
+
+    <span class="comment">// PRIVATE METHODS
+</span>    <span class="qualifier">void</span> unsafe_stop_check();
+    <span class="qualifier">void</span> unsafe_suspend();
+    <span class="qualifier">void</span> unsafe_resume();
+    <span class="qualifier">void</span> world_stop_notify();
+
+<span class="qualifier">public</span>:
+    bool debug;
+
+    <span class="comment">// PUBLIC METHODS
+</span>    bool get_debug()<span class="qualifier">const</span> override;
+    thread_control_t (bool);
+    size_t thread_count() override;
+    size_t active_count();
+    <span class="qualifier">void</span> set_realtime() override;
+    <span class="qualifier">void</span> add_thread(<span class="qualifier">void</span>*, thread_kind_t) override;
+    thread_data_t *get_thread_data_pointer()<span class="qualifier">const</span> override;
+    <span class="qualifier">void</span> remove_thread() override;
+    bool world_stop() override;
+    <span class="qualifier">void</span> join_all()  override;
+    <span class="qualifier">void</span> world_start() override;
+    <span class="qualifier">void</span> yield() override;
+    <span class="qualifier">void</span> suspend() override;
+    <span class="qualifier">void</span> resume() override;
+    <span class="qualifier">void</span> register_world_stop_notifier(world_stop_notifier_t *) override;
+    <span class="qualifier">void</span> unregister_world_stop_notifier(world_stop_notifier_t *) override;
+    memory_ranges_t *get_block_list() override; <span class="comment">// called owns result and should delete it
+</span>};
+
+<span class="big_keyword">struct</span> tstart_t
+{
+  <span class="qualifier">void</span> (*sr)(<span class="qualifier">void</span>*);
+  <span class="qualifier">void</span> *cd;
+  thread_control_base_t *tc;
+  ::<span class="small_keyword">std</span>::mutex *spawner_lock;
+  ::<span class="small_keyword">std</span>::condition_variable_any *spawner_cond;
+  bool *spawner_flag;
+  thread_kind_t thread_kind;
+
+  tstart_t(<span class="qualifier">void</span> (*s)(<span class="qualifier">void</span>*),<span class="qualifier">void</span>* c,thread_control_base_t *t, ::<span class="small_keyword">std</span>::mutex *sl, ::<span class="small_keyword">std</span>::condition_variable_any *sc, bool *sf, thread_kind_t k)
+    : sr(s), cd(c), tc(t), spawner_lock(sl), spawner_cond(sc), spawner_flag(sf), thread_kind(k)
+  {}
+};
+
+<span class="comment">// a class for threads that can't be joined. upon exit all their resources
+</span><span class="comment">// are freed. they just evaporate. probably the best type of thread.
+</span><span class="big_keyword">class</span> PTHREAD_EXTERN flx_detached_thread_t {
+  flx_native_thread_t thr;        <span class="comment">///< the thread
+</span>  flx_detached_thread_t(flx_detached_thread_t <span class="qualifier">const</span>&amp;) = delete; <span class="comment">// uncopyable
+</span>  <span class="qualifier">void</span> operator=(flx_detached_thread_t <span class="qualifier">const</span>&amp;) = delete; <span class="comment">// uncopyable
+</span><span class="qualifier">public</span>:
+  flx_detached_thread_t();
+  ~flx_detached_thread_t();
+  <span class="qualifier">int</span> init(<span class="qualifier">void</span> (*start)(<span class="qualifier">void</span>*), <span class="qualifier">void</span>* udat, thread_control_base_t*, ::<span class="small_keyword">std</span>::mutex *, ::<span class="small_keyword">std</span>::condition_variable_any *, bool*, thread_kind_t);
+};
+
+<span class="comment">// rf: joinable threads. is it an error to not join joinable threads?
+</span><span class="big_keyword">class</span> PTHREAD_EXTERN flx_thread_t {
+  flx_native_thread_t thr;        <span class="comment">///< the thread
+</span>  flx_thread_t(flx_thread_t <span class="qualifier">const</span>&amp;) = delete; <span class="comment">// uncopyable
+</span>  <span class="qualifier">void</span> operator=(flx_thread_t <span class="qualifier">const</span>&amp;) = delete; <span class="comment">// uncopyable
+</span><span class="qualifier">public</span>:
+  flx_thread_t();
+  ~flx_thread_t();
+  <span class="qualifier">int</span> init(<span class="qualifier">void</span> (*start)(<span class="qualifier">void</span>*), <span class="qualifier">void</span>* udat, thread_control_base_t*);
+  <span class="qualifier">void</span> join();
+};
+
+<span class="comment">/// RAII wrapper for joinable thread class
+</span><span class="big_keyword">class</span> PTHREAD_EXTERN flx_thread_wrapper_t {
+  flx_thread_t thread;
+  flx_thread_wrapper_t(flx_thread_wrapper_t <span class="qualifier">const</span>&amp;) = delete; <span class="comment">// uncopyable
+</span>  <span class="qualifier">void</span> operator=(flx_thread_wrapper_t <span class="qualifier">const</span>&amp;) = delete; <span class="comment">// uncopyable
+</span><span class="qualifier">public</span>:
+  ~flx_thread_wrapper_t();
+  flx_thread_wrapper_t(<span class="qualifier">void</span> (*start)(<span class="qualifier">void</span>*), <span class="qualifier">void</span>* udat, thread_control_base_t *tc);
+};
+
+}}
+#<span class="preproc">endif</span>
+
+</pre></p><pre class='inclusion'>
+share/src/pthread/pthread_posix_thread.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"pthread_thread.hpp"</span>
+#<span class="small_keyword">if</span> FLX_POSIX
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>  <span class="comment">// strerror
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;setjmp.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;functional&gt;</span> <span class="comment">// less
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;assert.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+
+flx_native_thread_t get_current_native_thread() { <span class="small_keyword">return</span> pthread_self(); }
+uintptr_t mythrid() { <span class="small_keyword">return</span> (uintptr_t)pthread_self(); }
+
+<span class="qualifier">static</span> <span class="qualifier">void</span> *get_stack_pointer() { 
+  <span class="qualifier">void</span> *x; 
+  <span class="qualifier">void</span> *y = (<span class="qualifier">void</span>*)&amp;x; 
+  <span class="small_keyword">return</span> y;
+}
+
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> <span class="qualifier">void</span> *flx_pthread_start_wrapper(<span class="qualifier">void</span> *e)
+{
+  <span class="qualifier">void</span> *stack_base = get_stack_pointer();
+  tstart_t *ehd = (tstart_t*)e;
+  thread_kind_t k = ehd-&gt;thread_kind;
+  thread_control_base_t *tc = ehd -&gt; tc;
+  <span class="small_keyword">if</span>(tc == 0)
+  {
+    fprintf(stderr, <span class="fstring">"ERROR: flx_pthread_start_wrapper got NULL thread control object\n"</span>);
+    assert(tc);
+  }
+  bool debug = tc-&gt;get_debug();
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"Spawned Thread %p start stack base = %p, tc=%p\n"</span>,
+       (<span class="qualifier">void</span>*)mythrid(),stack_base, tc);
+  <span class="small_keyword">if</span>(debug)
+      fprintf(stderr,<span class="fstring">"Thread registering itself\n"</span>);
+  tc-&gt;add_thread(stack_base, k);
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"Registered: Spawned Thread %p stack base = %p\n"</span>,
+      (<span class="qualifier">void</span>*)mythrid(),stack_base, tc);
+
+
+  <span class="qualifier">void</span> (*sr)(<span class="qualifier">void</span>*)=ehd-&gt;sr; <span class="comment">// client function
+</span>  <span class="qualifier">void</span> *cd = ehd-&gt;cd;        <span class="comment">// client data
+</span>  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"ehd-&gt;spawner_lock = %p\n"</span>,ehd-&gt;spawner_lock);
+
+  <span class="small_keyword">if</span>(ehd-&gt;spawner_lock)
+  {
+    ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt; dummy(*ehd-&gt;spawner_lock);
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p acquired mutex\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p notifying spawner it has registered itself\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+    *ehd-&gt;spawner_flag=true;
+    ehd-&gt;spawner_cond-&gt;notify_all();
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p releasing mutex\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+  }
+  delete ehd;
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr,<span class="fstring">"Thread %p yielding\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+  tc-&gt;yield();
+  try {
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p running client code\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+    (*sr)(cd);
+  }
+  catch (...) {
+    fprintf(stderr,<span class="fstring">"Uncaught exception in thread\n"</span>);
+    ::<span class="small_keyword">std</span>::exit(1);
+  }
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr,<span class="fstring">"Thread %p unregistering\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+  tc-&gt;remove_thread();
+  <span class="small_keyword">return</span> NULL;
+}
+
+
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> <span class="qualifier">void</span> *nonflx_pthread_start_wrapper(<span class="qualifier">void</span> *e)
+{
+  <span class="qualifier">void</span> *stack_base = get_stack_pointer();
+  tstart_t *ehd = (tstart_t*)e;
+  <span class="qualifier">void</span> (*sr)(<span class="qualifier">void</span>*)=ehd-&gt;sr; <span class="comment">// client function
+</span>  <span class="qualifier">void</span> *cd = ehd-&gt;cd;        <span class="comment">// client data
+</span>
+  <span class="small_keyword">if</span>(ehd-&gt;spawner_lock)
+  {
+    ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt; dummy(*ehd-&gt;spawner_lock);
+    *ehd-&gt;spawner_flag=true;
+    ehd-&gt;spawner_cond-&gt;notify_all();
+  }
+  delete ehd;
+  try {
+    (*sr)(cd);
+  }
+  catch (...) {
+    fprintf(stderr,<span class="fstring">"Uncaught exception in thread\n"</span>);
+    ::<span class="small_keyword">std</span>::exit(1);
+  }
+  <span class="small_keyword">return</span> NULL;
+}
+
+
+<span class="comment">// ---- detached threads ----------
+</span>
+<span class="qualifier">int</span>
+flx_detached_thread_t::init(<span class="qualifier">void</span> (*start)(<span class="qualifier">void</span>*), <span class="qualifier">void</span>* udat, thread_control_base_t *tc,
+  ::<span class="small_keyword">std</span>::mutex * m, ::<span class="small_keyword">std</span>::condition_variable_any *c,bool *flag, thread_kind_t k)
+{
+  pthread_attr_t attr;
+  pthread_attr_init(&amp;attr);
+  pthread_attr_setdetachstate(&amp;attr, PTHREAD_CREATE_DETACHED);
+  pthread_attr_setstacksize(&amp;attr, 1048576ul * 100ul ); <span class="comment">// 100Meg .. should get from control/env of something
+</span>  <span class="qualifier">int</span> res = pthread_create(&amp;thr, &amp;attr, flx_pthread_start_wrapper,
+    new tstart_t(start, udat, tc, m,c,flag,k));
+  <span class="small_keyword">if</span>(res)
+  {
+     fprintf(stderr, <span class="fstring">"WARNING: flx_detached_thread_t: pthread_create failed: %s\n"</span>,
+       strerror(res));
+  }
+  pthread_attr_destroy(&amp;attr);
+  <span class="small_keyword">return</span> res;
+}
+
+flx_detached_thread_t::~flx_detached_thread_t() { }
+flx_detached_thread_t::flx_detached_thread_t() { }
+
+<span class="comment">// ---- joinable threads ----------
+</span>
+<span class="qualifier">int</span>
+flx_thread_t::init(<span class="qualifier">void</span> (*start)(<span class="qualifier">void</span>*), <span class="qualifier">void</span>* udat, thread_control_base_t*tc)
+{
+  <span class="qualifier">int</span> res = pthread_create(&amp;thr, NULL, nonflx_pthread_start_wrapper,
+    new tstart_t(start, udat, tc,NULL,NULL,NULL,joinable));
+  <span class="small_keyword">if</span>(res)
+  {
+     fprintf(stderr, <span class="fstring">"WARNING: flx_thread_t: pthread_create failed: %s\n"</span>,
+       strerror(res));
+  }
+  <span class="small_keyword">return</span> res;
+}
+
+<span class="qualifier">void</span> flx_thread_t::join() {
+  <span class="qualifier">int</span> res = pthread_join(thr, NULL);
+  <span class="small_keyword">if</span>(res)
+  {
+     fprintf(stderr, <span class="fstring">"flx_thread_t: FATAL: pthread_join failed: %s\n"</span>,
+       strerror(res));
+#<span class="preproc">ifdef</span> exit
+     <span class="comment">// Someone wants to replace exit with their own thing ...
+</span>     exit(1);
+#<span class="preproc">else</span>
+     <span class="small_keyword">std</span>::exit(1);
+#<span class="preproc">endif</span>
+  }
+}
+
+flx_thread_t::~flx_thread_t() { }
+flx_thread_t::flx_thread_t() { }
+
+<span class="comment">// ---- joinable thread wrapper ----------
+</span>
+flx_thread_wrapper_t::flx_thread_wrapper_t(<span class="qualifier">void</span> (*start)(<span class="qualifier">void</span>*), <span class="qualifier">void</span>* udat, thread_control_base_t*tc)
+{
+  <span class="qualifier">int</span> res = thread.init(start,udat,tc);
+  {
+    <span class="small_keyword">if</span>(res)
+    {
+       fprintf(stderr, <span class="fstring">"FATAL: flx_thread_wapper_t: flx_thread_t.init failed: %s\n"</span>,
+         strerror(res));
+#<span class="preproc">ifdef</span> exit
+     <span class="comment">// Someone wants to replace exit with their own thing ...
+</span>     exit(1);
+#<span class="preproc">else</span>
+     <span class="small_keyword">std</span>::exit(1);
+#<span class="preproc">endif</span>
+    }
+  }
+}
+
+flx_thread_wrapper_t::~flx_thread_wrapper_t() { thread.join(); }
+}}
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/pthread/pthread_win_thread.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"pthread_thread.hpp"</span>
+#<span class="small_keyword">if</span> FLX_WIN32
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;assert.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+
+flx_native_thread_t get_current_native_thread() { <span class="small_keyword">return</span> GetCurrentThread(); }
+uintptr_t mythrid() { <span class="small_keyword">return</span> (uintptr_t)GetCurrentThreadId(); }
+
+<span class="qualifier">static</span> <span class="qualifier">void</span> *get_stack_pointer() { 
+  <span class="qualifier">void</span> *x; 
+  <span class="qualifier">void</span> *y = (<span class="qualifier">void</span>*)&amp;x;
+  <span class="small_keyword">return</span> y;
+}
+
+DWORD WINAPI flx_pthread_start_wrapper(LPVOID e)
+{
+  <span class="qualifier">void</span> *stack_base = get_stack_pointer();
+  tstart_t *ehd = (tstart_t*)e;
+  thread_kind_t k = ehd-&gt;thread_kind;
+  thread_control_base_t *tc = ehd -&gt; tc;
+  <span class="small_keyword">if</span>(tc == 0)
+  {
+    fprintf(stderr, <span class="fstring">"ERROR: flx_pthread_start_wrapper got NULL thread control object\n"</span>);
+    assert(tc);
+  }
+  bool debug = tc-&gt;get_debug();
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"Spawned Thread %p start stack base = %p, tc=%p\n"</span>,
+       (<span class="qualifier">void</span>*)mythrid(),stack_base, tc);
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"Spawned Thread %p start stack base = %p, tc=%p\n"</span>,(<span class="qualifier">void</span>*)mythrid(),stack_base, tc);
+  <span class="small_keyword">if</span>(tc-&gt;get_debug())
+    fprintf(stderr,<span class="fstring">"Thread registering itself\n"</span>);
+  tc-&gt;add_thread(stack_base, k);
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"Registered: Spawned Thread %p stack base = %p\n"</span>,
+      (<span class="qualifier">void</span>*)mythrid(),stack_base, tc);
+  <span class="qualifier">void</span> (*sr)(<span class="qualifier">void</span>*)=ehd-&gt;sr;
+  <span class="qualifier">void</span> *cd = ehd-&gt;cd;
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"ehd-&gt;spawner_lock = %p\n"</span>,ehd-&gt;spawner_lock);
+
+  <span class="small_keyword">if</span>(ehd-&gt;spawner_lock)
+  {
+    ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt; dummy(*ehd-&gt;spawner_lock);
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p acquired mutex\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p notifying spawner it has registered itself\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+    *ehd-&gt;spawner_flag=true;
+    ehd-&gt;spawner_cond-&gt;notify_all();
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p releasing mutex\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+  }
+  delete ehd;
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr,<span class="fstring">"Thread %p yielding\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+  tc-&gt;yield();
+  try {
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr,<span class="fstring">"Thread %p running client code\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+    (*sr)(cd);
+  }
+  catch (...) {
+    fprintf(stderr,<span class="fstring">"Uncaught exception in thread\n"</span>);
+    ::<span class="small_keyword">std</span>::exit(1);
+  }
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr,<span class="fstring">"Thread %p unregistering\n"</span>, (<span class="qualifier">void</span>*)mythrid());
+  tc-&gt;remove_thread();
+  <span class="small_keyword">return</span> 0;
+}
+
+DWORD WINAPI nonflx_pthread_start_wrapper(LPVOID e)
+{
+  <span class="qualifier">void</span> *stack_base = get_stack_pointer();
+  tstart_t *ehd = (tstart_t*)e;
+  <span class="qualifier">void</span> (*sr)(<span class="qualifier">void</span>*)=ehd-&gt;sr;
+  <span class="qualifier">void</span> *cd = ehd-&gt;cd;
+  <span class="small_keyword">if</span>(ehd-&gt;spawner_lock)
+  {
+    ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt; dummy(*ehd-&gt;spawner_lock);
+    *ehd-&gt;spawner_flag=true;
+    ehd-&gt;spawner_cond-&gt;notify_all();
+  }
+  delete ehd;
+  try {
+    (*sr)(cd);
+  }
+  catch (...) {
+    fprintf(stderr,<span class="fstring">"Uncaught exception in thread\n"</span>);
+    ::<span class="small_keyword">std</span>::exit(1);
+  }
+  <span class="small_keyword">return</span> 0;
+}
+
+
+<span class="comment">// ---- detached threads ----------
+</span>
+<span class="comment">// returns -1 on failure with error in GetLastError, 0 if all good.
+</span><span class="qualifier">int</span>
+flx_detached_thread_t::init(<span class="qualifier">void</span> (*start)(<span class="qualifier">void</span>*), <span class="qualifier">void</span> *lParam, thread_control_base_t *tc,
+  ::<span class="small_keyword">std</span>::mutex * m, ::<span class="small_keyword">std</span>::condition_variable_any *c,bool *flag, thread_kind_t k)
+{
+  DWORD thread_id = 0;
+  thr = (HANDLE)CreateThread(NULL, 1048576ul * 100ul, <span class="comment">// 100Meg .. should use control/env
+</span>    (LPTHREAD_START_ROUTINE)flx_pthread_start_wrapper,
+    new tstart_t(start,lParam, tc, m, c, flag,k), 0,
+    &amp;thread_id
+  );
+
+  <span class="small_keyword">if</span>(!thr)
+  {
+    DWORD err = GetLastError();
+    fprintf(stderr, <span class="fstring">"flx_detached_thread_t: CreateThread failed: %i\n"</span>, err);
+    <span class="small_keyword">return</span> err;
+  }
+  <span class="small_keyword">return</span> 0;
+}
+
+flx_detached_thread_t::~flx_detached_thread_t() { CloseHandle(thr); }
+flx_detached_thread_t::flx_detached_thread_t() { }
+
+<span class="comment">// ---- joinable threads ----------
+</span>
+flx_thread_t::flx_thread_t() { }
+flx_thread_t::~flx_thread_t() { }
+
+<span class="comment">// this should be idempotent
+</span><span class="qualifier">void</span>
+flx_thread_t::join()
+{
+  <span class="comment">// Let's try and wait for the thread to finish, however first I have to
+</span>  <span class="comment">// tell it to finish up.
+</span>
+  DWORD  wait_res = WaitForSingleObject(thr, INFINITE);
+
+  <span class="comment">// will this give me my return status? how do I get that?
+</span>  <span class="small_keyword">if</span>(WAIT_FAILED == wait_res)
+  {
+    fprintf(stderr,<span class="fstring">"WARNING: thread wait failed (%li)\n"</span>, GetLastError());
+  }
+
+  <span class="comment">// I've already tried waiting on the  thread's #include <stdlib> exit
+</span>  <span class="small_keyword">if</span>(!CloseHandle(thr))
+  {
+    fprintf(stderr,<span class="fstring">"FATAL: failed to delete thread (%li)\n"</span>, GetLastError());
+    <span class="small_keyword">std</span>::exit(1);
+  }
+}
+
+<span class="comment">// returns -1 on failure with error in GetLastError, 0 if all good.
+</span><span class="qualifier">int</span>
+flx_thread_t::init(<span class="qualifier">void</span> (*fn)(<span class="qualifier">void</span>*), <span class="qualifier">void</span> *lParam, thread_control_base_t *tc)
+{
+  DWORD thread_id = 0;
+  thr= (HANDLE)CreateThread(NULL, 0,
+    (LPTHREAD_START_ROUTINE)nonflx_pthread_start_wrapper,
+    new tstart_t(fn,lParam, tc,NULL,NULL,NULL,joinable), 0,
+    &amp;thread_id
+  );
+
+  <span class="small_keyword">if</span>(!thr)
+  {
+    DWORD err = GetLastError();
+    fprintf(stderr, <span class="fstring">"WARNING: flx_thread_t: CreateThread failed: %i\n"</span>, err);
+    <span class="small_keyword">return</span> err;
+  }
+
+  <span class="small_keyword">return</span> 0;
+}
+
+<span class="comment">// ---- joinable thread wrapper ----------
+</span>flx_thread_wrapper_t::flx_thread_wrapper_t(<span class="qualifier">void</span> (*f)(<span class="qualifier">void</span>*), <span class="qualifier">void</span> *lParam, thread_control_base_t*tc)
+{
+  <span class="qualifier">int</span> res = thread.init(f,lParam,tc);
+  <span class="small_keyword">if</span>(res)
+  {
+    fprintf(stderr,<span class="fstring">"flx_thread_wrapper_t: FATAL: flx_thread_t.init failed\n"</span>);
+    <span class="small_keyword">std</span>::exit(1);
+  }
+}
+flx_thread_wrapper_t::~flx_thread_wrapper_t() { thread.join(); }
+
+}}
+
+#<span class="preproc">endif</span>
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

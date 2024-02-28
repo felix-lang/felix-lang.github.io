@@ -1,0 +1,821 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Operations on integers.</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Conversion operators.",
+"Convert to decimal string.",
+"Convert to lexical string.",
+"Methods of integers",
+"Methods of signed integers",
+"Methods of unsigned integers",
+"Make functions accessible without qualification",
+"Integer Subtyping Rules"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Conversion operators._h')"> <a href="#Conversion_operators._h">Conversion operators.</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Convert to decimal string._h')"> <a href="#Convert_to_decimal_string._h">Convert to decimal string.</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Convert to lexical string._h')"> <a href="#Convert_to_lexical_string._h">Convert to lexical string.</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Methods of integers_h')"> <a href="#Methods_of_integers_h">Methods of integers</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Methods of signed integers_h')"> <a href="#Methods_of_signed_integers_h">Methods of signed integers</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Methods of unsigned integers_h')"> <a href="#Methods_of_unsigned_integers_h">Methods of unsigned integers</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Make functions accessible without qualification_h')"> <a href="#Make_functions_accessible_without_qualification_h">Make functions accessible without qualification</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Integer Subtyping Rules_h')"> <a href="#Integer_Subtyping_Rules_h">Integer Subtyping Rules</a></div>
+      <div class=sm id=menu8>
+      </div>
+    <script>counter_max=8;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Conversion_operators._h'><img src='/share/src/web/images/minus.gif' id='Conversion operators.' onclick='toggle(this,"Conversion_operators._d")' alt='+'/> 1 Conversion operators.</h1><div id='Conversion_operators._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/int256"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Tiny
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C signed char type">tiny</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C signed char type">tiny</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line7></span>  }
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Short
+<span class="lineno" id=line10></span>  {
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C short type">short</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C short type">short</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C short type">short</span>: <span class="library" title="binding of C short type">short</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Int
+<span class="lineno" id=line17></span>  {
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C int type">int</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span> : <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line21></span>    <span class="comment">// special hack</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span>(x:bool)=&gt; <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span> | <span class="library" title="truth value">true</span> =&gt; 1 | <span class="library" title="false value">false</span> =&gt; 0 <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line23></span>  }
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Long
+<span class="lineno" id=line26></span>  {
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C long type">long</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C long type">long</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C long type">long</span>: <span class="library" title="binding of C long type">long</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line30></span>  }
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Vlong
+<span class="lineno" id=line33></span>  {
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C long long type">vlong</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C long long type">vlong</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C long long type">vlong</span>: <span class="library" title="binding of C long long type">vlong</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line37></span>  }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Utiny
+<span class="lineno" id=line40></span>  {
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned char type">utiny</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C unsigned char type">utiny</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned char type">utiny</span>: <span class="library" title="binding of C unsigned char type">utiny</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line44></span>  }
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Ushort
+<span class="lineno" id=line47></span>  {
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned short type">ushort</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C unsigned short type">ushort</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned short type">ushort</span>: <span class="library" title="binding of C unsigned short type">ushort</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line51></span>  }
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uint
+<span class="lineno" id=line54></span>  {
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned int type">uint</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C unsigned int type">uint</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned int type">uint</span>: <span class="library" title="binding of C unsigned int type">uint</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line58></span>  }
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Ulong
+<span class="lineno" id=line61></span>  {
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned long type">ulong</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C unsigned long type">ulong</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned long type">ulong</span>: <span class="library" title="binding of C unsigned long type">ulong</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line65></span>  }
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uvlong
+<span class="lineno" id=line68></span>  {
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned long long type">uvlong</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line70></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C unsigned long long type">uvlong</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned long long type">uvlong</span>: <span class="library" title="binding of C unsigned long long type">uvlong</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line72></span>  }
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Int8
+<span class="lineno" id=line75></span>  {
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int8_t type">int8</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C int8_t type">int8</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int8_t type">int8</span>: <span class="library" title="binding of C int8_t type">int8</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line79></span>  }
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Int16
+<span class="lineno" id=line82></span>  {
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int16_t type">int16</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C int16_t type">int16</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line85></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int16_t type">int16</span>: <span class="library" title="binding of C int16_t type">int16</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line86></span>  }
+<span class="lineno" id=line87></span>  
+<span class="lineno" id=line88></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Int32
+<span class="lineno" id=line89></span>  {
+<span class="lineno" id=line90></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int32_t type">int32</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line91></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C int32_t type">int32</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int32_t type">int32</span>: <span class="library" title="binding of C int32_t type">int32</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line93></span>  }
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Int64
+<span class="lineno" id=line96></span>  {
+<span class="lineno" id=line97></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int64 type">int64</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line98></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C int64 type">int64</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line99></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int64 type">int64</span>: <span class="library" title="binding of C int64 type">int64</span>= <span class="fstring">"$1 /*int64 ident*/"</span>;
+<span class="lineno" id=line100></span>  }
+<span class="lineno" id=line101></span>  
+<span class="lineno" id=line102></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uint8
+<span class="lineno" id=line103></span>  {
+<span class="lineno" id=line104></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint8_t type">uint8</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line105></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C uint8_t type">uint8</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line106></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint8_t type">uint8</span>: <span class="library" title="binding of C uint8_t type">uint8</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line107></span>  }
+<span class="lineno" id=line108></span>  
+<span class="lineno" id=line109></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uint16
+<span class="lineno" id=line110></span>  {
+<span class="lineno" id=line111></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint16_t type">uint16</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line112></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C uint16_t type">uint16</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line113></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint16_t type">uint16</span>: <span class="library" title="binding of C uint16_t type">uint16</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line114></span>  }
+<span class="lineno" id=line115></span>  
+<span class="lineno" id=line116></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uint32
+<span class="lineno" id=line117></span>  {
+<span class="lineno" id=line118></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint32_t type">uint32</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line119></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C uint32_t type">uint32</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line120></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint32_t type">uint32</span>: <span class="library" title="binding of C uint32_t type">uint32</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line121></span>  }
+<span class="lineno" id=line122></span>  
+<span class="lineno" id=line123></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uint64
+<span class="lineno" id=line124></span>  {
+<span class="lineno" id=line125></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint64 type">uint64</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line126></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C uint64 type">uint64</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line127></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint64 type">uint64</span>: <span class="library" title="binding of C uint64 type">uint64</span>= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line128></span>  }
+<span class="lineno" id=line129></span>  
+<span class="lineno" id=line130></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uint128
+<span class="lineno" id=line131></span>  {
+<span class="lineno" id=line132></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> uint128: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line133></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] uint128: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line134></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> uint128: uint128= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line135></span>  }
+<span class="lineno" id=line136></span>  
+<span class="lineno" id=line137></span>  
+<span class="lineno" id=line138></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uint256
+<span class="lineno" id=line139></span>  {
+<span class="lineno" id=line140></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> uint256: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line141></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] uint256: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line142></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> uint256: uint256= <span class="fstring">"$1"</span>;
+<span class="lineno" id=line143></span>  }
+<span class="lineno" id=line144></span>  
+<span class="lineno" id=line145></span>  
+<span class="lineno" id=line146></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Size
+<span class="lineno" id=line147></span>  {
+<span class="lineno" id=line148></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C size_t type">size</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line149></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C size_t type">size</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor size from #0*/"</span>;
+<span class="lineno" id=line150></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C size_t type">size</span>: <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"($1)/*int.flx: ctor size IDENT*/"</span>;
+<span class="lineno" id=line151></span>  
+<span class="lineno" id=line152></span>    <span class="comment">// special overrides so s.len - 1 works</span>
+<span class="lineno" id=line153></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> - : <span class="library" title="binding of C size_t type">size</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1-$2"</span>;
+<span class="lineno" id=line154></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> + : <span class="library" title="binding of C size_t type">size</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1+$2"</span>;
+<span class="lineno" id=line155></span>  }
+<span class="lineno" id=line156></span>  
+<span class="lineno" id=line157></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Ptrdiff
+<span class="lineno" id=line158></span>  {
+<span class="lineno" id=line159></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C ptrdiff_t type">ptrdiff</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line160></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C ptrdiff_t type">ptrdiff</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line161></span>  }
+<span class="lineno" id=line162></span>  
+<span class="lineno" id=line163></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Intptr
+<span class="lineno" id=line164></span>  {
+<span class="lineno" id=line165></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C intptr_t type">intptr</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line166></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C intptr_t type">intptr</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line167></span>  }
+<span class="lineno" id=line168></span>  
+<span class="lineno" id=line169></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uintptr
+<span class="lineno" id=line170></span>  {
+<span class="lineno" id=line171></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line172></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>: <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"(uintptr_t*)$1"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line173></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line174></span>  }
+<span class="lineno" id=line175></span>  
+<span class="lineno" id=line176></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Intmax 
+<span class="lineno" id=line177></span>  {
+<span class="lineno" id=line178></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C intmax_t type">intmax</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line179></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C intmax_t type">intmax</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line180></span>  }
+<span class="lineno" id=line181></span>  
+<span class="lineno" id=line182></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Uintmax
+<span class="lineno" id=line183></span>  {
+<span class="lineno" id=line184></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uintmax_t type">uintmax</span>: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"static_cast&lt;#0&gt;(::std::atoi($1.c_str()))"</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line185></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T <span class="small_keyword" title="membership operator, function mem">in</span> reals] <span class="library" title="binding of C uintmax_t type">uintmax</span>: T = <span class="fstring">"static_cast&lt;#0&gt;($1)/*int.flx: ctor*/"</span>;
+<span class="lineno" id=line186></span>  }
+<span class="lineno" id=line187></span>  
+<span class="lineno" id=line188></span>  <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="special binding of C unsigned char type">byte</span> : <span class="library" title="binding of C uint8_t type">uint8</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line189></span>  <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C uint8_t type">uint8</span> : <span class="library" title="special binding of C unsigned char type">byte</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line190></span>  
+</pre></p></div><h1 id='Convert_to_decimal_string._h'><img src='/share/src/web/images/minus.gif' id='Convert to decimal string.' onclick='toggle(this,"Convert_to_decimal_string._d")' alt='+'/> 2 Convert to decimal string.</h1><div id='Convert_to_decimal_string._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[<span class="library" title="binding of C signed char type">tiny</span>] {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: <span class="library" title="binding of C signed char type">tiny</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::strutil::str&lt;int&gt;($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line3></span>  }
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[<span class="library" title="binding of C unsigned char type">utiny</span>] {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: <span class="library" title="binding of C unsigned char type">utiny</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::strutil::str&lt;unsigned int&gt;($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line7></span>  }
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[<span class="library" title="binding of C int8_t type">int8</span>] {
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: <span class="library" title="binding of C int8_t type">int8</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::strutil::str&lt;int&gt;($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line10></span>  }
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[<span class="library" title="binding of C uint8_t type">uint8</span>] {
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: uint8-&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::strutil::str&lt;unsigned int&gt;($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>
+<span class="lineno" id=line17></span>  [
+<span class="lineno" id=line18></span>    T <span class="small_keyword" title="membership operator, function mem">in</span> 
+<span class="lineno" id=line19></span>      <span class="library" title="binding of C short type">short</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> <span class="library" title="binding of C unsigned short type">ushort</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> <span class="library" title="binding of C int type">int</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> <span class="library" title="binding of C unsigned int type">uint</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> <span class="library" title="binding of C long type">long</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> <span class="library" title="binding of C unsigned long type">ulong</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> <span class="library" title="binding of C long long type">vlong</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> <span class="library" title="binding of C unsigned long long type">uvlong</span> <span class="tex_symbol" title="\cup">\(\cup\)</span> 
+<span class="lineno" id=line20></span>      exact_ints <span class="tex_symbol" title="\cup">\(\cup\)</span> weird_sints <span class="tex_symbol" title="\cup">\(\cup\)</span> weird_uints
+<span class="lineno" id=line21></span>  ] 
+<span class="lineno" id=line22></span>  Str[T] 
+<span class="lineno" id=line23></span>  {
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: T -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::strutil::str&lt;#1&gt;($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line25></span>  }
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex[T]: T -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(::flx::rtl::strutil::fmt_hex&lt;#1&gt;($1))'</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line28></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex: <span class="library" title="binding of C signed char type">tiny</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(::flx::rtl::strutil::fmt_hex((int)$1))'</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex: <span class="library" title="binding of C unsigned char type">utiny</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(::flx::rtl::strutil::fmt_hex((unsigned int)$1)+"UTINY")'</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line30></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex: <span class="library" title="binding of C int8_t type">int8</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(::flx::rtl::strutil::fmt_hex((int)$1))'</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line31></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex: <span class="library" title="binding of C uint8_t type">uint8</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(::flx::rtl::strutil::fmt_hex((unsigned int)$1)+"UINT8")'</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line32></span>  
+</pre></p></div><h1 id='Convert_to_lexical_string._h'><img src='/share/src/web/images/minus.gif' id='Convert to lexical string.' onclick='toggle(this,"Convert_to_lexical_string._d")' alt='+'/> 3 Convert to lexical string.</h1><div id='Convert_to_lexical_string._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C signed char type">tiny</span>]   { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C signed char type">tiny</span>]]   (t:<span class="library" title="binding of C signed char type">tiny</span>)   : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"t"</span>;  }
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C short type">short</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C short type">short</span>]]  (t:<span class="library" title="binding of C short type">short</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"s"</span>;  }
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C int type">int</span>]   { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C int type">int</span>]]   (t:<span class="library" title="binding of C int type">int</span>)   : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">""</span>;  }
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C long type">long</span>]   { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C long type">long</span>]]   (t:<span class="library" title="binding of C long type">long</span>)   : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"l"</span>;  }
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C long long type">vlong</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C long long type">vlong</span>]]  (t:<span class="library" title="binding of C long long type">vlong</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"v"</span>;  }
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C int8_t type">int8</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C int8_t type">int8</span>]]  (t:<span class="library" title="binding of C int8_t type">int8</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"i8"</span>;  }
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C int16_t type">int16</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C int16_t type">int16</span>]]  (t:<span class="library" title="binding of C int16_t type">int16</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"i16"</span>;  }
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C int32_t type">int32</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C int32_t type">int32</span>]]  (t:<span class="library" title="binding of C int32_t type">int32</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"i32"</span>;  }
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C int64 type">int64</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C int64 type">int64</span>]]  (t:<span class="library" title="binding of C int64 type">int64</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"i64"</span>;  }
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C intmax_t type">intmax</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C intmax_t type">intmax</span>]]  (t:<span class="library" title="binding of C intmax_t type">intmax</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"j"</span>;  }
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C intptr_t type">intptr</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C intptr_t type">intptr</span>]]  (t:<span class="library" title="binding of C intptr_t type">intptr</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"p"</span>;  }
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C ptrdiff_t type">ptrdiff</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C ptrdiff_t type">ptrdiff</span>]]  (t:<span class="library" title="binding of C ptrdiff_t type">ptrdiff</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"d"</span>;  }
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C unsigned char type">utiny</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C unsigned char type">utiny</span>]]  (t:<span class="library" title="binding of C unsigned char type">utiny</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"ut"</span>; }
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C unsigned short type">ushort</span>] { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C unsigned short type">ushort</span>]] (t:<span class="library" title="binding of C unsigned short type">ushort</span>) : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"us"</span>; }
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C unsigned int type">uint</span>]   { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C unsigned int type">uint</span>]]   (t:<span class="library" title="binding of C unsigned int type">uint</span>)   : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"u"</span>;  }
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C unsigned long type">ulong</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C unsigned long type">ulong</span>]]  (t:<span class="library" title="binding of C unsigned long type">ulong</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"ul"</span>; }
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C unsigned long long type">uvlong</span>] { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C unsigned long long type">uvlong</span>]] (t:<span class="library" title="binding of C unsigned long long type">uvlong</span>) : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"uv"</span>; }
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C uint8_t type">uint8</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C uint8_t type">uint8</span>]]  (t:<span class="library" title="binding of C uint8_t type">uint8</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"u8"</span>;  }
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C uint16_t type">uint16</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C uint16_t type">uint16</span>]]  (t:<span class="library" title="binding of C uint16_t type">uint16</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"u16"</span>;  }
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C uint32_t type">uint32</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C uint32_t type">uint32</span>]]  (t:<span class="library" title="binding of C uint32_t type">uint32</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"u32"</span>;  }
+<span class="lineno" id=line22></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C uint64 type">uint64</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C uint64 type">uint64</span>]]  (t:<span class="library" title="binding of C uint64 type">uint64</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"u64"</span>;  }
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C size_t type">size</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C size_t type">size</span>]]  (t:<span class="library" title="binding of C size_t type">size</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"uz"</span>;  }
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C uintmax_t type">uintmax</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C uintmax_t type">uintmax</span>]]  (t:<span class="library" title="binding of C uintmax_t type">uintmax</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"uj"</span>;  }
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Repr[<span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>]  { <span class="big_keyword" title="Define a function with no side-effects">fun</span> repr[<span class="small_keyword" title="type-class constraint">with</span> Str[<span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>]]  (t:<span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>)  : <span class="library" title="binding of C++ string type">string</span> =&gt; (<span class="library" title="Convert a value to a string">str</span> t) + <span class="fstring">"up"</span>;  }
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  
+</pre></p></div><h1 id='Methods_of_integers_h'><img src='/share/src/web/images/minus.gif' id='Methods of integers' onclick='toggle(this,"Methods_of_integers_d")' alt='+'/> 4 Methods of integers</h1><div id='Methods_of_integers_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] Addgrp[t] {}
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] Ring[t] {}
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] MultSemi1[t] {}
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] Dring[t] {}
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> [t <span class="small_keyword" title="membership operator, function mem">in</span> uints] Bits [t] {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \^ : t * t -&gt; t = <span class="fstring">"(?1)($1^$2)"</span>;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \| : t * t -&gt; t = <span class="fstring">"(?1)($1|$2)"</span>;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \&amp; : t * t -&gt; t = <span class="fstring">"(?1)($1&amp;$2)"</span>;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="comment">// note: the cast is essential to ensure ~1tu is 254tu</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ~ : t -&gt; t = <span class="fstring">"(?1)~$1"</span>;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ^= : &amp;t * t = <span class="fstring">"*$1^=$2;"</span>;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> |= : &amp;t * t = <span class="fstring">"*$1|=$2;"</span>;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> &amp;= : &amp;t * t = <span class="fstring">"*$1&amp;=$2;"</span>;
+<span class="lineno" id=line16></span>  }
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] ForwardSequence[t] {
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: t -&gt; t = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr: &amp;t = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr: &amp;t = <span class="fstring">"(*$1)++;"</span>;
+<span class="lineno" id=line22></span>  }
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] BidirectionalSequence[t] {
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: t -&gt; t = <span class="fstring">"$1-1"</span>;
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr: &amp;t = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr: &amp;t = <span class="fstring">"(*$1)--;"</span>;
+<span class="lineno" id=line28></span>  }
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] RandomSequence[t] {
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> advance: <span class="library" title="binding of C int type">int</span> * t -&gt; t = <span class="fstring">"$1+$2"</span>;
+<span class="lineno" id=line31></span>  }
+<span class="lineno" id=line32></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] UpperBoundTotalOrder[t] {
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> maxval: 1 -&gt; t = <span class="fstring">"::std::numeric_limits&lt;?1&gt;::max()"</span>;
+<span class="lineno" id=line34></span>  }
+<span class="lineno" id=line35></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] LowerBoundTotalOrder[t] {
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> minval: 1 -&gt; t = <span class="fstring">"::std::numeric_limits&lt;?1&gt;::min()"</span>;
+<span class="lineno" id=line37></span>  }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> ints] Integer[t] {
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt;&lt; : t * t -&gt; t = <span class="fstring">"$1&lt;&lt;$2"</span>;
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &gt;&gt; : t * t -&gt; t = <span class="fstring">"$1&gt;&gt;$2"</span>;
+<span class="lineno" id=line42></span>  }
+<span class="lineno" id=line43></span>  
+</pre></p></div><h1 id='Methods_of_signed_integers_h'><img src='/share/src/web/images/minus.gif' id='Methods of signed integers' onclick='toggle(this,"Methods_of_signed_integers_d")' alt='+'/> 5 Methods of signed integers</h1><div id='Methods_of_signed_integers_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> sints] Signed_integer[t] {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> sgn: t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1&lt;0??-1:$1&gt;0??1:0"</span>;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> abs: t -&gt; t = <span class="fstring">"$1&lt;0??-$1:$1"</span>;
+<span class="lineno" id=line4></span>  }
+<span class="lineno" id=line5></span>  
+</pre></p></div><h1 id='Methods_of_unsigned_integers_h'><img src='/share/src/web/images/minus.gif' id='Methods of unsigned integers' onclick='toggle(this,"Methods_of_unsigned_integers_d")' alt='+'/> 6 Methods of unsigned integers</h1><div id='Methods_of_unsigned_integers_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="membership operator, function mem">in</span> uints] Unsigned_integer[t] {}
+<span class="lineno" id=line2></span>  
+</pre></p></div><h1 id='Make_functions_accessible_without_qualification_h'><img src='/share/src/web/images/minus.gif' id='Make functions accessible without qualification' onclick='toggle(this,"Make_functions_accessible_without_qualification_d")' alt='+'/> 7 Make functions accessible without qualification</h1><div id='Make_functions_accessible_without_qualification_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">//open[T in sints] Signed_integer[T];</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C signed char type">tiny</span>];
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C short type">short</span>];
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C int type">int</span>];
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C long type">long</span>];
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C long long type">vlong</span>];
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C int8_t type">int8</span>];
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C int16_t type">int16</span>];
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C int32_t type">int32</span>];
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C int64 type">int64</span>];
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C intmax_t type">intmax</span>];
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C ptrdiff_t type">ptrdiff</span>];
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Open a module or class">open</span> Signed_integer[<span class="library" title="binding of C intptr_t type">intptr</span>];
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  <span class="comment">//open[T in uints] Unsigned_integer[T];</span>
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C unsigned char type">utiny</span>];
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C unsigned short type">ushort</span>];
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C unsigned int type">uint</span>];
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C unsigned long type">ulong</span>];
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C unsigned long long type">uvlong</span>];
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C uint8_t type">uint8</span>];
+<span class="lineno" id=line22></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C uint16_t type">uint16</span>];
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C uint32_t type">uint32</span>];
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C uint64 type">uint64</span>];
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[uint128];
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[uint256];
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C uintmax_t type">uintmax</span>];
+<span class="lineno" id=line28></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C size_t type">size</span>];
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Open a module or class">open</span> Unsigned_integer[<span class="library" title="binding of C unsigned type corresponding to intptr_t type">uintptr</span>];
+<span class="lineno" id=line30></span>  
+</pre></p></div><h1 id='Integer_Subtyping_Rules_h'><img src='/share/src/web/images/minus.gif' id='Integer Subtyping Rules' onclick='toggle(this,"Integer_Subtyping_Rules_d")' alt='+'/> 8 Integer Subtyping Rules</h1><div id='Integer_Subtyping_Rules_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/scalar/int.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  supertype <span class="library" title="binding of C long long type">vlong</span>: <span class="library" title="binding of C long type">long</span> = <span class="fstring">"(long long)$1"</span>;
+<span class="lineno" id=line3></span>  supertype <span class="library" title="binding of C long type">long</span>: <span class="library" title="binding of C int type">int</span> = <span class="fstring">"(long)$1"</span>;
+<span class="lineno" id=line4></span>  supertype <span class="library" title="binding of C int type">int</span> : <span class="library" title="binding of C short type">short</span>= <span class="fstring">"(int)$1"</span>;
+<span class="lineno" id=line5></span>  supertype <span class="library" title="binding of C short type">short</span> : <span class="library" title="binding of C signed char type">tiny</span> = <span class="fstring">"(short)$1"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  supertype <span class="library" title="binding of C int64 type">int64</span>: <span class="library" title="binding of C int32_t type">int32</span> = <span class="fstring">"(int64_t)$1"</span>;
+<span class="lineno" id=line8></span>  supertype <span class="library" title="binding of C int32_t type">int32</span> : <span class="library" title="binding of C int16_t type">int16</span> = <span class="fstring">"(int32_t)$1"</span>;
+<span class="lineno" id=line9></span>  supertype <span class="library" title="binding of C int16_t type">int16</span> : <span class="library" title="binding of C int8_t type">int8</span> =  <span class="fstring">"(int16_t)$1"</span>;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  <span class="comment">/* currently breaks instance Str[fcomplex] for unknown reason! 
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>  But almost certainly its because of the definition of complex[t]
+<span class="lineno" id=line14></span>  by a type match, plus, then open[t in floats] Complex[complex[t],t]
+<span class="lineno" id=line15></span>  */</span>
+<span class="lineno" id=line16></span>  <span class="comment">/*
+<span class="lineno" id=line17></span>  supertype fcomplex: float = "::std::complex&lt;float&gt;($1)";
+<span class="lineno" id=line18></span>  supertype dcomplex: double = "::std::complex&lt;double&gt;($1)";
+<span class="lineno" id=line19></span>  supertype lcomplex: ldouble = "::std::complex&lt;long double&gt;($1)";
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  Guessing name map contains unreduced type match ... indeed I think
+<span class="lineno" id=line22></span>  it HAS to, because there is no provision in the type map data structure
+<span class="lineno" id=line23></span>  for constraints. This is why above
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  open[T in units] Unsigned_integer[T] is commented out.
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  open supports specialisations but not constraints including typeset constraints
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  However we don't open Complex with a constraint. The instances use
+<span class="lineno" id=line30></span>  constraints but this is unrelated to the failure.
+<span class="lineno" id=line31></span>  */</span>
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

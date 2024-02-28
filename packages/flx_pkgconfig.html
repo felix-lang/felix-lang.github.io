@@ -1,0 +1,1228 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>The configuration database manager @{flx_pkgconfig}.</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Command Line Interface",
+"Tool executable.",
+"Database query object.",
+"Database query object interface.",
+"Database query object implementation.",
+"Database Manager Library",
+"Compendium class.",
+"Separate compilation wrapper.",
+"Pkg config"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Command Line Interface_h')"> <a href="#Command_Line_Interface_h">Command Line Interface</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Tool executable._h')"> <a href="#Tool_executable._h">Tool executable.</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Database query object._h')"> <a href="#Database_query_object._h">Database query object.</a></div>
+      <div class=sm id=menu3>
+      <div class=m2><a href="#Database_query_object_interface._h">Database query object interface.</a></div>
+      <div class=m2><a href="#Database_query_object_implementation._h">Database query object implementation.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Database Manager Library_h')"> <a href="#Database_Manager_Library_h">Database Manager Library</a></div>
+      <div class=sm id=menu4>
+      <div class=m2><a href="#Compendium_class._h">Compendium class.</a></div>
+      <div class=m2><a href="#Separate_compilation_wrapper._h">Separate compilation wrapper.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Pkg config_h')"> <a href="#Pkg_config_h">Pkg config</a></div>
+      <div class=sm id=menu5>
+      </div>
+    <script>counter_max=5;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Command_Line_Interface_h'><img src='/share/src/web/images/minus.gif' id='Command Line Interface' onclick='toggle(this,"Command_Line_Interface_d")' alt='+'/> 1 Command Line Interface</h1><div id='Command_Line_Interface_d' style='display:block'>
+<p>Provides function to handle generic shell style call with
+parsed arguments, supporting calls from either inside
+ordinary Felix code or from a stub execuatble which
+just parses the command line.
+</p><p>This code always returns, it cannot fail EXCEPT if --help
+is given.
+</p><pre class='inclusion'>
+share/lib/std/felix/flx_pkgconfig_core.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> FlxPkgConfig_core
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Open a module or class">open</span> Lexer;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> flx_pkgconfig (args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="binding of C int type">int</span> * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = 
+<span class="lineno" id=line6></span>    {
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> print_help {
+<span class="lineno" id=line8></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"flx_pkgconfig [options] pkg pkg ..."</span>;
+<span class="lineno" id=line9></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  returns code 1 if any packages are missing unless --noerror is specified"</span>;
+<span class="lineno" id=line10></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  prints package or field list to standard output on one line"</span>;
+<span class="lineno" id=line11></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"options: (follows GNU conventions)"</span>;
+<span class="lineno" id=line12></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --path=dirname        set database directory name"</span>;
+<span class="lineno" id=line13></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --path+=dirname       append database directory name"</span>;
+<span class="lineno" id=line14></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --extension=fpc       set resource descriptor extensions,"</span>;
+<span class="lineno" id=line15></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"                          default 'fpc' use 'pc' for pkgconfig databases"</span>;
+<span class="lineno" id=line16></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  -h"</span>;
+<span class="lineno" id=line17></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --hide                only process first package in path with a given name"</span>;
+<span class="lineno" id=line18></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"                          default, process all occurences"</span>;
+<span class="lineno" id=line19></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --list                list available packages from specified set"</span>;
+<span class="lineno" id=line20></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --missing             list missing packages from specified set"</span>;
+<span class="lineno" id=line21></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --noerror             do not return 1 because of missing packages"</span>;
+<span class="lineno" id=line22></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  -r"</span>;
+<span class="lineno" id=line23></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --rec                 form transitive closure of specified set based on Requires field"</span>;
+<span class="lineno" id=line24></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --rec=field           form transitive closure of specified set based on specified field"</span>;
+<span class="lineno" id=line25></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  -b"</span>;
+<span class="lineno" id=line26></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --backwards           process specified packages in reverse order"</span>;
+<span class="lineno" id=line27></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --field=field         collate values of field in package set"</span>;
+<span class="lineno" id=line28></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --keepleftmost        remove duplicate values in output keeping only leftmost occurrence"</span>;
+<span class="lineno" id=line29></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --keeprightmost       remove duplicate values in output keeping only rightmost occurrence"</span>;
+<span class="lineno" id=line30></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  --keepall             keep duplicate values in output"</span>;
+<span class="lineno" id=line31></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  @filename             Replace with arguments from filename, one line per argument"</span>;
+<span class="lineno" id=line32></span>      }
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr:&amp;lex_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>      variant token_t = Str of <span class="library" title="binding of C++ string type">string</span> | Cmd of <span class="library" title="binding of C++ string type">string</span> | Eos;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> lexit(ini:lex_iterator, finish:lex_iterator): lex_iterator * token_t=
+<span class="lineno" id=line39></span>      {
+<span class="lineno" id=line40></span>        <span class="comment">//println$ "lexit input='" + string_between(ini,finish)+"'";</span>
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>        <span class="big_keyword" title="Define a mutable variable">var</span> start = ini;
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>        <span class="comment">// already at end</span>
+<span class="lineno" id=line45></span>        <span class="small_keyword" title="conditional">if</span> start == finish <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line46></span>          <span class="small_keyword" title="return">return</span> start, Eos;
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>        <span class="comment">// eat white space </span>
+<span class="lineno" id=line49></span>        <span class="small_keyword" title="conditional">elif</span> *start == <span class="library" title="binding of C char type">char</span>(<span class="fstring">' '</span>) <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line50></span>          ++start;
+<span class="lineno" id=line51></span>          <span class="small_keyword" title="while loop">while</span> start != finish <span class="small_keyword" title="logical conjunction">and</span> *start == <span class="library" title="binding of C char type">char</span>(<span class="fstring">' '</span>) <span class="small_keyword" title="imperative code begins">do</span> ++start; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line52></span>          <span class="small_keyword" title="return">return</span> start,Eos;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>        <span class="comment">// double quoted string</span>
+<span class="lineno" id=line55></span>        <span class="small_keyword" title="conditional">elif</span> *start == <span class="library" title="binding of C char type">char</span>(<span class="fstring">'"'</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line56></span>          ++start;
+<span class="lineno" id=line57></span>          p1 := start;
+<span class="lineno" id=line58></span>          <span class="small_keyword" title="while loop">while</span> start != finish <span class="small_keyword" title="logical conjunction">and</span> *start != <span class="library" title="binding of C char type">char</span>(<span class="fstring">'"'</span>) <span class="small_keyword" title="imperative code begins">do</span> ++start; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line59></span>          <span class="small_keyword" title="conditional">if</span> start == finish <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line60></span>            <span class="small_keyword" title="return">return</span> start,Str (string_between(p1,start));
+<span class="lineno" id=line61></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line62></span>            <span class="small_keyword" title="return">return</span> start+1,Str (string_between(p1, start));
+<span class="lineno" id=line63></span>          <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>        <span class="comment">// single quoted string</span>
+<span class="lineno" id=line66></span>        <span class="small_keyword" title="conditional">elif</span> *start == <span class="library" title="binding of C char type">char</span>(<span class="fstring">"'"</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line67></span>          ++start;
+<span class="lineno" id=line68></span>          p2 := start;
+<span class="lineno" id=line69></span>          <span class="small_keyword" title="while loop">while</span> start != finish <span class="small_keyword" title="logical conjunction">and</span> *start != <span class="library" title="binding of C char type">char</span>(<span class="fstring">"'"</span>) <span class="small_keyword" title="imperative code begins">do</span> ++start; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line70></span>          <span class="small_keyword" title="conditional">if</span> start == finish <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line71></span>            <span class="small_keyword" title="return">return</span> start,Str (string_between(p2,start));
+<span class="lineno" id=line72></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line73></span>            <span class="small_keyword" title="return">return</span> start+1,Str (string_between(p2, start));
+<span class="lineno" id=line74></span>          <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>        <span class="small_keyword" title="conditional">elif</span> *start == <span class="library" title="binding of C char type">char</span>(<span class="fstring">"`"</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line77></span>          ++start;
+<span class="lineno" id=line78></span>          p3 := start;
+<span class="lineno" id=line79></span>          <span class="small_keyword" title="while loop">while</span> start != finish <span class="small_keyword" title="logical conjunction">and</span> *start != <span class="library" title="binding of C char type">char</span>(<span class="fstring">"`"</span>) <span class="small_keyword" title="imperative code begins">do</span> ++start; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line80></span>          <span class="small_keyword" title="conditional">if</span> start == finish <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line81></span>            <span class="small_keyword" title="return">return</span> start,Cmd (string_between(p3,start));
+<span class="lineno" id=line82></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line83></span>            <span class="small_keyword" title="return">return</span> start+1,Cmd (string_between(p3, start));
+<span class="lineno" id=line84></span>          <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>  
+<span class="lineno" id=line87></span>        <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line88></span>        <span class="comment">// identifier</span>
+<span class="lineno" id=line89></span>        p4 := start;
+<span class="lineno" id=line90></span>        <span class="small_keyword" title="while loop">while</span> start != finish <span class="small_keyword" title="logical conjunction">and</span> *start != <span class="library" title="binding of C char type">char</span>(<span class="fstring">" "</span>)  <span class="small_keyword" title="imperative code begins">do</span> ++start; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line91></span>        <span class="small_keyword" title="return">return</span> start,Str (string_between(p4,start));
+<span class="lineno" id=line92></span>      }
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> lexstr(s':<span class="library" title="binding of C++ string type">string</span>): <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line95></span>      {
+<span class="lineno" id=line96></span>        <span class="big_keyword" title="Define a mutable variable">var</span> s = s';
+<span class="lineno" id=line97></span>        <span class="big_keyword" title="Define an immutable value">val</span> first = start_iterator s;
+<span class="lineno" id=line98></span>        <span class="big_keyword" title="Define an immutable value">val</span> finish = end_iterator s;
+<span class="lineno" id=line99></span>        <span class="big_keyword" title="Define a mutable variable">var</span> current = first;
+<span class="lineno" id=line100></span>        <span class="big_keyword" title="Define a mutable variable">var</span> words = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line101></span>        <span class="small_keyword" title="while loop">while</span> current != finish <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line102></span>          <span class="small_keyword" title="match statement or expression">match</span> lexit(current,finish) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line103></span>          | next,token=&gt;
+<span class="lineno" id=line104></span>            {
+<span class="lineno" id=line105></span>              current = next;
+<span class="lineno" id=line106></span>              <span class="small_keyword" title="match statement or expression">match</span> token <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line107></span>              | Eos =&gt; ;
+<span class="lineno" id=line108></span>              | Str lexeme =&gt; <span class="small_keyword" title="conditional">if</span> lexeme != <span class="fstring">""</span> perform words = Cons(lexeme,words);
+<span class="lineno" id=line109></span>              | Cmd cmd =&gt;
+<span class="lineno" id=line110></span>                <span class="big_keyword" title="Define a mutable variable">var</span> res,s = System::get_stdout cmd;
+<span class="lineno" id=line111></span>                <span class="big_keyword" title="Define a mutable variable">var</span> recres = lexstr s.strip;
+<span class="lineno" id=line112></span>                words = <span class="library" title="return data structure with elements reversed">rev</span> recres + words;
+<span class="lineno" id=line113></span>              <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line114></span>            }
+<span class="lineno" id=line115></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line116></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line117></span>        <span class="comment">//println$ "Words='" + str(rev words)+"'";</span>
+<span class="lineno" id=line118></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> words;
+<span class="lineno" id=line119></span>      }
+<span class="lineno" id=line120></span>  
+<span class="lineno" id=line121></span>      <span class="big_keyword" title="prefix for macro definitions">macro</span> <span class="big_keyword" title="Define an immutable value">val</span> streq = eq of (<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>);
+<span class="lineno" id=line122></span>  
+<span class="lineno" id=line123></span>      <span class="big_keyword" title="Define a mutable variable">var</span> path=Env::getenv(<span class="fstring">"PKG_CONFIG_PATH"</span>);
+<span class="lineno" id=line124></span>  
+<span class="lineno" id=line125></span>      <span class="comment">// parse arguments</span>
+<span class="lineno" id=line126></span>      <span class="big_keyword" title="Define a mutable variable">var</span> fields = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line127></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pkgs = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line128></span>  
+<span class="lineno" id=line129></span>      <span class="big_keyword" title="Define a mutable variable">var</span> hide = <span class="library" title="false value">false</span>; <span class="comment">// only find first file in path</span>
+<span class="lineno" id=line130></span>      <span class="big_keyword" title="Define a mutable variable">var</span> require_pkg_exists = <span class="library" title="truth value">true</span>; <span class="comment">// fail if file not found</span>
+<span class="lineno" id=line131></span>      <span class="big_keyword" title="Define a mutable variable">var</span> missing = <span class="library" title="false value">false</span>; <span class="comment">// report missing packages</span>
+<span class="lineno" id=line132></span>      <span class="big_keyword" title="Define a mutable variable">var</span> require_field_exists = <span class="library" title="false value">false</span>; <span class="comment">// fail if file doesn't contain field</span>
+<span class="lineno" id=line133></span>      <span class="big_keyword" title="Define a mutable variable">var</span> recfields = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line134></span>      <span class="big_keyword" title="Define a mutable variable">var</span> dolist = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line135></span>      <span class="big_keyword" title="Define a mutable variable">var</span> listkeys = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line136></span>      <span class="big_keyword" title="Define a mutable variable">var</span> return_code = 0;
+<span class="lineno" id=line137></span>      <span class="big_keyword" title="Define a mutable variable">var</span> backwards = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line138></span>      <span class="big_keyword" title="Elaborate an enumeration, a simple sum type">enum</span> keep_t {keepall, keepleftmost, keeprightmost};
+<span class="lineno" id=line139></span>      <span class="big_keyword" title="Define a mutable variable">var</span> keep= keepleftmost;
+<span class="lineno" id=line140></span>      <span class="big_keyword" title="Define a mutable variable">var</span> extension = <span class="fstring">"fpc"</span>;
+<span class="lineno" id=line141></span>  
+<span class="lineno" id=line142></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_prefix_of(p:<span class="library" title="binding of C++ string type">string</span>,w:<span class="library" title="binding of C++ string type">string</span>)=&gt; p == w.[<span class="small_keyword" title="substring range separator">to</span> <span class="library" title="number of elements in data structure">len</span> p];
+<span class="lineno" id=line143></span>  
+<span class="lineno" id=line144></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> xfind(flags: <span class="library" title="binding of C++ string type">string</span>, c: <span class="library" title="binding of C++ string type">string</span>) =&gt;
+<span class="lineno" id=line145></span>       <span class="small_keyword" title="match statement or expression">match</span> find(flags, c) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line146></span>       | #None =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line147></span>       | Some _ =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line148></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line149></span>      ;
+<span class="lineno" id=line150></span>  
+<span class="lineno" id=line151></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> parse_args(args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line152></span>      {
+<span class="lineno" id=line153></span>        <span class="small_keyword" title="match statement or expression">match</span> args <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line154></span>        | #Empty =&gt; {}
+<span class="lineno" id=line155></span>        | Cons (arg,tail) =&gt;
+<span class="lineno" id=line156></span>          {
+<span class="lineno" id=line157></span>            <span class="big_keyword" title="Define a function with no side-effects">fun</span> prefix(x:<span class="library" title="binding of C++ string type">string</span>)=&gt;is_prefix_of(x,arg);
+<span class="lineno" id=line158></span>  
+<span class="lineno" id=line159></span>            <span class="small_keyword" title="conditional">if</span> prefix(<span class="fstring">"--hide"</span>) <span class="small_keyword" title="imperative code begins">do</span> hide = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line160></span>            <span class="small_keyword" title="conditional">elif</span> prefix(<span class="fstring">"--backwards"</span>) <span class="small_keyword" title="imperative code begins">do</span> backwards = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line161></span>            <span class="small_keyword" title="conditional">elif</span> prefix(<span class="fstring">"--list"</span>) <span class="small_keyword" title="imperative code begins">do</span> dolist = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line162></span>            <span class="small_keyword" title="conditional">elif</span> prefix(<span class="fstring">"--missing"</span>) <span class="small_keyword" title="imperative code begins">do</span> missing = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line163></span>            <span class="small_keyword" title="conditional">elif</span> prefix(<span class="fstring">"--noerror"</span>) <span class="small_keyword" title="imperative code begins">do</span> require_pkg_exists = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line164></span>            <span class="small_keyword" title="conditional">elif</span> prefix(<span class="fstring">"--keeprightmost"</span>) <span class="small_keyword" title="imperative code begins">do</span> keep = keeprightmost;
+<span class="lineno" id=line165></span>            <span class="small_keyword" title="conditional">elif</span> prefix(<span class="fstring">"--keepleftmost"</span>) <span class="small_keyword" title="imperative code begins">do</span> keep = keepleftmost;
+<span class="lineno" id=line166></span>            <span class="small_keyword" title="conditional">elif</span> prefix(<span class="fstring">"--keepall"</span>) <span class="small_keyword" title="imperative code begins">do</span> keep = keepall;
+<span class="lineno" id=line167></span>  
+<span class="lineno" id=line168></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"--field"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 7] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line169></span>              fields = fields + arg.[8 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line170></span>  
+<span class="lineno" id=line171></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"--extension"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 11] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line172></span>              extension = arg.[12 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line173></span>  
+<span class="lineno" id=line174></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"-"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 1] <span class="small_keyword" title="logical conjunction">and</span> <span class="fstring">"-"</span> != arg.[1 <span class="small_keyword" title="substring range separator">to</span> 2] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line175></span>              flags := arg.[1 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line176></span>              <span class="small_keyword" title="conditional">if</span> xfind(flags, <span class="fstring">"r"</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line177></span>                recfields = append_unique streq recfields <span class="fstring">"Requires"</span>;
+<span class="lineno" id=line178></span>              <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line179></span>  
+<span class="lineno" id=line180></span>              <span class="small_keyword" title="conditional">if</span> xfind(flags,<span class="fstring">"h"</span>) <span class="small_keyword" title="imperative code begins">do</span> hide = <span class="library" title="truth value">true</span>; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line181></span>              <span class="small_keyword" title="conditional">if</span> xfind(flags,<span class="fstring">"b"</span>) <span class="small_keyword" title="imperative code begins">do</span> backwards = <span class="library" title="truth value">true</span>; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line182></span>              <span class="small_keyword" title="conditional">if</span> xfind(flags,<span class="fstring">"l"</span>) <span class="small_keyword" title="imperative code begins">do</span> dolist = <span class="library" title="truth value">true</span>; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line183></span>  
+<span class="lineno" id=line184></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"--rec"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 5] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line185></span>              <span class="big_keyword" title="Define a mutable variable">var</span> fld = arg.[6 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line186></span>              fld = <span class="small_keyword" title="conditional">if</span> fld == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">"Requires"</span> <span class="small_keyword" title="conditional">else</span> fld <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line187></span>              recfields = append_unique streq recfields fld;
+<span class="lineno" id=line188></span>  
+<span class="lineno" id=line189></span>            <span class="comment">// add to path</span>
+<span class="lineno" id=line190></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"--path+"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 7] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line191></span>              <span class="big_keyword" title="Define an immutable value">val</span> x = arg.[8 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line192></span>              <span class="small_keyword" title="conditional">if</span> path != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line193></span>                path= path + <span class="fstring">":"</span> + x;
+<span class="lineno" id=line194></span>              <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line195></span>                path= x;
+<span class="lineno" id=line196></span>              <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line197></span>  
+<span class="lineno" id=line198></span>            <span class="comment">// set path</span>
+<span class="lineno" id=line199></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"--path"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 6] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line200></span>              path= arg.[7 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line201></span>  
+<span class="lineno" id=line202></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"--help"</span> == arg <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line203></span>              print_help;
+<span class="lineno" id=line204></span>              <span class="comment">// FIXME</span>
+<span class="lineno" id=line205></span>              System::exit(0);
+<span class="lineno" id=line206></span>  
+<span class="lineno" id=line207></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"@"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 1] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line208></span>              <span class="big_keyword" title="Define an immutable value">val</span> data = load$ strip arg.[1 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line209></span>              parse_args$ split(data,c<span class="fstring">" \n\r\t,"</span>);
+<span class="lineno" id=line210></span>  
+<span class="lineno" id=line211></span>            <span class="comment">// ignore unknown options</span>
+<span class="lineno" id=line212></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">"-"</span> == arg.[0 <span class="small_keyword" title="substring range separator">to</span> 1] <span class="small_keyword" title="imperative code begins">do</span> ;
+<span class="lineno" id=line213></span>  
+<span class="lineno" id=line214></span>            <span class="comment">// ignore empty arguments</span>
+<span class="lineno" id=line215></span>            <span class="small_keyword" title="conditional">elif</span> <span class="fstring">""</span> == arg <span class="small_keyword" title="imperative code begins">do</span> ;
+<span class="lineno" id=line216></span>  
+<span class="lineno" id=line217></span>            <span class="comment">// package name</span>
+<span class="lineno" id=line218></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line219></span>              pkgs = pkgs + arg;
+<span class="lineno" id=line220></span>            <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line221></span>            parse_args(tail);
+<span class="lineno" id=line222></span>          }
+<span class="lineno" id=line223></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line224></span>      }
+<span class="lineno" id=line225></span>  
+<span class="lineno" id=line226></span>      parse_args(args);
+<span class="lineno" id=line227></span>  
+<span class="lineno" id=line228></span>      <span class="comment">//print$ "Fields   = " + str fields; endl;</span>
+<span class="lineno" id=line229></span>      <span class="comment">//print$ "Packages = " + str pkgs; endl;</span>
+<span class="lineno" id=line230></span>  
+<span class="lineno" id=line231></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> reattach_drive_letters : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line232></span>        | Cons (a, Cons (b, tail)) =&gt;
+<span class="lineno" id=line233></span>            <span class="small_keyword" title="conditional">if</span> (<span class="library" title="number of elements in data structure">len</span>(a) == <span class="library" title="binding of C size_t type">size</span> 1 <span class="small_keyword" title="logical conjunction">and</span> isalpha(a.[0]) <span class="small_keyword" title="logical conjunction">and</span> b.startswith(<span class="fstring">'\\'</span>)) <span class="small_keyword" title="conditional">then</span> 
+<span class="lineno" id=line234></span>              Cons (a+<span class="fstring">':'</span>+b, reattach_drive_letters tail)
+<span class="lineno" id=line235></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line236></span>              Cons (a, reattach_drive_letters (Cons (b, tail)))
+<span class="lineno" id=line237></span>            <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line238></span>        | other =&gt; other <span class="comment">// 1 or 0 elements left</span>
+<span class="lineno" id=line239></span>      ;
+<span class="lineno" id=line240></span>        
+<span class="lineno" id=line241></span>      <span class="big_keyword" title="Define an immutable value">val</span> dirs=reattach_drive_letters(split(path, <span class="library" title="binding of C char type">char</span> <span class="fstring">':'</span>));
+<span class="lineno" id=line242></span>  
+<span class="lineno" id=line243></span>      <span class="comment">// print$ "Path = " + str dirs; endl;</span>
+<span class="lineno" id=line244></span>  
+<span class="lineno" id=line245></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line246></span>  
+<span class="lineno" id=line247></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> check_id (s:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line248></span>        <span class="big_keyword" title="Define a mutable variable">var</span> acc=<span class="library" title="truth value">true</span>;
+<span class="lineno" id=line249></span>        <span class="small_keyword" title="for loop">for</span> elt <span class="small_keyword" title="membership operator, function mem">in</span> s <span class="small_keyword" title="imperative code begins">do</span> acc = acc <span class="small_keyword" title="logical conjunction">and</span> isalphanum elt; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line250></span>        <span class="small_keyword" title="return">return</span> acc;
+<span class="lineno" id=line251></span>      }
+<span class="lineno" id=line252></span>  
+<span class="lineno" id=line253></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_field(line:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line254></span>          <span class="small_keyword" title="match statement or expression">match</span> find (line,<span class="library" title="binding of C char type">char</span> <span class="fstring">':'</span>) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line255></span>          | #None =&gt; <span class="fstring">""</span>,<span class="fstring">""</span>
+<span class="lineno" id=line256></span>          | Some n =&gt;
+<span class="lineno" id=line257></span>              strip line.[<span class="small_keyword" title="substring range separator">to</span> n],
+<span class="lineno" id=line258></span>              strip line.[n+1 <span class="small_keyword" title="substring range separator">to</span>]
+<span class="lineno" id=line259></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line260></span>        ;
+<span class="lineno" id=line261></span>  
+<span class="lineno" id=line262></span>  
+<span class="lineno" id=line263></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_variable(line:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line264></span>          <span class="small_keyword" title="match statement or expression">match</span> find (line,<span class="library" title="binding of C char type">char</span> <span class="fstring">'='</span>) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line265></span>          | #None =&gt; <span class="fstring">""</span>,<span class="fstring">""</span>
+<span class="lineno" id=line266></span>          | Some n =&gt;
+<span class="lineno" id=line267></span>              <span class="small_keyword" title="let binder">let</span> name = strip line.[<span class="small_keyword" title="substring range separator">to</span> n] <span class="small_keyword" title="membership operator, function mem">in</span> 
+<span class="lineno" id=line268></span>              <span class="small_keyword" title="let binder">let</span> value = strip line.[n+1 <span class="small_keyword" title="substring range separator">to</span>] <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line269></span>              <span class="small_keyword" title="conditional">if</span> check_id name <span class="small_keyword" title="conditional">then</span> name,value <span class="small_keyword" title="conditional">else</span> <span class="fstring">""</span>,<span class="fstring">""</span>
+<span class="lineno" id=line270></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line271></span>        ;
+<span class="lineno" id=line272></span>  
+<span class="lineno" id=line273></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> add_val(v:<span class="library" title="binding of C++ string type">string</span>){
+<span class="lineno" id=line274></span>       <span class="small_keyword" title="value of function return used in post condition">result</span> = insert_unique streq <span class="small_keyword" title="value of function return used in post condition">result</span> v;
+<span class="lineno" id=line275></span>      <span class="comment">//  result = rev$ Cons(v, rev result);</span>
+<span class="lineno" id=line276></span>      }
+<span class="lineno" id=line277></span>  
+<span class="lineno" id=line278></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> tail_val(v:<span class="library" title="binding of C++ string type">string</span>){
+<span class="lineno" id=line279></span>         <span class="small_keyword" title="value of function return used in post condition">result</span> = append_unique streq <span class="small_keyword" title="value of function return used in post condition">result</span> v;
+<span class="lineno" id=line280></span>      <span class="comment">//  result = Cons(v, result);</span>
+<span class="lineno" id=line281></span>      }
+<span class="lineno" id=line282></span>  
+<span class="lineno" id=line283></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> keep_val (v:<span class="library" title="binding of C++ string type">string</span>){
+<span class="lineno" id=line284></span>        <span class="small_keyword" title="value of function return used in post condition">result</span> = <span class="small_keyword" title="value of function return used in post condition">result</span> + v;
+<span class="lineno" id=line285></span>      }
+<span class="lineno" id=line286></span>  
+<span class="lineno" id=line287></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> handle_pkg (pkg:<span class="library" title="binding of C++ string type">string</span>, trace:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]){
+<span class="lineno" id=line288></span>  <span class="comment">//eprintln$ "Handle_pkg pkg= " + pkg + " trace= " + trace.str;</span>
+<span class="lineno" id=line289></span>         <span class="big_keyword" title="Define a mutable variable">var</span> variables = Empty[<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line290></span>  
+<span class="lineno" id=line291></span>         <span class="small_keyword" title="conditional">if</span> mem streq trace pkg <span class="small_keyword" title="return">return</span>;
+<span class="lineno" id=line292></span>         <span class="big_keyword" title="Define a mutable variable">var</span> found = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line293></span>         <span class="library" title="call procedure on each element of data structure">iter</span>(<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (dir:<span class="library" title="binding of C++ string type">string</span>){
+<span class="lineno" id=line294></span>           <span class="big_keyword" title="Define an immutable value">val</span> filename =
+<span class="lineno" id=line295></span>             <span class="small_keyword" title="conditional">if</span> dir==<span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">"."</span> <span class="small_keyword" title="conditional">else</span> dir <span class="small_keyword" title="conditional">endif</span> + #Filename::sep + pkg + <span class="fstring">"."</span>+extension
+<span class="lineno" id=line296></span>           ;
+<span class="lineno" id=line297></span>           <span class="comment">//print filename; endl;</span>
+<span class="lineno" id=line298></span>  
+<span class="lineno" id=line299></span>           <span class="comment">// examine line of one file</span>
+<span class="lineno" id=line300></span>           file := fopen_input filename;
+<span class="lineno" id=line301></span>           <span class="small_keyword" title="conditional">if</span> valid file <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line302></span>             <span class="small_keyword" title="conditional">if</span> dolist <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line303></span>               <span class="small_keyword" title="match statement or expression">match</span> keep <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line304></span>               | #keepleftmost =&gt; add_val pkg;
+<span class="lineno" id=line305></span>               | #keeprightmost =&gt; tail_val pkg;
+<span class="lineno" id=line306></span>               | #keepall =&gt; keep_val pkg;
+<span class="lineno" id=line307></span>               <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line308></span>             <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line309></span>             <span class="big_keyword" title="Define a mutable variable">var</span> lines = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line310></span>             <span class="big_keyword" title="Define a mutable variable">var</span> line = <span class="library" title="Read a string from a stream including trailing newline">readln</span> file;
+<span class="lineno" id=line311></span>             <span class="small_keyword" title="while loop">while</span> line != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line312></span>               line = line.strip;
+<span class="lineno" id=line313></span>               <span class="small_keyword" title="conditional">if</span> line != <span class="fstring">""</span> <span class="small_keyword" title="logical conjunction">and</span> line.[0] != <span class="library" title="binding of C char type">char</span> <span class="fstring">"#"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line314></span>                 lines = Cons(line,lines);
+<span class="lineno" id=line315></span>               <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line316></span>               line = <span class="library" title="Read a string from a stream including trailing newline">readln</span> file;
+<span class="lineno" id=line317></span>             <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line318></span>             <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> backwards <span class="small_keyword" title="imperative code begins">do</span> lines = <span class="library" title="return data structure with elements reversed">rev</span> lines; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line319></span>  
+<span class="lineno" id=line320></span>             <span class="library" title="call procedure on each element of data structure">iter</span> (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (line:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line321></span>             {
+<span class="lineno" id=line322></span>               <span class="comment">//print line;</span>
+<span class="lineno" id=line323></span>               def <span class="big_keyword" title="Define a mutable variable">var</span> variable, <span class="big_keyword" title="Define a mutable variable">var</span> vval = get_variable(line);
+<span class="lineno" id=line324></span>               <span class="small_keyword" title="conditional">if</span> variable != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line325></span>                 <span class="big_keyword" title="Define a mutable variable">var</span> bdy = search_and_replace variables vval;
+<span class="lineno" id=line326></span>                 variables = Cons ( (<span class="fstring">"${"</span>+variable+<span class="fstring">"}"</span>,bdy), variables);
+<span class="lineno" id=line327></span>               <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line328></span>                 def <span class="big_keyword" title="Define a mutable variable">var</span> key, <span class="big_keyword" title="Define a mutable variable">var</span> value = get_field(line);
+<span class="lineno" id=line329></span>                 <span class="small_keyword" title="conditional">if</span> listkeys <span class="small_keyword" title="call a procedure">call</span> add_val key;
+<span class="lineno" id=line330></span>                 <span class="big_keyword" title="Define a mutable variable">var</span> values = lexstr(value);
+<span class="lineno" id=line331></span>                 values = <span class="library" title="return data structure with function applied to each value">map</span> (search_and_replace variables) values;
+<span class="lineno" id=line332></span>                 <span class="small_keyword" title="conditional">if</span> mem streq fields key <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line333></span>                   <span class="small_keyword" title="match statement or expression">match</span> keep <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line334></span>                   | #keepleftmost =&gt; { <span class="library" title="call procedure on each element of data structure">iter</span> add_val values; }
+<span class="lineno" id=line335></span>                   | #keeprightmost =&gt; { <span class="library" title="call procedure on each element of data structure">iter</span> tail_val values; }
+<span class="lineno" id=line336></span>                   | #keepall =&gt; { <span class="library" title="call procedure on each element of data structure">iter</span> keep_val values; }
+<span class="lineno" id=line337></span>                   <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line338></span>                 <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line339></span>  <span class="comment">//eprintln$ "Chase dependent packages key = " + key + " recfields = " + recfields.str;</span>
+<span class="lineno" id=line340></span>                 <span class="comment">// chase dependent packages</span>
+<span class="lineno" id=line341></span>                 <span class="small_keyword" title="conditional">if</span> mem streq recfields key <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line342></span>  <span class="comment">//eprintln$ "FOUND";</span>
+<span class="lineno" id=line343></span>                   <span class="library" title="call procedure on each element of data structure">iter</span> (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (s:<span class="library" title="binding of C++ string type">string</span>){
+<span class="lineno" id=line344></span>                     handle_pkg$ s,Cons(pkg,trace);
+<span class="lineno" id=line345></span>                   })
+<span class="lineno" id=line346></span>                   values;
+<span class="lineno" id=line347></span>                 <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line348></span>  <span class="comment">//eprintln$ "DONE  dependent packages key = " + key + " recfields = " + recfields.str;</span>
+<span class="lineno" id=line349></span>  
+<span class="lineno" id=line350></span>               <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line351></span>             })
+<span class="lineno" id=line352></span>             lines
+<span class="lineno" id=line353></span>             ;
+<span class="lineno" id=line354></span>             fclose file;
+<span class="lineno" id=line355></span>             found = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line356></span>             <span class="small_keyword" title="conditional">if</span> hide <span class="small_keyword" title="return">return</span>; <span class="comment">// only find first file in path</span>
+<span class="lineno" id=line357></span>           <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line358></span>         })
+<span class="lineno" id=line359></span>         dirs;
+<span class="lineno" id=line360></span>         <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> found <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line361></span>           <span class="comment">//eprintln$ "package not found: " + pkg;</span>
+<span class="lineno" id=line362></span>           <span class="small_keyword" title="conditional">if</span> require_pkg_exists <span class="small_keyword" title="imperative code begins">do</span> return_code = 1; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line363></span>           <span class="small_keyword" title="conditional">if</span> missing <span class="small_keyword" title="call a procedure">call</span> add_val(pkg);
+<span class="lineno" id=line364></span>         <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line365></span>      }
+<span class="lineno" id=line366></span>  
+<span class="lineno" id=line367></span>      <span class="big_keyword" title="Define a mutable variable">var</span> original_pkgs = pkgs;
+<span class="lineno" id=line368></span>  <span class="comment">//eprintln$ "+++++++++++++++++++++++++";</span>
+<span class="lineno" id=line369></span>  <span class="comment">//eprintln$ "TOP LEVEL HANDLING PACKAGES " + original_pkgs.str;</span>
+<span class="lineno" id=line370></span>      <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> is_empty pkgs <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line371></span>        <span class="small_keyword" title="match statement or expression">match</span> pkgs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line372></span>        | #Empty =&gt; {}
+<span class="lineno" id=line373></span>        | Cons (pkg,tail) =&gt;
+<span class="lineno" id=line374></span>          {
+<span class="lineno" id=line375></span>  <span class="comment">//eprintln$ "TOP LEVEL HANDLE ONE PACKAGE " + pkg.str;</span>
+<span class="lineno" id=line376></span>            pkgs = tail;
+<span class="lineno" id=line377></span>            handle_pkg(pkg,Empty[<span class="library" title="binding of C++ string type">string</span>]);
+<span class="lineno" id=line378></span>  <span class="comment">//eprintln$ "DONE: TOP LEVEL HANDLE ONE PACKAGE " + pkg.str;</span>
+<span class="lineno" id=line379></span>          }
+<span class="lineno" id=line380></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line381></span>      <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line382></span>  <span class="comment">//eprintln$ "DONE: TOP LEVEL HANDLING PACKAGES " + original_pkgs.str;</span>
+<span class="lineno" id=line383></span>  <span class="comment">//eprintln$ " ************************";</span>
+<span class="lineno" id=line384></span>  
+<span class="lineno" id=line385></span>      <span class="small_keyword" title="return">return</span> return_code, <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line386></span>    }
+<span class="lineno" id=line387></span>  }
+<span class="lineno" id=line388></span>  
+</pre></p></div><h1 id='Tool_executable._h'><img src='/share/src/web/images/minus.gif' id='Tool executable.' onclick='toggle(this,"Tool_executable._d")' alt='+'/> 2 Tool executable.</h1><div id='Tool_executable._d' style='display:block'>
+<p>This the actual command line tool.
+It depends on only the flx_pkgconfig function.
+It exits with the return code that function returns.
+</p><pre class='inclusion'>
+$PWD/src/tools/flx_pkgconfig.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> flx_pkgconfig_header = 
+<span class="lineno" id=line4></span>  """<span class="embedded_c">
+<span class="lineno" id=line5></span>  #<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
+<span class="lineno" id=line6></span>  #<span class="preproc">include</span> <span class="fstring">"flx_ioutil.hpp"</span>
+<span class="lineno" id=line7></span>  #<span class="preproc">include</span> <span class="fstring">"flx_strutil.hpp"</span>
+<span class="lineno" id=line8></span>  #<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+<span class="lineno" id=line9></span>  #<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+<span class="lineno" id=line10></span>  </span>""";
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="comment">// This KLUDGE does two independent things:</span>
+<span class="lineno" id=line13></span>  <span class="comment">//</span>
+<span class="lineno" id=line14></span>  <span class="comment">// (1) It stops problems with the GC preventing</span>
+<span class="lineno" id=line15></span>  <span class="comment">// building Felix in a core build.</span>
+<span class="lineno" id=line16></span>  <span class="comment">//</span>
+<span class="lineno" id=line17></span>  <span class="comment">// (2) It injects the header includes required by flx_pkgconfig</span>
+<span class="lineno" id=line18></span>  <span class="comment">// directly into flx_pkgconfig so the executable can be built</span>
+<span class="lineno" id=line19></span>  <span class="comment">// without flx or flx_pkgconfig.</span>
+<span class="lineno" id=line20></span>  <span class="comment">//</span>
+<span class="lineno" id=line21></span>  <span class="comment">// The latter is essential during the Python based bootstrap</span>
+<span class="lineno" id=line22></span>  <span class="comment">// build process. That process uses the flx_pkgconfig executable</span>
+<span class="lineno" id=line23></span>  <span class="comment">// to translate the flx.resh file produced by compiling flx.flx</span>
+<span class="lineno" id=line24></span>  <span class="comment">// with flxg into actual package requirements, and thence</span>
+<span class="lineno" id=line25></span>  <span class="comment">// into the required header file.</span>
+<span class="lineno" id=line26></span>  <span class="comment">//</span>
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> kludge : 1 = <span class="fstring">"ptf-&gt; gcp-&gt;allow_collection_anywhere=false;"</span> <span class="big_keyword" title="specify requirements">requires</span> flx_pkgconfig_header;
+<span class="lineno" id=line29></span>  kludge();
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>  <span class="comment">// strip any trailing space off to ease bash scripting</span>
+<span class="lineno" id=line32></span>  <span class="big_keyword" title="Define a mutable variable">var</span> return_code, <span class="small_keyword" title="value of function return used in post condition">result</span> = FlxPkgConfig::flx_pkgconfig (tail #System::args);
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>  <span class="library" title="Print a string to standard output">print</span>$ strip$ cat <span class="fstring">' '</span> <span class="small_keyword" title="value of function return used in post condition">result</span>; endl;
+<span class="lineno" id=line35></span>  System::exit return_code;
+<span class="lineno" id=line36></span>  
+</pre></p></div><h1 id='Database_query_object._h'><img src='/share/src/web/images/minus.gif' id='Database query object.' onclick='toggle(this,"Database_query_object._d")' alt='+'/> 3 Database query object.</h1><div id='Database_query_object._d' style='display:block'>
+<p>This code provides an object wrapper around the
+flx_pkgconfig CLI interface function to allow
+low level queries about specific fields of specific
+packages.
+</p><h2 id='Database_query_object_interface._h'><img src='/share/src/web/images/minus.gif' id='Database query object interface.' onclick='toggle(this,"Database_query_object_interface._d")' alt='+'/> 3.1 Database query object interface.</h2><div id='Database_query_object_interface._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/felix/flx_pkgconfig_query_interface.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> FlxPkgConfigQuery_interface
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="define an object interface">interface</span> FlxPkgConfigQuery_t {
+<span class="lineno" id=line4></span>      query:           <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] -&gt; <span class="library" title="binding of C int type">int</span> * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line5></span>      getpkgfield:     (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line6></span>      getpkgfield1:    (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line7></span>      getpkgfieldopt:  (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line8></span>      getpkgfielddflt: (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt;  <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line9></span>      getclosure:      (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line10></span>     }
+<span class="lineno" id=line11></span>  }
+<span class="lineno" id=line12></span>  
+</pre></p></div><h2 id='Database_query_object_implementation._h'><img src='/share/src/web/images/minus.gif' id='Database query object implementation.' onclick='toggle(this,"Database_query_object_implementation._d")' alt='+'/> 3.2 Database query object implementation.</h2><div id='Database_query_object_implementation._d' style='display:block'>
+<p>Depends on on the CLI function interface.
+</p><pre class='inclusion'>
+share/lib/std/felix/flx_pkgconfig_query.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig_core"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig_query_interface"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a type class">class</span> FlxPkgConfig_query
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="define an object factory">object</span> FlxPkgConfigQuery (path:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> FlxPkgConfigQuery_interface::FlxPkgConfigQuery_t = 
+<span class="lineno" id=line7></span>    {
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a mutable variable">var</span> paths = 
+<span class="lineno" id=line9></span>        <span class="small_keyword" title="match statement or expression">match</span> path <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line10></span>        | #Empty =&gt; Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line11></span>        | Cons (h,t) =&gt; 
+<span class="lineno" id=line12></span>          <span class="small_keyword" title="let binder">let</span> 
+<span class="lineno" id=line13></span>            <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (lst:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (out:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt; 
+<span class="lineno" id=line14></span>            <span class="small_keyword" title="match statement or expression">match</span> lst <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line15></span>            | #Empty =&gt; <span class="library" title="return data structure with elements reversed">rev</span> out
+<span class="lineno" id=line16></span>            | Cons (h,t) =&gt; aux t ((<span class="fstring">"--path+="</span>+h)!out) 
+<span class="lineno" id=line17></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line18></span>          <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line19></span>          (<span class="fstring">"--path="</span>+h) ! aux t Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line20></span>      ;
+<span class="lineno" id=line21></span>      <span class="small_keyword" title="match statement or expression">match</span> path <span class="small_keyword" title="type-class constraint">with</span> | #Empty =&gt; <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>; | _ =&gt; ; <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>      <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> query (args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line25></span>        FlxPkgConfig_core::flx_pkgconfig (paths + args)
+<span class="lineno" id=line26></span>      ;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>      <span class="comment">// Get all the values of a field in a particular package</span>
+<span class="lineno" id=line29></span>      <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getpkgfield (ehandler:1-&gt;0) (pkg:<span class="library" title="binding of C++ string type">string</span>, field:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line30></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span>,values = query$ <span class="library" title="functional, singly linked list">list</span>$ (<span class="fstring">"--field="</span>+field, pkg);
+<span class="lineno" id=line31></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line32></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"[FlxPkgConfigQuery: getpkgfield] Can't find package "</span> + pkg;
+<span class="lineno" id=line33></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Searching in paths:"</span>;
+<span class="lineno" id=line34></span>          <span class="small_keyword" title="for loop">for</span> path <span class="small_keyword" title="membership operator, function mem">in</span> paths <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line35></span>            <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  "</span> + path;
+<span class="lineno" id=line36></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line37></span>          <span class="comment">// FIXME</span>
+<span class="lineno" id=line38></span>          <span class="comment">// System::exit(1);</span>
+<span class="lineno" id=line39></span>          throw_continuation ehandler;
+<span class="lineno" id=line40></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line41></span>        <span class="small_keyword" title="return">return</span> values;
+<span class="lineno" id=line42></span>      }
+<span class="lineno" id=line43></span>      
+<span class="lineno" id=line44></span>      <span class="comment">// Get the single value of a field in a particular package.</span>
+<span class="lineno" id=line45></span>      <span class="comment">// Bug out if missing or multiple values.</span>
+<span class="lineno" id=line46></span>      <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getpkgfield1 (ehandler:1-&gt;0) (pkg:<span class="library" title="binding of C++ string type">string</span>, field:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line47></span>        <span class="big_keyword" title="Define a mutable variable">var</span> values = getpkgfield ehandler (pkg,field);
+<span class="lineno" id=line48></span>        <span class="small_keyword" title="match statement or expression">match</span> values <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line49></span>        | Cons (h,#Empty) =&gt; <span class="small_keyword" title="return">return</span> h;
+<span class="lineno" id=line50></span>        | #Empty =&gt; 
+<span class="lineno" id=line51></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"[FlxPkgConfigQuery: getpkgfield1] Required field "</span> + field + <span class="fstring">" not found in package "</span>+pkg;
+<span class="lineno" id=line52></span>          throw_continuation ehandler;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>        | _ =&gt;
+<span class="lineno" id=line55></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"[FlxPkgConfigQuery: getpkgfield1] Multiple values for field "</span> + field + <span class="fstring">" in "</span> + pkg + <span class="fstring">" not allowed, got"</span> + <span class="library" title="Convert a value to a string">str</span> values;
+<span class="lineno" id=line56></span>          throw_continuation ehandler;
+<span class="lineno" id=line57></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line58></span>      }
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>      <span class="comment">// Get the single value of a field in a particular package.</span>
+<span class="lineno" id=line61></span>      <span class="comment">// Bug out if multiple values.</span>
+<span class="lineno" id=line62></span>      <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getpkgfieldopt (ehandler:1-&gt;0) (pkg:<span class="library" title="binding of C++ string type">string</span>, field:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line63></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span>,values = query$ <span class="library" title="functional, singly linked list">list</span>$ (<span class="fstring">"--field="</span>+field, pkg);
+<span class="lineno" id=line64></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> !=0 <span class="small_keyword" title="return">return</span> None[<span class="library" title="binding of C++ string type">string</span>]; <span class="comment">// package or field missing </span>
+<span class="lineno" id=line65></span>        <span class="small_keyword" title="match statement or expression">match</span> values <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line66></span>        | Cons (h,#Empty) =&gt; <span class="small_keyword" title="return">return</span> Some h;
+<span class="lineno" id=line67></span>        | #Empty =&gt; <span class="small_keyword" title="return">return</span> None[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line68></span>        | _ =&gt;
+<span class="lineno" id=line69></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"[FlxPkgConfigQuery: getpkgfieldopt ]Multiple values for field "</span> + field + <span class="fstring">" in "</span> + pkg + <span class="fstring">" not allowed, got"</span> + <span class="library" title="Convert a value to a string">str</span> values;
+<span class="lineno" id=line70></span>          throw_continuation ehandler;
+<span class="lineno" id=line71></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line72></span>      }
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>      <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getpkgfielddflt (ehandler:1-&gt;0) (pkg:<span class="library" title="binding of C++ string type">string</span>, field:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line75></span>        <span class="small_keyword" title="match statement or expression">match</span> getpkgfieldopt ehandler (pkg, field) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line76></span>        | Some h =&gt; h
+<span class="lineno" id=line77></span>        | #None =&gt; <span class="fstring">""</span>
+<span class="lineno" id=line78></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line79></span>      ;
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>      <span class="doccomment">Get Requires closure.</span>
+<span class="lineno" id=line82></span>      <span class="doccomment">Result is topologically sorted with each package listed</span>
+<span class="lineno" id=line83></span>      <span class="doccomment">after ones it requires.</span>
+<span class="lineno" id=line84></span>      <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getclosure (ehandler:1-&gt;0) (pkg:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line85></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span>,values = FlxPkgConfig_core::flx_pkgconfig $ paths +
+<span class="lineno" id=line86></span>          <span class="fstring">"--keeprightmost"</span> + <span class="fstring">"--rec"</span> + <span class="fstring">"--list"</span> +  pkg
+<span class="lineno" id=line87></span>        ;
+<span class="lineno" id=line88></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line89></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"[GetPkgConfigQuery: getclosure] missing package for closure of "</span> + pkg;
+<span class="lineno" id=line90></span>          <span class="comment">// FIXME</span>
+<span class="lineno" id=line91></span>          <span class="comment">// System::exit(1);</span>
+<span class="lineno" id=line92></span>          throw_continuation ehandler;
+<span class="lineno" id=line93></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line94></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> values;
+<span class="lineno" id=line95></span>      }
+<span class="lineno" id=line96></span>    }
+<span class="lineno" id=line97></span>  }
+<span class="lineno" id=line98></span>  
+</pre></p></div></div><h1 id='Database_Manager_Library_h'><img src='/share/src/web/images/minus.gif' id='Database Manager Library' onclick='toggle(this,"Database_Manager_Library_d")' alt='+'/> 4 Database Manager Library</h1><div id='Database_Manager_Library_d' style='display:block'>
+<p>Export thunks to support separate compilation
+of the flx_pkgconfig database query library.
+This allows the code to be dynamically loaded
+or statically linked against as if a foreign C library.
+</p><p>The support does not reach the level of a plugin, however.
+</p><h2 id='Compendium_class._h'><img src='/share/src/web/images/minus.gif' id='Compendium class.' onclick='toggle(this,"Compendium_class._d")' alt='+'/> 4.1 Compendium class.</h2><div id='Compendium_class._d' style='display:block'>
+<p>This class provides both of the core CLI function
+and the object based query wrapper, wrapped in a 
+single include file and with a single wrapping namespace.
+</p><pre class='inclusion'>
+share/lib/std/felix/flx_pkgconfig.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig_core"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig_query_interface"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig_query"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a type class">class</span> FlxPkgConfig
+<span class="lineno" id=line6></span>  {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FlxPkgConfig_core;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FlxPkgConfigQuery_interface;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FlxPkgConfig_query;
+<span class="lineno" id=line10></span>  }
+</pre></p></div><h2 id='Separate_compilation_wrapper._h'><img src='/share/src/web/images/minus.gif' id='Separate compilation wrapper.' onclick='toggle(this,"Separate_compilation_wrapper._d")' alt='+'/> 4.2 Separate compilation wrapper.</h2><div id='Separate_compilation_wrapper._d' style='display:block'>
+<p>This file provides the separate compilation wrapper.
+We provide a struct wrapper around the underlying
+record type, because it is a nominal type and can be 
+exported.
+</p><pre class='inclusion'>
+share/lib/std/felix/flx_pkgconfig_export.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> FlxPkgConfig::flx_pkgconfig of (<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) as <span class="fstring">"flx_pkgconfig"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a structure">struct</span> FlxPkgConfigQuery_struct 
+<span class="lineno" id=line6></span>  {
+<span class="lineno" id=line7></span>      query:           <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] -&gt; <span class="library" title="binding of C int type">int</span> * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line8></span>      getpkgfield:     (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line9></span>      getpkgfield1:    (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line10></span>      getpkgfieldopt:  (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line11></span>      getpkgfielddflt: (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt;  <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line12></span>      getclosure:      (1-&gt;0) -&gt; <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line13></span>  }
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mk_pkgconfig_query (a:FlxPkgConfigQuery_struct) =&gt; 
+<span class="lineno" id=line16></span>    FlxPkgConfig::FlxPkgConfigQuery (
+<span class="lineno" id=line17></span>      query=a.query,
+<span class="lineno" id=line18></span>      getpkgfield=a.getpkgfield,
+<span class="lineno" id=line19></span>      getpkgfield1=a.getpkgfield1,
+<span class="lineno" id=line20></span>      getpkgfieldopt=a.getpkgfieldopt,
+<span class="lineno" id=line21></span>      getpkgfielddflt=a.getpkgfielddflt,
+<span class="lineno" id=line22></span>      getclosure=a.getclosure
+<span class="lineno" id=line23></span>    )
+<span class="lineno" id=line24></span>  ;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> mk_pkgconfig_query
+<span class="lineno" id=line27></span>    of (FlxPkgConfigQuery_struct)
+<span class="lineno" id=line28></span>    as <span class="fstring">"flx_pkgconfig_query"</span>
+<span class="lineno" id=line29></span>  ;
+<span class="lineno" id=line30></span>   
+</pre></p></div></div><h1 id='Pkg_config_h'><img src='/share/src/web/images/minus.gif' id='Pkg config' onclick='toggle(this,"Pkg_config_d")' alt='+'/> 5 Pkg config</h1><div id='Pkg_config_d' style='display:block'>
+<p>This code provides a class wrapper around the command 
+line function flx_pkgconfig AND the object based query system,
+designed solely to simplify access from the flx tool.
+</p><p>This code can do a System::exit which also exits the flx
+process using it.
+</p><p>This has to be FIXED so flx can run in non-stop mode.
+</p><pre class='inclusion'>
+share/lib/std/felix/flx_pkg.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_pkgconfig"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> FlxPkg
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> pkgconfig_inspec_t = (
+<span class="lineno" id=line6></span>      FLX_CONFIG_DIRS: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line7></span>      FLX_TARGET_DIR:<span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line8></span>      EXT_EXE: <span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line9></span>      EXT_STATIC_OBJ: <span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line10></span>      EXT_DYNAMIC_OBJ: <span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line11></span>      STATIC: <span class="library" title="binding of C int type">int</span>,
+<span class="lineno" id=line12></span>      LINKEXE: <span class="library" title="binding of C int type">int</span>,
+<span class="lineno" id=line13></span>      SLINK_STRINGS: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line14></span>      DLINK_STRINGS: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line15></span>      LINKER_SWITCHES: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line16></span>      EXTRA_PACKAGES: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line17></span>      cpp_filebase : <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line18></span>    );
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[pkgconfig_inspec_t] {
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (spec: pkgconfig_inspec_t) =&gt; spec._strr;
+<span class="lineno" id=line22></span>    }
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> pkgconfig_outspec_t = (
+<span class="lineno" id=line25></span>      CFLAGS: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line26></span>      INCLUDE_FILES: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line27></span>      DRIVER_EXE: <span class="library" title="binding of C++ string type">string</span>,
+<span class="lineno" id=line28></span>      DRIVER_OBJS: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line29></span>      LINK_STRINGS: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line30></span>    );
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> fix2word_flags (fs: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) = {
+<span class="lineno" id=line33></span>      <span class="comment">//println$ "Fix2word, input=" + fs.str;</span>
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="Define a mutable variable">var</span> output =  <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span>
+<span class="lineno" id=line35></span>       (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (elt:<span class="library" title="binding of C++ string type">string</span>) =&gt;
+<span class="lineno" id=line36></span>         <span class="small_keyword" title="conditional">if</span> prefix (elt, <span class="fstring">"---"</span>) <span class="small_keyword" title="conditional">then</span> acc + (split (elt.[2 <span class="small_keyword" title="substring range separator">to</span>], <span class="library" title="binding of C char type">char</span> <span class="fstring">"="</span>))
+<span class="lineno" id=line37></span>         <span class="small_keyword" title="conditional">else</span> acc + elt
+<span class="lineno" id=line38></span>         <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line39></span>        )
+<span class="lineno" id=line40></span>        Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line41></span>        fs
+<span class="lineno" id=line42></span>      ;
+<span class="lineno" id=line43></span>      <span class="comment">//println$ "Fix2word, output=" + output.str;</span>
+<span class="lineno" id=line44></span>      <span class="small_keyword" title="return">return</span> output;
+<span class="lineno" id=line45></span>    }
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>    <span class="comment">// Model:</span>
+<span class="lineno" id=line49></span>    <span class="comment">// Static link exe: return the object files required, no driver exe</span>
+<span class="lineno" id=line50></span>    <span class="comment">// Dynamic link exe: the same</span>
+<span class="lineno" id=line51></span>    <span class="comment">// DLL: return the executable (flx_run) required to run the DLL</span>
+<span class="lineno" id=line52></span>    <span class="comment">// </span>
+<span class="lineno" id=line53></span>    <span class="comment">// We provide instructions to link the target binary and how to run it.</span>
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>  <span class="comment">/*
+<span class="lineno" id=line56></span>    proc ehandler () {
+<span class="lineno" id=line57></span>      eprintln$ "Flx_pkgconfig: map_package_requirements: failed, temporary ehandler invoked";
+<span class="lineno" id=line58></span>      System::exit 1;
+<span class="lineno" id=line59></span>    }
+<span class="lineno" id=line60></span>  */</span>
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> map_package_requirements (ehandler:1-&gt;0) (spec:pkgconfig_inspec_t) : pkgconfig_outspec_t =
+<span class="lineno" id=line62></span>    {
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> / (a:<span class="library" title="binding of C++ string type">string</span>, b:<span class="library" title="binding of C++ string type">string</span>) =&gt; Filename::join (a,b);
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>  <span class="comment">// println$ "MAP PACKAGE REQUIREMENTS: " + spec.str;</span>
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>      <span class="big_keyword" title="Define a mutable variable">var</span> PKGCONFIG_PATH=unbox (<span class="library" title="return data structure with function applied to each value">map</span> 
+<span class="lineno" id=line68></span>         (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="fstring">"--path+="</span>+s) 
+<span class="lineno" id=line69></span>         spec.FLX_CONFIG_DIRS)
+<span class="lineno" id=line70></span>      ;
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>      <span class="comment">// to hook any extra packages found by the compiler</span>
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a mutable variable">var</span> RESH = <span class="fstring">"@"</span>+spec.cpp_filebase+<span class="fstring">".resh"</span>;
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>      <span class="comment">// find all the compiler or switches</span>
+<span class="lineno" id=line76></span>      <span class="comment">// args are the args to flx_pkgconfig</span>
+<span class="lineno" id=line77></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pkgconfl(args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line78></span>      {
+<span class="lineno" id=line79></span>        <span class="small_keyword" title="conditional">if</span> spec.EXTRA_PACKAGES != Empty[<span class="library" title="binding of C++ string type">string</span>] <span class="small_keyword" title="call a procedure">call</span>
+<span class="lineno" id=line80></span>           eprintln$ <span class="fstring">"calpackages, EXTRA_PACKAGES = "</span> + <span class="library" title="Convert a value to a string">str</span> spec.EXTRA_PACKAGES
+<span class="lineno" id=line81></span>        ;
+<span class="lineno" id=line82></span>        <span class="big_keyword" title="Define a mutable variable">var</span> allargs = PKGCONFIG_PATH+args+spec.EXTRA_PACKAGES + RESH; 
+<span class="lineno" id=line83></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ret,s = FlxPkgConfig::flx_pkgconfig(allargs);
+<span class="lineno" id=line84></span>        <span class="small_keyword" title="conditional">if</span> ret != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line85></span>          eprintln$ <span class="fstring">"[FlxPkg:map_package_requirements] Error "</span> + <span class="library" title="Convert a value to a string">str</span> ret + <span class="fstring">" executing flx_pkgconfig, args="</span> + <span class="library" title="Convert a value to a string">str</span> allargs;
+<span class="lineno" id=line86></span>          <span class="comment">// FIXME</span>
+<span class="lineno" id=line87></span>          <span class="comment">//System::exit (1);</span>
+<span class="lineno" id=line88></span>          throw_continuation ehandler;
+<span class="lineno" id=line89></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line90></span>        <span class="small_keyword" title="return">return</span> s;
+<span class="lineno" id=line91></span>      }
+<span class="lineno" id=line92></span>      <span class="comment">// convert list of switches to a single string</span>
+<span class="lineno" id=line93></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pkgconfs(args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="binding of C++ string type">string</span> =&gt; cat <span class="fstring">' '</span> $ pkgconfl(args);
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>      <span class="big_keyword" title="Define a mutable variable">var</span> e = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>      <span class="comment">// find all include directories</span>
+<span class="lineno" id=line98></span>      <span class="big_keyword" title="Define a mutable variable">var</span> CFLAGS=pkgconfl(e+<span class="fstring">'--field=cflags'</span>+<span class="fstring">'--keepleftmost'</span>);
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>      <span class="comment">// find all include files</span>
+<span class="lineno" id=line101></span>      <span class="big_keyword" title="Define a mutable variable">var</span> INCLUDE_FILES=pkgconfl(e+<span class="fstring">'--field=includes'</span>+<span class="fstring">'--keepleftmost'</span>);
+<span class="lineno" id=line102></span>  
+<span class="lineno" id=line103></span>  
+<span class="lineno" id=line104></span>      <span class="comment">// find the driver package</span>
+<span class="lineno" id=line105></span>      <span class="comment">// not useful for C++ only</span>
+<span class="lineno" id=line106></span>      <span class="big_keyword" title="Define a mutable variable">var</span> DRIVER_PKG=pkgconfs(e+<span class="fstring">'--field=flx_requires_driver'</span>);
+<span class="lineno" id=line107></span>      <span class="small_keyword" title="conditional">if</span> DRIVER_PKG == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> DRIVER_PKG=<span class="fstring">"flx_run"</span>; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line108></span>  
+<span class="lineno" id=line109></span>      <span class="comment">// find the driver entity</span>
+<span class="lineno" id=line110></span>      <span class="comment">// not useful for C++ only</span>
+<span class="lineno" id=line111></span>      <span class="small_keyword" title="conditional">if</span> spec.STATIC == 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line112></span>        <span class="comment">// dynamic linkage: the driver executable</span>
+<span class="lineno" id=line113></span>        <span class="small_keyword" title="conditional">if</span> spec.LINKEXE == 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line114></span>          <span class="big_keyword" title="Define a mutable variable">var</span> DRIVER_EXE= spec.FLX_TARGET_DIR/ <span class="fstring">"bin"</span>/ DRIVER_PKG+spec.EXT_EXE;
+<span class="lineno" id=line115></span>          <span class="big_keyword" title="Define a mutable variable">var</span> DRIVER_OBJS = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line116></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line117></span>        <span class="comment">// dynamic linkage: the object files for executable with DLL support</span>
+<span class="lineno" id=line118></span>          DRIVER_OBJS =([
+<span class="lineno" id=line119></span>              spec.FLX_TARGET_DIR / <span class="fstring">"lib"</span> / <span class="fstring">"rtl"</span> / (DRIVER_PKG+<span class="fstring">"_lib_static"</span>+ spec.EXT_DYNAMIC_OBJ),
+<span class="lineno" id=line120></span>              spec.FLX_TARGET_DIR / <span class="fstring">"lib"</span> / <span class="fstring">"rtl"</span> / (DRIVER_PKG+<span class="fstring">"_main"</span>+spec.EXT_DYNAMIC_OBJ)
+<span class="lineno" id=line121></span>          ]);
+<span class="lineno" id=line122></span>          DRIVER_EXE = <span class="fstring">""</span>;
+<span class="lineno" id=line123></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line124></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line125></span>        <span class="comment">// static linkage: the object files for full static link</span>
+<span class="lineno" id=line126></span>        DRIVER_OBJS = ([
+<span class="lineno" id=line127></span>            spec.FLX_TARGET_DIR/ <span class="fstring">"lib"</span>/ <span class="fstring">"rtl"</span>/ (DRIVER_PKG+<span class="fstring">"_lib_static"</span>+ spec.EXT_STATIC_OBJ),
+<span class="lineno" id=line128></span>            spec.FLX_TARGET_DIR/ <span class="fstring">"lib"</span>/ <span class="fstring">"rtl"</span>/ (DRIVER_PKG+<span class="fstring">"_main"</span>+spec.EXT_STATIC_OBJ)
+<span class="lineno" id=line129></span>        ]);
+<span class="lineno" id=line130></span>        DRIVER_EXE = <span class="fstring">""</span>;
+<span class="lineno" id=line131></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line132></span>  
+<span class="lineno" id=line133></span>      <span class="small_keyword" title="conditional">if</span> spec.STATIC == 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line134></span>        <span class="small_keyword" title="conditional">if</span> spec.LINKEXE == 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line135></span>          <span class="comment">// Linking a DLL</span>
+<span class="lineno" id=line136></span>          <span class="big_keyword" title="Define a mutable variable">var</span> LINK_STRINGS =
+<span class="lineno" id=line137></span>            spec.DLINK_STRINGS+
+<span class="lineno" id=line138></span>            spec.LINKER_SWITCHES+
+<span class="lineno" id=line139></span>            pkgconfl(e+<span class="fstring">'-r'</span>+<span class="fstring">'--keeprightmost'</span>+<span class="fstring">'--field=provides_dlib'</span>+<span class="fstring">'--field=requires_dlibs'</span>+DRIVER_PKG);
+<span class="lineno" id=line140></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line141></span>          <span class="comment">// Linking an EXE (with DLL support)</span>
+<span class="lineno" id=line142></span>          LINK_STRINGS =
+<span class="lineno" id=line143></span>            spec.DLINK_STRINGS +
+<span class="lineno" id=line144></span>            spec.LINKER_SWITCHES+
+<span class="lineno" id=line145></span>            pkgconfl(e+<span class="fstring">'-r'</span>+<span class="fstring">'--keepleftmost'</span>+<span class="fstring">'--field=provides_dlib'</span>+<span class="fstring">'--field=requires_dlibs'</span>+DRIVER_PKG);
+<span class="lineno" id=line146></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line147></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line148></span>        <span class="comment">// static linkage: all the libraries required by the application and driver</span>
+<span class="lineno" id=line149></span>        <span class="comment">// This has to be recursive to find the closure.</span>
+<span class="lineno" id=line150></span>        <span class="comment">// Linking an EXE (fully static)</span>
+<span class="lineno" id=line151></span>        LINK_STRINGS =
+<span class="lineno" id=line152></span>          spec.SLINK_STRINGS+
+<span class="lineno" id=line153></span>          spec.LINKER_SWITCHES+
+<span class="lineno" id=line154></span>          pkgconfl(e+<span class="fstring">'-r'</span>+<span class="fstring">'--keeprightmost'</span>+<span class="fstring">'--field=provides_slib'</span>+<span class="fstring">'--field=requires_slibs'</span>+DRIVER_PKG);
+<span class="lineno" id=line155></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line156></span>      LINK_STRINGS = fix2word_flags LINK_STRINGS;
+<span class="lineno" id=line157></span>  
+<span class="lineno" id=line158></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = ( 
+<span class="lineno" id=line159></span>        CFLAGS = CFLAGS,
+<span class="lineno" id=line160></span>        INCLUDE_FILES = INCLUDE_FILES,
+<span class="lineno" id=line161></span>        DRIVER_EXE = DRIVER_EXE,
+<span class="lineno" id=line162></span>        DRIVER_OBJS = DRIVER_OBJS,
+<span class="lineno" id=line163></span>        LINK_STRINGS = LINK_STRINGS
+<span class="lineno" id=line164></span>      );
+<span class="lineno" id=line165></span>      <span class="comment">//println$ "Mapped requirements = " + result._strr;</span>
+<span class="lineno" id=line166></span>      <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line167></span>    }
+<span class="lineno" id=line168></span>  
+<span class="lineno" id=line169></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> write_include_file(path:<span class="library" title="binding of C++ string type">string</span>, INCLUDE_FILES:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) {
+<span class="lineno" id=line170></span>      <span class="big_keyword" title="Define a mutable variable">var</span> f = fopen_output(path+<span class="fstring">".includes"</span>);
+<span class="lineno" id=line171></span>      List::<span class="library" title="call procedure on each element of data structure">iter</span>  
+<span class="lineno" id=line172></span>        (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (i:<span class="library" title="binding of C++ string type">string</span>) { writeln$ f, <span class="fstring">"#include "</span> + i; })
+<span class="lineno" id=line173></span>        INCLUDE_FILES
+<span class="lineno" id=line174></span>      ;
+<span class="lineno" id=line175></span>      fclose f;
+<span class="lineno" id=line176></span>    }
+<span class="lineno" id=line177></span>  
+<span class="lineno" id=line178></span>  }
+<span class="lineno" id=line179></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

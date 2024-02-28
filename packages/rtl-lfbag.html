@@ -1,0 +1,553 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Lock Free Bag</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Lock Free Bag"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Lock Free Bag_h')"> <a href="#Lock_Free_Bag_h">Lock Free Bag</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Lock_Free_Bag_h'><img src='/share/src/web/images/minus.gif' id='Lock Free Bag' onclick='toggle(this,"Lock_Free_Bag_d")' alt='+'/> 1 Lock Free Bag</h1><div id='Lock_Free_Bag_d' style='display:block'>
+<p>A lock free thread safe bag for holding non-null pointers.
+</p><pre class='inclusion'>
+share/lib/rtl/pthread_lf_bag.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_PTHREAD_LF_BAG_H__
+#<span class="preproc">define</span> __FLX_PTHREAD_LF_BAG_H__
+
+#<span class="preproc">include</span> <span class="fstring">"flx_pthread_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdint.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;atomic&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_thread_control_base.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+
+<span class="big_keyword">struct</span> PTHREAD_EXTERN pthread_lf_bag {
+  ::<span class="small_keyword">std</span>::atomic &lt;<span class="qualifier">void</span> *&gt; * <span class="qualifier">volatile</span> a;
+  size_t n;
+  thread_control_base_t *tc;
+  
+  <span class="comment">// for statistics
+</span>  size_t throughput;
+
+  <span class="comment">// these indices are for optimisation purposes ONLY
+</span>  <span class="comment">// the head points at the next element to dequeue or a bit earlier
+</span>  ::<span class="small_keyword">std</span>::atomic&lt;size_t&gt; head;
+
+  <span class="comment">// we can't use unsigned type because the value may go negative
+</span>  <span class="comment">// if dequeue operations decrement the counter before the enqueue
+</span>  <span class="comment">// that pushed the data does.
+</span>  ::<span class="small_keyword">std</span>::atomic&lt;int32_t&gt; used; 
+
+  pthread_lf_bag (thread_control_base_t *tc_, size_t n_);
+
+  <span class="comment">// the destructor is not safe!
+</span>  <span class="comment">// to make it safe one needs to be sure the queue is empty
+</span>  <span class="comment">// AND that no more values will be enqueued.
+</span>  <span class="comment">// This is very hard to do. Using a smart ptr for the bag
+</span>  <span class="comment">// ensures there will be no more enqueue operations started
+</span>  <span class="comment">// but not that one is not in progress. The queue may appear
+</span>  <span class="comment">// empty during the progress of such final enqueue operations.
+</span>  <span class="comment">// there is no safe way to ensure the queue will remain empty.
+</span>  ~pthread_lf_bag();
+
+  <span class="qualifier">void</span> enqueue(<span class="qualifier">void</span> *d);
+  <span class="qualifier">void</span> *dequeue ();
+};
+
+}} <span class="comment">// namespaces
+</span>#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/pthread/pthread_lf_bag.cpp</pre>
+<p><pre class='cppbg'><span class="comment">// simple very efficient lock free bag
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;atomic&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;chrono&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;algorithm&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;thread&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdlib.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_lf_bag.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;assert.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;pthread_thread.hpp&gt;</span>
+
+using <span class="big_keyword">namespace</span> flx::pthread;
+
+<span class="comment">// 10 ms max sleep, that's 10,000,000 nanoseconds
+</span>#<span class="preproc">define</span> MAXSLEEP (size_t)10000000
+
+<span class="qualifier">static</span> <span class="qualifier">void</span> sleep(thread_control_base_t *tc, size_t ns) 
+{
+fprintf(stderr, <span class="fstring">"pthread_lf_bag: sleep: thread %p calling std::this_thread::yield()"</span>,::flx::pthread::mythrid());
+  assert(tc);
+  tc-&gt;yield();
+  <span class="comment">//::std::this_thread::sleep_for(::std::chrono::nanoseconds(ns));
+</span>  ::<span class="small_keyword">std</span>::this_thread::yield();
+}
+
+#<span class="preproc">define</span> NQFENCE ::<span class="small_keyword">std</span>::memory_order_seq_cst
+#<span class="preproc">define</span> DQFENCE ::<span class="small_keyword">std</span>::memory_order_seq_cst
+
+
+  pthread_lf_bag::pthread_lf_bag (thread_control_base_t *tc_, size_t n_) :
+    n (n_), tc(tc_), head(0), used(0), 
+    throughput(0),
+    a((::<span class="small_keyword">std</span>::atomic&lt;<span class="qualifier">void</span>*&gt;*)calloc (n_ , sizeof (<span class="qualifier">void</span>*))) 
+  {}
+
+  <span class="comment">// the destructor is not safe!
+</span>  <span class="comment">// to make it safe one needs to be sure the queue is empty
+</span>  <span class="comment">// AND that no more values will be enqueued.
+</span>  <span class="comment">// This is very hard to do. Using a smart ptr for the bag
+</span>  <span class="comment">// ensures there will be no more enqueue operations started
+</span>  <span class="comment">// but not that one is not in progress. The queue may appear
+</span>  <span class="comment">// empty during the progress of such final enqueue operations.
+</span>  <span class="comment">// there is no safe way to ensure the queue will remain empty.
+</span>  pthread_lf_bag::~pthread_lf_bag() { }
+
+  <span class="qualifier">void</span> pthread_lf_bag::enqueue(<span class="qualifier">void</span> *d) 
+  { 
+wait:
+    size_t stime = 1;
+    <span class="small_keyword">while</span> (used.load(::<span class="small_keyword">std</span>::memory_order_seq_cst) == n) sleep(tc,stime);
+    size_t i = (head + used) % n;
+    <span class="small_keyword">while</span> 
+    (
+      (d = ::<span class="small_keyword">std</span>::atomic_exchange_explicit(a + i, d, 
+        NQFENCE))
+    ) 
+    { 
+      <span class="small_keyword">if</span> (used.load(::<span class="small_keyword">std</span>::memory_order_seq_cst) == n) <span class="small_keyword">goto</span> wait; <span class="comment">// lost the race
+</span>      i = (i + 1) % n; 
+      <span class="small_keyword">if</span> (i == head) sleep(tc,stime);
+    }
+    ++used;
+  }
+
+  <span class="qualifier">void</span> *pthread_lf_bag::dequeue () 
+  { 
+wait:
+    size_t stime = 1;
+    <span class="small_keyword">while</span> (used.load(::<span class="small_keyword">std</span>::memory_order_seq_cst) == 0) sleep(tc,stime );
+    
+    size_t i = head.load(::<span class="small_keyword">std</span>::memory_order_seq_cst);
+    <span class="qualifier">void</span> *d = nullptr;
+    <span class="small_keyword">while</span> 
+    (
+      !(d = ::<span class="small_keyword">std</span>::atomic_exchange_explicit(a + i, d, 
+        DQFENCE))
+    ) 
+    { 
+      <span class="small_keyword">if</span> (used.load(::<span class="small_keyword">std</span>::memory_order_seq_cst) == 0) <span class="small_keyword">goto</span> wait; <span class="comment">// lost the race
+</span>      i = (i + 1) % n; 
+      <span class="small_keyword">if</span> (i == head) sleep(tc,stime);
+    }
+    head.store (i,::<span class="small_keyword">std</span>::memory_order_seq_cst);
+    --used;
+    ++throughput;
+    <span class="small_keyword">return</span> d;
+  }
+</pre></p><pre class='inclusion'>
+share/lib/std/pthread/pthread_lf_bag.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> LockFreeBag
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> lf_bag = <span class="fstring">"::std::shared_ptr&lt;::flx::pthread::pthread_lf_bag&gt;"</span>
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="specify requirements">requires</span> 
+<span class="lineno" id=line5></span>        <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"pthread_lf_bag.hpp"</span></span>',
+<span class="lineno" id=line6></span>        <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"pthread"</span>,
+<span class="lineno" id=line7></span>        Cxx11_headers::memory
+<span class="lineno" id=line8></span>    ;
+<span class="lineno" id=line9></span>    <span class="comment">// note: unmanaged container at the moment!!</span>
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> lf_bag : <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"""
+<span class="lineno" id=line11></span>       ::std::shared_ptr&lt;::flx::pthread::pthread_lf_bag&gt; 
+<span class="lineno" id=line12></span>       (new ::flx::pthread::pthread_lf_bag(ptf-&gt;gcp-&gt;collector-&gt;get_thread_control(),$1))
+<span class="lineno" id=line13></span>    """</span>;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> enqueue : lf_bag * <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"$1-&gt;enqueue ($2);"</span>;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dequeue : lf_bag -&gt; <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"$1-&gt;dequeue ()"</span>;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="library" title="number of elements in data structure">len</span> : lf_bag -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1-&gt;n"</span>; 
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> used : lf_bag -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1-&gt;used.load()"</span>; 
+<span class="lineno" id=line18></span>  }
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

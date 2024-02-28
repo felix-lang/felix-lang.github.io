@@ -1,0 +1,515 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>slist</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Singly linked list of pointers"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Singly linked list of pointers_h')"> <a href="#Singly_linked_list_of_pointers_h">Singly linked list of pointers</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Singly_linked_list_of_pointers_h'><img src='/share/src/web/images/minus.gif' id='Singly linked list of pointers' onclick='toggle(this,"Singly_linked_list_of_pointers_d")' alt='+'/> 1 Singly linked list of pointers</h1><div id='Singly_linked_list_of_pointers_d' style='display:block'>
+<p>Not used any more.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_slist.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_SLIST_H__
+#<span class="preproc">define</span> __FLX_SLIST_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_serialisers.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+<span class="big_keyword">struct</span> RTL_EXTERN slist_t;   <span class="comment">// singly linked list of void*
+</span><span class="big_keyword">struct</span> RTL_EXTERN slist_node_t;   <span class="comment">// singly linked list of void*
+</span>RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t slist_node_ptr_map;
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t slist_ptr_map;
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// SLIST. singly linked lists: SHARABLE and COPYABLE
+</span><span class="comment">/// SLIST manages pointers to memory managed by the collector
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN slist_node_t {
+  slist_node_t *next;
+  <span class="qualifier">void</span> *data;
+  slist_node_t(slist_node_t *n, <span class="qualifier">void</span> *d) : next(n), data(d) {}
+};
+
+
+<span class="big_keyword">struct</span> RTL_EXTERN slist_t {
+  slist_t(){}
+
+  gc::generic::gc_profile_t *gcp;
+  <span class="big_keyword">struct</span> slist_node_t *head;
+
+  slist_t (gc::generic::gc_profile_t*); <span class="comment">///< create empty list
+</span>
+  <span class="qualifier">void</span> push(<span class="qualifier">void</span> *data);                <span class="comment">///< push a gc pointer
+</span>  <span class="qualifier">void</span> *pop();                          <span class="comment">///< pop a gc pointer
+</span>  bool isempty()<span class="qualifier">const</span>;
+};
+
+}}
+#<span class="preproc">endif</span>
+
+</pre></p><pre class='inclusion'>
+share/src/rtl/flx_slist.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_slist.hpp"</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// slist implementation
+</span><span class="comment">// ********************************************************
+</span>
+slist_t::slist_t(::flx::gc::generic::gc_profile_t *_gcp) : gcp (_gcp), head(0) {}
+
+bool slist_t::isempty()<span class="qualifier">const</span> { <span class="small_keyword">return</span> head == 0; }
+
+<span class="qualifier">void</span> slist_t::push(<span class="qualifier">void</span> *data)
+{
+  head = new(*gcp,slist_node_ptr_map,false) slist_node_t(head,data);
+}
+
+<span class="comment">// note: never fails, return NULL pointer if the list is empty
+</span><span class="qualifier">void</span> *slist_t::pop()
+{
+  <span class="small_keyword">if</span>(head) {
+    <span class="qualifier">void</span> *data = head-&gt;data;
+    head=head-&gt;next;
+    <span class="small_keyword">return</span> data;
+  }
+  else <span class="small_keyword">return</span> 0;
+}
+
+<span class="comment">// ********************************************************
+</span><span class="comment">//OFFSETS for slist_node_t
+</span><span class="comment">// ********************************************************
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t slist_node_offsets[2]={
+    {offsetof(slist_node_t,next),nullptr},
+    {offsetof(slist_node_t,data),nullptr}
+};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> slist_node_offset_data = { 2, slist_node_offsets };
+::flx::gc::generic::gc_shape_t slist_node_ptr_map = {
+  <span class="fstring">"rtl::slist_node_t"</span>,
+  1,sizeof(slist_node_t),
+  0, <span class="comment">// no finaliser,
+</span>  0, <span class="comment">// fcops
+</span>  &amp;slist_node_offset_data,
+  ::flx::gc::generic::scan_by_offsets,
+  ::flx::gc::generic::tblit&lt;slist_node_t&gt;,::flx::gc::generic::tunblit&lt;slist_node_t&gt;, 
+  ::flx::gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">//OFFSETS for slist_t
+</span><span class="comment">// ********************************************************
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t slist_offsets[1]={
+    {offsetof(slist_t,head),nullptr}
+};
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> slist_offset_data = { 1, slist_offsets };
+
+<span class="qualifier">static</span> CxxValueType&lt;slist_t&gt; _slist_t_fcops {};
+
+::flx::gc::generic::gc_shape_t slist_ptr_map = {
+  <span class="fstring">"rtl::slist_t"</span>,
+  1,sizeof(slist_t),
+  0, <span class="comment">// no finaliser
+</span>  &amp;_slist_t_fcops, <span class="comment">// fcops
+</span>  &amp;slist_offset_data,
+  ::flx::gc::generic::scan_by_offsets,
+  ::flx::gc::generic::tblit&lt;slist_t&gt;,::flx::gc::generic::tunblit&lt;slist_t&gt;, 
+  ::flx::gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+}}
+
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

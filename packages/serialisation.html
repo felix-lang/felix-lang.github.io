@@ -1,0 +1,861 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Serialisation Support</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Serialisers",
+"Generic Serialisation",
+"Judy Serialisers",
+"Serialisation functions"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Serialisers_h')"> <a href="#Serialisers_h">Serialisers</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Generic_Serialisation_h">Generic Serialisation</a></div>
+      <div class=m2><a href="#Judy_Serialisers_h">Judy Serialisers</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Serialisation functions_h')"> <a href="#Serialisation_functions_h">Serialisation functions</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Serialisers_h'><img src='/share/src/web/images/minus.gif' id='Serialisers' onclick='toggle(this,"Serialisers_d")' alt='+'/> 1 Serialisers</h1><div id='Serialisers_d' style='display:block'>
+<h2 id='Generic_Serialisation_h'><img src='/share/src/web/images/minus.gif' id='Generic Serialisation' onclick='toggle(this,"Generic_Serialisation_d")' alt='+'/> 1.1 Generic Serialisation</h2><div id='Generic_Serialisation_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_serialisers.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_SERIALISERS_HPP__
+#<span class="preproc">define</span> __FLX_SERIALISERS_HPP__
+
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> gc { <span class="big_keyword">namespace</span> generic {
+GC_EXTERN encoder_t string_encoder;
+GC_EXTERN decoder_t string_decoder;
+
+GC_EXTERN ::<span class="small_keyword">std</span>::string blit (<span class="qualifier">void</span> *, size_t);
+GC_EXTERN size_t unblit (<span class="qualifier">void</span> *, size_t, <span class="qualifier">char</span>*, size_t);
+
+GC_EXTERN ::<span class="small_keyword">std</span>::string string_blit (::<span class="small_keyword">std</span>::string <span class="qualifier">const</span>&amp;);
+
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt; 
+::<span class="small_keyword">std</span>::string tblit(<span class="qualifier">void</span> *p) 
+{
+  <span class="small_keyword">return</span> blit (p, sizeof(T));
+}
+
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt; 
+size_t tunblit(<span class="qualifier">void</span> *p, <span class="qualifier">char</span> *s, size_t i) 
+{
+  <span class="small_keyword">return</span> unblit (p, sizeof(T), s, i);
+}
+
+
+}}}
+
+#<span class="preproc">endif</span>
+
+</pre></p><pre class='inclusion'>
+share/src/gc/flx_serialisers.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_serialisers.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstring&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstddef&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> gc { <span class="big_keyword">namespace</span> generic {
+
+<span class="comment">// This is an encoder for a primitive string.
+</span>::<span class="small_keyword">std</span>::string string_encoder (<span class="qualifier">void</span> *p)
+{
+  <span class="small_keyword">return</span> *(::<span class="small_keyword">std</span>::string*)p;
+}
+
+<span class="comment">// This is NOT an encoder. It's a utility wrapper which
+</span><span class="comment">// takes a variable length string and returns another
+</span><span class="comment">// string prefixed by the length.
+</span><span class="comment">//
+</span><span class="comment">// This function is applied to all user defined encoders,
+</span><span class="comment">// to get a length managed serialisation.
+</span>::<span class="small_keyword">std</span>::string string_blit (::<span class="small_keyword">std</span>::string <span class="qualifier">const</span> &amp;s) 
+{
+  ::<span class="small_keyword">std</span>::size_t n = s.size();
+  ::<span class="small_keyword">std</span>::string b = blit (&amp;n, sizeof(::<span class="small_keyword">std</span>::size_t));
+  b+=s;
+  <span class="small_keyword">return</span> b;
+}
+
+<span class="comment">// This is a utility for encoding a pod of size n.
+</span><span class="comment">// We don't need a length because it is statically known.
+</span>::<span class="small_keyword">std</span>::string blit (<span class="qualifier">void</span> *p, ::<span class="small_keyword">std</span>::size_t n) {
+  <span class="small_keyword">return</span> ::<span class="small_keyword">std</span>::string((<span class="qualifier">char</span>*)p,n);
+}
+
+::<span class="small_keyword">std</span>::size_t string_decoder (<span class="qualifier">void</span> *p, <span class="qualifier">char</span> *s, ::<span class="small_keyword">std</span>::size_t i)
+{
+   ::<span class="small_keyword">std</span>::size_t n;
+   ::<span class="small_keyword">std</span>::memcpy (&amp;n,s + i,sizeof(::<span class="small_keyword">std</span>::size_t));
+   new (p) ::<span class="small_keyword">std</span>::string(s+i+sizeof(::<span class="small_keyword">std</span>::size_t), n);
+   <span class="small_keyword">return</span> i + sizeof(::<span class="small_keyword">std</span>::size_t) + n;
+}
+
+::<span class="small_keyword">std</span>::size_t unblit (<span class="qualifier">void</span> *p, ::<span class="small_keyword">std</span>::size_t n, <span class="qualifier">char</span> *s, ::<span class="small_keyword">std</span>::size_t i)
+{
+  ::<span class="small_keyword">std</span>::memcpy (p,s+i,n);
+  <span class="small_keyword">return</span> i + n;
+}
+
+}}}
+</pre></p></div><h2 id='Judy_Serialisers_h'><img src='/share/src/web/images/minus.gif' id='Judy Serialisers' onclick='toggle(this,"Judy_Serialisers_d")' alt='+'/> 1.2 Judy Serialisers</h2><div id='Judy_Serialisers_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_judy_scanner.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> gc { <span class="big_keyword">namespace</span> generic {
+GC_EXTERN scanner_t Judy1_scanner;
+GC_EXTERN scanner_t JudyL_scanner;
+GC_EXTERN scanner_t JudySL_scanner;
+}}}
+
+</pre></p><pre class='inclusion'>
+share/src/gc/flx_judy_scanner.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_judy_scanner.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;Judy.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> gc { <span class="big_keyword">namespace</span> generic {
+
+<span class="qualifier">void</span> *Judy1_scanner(collector_t *collector, gc_shape_t *shape, <span class="qualifier">void</span> *pp, size_t dyncount, <span class="qualifier">int</span> reclimit)
+{
+  <span class="qualifier">void</span> *p = *(<span class="qualifier">void</span>**)pp;
+  <span class="comment">//printf("Scanning judy1 array %p->%p\n", pp, p);
+</span>  JError_t je;
+  Word_t key = 0;
+  <span class="qualifier">int</span> res = Judy1First(p, &amp;key, &amp;je);
+  <span class="small_keyword">while</span>(res) {
+    <span class="comment">//printf("Judy1 scanning p=%p\n",key); 
+</span>    collector-&gt;register_pointer((<span class="qualifier">void</span>*)key,reclimit);
+    res = Judy1Next(p,&amp;key, &amp;je);
+  }
+  <span class="small_keyword">return</span> 0;
+}
+
+<span class="qualifier">void</span> *JudyL_scanner(collector_t *collector, gc_shape_t *shape, <span class="qualifier">void</span> *pp, size_t dyncount, <span class="qualifier">int</span> reclimit)
+{
+  <span class="qualifier">void</span> *p = *(<span class="qualifier">void</span>**)pp;
+  <span class="comment">//printf("Scanning judyL array %p->%p\n", pp, p);
+</span>  JError_t je;
+  Word_t key = 0;
+  Word_t *pval = 0;
+  pval = (Word_t*)JudyLFirst(p, &amp;key, &amp;je);
+  <span class="small_keyword">while</span>(pval) {
+    <span class="comment">//printf("JudyL scanning p=%p\n",key); 
+</span>    collector-&gt;register_pointer((<span class="qualifier">void</span>*)key,reclimit);
+    <span class="comment">//printf("JudyL scanning p=%p\n",key); 
+</span>    collector-&gt;register_pointer((<span class="qualifier">void</span>*)*pval,reclimit);
+    pval = (Word_t*)JudyLNext(p, &amp;key, &amp;je);
+  }
+  <span class="small_keyword">return</span> 0;
+}
+
+<span class="qualifier">void</span> *JudySL_scanner(collector_t *collector, gc_shape_t *shape, <span class="qualifier">void</span> *pp, size_t dyncount, <span class="qualifier">int</span> reclimit)
+{
+  <span class="qualifier">void</span> *p = *(<span class="qualifier">void</span>**)pp;
+  <span class="comment">//fprintf(stderr,"Scanning judySL array %p->%p\n", pp, p);
+</span>  JError_t je;
+  <span class="qualifier">unsigned</span> <span class="qualifier">char</span> *key = (<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)::<span class="small_keyword">std</span>::malloc(10000); <span class="comment">// HACK
+</span>  *key = 0;
+  Word_t *pval = 0;
+  pval = (Word_t*)JudySLFirst(p, key, &amp;je);
+  <span class="small_keyword">while</span>(pval) {
+    <span class="comment">//printf("JudyL scanning p=%s, v=%p\n",key,*pval); 
+</span>    collector-&gt;register_pointer((<span class="qualifier">void</span>*)*pval,reclimit);
+    pval = (Word_t*)JudySLNext(p, key, &amp;je);
+  }
+  ::<span class="small_keyword">std</span>::free(key);
+  <span class="small_keyword">return</span> 0;
+}
+
+
+}}} <span class="comment">// end namespaces
+</span></pre></p></div></div><h1 id='Serialisation_functions_h'><img src='/share/src/web/images/minus.gif' id='Serialisation functions' onclick='toggle(this,"Serialisation_functions_d")' alt='+'/> 2 Serialisation functions</h1><div id='Serialisation_functions_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/felix/serialise.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Serialise 
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Open a module or class">open</span> Collector;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Open a module or class">open</span> Rtti;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Open a module or class">open</span> Judy;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Encode binary image of a type, without length.</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> blit[T] (p: &amp;T) =&gt; <span class="library" title="binding of C++ string type">string</span> ( <span class="hack">C_hack</span>::cast[+<span class="library" title="binding of C char type">char</span>] p, <span class="hack">C_hack</span>::sizeof[T]);
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ncode [T] (<span class="big_keyword" title="Define a mutable variable">var</span> v: T) =&gt; blit &amp;v;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="doccomment">Decode a type</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> unblit[T] (p: &amp;T, s: +<span class="library" title="binding of C char type">char</span>, i:<span class="library" title="binding of C size_t type">size</span>) : <span class="library" title="binding of C size_t type">size</span> = 
+<span class="lineno" id=line13></span>    {
+<span class="lineno" id=line14></span>       Memory::memcpy(p.<span class="library" title="special binding of C void* type">address</span>,(s+i).<span class="library" title="special binding of C void* type">address</span>,<span class="hack">C_hack</span>::sizeof[T]);
+<span class="lineno" id=line15></span>       <span class="small_keyword" title="return">return</span> i + <span class="hack">C_hack</span>::sizeof[T];
+<span class="lineno" id=line16></span>    } 
+<span class="lineno" id=line17></span>    
+<span class="lineno" id=line18></span>    <span class="comment">// Despite the name this is the general heap object encoder</span>
+<span class="lineno" id=line19></span>    <span class="comment">// sans pointers and head adjustment.</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> encode_varray (p:<span class="library" title="special binding of C void* type">address</span>) : <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line21></span>    {
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pd = Collector::get_pointer_data p;
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Run time assertion">assert</span> pd.is_felix_pointer;
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a mutable variable">var</span> shape = pd.shape;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a mutable variable">var</span> has_encoder = <span class="small_keyword" title="logical negation">not</span> shape.<span class="small_keyword" title="serialisation encoder">encoder</span>.<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>].isNULL;
+<span class="lineno" id=line27></span>      <span class="big_keyword" title="Define a mutable variable">var</span> has_pointers = shape._unsafe_n_offsets == 0uz;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>      <span class="comment">// write shape</span>
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a mutable variable">var</span> out = ncode shape;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>      <span class="comment">// write head pointer</span>
+<span class="lineno" id=line33></span>      out += ncode pd.head;
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>      <span class="comment">// write max slots</span>
+<span class="lineno" id=line36></span>      out += ncode pd.max_elements;
+<span class="lineno" id=line37></span>    
+<span class="lineno" id=line38></span>      <span class="comment">// write used slots</span>
+<span class="lineno" id=line39></span>      out += ncode pd.used_elements;
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>      <span class="big_keyword" title="Run time assertion">assert</span> has_encoder;
+<span class="lineno" id=line42></span>      <span class="big_keyword" title="Define a mutable variable">var</span> dynamic_slot_size = shape.bytes_per_element * shape.number_of_elements;
+<span class="lineno" id=line43></span>      <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i:<span class="library" title="binding of C size_t type">size</span> <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> pd.used_elements.<span class="library" title="binding of C size_t type">size</span>  - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line44></span>        <span class="comment">// write out each encoded value </span>
+<span class="lineno" id=line45></span>        out += shape.<span class="small_keyword" title="serialisation encoder">encoder</span> (pd.head + i * dynamic_slot_size);
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line47></span>      <span class="small_keyword" title="return">return</span> out;
+<span class="lineno" id=line48></span>    }
+<span class="lineno" id=line49></span>  
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find_pointers (p:<span class="library" title="special binding of C void* type">address</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="special binding of C void* type">address</span>] =
+<span class="lineno" id=line51></span>    {
+<span class="lineno" id=line52></span>      <span class="comment">//println$ "Find pointers for object " + p.str;</span>
+<span class="lineno" id=line53></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pd = Collector::get_pointer_data p;
+<span class="lineno" id=line54></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> pd.is_felix_pointer <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line55></span>        <span class="comment">//println$ "Not Felix pointer";</span>
+<span class="lineno" id=line56></span>        <span class="small_keyword" title="return">return</span> Empty[<span class="library" title="special binding of C void* type">address</span>];
+<span class="lineno" id=line57></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line58></span>      <span class="comment">//Collector::print_pointer_data pd;</span>
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Define a mutable variable">var</span> shape = pd.shape;
+<span class="lineno" id=line60></span>      <span class="big_keyword" title="Define a mutable variable">var</span> head = pd.head;
+<span class="lineno" id=line61></span>      <span class="big_keyword" title="Define a mutable variable">var</span> n_offsets = shape.Rtti::n_offsets;
+<span class="lineno" id=line62></span>      <span class="comment">//println$ "Number of offsets " + n_offsets.str;</span>
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pointers = Empty[<span class="library" title="special binding of C void* type">address</span>];
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="conditional">if</span> n_offsets &gt; 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line65></span>        <span class="big_keyword" title="Define a mutable variable">var</span> offsets = shape.Rtti::offsets;
+<span class="lineno" id=line66></span>        <span class="big_keyword" title="Define a mutable variable">var</span> repeat_count = pd.used_elements.<span class="library" title="binding of C size_t type">size</span> * shape.number_of_elements;
+<span class="lineno" id=line67></span>        <span class="big_keyword" title="Define a mutable variable">var</span> element_size = shape.bytes_per_element;
+<span class="lineno" id=line68></span>        <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> sindex <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> repeat_count - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line69></span>          <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> oindex <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> n_offsets - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line70></span>            <span class="big_keyword" title="Define a mutable variable">var</span> bindex = sindex * element_size + (offsets + oindex)*.offset;
+<span class="lineno" id=line71></span>            <span class="big_keyword" title="Define a mutable variable">var</span> ptr = *((head + bindex).<span class="hack">C_hack</span>::cast[&amp;<span class="library" title="special binding of C void* type">address</span>]);
+<span class="lineno" id=line72></span>            pointers = Cons (ptr, pointers);
+<span class="lineno" id=line73></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line74></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line75></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line76></span>      <span class="small_keyword" title="return">return</span> pointers;
+<span class="lineno" id=line77></span>    }
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>    <span class="comment">// data structure to represent pointer closure</span>
+<span class="lineno" id=line80></span>    <span class="big_keyword" title="Define a structure">struct</span> pclosure 
+<span class="lineno" id=line81></span>    {
+<span class="lineno" id=line82></span>       processed: J1Array;
+<span class="lineno" id=line83></span>       waiting: J1Array;
+<span class="lineno" id=line84></span>    };
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>    <span class="comment">// initially empty</span>
+<span class="lineno" id=line87></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> pclosure () =&gt; pclosure (#J1Array, #J1Array);
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>    <span class="comment">// add a pointer to the waiting set,</span>
+<span class="lineno" id=line90></span>    <span class="comment">// provided it isn't already processed or waiting</span>
+<span class="lineno" id=line91></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> add_pointer (self: &amp;pclosure) (p:<span class="library" title="special binding of C void* type">address</span>) 
+<span class="lineno" id=line92></span>    {
+<span class="lineno" id=line93></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pd = Collector::get_pointer_data p;
+<span class="lineno" id=line94></span>      <span class="small_keyword" title="conditional">if</span> pd.is_felix_pointer <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line95></span>        <span class="big_keyword" title="Define a mutable variable">var</span> je : JError_t;
+<span class="lineno" id=line96></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ret : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line97></span>        <span class="big_keyword" title="Define a mutable variable">var</span> w = pd.head.Judy::word;
+<span class="lineno" id=line98></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> (w <span class="tex_symbol" title="\in">\(\in\)</span> self*.processed <span class="small_keyword" title="logical disjunction">or</span> w <span class="tex_symbol" title="\in">\(\in\)</span> self*.waiting) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line99></span>          Judy1Set (self*.waiting, w, &amp;je, &amp;ret);
+<span class="lineno" id=line100></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line101></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line102></span>    }
+<span class="lineno" id=line103></span>  
+<span class="lineno" id=line104></span>    <span class="comment">// get a pointer from the waiting set, put it in</span>
+<span class="lineno" id=line105></span>    <span class="comment">// the processed set, and return it, None if the</span>
+<span class="lineno" id=line106></span>    <span class="comment">// waiting set is empty.</span>
+<span class="lineno" id=line107></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator (self: &amp;pclosure) () : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="special binding of C void* type">address</span>] =
+<span class="lineno" id=line108></span>    {
+<span class="lineno" id=line109></span>      <span class="big_keyword" title="Define a mutable variable">var</span> w: word = 0.word;
+<span class="lineno" id=line110></span>      <span class="big_keyword" title="Define a mutable variable">var</span> je : JError_t;
+<span class="lineno" id=line111></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ret: <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line112></span>      Judy1First(self*.waiting,&amp;w,&amp;je,&amp;ret);
+<span class="lineno" id=line113></span>      <span class="small_keyword" title="conditional">if</span> ret == 1 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line114></span>        Judy1Unset(self*.waiting, w, &amp;je, &amp;ret);
+<span class="lineno" id=line115></span>        Judy1Set (self*.processed, w, &amp;je, &amp;ret);
+<span class="lineno" id=line116></span>        <span class="small_keyword" title="return">return</span> Some w.<span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line117></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line118></span>        <span class="small_keyword" title="return">return</span> None[<span class="library" title="special binding of C void* type">address</span>];
+<span class="lineno" id=line119></span>      <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line120></span>     }
+<span class="lineno" id=line121></span>  
+<span class="lineno" id=line122></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find_closure (p:<span class="library" title="special binding of C void* type">address</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="special binding of C void* type">address</span>] =
+<span class="lineno" id=line123></span>    {
+<span class="lineno" id=line124></span>       <span class="big_keyword" title="Define a mutable variable">var</span> xpc = #pclosure;
+<span class="lineno" id=line125></span>       <span class="big_keyword" title="Define a mutable variable">var</span> pd = Collector::get_pointer_data p;
+<span class="lineno" id=line126></span>       add_pointer &amp;xpc pd.head;
+<span class="lineno" id=line127></span>       <span class="small_keyword" title="for loop">for</span> ptr <span class="small_keyword" title="membership operator, function mem">in</span> &amp;xpc <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line128></span>         <span class="comment">//println$ "Processing pointer " + ptr.str;</span>
+<span class="lineno" id=line129></span>         <span class="library" title="call procedure on each element of data structure">iter</span> (add_pointer &amp;xpc) (find_pointers ptr);
+<span class="lineno" id=line130></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line131></span>       <span class="big_keyword" title="Define a mutable variable">var</span> lst = <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="special binding of C void* type">address</span>] (pd.head);
+<span class="lineno" id=line132></span>       <span class="big_keyword" title="Define a mutable variable">var</span> a: word = 0.word;
+<span class="lineno" id=line133></span>       <span class="big_keyword" title="Define a mutable variable">var</span> ret: <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line134></span>       Judy1First (xpc.processed, &amp;a, &amp;je, &amp;ret);
+<span class="lineno" id=line135></span>       <span class="small_keyword" title="while loop">while</span> ret == 1 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line136></span>         <span class="small_keyword" title="conditional">if</span> a.<span class="library" title="special binding of C void* type">address</span> != pd.head <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line137></span>           lst = Cons (a.<span class="library" title="special binding of C void* type">address</span>, lst);
+<span class="lineno" id=line138></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line139></span>         Judy1Next(xpc.processed, &amp;a, &amp;je, &amp;ret);
+<span class="lineno" id=line140></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line141></span>       <span class="big_keyword" title="Define a mutable variable">var</span> w:word;
+<span class="lineno" id=line142></span>       <span class="big_keyword" title="Define a mutable variable">var</span> je:JError_t;
+<span class="lineno" id=line143></span>       Judy1FreeArray (xpc.processed, &amp;je, &amp;w);
+<span class="lineno" id=line144></span>       <span class="comment">// pc.waiting should be empty already</span>
+<span class="lineno" id=line145></span>       <span class="comment">// original pointer is LAST in the list!</span>
+<span class="lineno" id=line146></span>       <span class="small_keyword" title="return">return</span> lst;
+<span class="lineno" id=line147></span>    } 
+<span class="lineno" id=line148></span>  
+<span class="lineno" id=line149></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> encode_closure (alst:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="special binding of C void* type">address</span>]) : <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line150></span>    {
+<span class="lineno" id=line151></span>      <span class="big_keyword" title="Define a mutable variable">var</span> b = <span class="fstring">""</span>;
+<span class="lineno" id=line152></span>      <span class="library" title="call procedure on each element of data structure">iter</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (elt:<span class="library" title="special binding of C void* type">address</span>) { b+=encode_varray elt; } alst;
+<span class="lineno" id=line153></span>      <span class="small_keyword" title="return">return</span> b;
+<span class="lineno" id=line154></span>    }
+<span class="lineno" id=line155></span>  
+<span class="lineno" id=line156></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> encode_pointer_closure (p:<span class="library" title="special binding of C void* type">address</span>) =&gt;
+<span class="lineno" id=line157></span>       p.find_closure.encode_closure
+<span class="lineno" id=line158></span>    ;
+<span class="lineno" id=line159></span>  
+<span class="lineno" id=line160></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> create_empty_varray : gc_shape_t * <span class="library" title="binding of C size_t type">size</span> -&gt; <span class="library" title="special binding of C void* type">address</span> =
+<span class="lineno" id=line161></span>      <span class="fstring">"(ptf-&gt; gcp-&gt;collector-&gt;create_empty_array($1,$2))"</span>
+<span class="lineno" id=line162></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>
+<span class="lineno" id=line163></span>    ;
+<span class="lineno" id=line164></span>  
+<span class="lineno" id=line165></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_used: <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="binding of C size_t type">size</span> =
+<span class="lineno" id=line166></span>      <span class="fstring">"ptf-&gt; gcp-&gt;collector-&gt;set_used($1,$2);"</span>
+<span class="lineno" id=line167></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>
+<span class="lineno" id=line168></span>    ;
+<span class="lineno" id=line169></span>  
+<span class="lineno" id=line170></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> decode_varray (ss:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="special binding of C void* type">address</span> = 
+<span class="lineno" id=line171></span>    {
+<span class="lineno" id=line172></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s = ss.cstr;
+<span class="lineno" id=line173></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = 0uz;
+<span class="lineno" id=line174></span>  
+<span class="lineno" id=line175></span>      <span class="comment">// get header data</span>
+<span class="lineno" id=line176></span>      <span class="big_keyword" title="Define a mutable variable">var</span> shape: gc_shape_t;
+<span class="lineno" id=line177></span>      <span class="big_keyword" title="Define a mutable variable">var</span> head: <span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line178></span>      <span class="big_keyword" title="Define a mutable variable">var</span> maxslots : <span class="library" title="binding of C size_t type">size</span>;
+<span class="lineno" id=line179></span>      <span class="big_keyword" title="Define a mutable variable">var</span> usedslots: <span class="library" title="binding of C size_t type">size</span>;
+<span class="lineno" id=line180></span>      i = unblit (&amp;shape, s, i);
+<span class="lineno" id=line181></span>      i = unblit (&amp;head, s, i);
+<span class="lineno" id=line182></span>      i = unblit (&amp;maxslots, s, i);
+<span class="lineno" id=line183></span>      i = unblit (&amp;usedslots, s, i);
+<span class="lineno" id=line184></span>      <span class="big_keyword" title="Run time assertion">assert</span> <span class="small_keyword" title="logical negation">not</span> shape.<span class="small_keyword" title="serialisation decoder">decoder</span>.<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>].isNULL;
+<span class="lineno" id=line185></span>      <span class="big_keyword" title="Define a mutable variable">var</span> dynamic_slot_size = shape.bytes_per_element * shape.number_of_elements;
+<span class="lineno" id=line186></span>      <span class="big_keyword" title="Define a mutable variable">var</span> p = create_empty_varray (shape, maxslots);
+<span class="lineno" id=line187></span>      <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> slot <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> usedslots - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line188></span>        i = (shape.<span class="small_keyword" title="serialisation decoder">decoder</span> ( p + slot * dynamic_slot_size, s, i));
+<span class="lineno" id=line189></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line190></span>      set_used (p, usedslots);
+<span class="lineno" id=line191></span>      <span class="small_keyword" title="return">return</span> p;
+<span class="lineno" id=line192></span>    }
+<span class="lineno" id=line193></span>  
+<span class="lineno" id=line194></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> decode_pointer_closure (ss:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="special binding of C void* type">address</span> =  
+<span class="lineno" id=line195></span>    {
+<span class="lineno" id=line196></span>      <span class="comment">// A map from old object head to new head</span>
+<span class="lineno" id=line197></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pmap = #JLArray; 
+<span class="lineno" id=line198></span>      <span class="big_keyword" title="Define a mutable variable">var</span> je : JError_t;
+<span class="lineno" id=line199></span>  
+<span class="lineno" id=line200></span>      <span class="comment">// create set of objects from serialised data</span>
+<span class="lineno" id=line201></span>      <span class="comment">// return a pointer to the last one which is </span>
+<span class="lineno" id=line202></span>      <span class="comment">// assumed to be the root of the closure</span>
+<span class="lineno" id=line203></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> create_objects () : <span class="library" title="special binding of C void* type">address</span> =
+<span class="lineno" id=line204></span>      {
+<span class="lineno" id=line205></span>        <span class="big_keyword" title="Define a mutable variable">var</span> s = ss.cstr;
+<span class="lineno" id=line206></span>        <span class="big_keyword" title="Define a mutable variable">var</span> n = ss.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line207></span>        <span class="big_keyword" title="Define a mutable variable">var</span> i = 0uz;
+<span class="lineno" id=line208></span>        <span class="big_keyword" title="Define a mutable variable">var</span> pnew : &amp;word;
+<span class="lineno" id=line209></span>        <span class="big_keyword" title="Define a mutable variable">var</span> head: <span class="library" title="special binding of C void* type">address</span> = NULL;
+<span class="lineno" id=line210></span>        <span class="small_keyword" title="while loop">while</span> i != n <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line211></span>          <span class="comment">// get header data</span>
+<span class="lineno" id=line212></span>          <span class="big_keyword" title="Define a mutable variable">var</span> shape: gc_shape_t;
+<span class="lineno" id=line213></span>          <span class="big_keyword" title="Define a mutable variable">var</span> maxslots : <span class="library" title="binding of C size_t type">size</span>;
+<span class="lineno" id=line214></span>          <span class="big_keyword" title="Define a mutable variable">var</span> usedslots: <span class="library" title="binding of C size_t type">size</span>;
+<span class="lineno" id=line215></span>          i = unblit (&amp;shape, s, i);
+<span class="lineno" id=line216></span>          i = unblit (&amp;head, s, i);
+<span class="lineno" id=line217></span>          i = unblit (&amp;maxslots, s, i);
+<span class="lineno" id=line218></span>          i = unblit (&amp;usedslots, s, i);
+<span class="lineno" id=line219></span>          <span class="big_keyword" title="Run time assertion">assert</span> <span class="small_keyword" title="logical negation">not</span> shape.<span class="small_keyword" title="serialisation decoder">decoder</span>.<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>].isNULL;
+<span class="lineno" id=line220></span>          <span class="big_keyword" title="Define a mutable variable">var</span> dynamic_slot_size = shape.bytes_per_element * shape.number_of_elements;
+<span class="lineno" id=line221></span>          <span class="big_keyword" title="Define a mutable variable">var</span> p = create_empty_varray (shape, maxslots);
+<span class="lineno" id=line222></span>          <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> slot <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> usedslots - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line223></span>            i = (shape.<span class="small_keyword" title="serialisation decoder">decoder</span> ( p + slot * dynamic_slot_size, s, i));
+<span class="lineno" id=line224></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line225></span>          set_used (p, usedslots);
+<span class="lineno" id=line226></span>  
+<span class="lineno" id=line227></span>          JudyLIns(pmap,head.word,&amp;je,&amp;pnew);
+<span class="lineno" id=line228></span>          pnew &lt;- p.word;
+<span class="lineno" id=line229></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line230></span>        <span class="small_keyword" title="return">return</span> head; <span class="comment">// root pointer is last in list!</span>
+<span class="lineno" id=line231></span>      }
+<span class="lineno" id=line232></span>  
+<span class="lineno" id=line233></span>      <span class="comment">// Adjust a pointer at the given address</span>
+<span class="lineno" id=line234></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> adjust_pointer (pptr:&amp;<span class="library" title="special binding of C void* type">address</span>) 
+<span class="lineno" id=line235></span>      {
+<span class="lineno" id=line236></span>        <span class="big_keyword" title="Define a mutable variable">var</span> oldptr = *pptr;
+<span class="lineno" id=line237></span>        <span class="big_keyword" title="Define a mutable variable">var</span> oldhead = oldptr.word;
+<span class="lineno" id=line238></span>        <span class="big_keyword" title="Define a mutable variable">var</span> pnew2 : &amp;word;
+<span class="lineno" id=line239></span>        <span class="comment">// find the equal or next lowest old object address</span>
+<span class="lineno" id=line240></span>        <span class="comment">// and the associated new object address</span>
+<span class="lineno" id=line241></span>        JudyLLast(pmap,&amp;oldhead,&amp;je,&amp;pnew2);
+<span class="lineno" id=line242></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> isNULL pnew2 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line243></span>          <span class="big_keyword" title="Define a mutable variable">var</span> newhead2 = *pnew2;
+<span class="lineno" id=line244></span>          <span class="big_keyword" title="Define a mutable variable">var</span> pd2 = Collector::get_pointer_data newhead2.<span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line245></span>          <span class="big_keyword" title="Define a mutable variable">var</span> nbytes = pd2.shape.bytes_per_element * pd2.max_elements.<span class="library" title="binding of C size_t type">size</span> * pd2.shape.number_of_elements;
+<span class="lineno" id=line246></span>          <span class="small_keyword" title="conditional">if</span> oldptr &lt; oldhead.<span class="library" title="special binding of C void* type">address</span> + nbytes <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line247></span>             pptr &lt;- newhead2.<span class="library" title="special binding of C void* type">address</span> + (oldptr - oldhead.<span class="library" title="special binding of C void* type">address</span>);
+<span class="lineno" id=line248></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line249></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line250></span>      }
+<span class="lineno" id=line251></span>  
+<span class="lineno" id=line252></span>      <span class="comment">// Adjust all the pointers in one of the new objects</span>
+<span class="lineno" id=line253></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> adjust_all_pointers (newhead:<span class="library" title="special binding of C void* type">address</span>)
+<span class="lineno" id=line254></span>      {
+<span class="lineno" id=line255></span>        <span class="big_keyword" title="Define a mutable variable">var</span> pd = Collector::get_pointer_data newhead;
+<span class="lineno" id=line256></span>        <span class="big_keyword" title="Define a mutable variable">var</span> shape = pd.shape;
+<span class="lineno" id=line257></span>        <span class="big_keyword" title="Define a mutable variable">var</span> head = pd.head;
+<span class="lineno" id=line258></span>        <span class="big_keyword" title="Define a mutable variable">var</span> n_offsets = shape.Rtti::n_offsets;
+<span class="lineno" id=line259></span>        <span class="comment">//println$ "Number of offsets " + n_offsets.str;</span>
+<span class="lineno" id=line260></span>        <span class="small_keyword" title="conditional">if</span> n_offsets &gt; 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line261></span>          <span class="big_keyword" title="Define a mutable variable">var</span> offsets = shape.Rtti::offsets;
+<span class="lineno" id=line262></span>          <span class="big_keyword" title="Define a mutable variable">var</span> repeat_count = pd.used_elements.<span class="library" title="binding of C size_t type">size</span> * shape.number_of_elements;
+<span class="lineno" id=line263></span>          <span class="big_keyword" title="Define a mutable variable">var</span> element_size = shape.bytes_per_element;
+<span class="lineno" id=line264></span>          <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> sindex <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> repeat_count - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line265></span>            <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> oindex <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> n_offsets - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line266></span>              <span class="big_keyword" title="Define a mutable variable">var</span> bindex = sindex * element_size + (offsets+oindex)*.offset;
+<span class="lineno" id=line267></span>              <span class="big_keyword" title="Define a mutable variable">var</span> pptr = ((head + bindex).<span class="hack">C_hack</span>::cast[&amp;<span class="library" title="special binding of C void* type">address</span>]);
+<span class="lineno" id=line268></span>              adjust_pointer (pptr);
+<span class="lineno" id=line269></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line270></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line271></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line272></span>      }
+<span class="lineno" id=line273></span>  
+<span class="lineno" id=line274></span>      <span class="big_keyword" title="Define a mutable variable">var</span> rootp = create_objects();
+<span class="lineno" id=line275></span>  
+<span class="lineno" id=line276></span>      <span class="comment">// Adjust all the pointers in all of the new objects</span>
+<span class="lineno" id=line277></span>      <span class="big_keyword" title="Define a mutable variable">var</span> old : word = 0.word;
+<span class="lineno" id=line278></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pnew : &amp;word;
+<span class="lineno" id=line279></span>      JudyLFirst(pmap, &amp;old, &amp;je, &amp;pnew);
+<span class="lineno" id=line280></span>      <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> (isNULL pnew) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line281></span>        <span class="big_keyword" title="Define a mutable variable">var</span> newhead = (*pnew).<span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line282></span>        adjust_all_pointers (newhead);
+<span class="lineno" id=line283></span>        JudyLNext(pmap, &amp;old, &amp;je, &amp;pnew);
+<span class="lineno" id=line284></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line285></span>      <span class="small_keyword" title="return">return</span> rootp;
+<span class="lineno" id=line286></span>    }
+<span class="lineno" id=line287></span>  }
+<span class="lineno" id=line288></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

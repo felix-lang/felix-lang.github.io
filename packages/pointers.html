@@ -1,0 +1,877 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Pointers and low level address manipulation.</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"C pointer",
+"C Arrays",
+"Allocation",
+"Dereference",
+"Lvalue dereferences",
+"Pointer operators",
+"Mutators",
+"Comparisons",
+"Conversions",
+"Array sort",
+"Reference counting pointer.",
+"MMap"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#C pointer_h')"> <a href="#C_pointer_h">C pointer</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#C Arrays_h')"> <a href="#C_Arrays_h">C Arrays</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#Allocation_h">Allocation</a></div>
+      <div class=m2><a href="#Dereference_h">Dereference</a></div>
+      <div class=m2><a href="#Lvalue_dereferences_h">Lvalue dereferences</a></div>
+      <div class=m2><a href="#Pointer_operators_h">Pointer operators</a></div>
+      <div class=m2><a href="#Mutators_h">Mutators</a></div>
+      <div class=m2><a href="#Comparisons_h">Comparisons</a></div>
+      <div class=m2><a href="#Conversions_h">Conversions</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Array sort_h')"> <a href="#Array_sort_h">Array sort</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Reference counting pointer._h')"> <a href="#Reference_counting_pointer._h">Reference counting pointer.</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#MMap_h')"> <a href="#MMap_h">MMap</a></div>
+      <div class=sm id=menu5>
+      </div>
+    <script>counter_max=5;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='C_pointer_h'><img src='/share/src/web/images/minus.gif' id='C pointer' onclick='toggle(this,"C_pointer_d")' alt='+'/> 1 C pointer</h1><div id='C_pointer_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/c/cptr.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// move to separate file later.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> AbstractPointers
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    typefun rptr (T:TYPE) : TYPE =&gt;  (get: 1 -&gt; T);
+<span class="lineno" id=line6></span>    typefun wptr (T:TYPE) : TYPE =&gt;  (set : T -&gt; 0);
+<span class="lineno" id=line7></span>    typefun rwptr (T:TYPE) : TYPE =&gt; (get: 1 -&gt; T, set : T -&gt; 0);
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mkr[T] (p:&amp;&lt;T) =&gt; (get= { *p });
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mkw[T] (p:&amp;&gt;T) =&gt; (set = <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (v:T) { p&lt;-v; });
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mkrw[T] (p:&amp;T) =&gt; mkr p + mkw p;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref[T] (p: rptr T) =&gt; p.get ();
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> storeat[T] (p: wptr T, v: T) { p.set v; }
+<span class="lineno" id=line15></span>  }
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> MachinePointers
+<span class="lineno" id=line18></span>  {
+<span class="lineno" id=line19></span>    <span class="comment">// ordinary pointers</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> storeat[T:LINEAR] ( p: &amp;&gt;T, v: T) = { _storeat (p,v); }
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="doccomment">Dereference a Felx pointer.</span>
+<span class="lineno" id=line23></span>    <span class="comment">//fun _deref[T:LINEAR]: &amp;&lt;T -&gt; T = "*$t";</span>
+<span class="lineno" id=line24></span>    <span class="comment">//fun _deref[T:LINEAR]: &amp;&lt;&lt;T -&gt; T = "*$t";</span>
+<span class="lineno" id=line25></span>    <span class="comment">// NOTE: at present we need all these cases because overload resolution</span>
+<span class="lineno" id=line26></span>    <span class="comment">// does not "rank" kinds .. hmm .. but even this doesn't work!</span>
+<span class="lineno" id=line27></span>    <span class="comment">// adding the RW case changes the ambiguity from the view and read only case</span>
+<span class="lineno" id=line28></span>    <span class="comment">// to the view and read/write case</span>
+<span class="lineno" id=line29></span>    <span class="comment">// looks like a problem in unification not ranking the modes</span>
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref[T:LINEAR] (p:&amp;&lt;T) =&gt; <span class="comment">/* { println$ "deref R"; return */</span> _deref p; <span class="comment">/* }(); */</span>
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref[T:LINEAR] (p:&amp;&lt;&lt;T) =&gt; <span class="comment">/* { println$ "deref V"; return */</span> _deref p; <span class="comment">/* }(); */</span>
+<span class="lineno" id=line32></span>  }
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> CompactLinearPointers 
+<span class="lineno" id=line35></span>  {
+<span class="lineno" id=line36></span>    <span class="comment">// concrete compact linear type pointers</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> storeat[D,C] ( p:_wpclt&lt; D, C &gt;, v: C) = { _storeat (p,v); }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="comment">// deref a pointer to compact linear component</span>
+<span class="lineno" id=line40></span>    <span class="comment">//fun _deref[mach,clv]: _rpclt&lt;mach,clv&gt; -&gt; clv = "::flx::rtl::clt_deref($t)";</span>
+<span class="lineno" id=line41></span>    <span class="comment">//fun _deref[mach,clv]: _rpclt&lt;mach,clv&gt; -&gt; clv = "*($t)"; // operator * added to C++</span>
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref[mach,clv] (p: _rpclt&lt;mach,clv&gt;) =&gt; _deref p;
+<span class="lineno" id=line43></span>  }
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  <span class="doccomment">Felix and C pointers.</span>
+<span class="lineno" id=line47></span>  <span class="doccomment">Felix pointer ptr[T] = &amp;T.</span>
+<span class="lineno" id=line48></span>  <span class="doccomment">C pointer cptr[T] = &amp;T.</span>
+<span class="lineno" id=line49></span>  <span class="doccomment">See also carray for incrementable pointers carray[T] = +T.</span>
+<span class="lineno" id=line50></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Cptr 
+<span class="lineno" id=line51></span>  {
+<span class="lineno" id=line52></span>    <span class="doccomment">Type of a Felix pointer.</span>
+<span class="lineno" id=line53></span>    <span class="doccomment">Always points to an object.</span>
+<span class="lineno" id=line54></span>    <span class="doccomment">Cannot be NULL.</span>
+<span class="lineno" id=line55></span>    <span class="doccomment">Cannot be incremented.</span>
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> ptr[T] = &amp;T;
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>    <span class="doccomment">Type of a C pointer.</span>
+<span class="lineno" id=line59></span>    <span class="doccomment">Either pointes to an object or is NULL.</span>
+<span class="lineno" id=line60></span>    <span class="doccomment">Cannot be incremented.</span>
+<span class="lineno" id=line61></span>    variant cptr[T] = | nullptr | Ptr of &amp;T;
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>    <span class="doccomment">Demote a Felix pointer to a C pointer. Safe.</span>
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] cptr[T]: &amp;T = <span class="fstring">"$t"</span>;
+<span class="lineno" id=line65></span>  
+<span class="lineno" id=line66></span>    <span class="doccomment">Promote a C pointer to a Felix pointer.</span>
+<span class="lineno" id=line67></span>    <span class="doccomment">Conversion is checked.</span>
+<span class="lineno" id=line68></span>    <span class="doccomment">Aborts with match failure if NULL.</span>
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] ptr[T](px:cptr[T]) =&gt; 
+<span class="lineno" id=line70></span>      <span class="small_keyword" title="let binder">let</span> Ptr p = px <span class="small_keyword" title="membership operator, function mem">in</span> p
+<span class="lineno" id=line71></span>     ; <span class="comment">// match failure if null</span>
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="doccomment">Checked dereference of C pointer.</span>
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref[T] (px:cptr[T])=&gt; *(px.ptr);
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    <span class="doccomment">Test if a C pointer is NULL.</span>
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_nullptr[T] (px:cptr[T])=&gt; <span class="small_keyword" title="match statement or expression">match</span> px <span class="small_keyword" title="type-class constraint">with</span> | #nullptr =&gt; <span class="library" title="truth value">true</span> | _ =&gt; <span class="library" title="false value">false</span> <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line78></span>    
+<span class="lineno" id=line79></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Eq[cptr[T]] {
+<span class="lineno" id=line80></span>      <span class="doccomment">Equality of C pointers.</span>
+<span class="lineno" id=line81></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : cptr[T] * cptr[T] -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line82></span>    }
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Tord[cptr[T]] {
+<span class="lineno" id=line84></span>      <span class="doccomment">Total ordering of C pointer.</span>
+<span class="lineno" id=line85></span>      <span class="doccomment">NULL is the least element.</span>
+<span class="lineno" id=line86></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : cptr[T] * cptr[T] -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line87></span>    }
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>    <span class="doccomment">Allocate unmanaged C++ object on the heap and return pointer.</span>
+<span class="lineno" id=line90></span>    <span class="doccomment">Felix does not check the argument type, but C++ does.</span>
+<span class="lineno" id=line91></span>    <span class="doccomment">The argument must select a suitable C++ constructor.</span>
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> cnew[T,A] : A -&gt; &amp;T = <span class="fstring">"new (?1)($a)"</span>;
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>    <span class="doccomment">Delete unmanaged C++ object from heap</span>
+<span class="lineno" id=line95></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> delete[T] : &amp;T = <span class="fstring">"delete $1;"</span>;
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>    <span class="doccomment">Allocate managed C++ object directly on heap.</span>
+<span class="lineno" id=line98></span>    <span class="doccomment">Felix does not check the argument type, but C++ does.</span>
+<span class="lineno" id=line99></span>    <span class="doccomment">The argument must select a suitable constructor.</span>
+<span class="lineno" id=line100></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> gcnew[T,A] : A -&gt; &amp;T = <span class="fstring">"new (*ptf-&gt;gcp, @?1,true) (?1)($a)"</span>;
+<span class="lineno" id=line101></span>  
+<span class="lineno" id=line102></span>  }
+<span class="lineno" id=line103></span>  
+<span class="lineno" id=line104></span>  <span class="big_keyword" title="Open a module or class">open</span>[T] Eq[cptr[T]];
+<span class="lineno" id=line105></span>  <span class="big_keyword" title="Open a module or class">open</span>[T] Tord[cptr[T]];
+<span class="lineno" id=line106></span>  
+<span class="lineno" id=line107></span>  <span class="doccomment">Special notation @T for  type of a C pointer.</span>
+<span class="lineno" id=line108></span>  typefun n<span class="fstring">"@"</span> (T:TYPE) : TYPE =&gt; cptr[T]; 
+<span class="lineno" id=line109></span>  
+</pre></p></div><h1 id='C_Arrays_h'><img src='/share/src/web/images/minus.gif' id='C Arrays' onclick='toggle(this,"C_Arrays_d")' alt='+'/> 2 C Arrays</h1><div id='C_Arrays_d' style='display:block'>
+<p>A <code>carray[T]</code>, with more suggestive shorthand notation <code>+T</code>,
+is an incrementable, non-NULL pointer to a contiguous store.
+</p><pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="comment">// For some reason this functor must be in global scope</span>
+<span class="lineno" id=line4></span>  <span class="doccomment">Define prefix + notation.</span>
+<span class="lineno" id=line5></span>  typefun tprefix_plus(T:TYPE) : TYPE =&gt; Carray::carray[T]; 
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="doccomment">A carray[T] = +T is an incrementable, non-NULL, pointer.</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Carray
+<span class="lineno" id=line9></span>  {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Open a module or class">open</span> <span class="hack">C_hack</span>;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="doccomment">The carray type.</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> carray[T] = new &amp;T;
+<span class="lineno" id=line15></span>  
+</pre></p><h2 id='Allocation_h'><img src='/share/src/web/images/minus.gif' id='Allocation' onclick='toggle(this,"Allocation_d")' alt='+'/> 2.1 Allocation</h2><div id='Allocation_d' style='display:block'>
+<p>These allocators use raw <code>malloc</code>/<code>calloc</code>/<code>free</code> and therefore
+provide store of which the garbage collector is unaware. It is best
+to reserve such carrays for C datatypes.
+</p><pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>    <span class="doccomment">Allocate a C array on the C heap (malloc).</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">Unsafe: Not tracked by GC.</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> array_alloc[T]: !ints -&gt; carray[T] = <span class="fstring">'(?1*)::std::malloc(sizeof(?1)*$1)'</span>;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="doccomment">Allocate a C array on the C heap with 0 fill (cmalloc).</span>
+<span class="lineno" id=line7></span>    <span class="doccomment">Unsafe: Not tracked by GC.</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> array_calloc[T]: !ints -&gt; carray[T] = <span class="fstring">'(?1*)::std::calloc(sizeof(?1),$1)'</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Free a C array (free).</span>
+<span class="lineno" id=line11></span>    <span class="doccomment">Must point to C heap allocated storage. Unsafe.</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> free[T]: carray[T] = <span class="fstring">"::std::free($1);"</span>;
+<span class="lineno" id=line13></span>  
+</pre></p></div><h2 id='Dereference_h'><img src='/share/src/web/images/minus.gif' id='Dereference' onclick='toggle(this,"Dereference_d")' alt='+'/> 2.2 Dereference</h2><div id='Dereference_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>    <span class="doccomment">Functional get by index.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get[T]: carray[T] * !ints -&gt; T = <span class="fstring">'$1[$2]'</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="doccomment">Store value in array at index position.</span>
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set[T] : carray[T] * !ints * T = <span class="fstring">"$1[$2]=$3;"</span>;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set[T] : carray[T] *  T = <span class="fstring">"$1[0]=$2;"</span>;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> storeat[T] (lhs: carray[T], rhs: T) { set (lhs, 0, rhs); }
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="doccomment">Get by index using application.</span>
+<span class="lineno" id=line12></span>    <span class="doccomment">i x = x . i = get (x,i)</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> apply [T,I <span class="small_keyword" title="membership operator, function mem">in</span> ints] (i:I, x:carray[T]) =&gt; get (x,i);
+<span class="lineno" id=line14></span>  
+</pre></p></div><h2 id='Lvalue_dereferences_h'><img src='/share/src/web/images/minus.gif' id='Lvalue dereferences' onclick='toggle(this,"Lvalue_dereferences_d")' alt='+'/> 2.3 Lvalue dereferences</h2><div id='Lvalue_dereferences_d' style='display:block'>
+<p>Note that lvalue operators are for convenience of those
+familiar with C notation. Felix does not support the notion
+of lvalues in general: this is a very special case.
+</p><pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Lvalue reference to element by index position. Unsafe.</span>
+<span class="lineno" id=line2></span>    <span class="comment">//lvalue fun subscript[T]: carray[T] * !ints -&gt; T = '$1[$2]';</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> subscript[T]: carray[T] * !ints -&gt; T = <span class="fstring">'$1[$2]'</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="doccomment">Lvalue reference to element by pointer.</span>
+<span class="lineno" id=line6></span>    <span class="comment">//lvalue fun deref[T]: carray[T] -&gt; T = '*$1';</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref[T]: carray[T] -&gt; T = <span class="fstring">'*$1'</span>;
+<span class="lineno" id=line8></span>  
+</pre></p></div><h2 id='Pointer_operators_h'><img src='/share/src/web/images/minus.gif' id='Pointer operators' onclick='toggle(this,"Pointer_operators_d")' alt='+'/> 2.4 Pointer operators</h2><div id='Pointer_operators_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Advance carray to next element.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> + [T]: carray[T] * !ints -&gt; carray[T]= <span class="fstring">'$1+$2'</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    <span class="doccomment">Backup carray to previous element.</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> - [T]: carray[T] * !ints -&gt; carray[T] = <span class="fstring">'$1-$2'</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Calculate the offset in elements between</span>
+<span class="lineno" id=line8></span>    <span class="doccomment">two overlapping carrays.</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> - [T]: carray[T] * carray[T]-&gt; <span class="library" title="binding of C ptrdiff_t type">ptrdiff</span> = <span class="fstring">'$1-$2'</span>;
+<span class="lineno" id=line10></span>  
+</pre></p></div><h2 id='Mutators_h'><img src='/share/src/web/images/minus.gif' id='Mutators' onclick='toggle(this,"Mutators_d")' alt='+'/> 2.5 Mutators</h2><div id='Mutators_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>    <span class="doccomment">Mutable pre-increment ++p.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr[T]: &amp;carray[T] = <span class="fstring">'++*$1;'</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="doccomment">Mutable post-increment p++.</span>
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr[T]: &amp;carray[T] = <span class="fstring">'(*$1)++;'</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="doccomment">Mutable pre-decarement --p.</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr[T]: &amp;carray[T] = <span class="fstring">'--*$1;'</span>;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="doccomment">Mutable post-decarement p--.</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr[T]: &amp;carray[T] = <span class="fstring">'(*$1)--;'</span>;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="doccomment">Mutable advance by offset amount.</span>
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> += [T]: &amp;carray[T] * !ints = <span class="fstring">'*$1+=$2;'</span>;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="doccomment">Mutable backup by offset amount.</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> -= [T]: &amp;carray[T] * !ints = <span class="fstring">'*$1-=$2;'</span>;
+<span class="lineno" id=line19></span>  
+</pre></p></div><h2 id='Comparisons_h'><img src='/share/src/web/images/minus.gif' id='Comparisons' onclick='toggle(this,"Comparisons_d")' alt='+'/> 2.6 Comparisons</h2><div id='Comparisons_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>    <span class="doccomment">Pointer equality.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Eq[carray[T]] {
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : carray[T] * carray[T] -&gt; bool = <span class="fstring">'$1==$2'</span>;
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> != : carray[T] * carray[T] -&gt; bool = <span class="fstring">'$1!=$2'</span>;
+<span class="lineno" id=line6></span>    }
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="doccomment">Pointer total ordering.</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Tord[carray[T]] {
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : carray[T] * carray[T] -&gt; bool = <span class="fstring">'$1&lt;$2'</span>;
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt;= : carray[T] * carray[T] -&gt; bool = <span class="fstring">'$1&lt;=$2'</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &gt; : carray[T] * carray[T] -&gt; bool = <span class="fstring">'$1&gt;$2'</span>;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &gt;= : carray[T] * carray[T] -&gt; bool = <span class="fstring">'$1&gt;=$2'</span>;
+<span class="lineno" id=line14></span>    }
+<span class="lineno" id=line15></span>  
+</pre></p></div><h2 id='Conversions_h'><img src='/share/src/web/images/minus.gif' id='Conversions' onclick='toggle(this,"Conversions_d")' alt='+'/> 2.7 Conversions</h2><div id='Conversions_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/c/carray.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Get carray of an array.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> stl_begin[T,N:COMPACTLINEAR]: carray[<span class="library" title="array type, a tuple of all components the same type">array</span>[T,N]] -&gt; carray[T] = <span class="fstring">"(?1*)&amp;($1-&gt;data)"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    <span class="doccomment">Unsafe conversion of Felix pointer to carray.</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> prefix_plus [T]:&amp;T -&gt; carray[T] = <span class="fstring">"$t"</span>; <span class="comment">// unsafe</span>
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Demote carray to Felix pointer (safe unless off the end).</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> neg [T]: carray[T] -&gt; &amp;T = <span class="fstring">"$t"</span>; <span class="comment">// safe (unless we allow +T to be NULL later ..)</span>
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Unsafe conversion of Felix pointer to carray.</span>
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] carray[T] : &amp;T = <span class="fstring">"$t"</span>;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="doccomment">Get a carray from a Felix array object.</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T,N:COMPACTLINEAR] carray[T]: &amp;<span class="library" title="array type, a tuple of all components the same type">array</span>[T,N] = <span class="fstring">"($1)-&gt;data"</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="doccomment">Convert C array to Felix array.</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> array_of[T,N:COMPACTLINEAR]: carray[T] -&gt; &amp;<span class="library" title="array type, a tuple of all components the same type">array</span>[T,N] = <span class="fstring">"*(#0*)(void*)$1"</span>;
+<span class="lineno" id=line19></span>  }
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Open a module or class">open</span>[T] Eq[carray[T]];
+<span class="lineno" id=line22></span>  <span class="big_keyword" title="Open a module or class">open</span>[T] Tord[carray[T]];
+</pre></p><pre class='inclusion'>
+test/regress/rt/carray_test.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// carray test</span>
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> a : +<span class="library" title="binding of C int type">int</span> = array_alloc[<span class="library" title="binding of C int type">int</span>] 10;
+<span class="lineno" id=line4></span>  <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0 <span class="small_keyword" title="upwards counting for loop">upto</span> 9 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line5></span>    set(a, i, i * i);
+<span class="lineno" id=line6></span>    set(a,i,get(a,i)+1);
+<span class="lineno" id=line7></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line8></span>  <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0 <span class="small_keyword" title="upwards counting for loop">upto</span> 9 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line9></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$  a.[i], *(a+i), a.i;
+<span class="lineno" id=line10></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line11></span>  free a;
+</pre></p><pre class='inclusion'>
+test/regress/rt/carray_test.expect</pre>
+<p><pre class="prefmtbg">(1, 1, 1)
+(2, 2, 2)
+(5, 5, 5)
+(10, 10, 10)
+(17, 17, 17)
+(26, 26, 26)
+(37, 37, 37)
+(50, 50, 50)
+(65, 65, 65)
+(82, 82, 82)
+</pre></p></div></div><h1 id='Array_sort_h'><img src='/share/src/web/images/minus.gif' id='Array sort' onclick='toggle(this,"Array_sort_d")' alt='+'/> 3 Array sort</h1><div id='Array_sort_d' style='display:block'>
+<p>Sort an array using STL sort.
+</p><pre class='inclusion'>
+share/lib/std/datatype/sort.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Utility class to leverage STL sort.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Sort
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="doccomment">STL compliant comparator object built from</span>
+<span class="lineno" id=line6></span>    <span class="doccomment">a closure of a Felix function.</span>
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> stl_comparator_def = 
+<span class="lineno" id=line8></span>    """<span class="embedded_c">
+<span class="lineno" id=line9></span>    <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> CT, <span class="big_keyword">class</span> FT2, <span class="big_keyword">class</span> FFT&gt;
+<span class="lineno" id=line10></span>    <span class="big_keyword">struct</span> comparator {
+<span class="lineno" id=line11></span>      FFT cmp;
+<span class="lineno" id=line12></span>      comparator() : cmp(0) {}
+<span class="lineno" id=line13></span>      comparator(FFT cmp_a) : cmp(cmp_a) {}
+<span class="lineno" id=line14></span>      bool operator ()(CT x, CT y){
+<span class="lineno" id=line15></span>        ::<span class="small_keyword">std</span>::pair&lt;CT,CT&gt; z(x,y); 
+<span class="lineno" id=line16></span>        <span class="small_keyword">return</span> cmp-&gt;apply(*(FT2*)(<span class="qualifier">void</span>*)&amp;z);
+<span class="lineno" id=line17></span>      }
+<span class="lineno" id=line18></span>    };
+<span class="lineno" id=line19></span>    </span>""" <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::utility;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> _comparator[CT,FT2,FFT] = <span class="fstring">"comparator&lt;?1,?2,?3&gt;"</span> <span class="big_keyword" title="specify requirements">requires</span> stl_comparator_def;
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_comparator[T] = new _comparator[T,T*T,T*T-&gt;bool];
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> _make_comparator[CT,FT2,FFT]: FFT -&gt; stl_comparator[CT] = 
+<span class="lineno" id=line25></span>      <span class="fstring">"comparator&lt;?1,?2,?3&gt;($1)"</span>
+<span class="lineno" id=line26></span>    ;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    <span class="doccomment">Make a C++ STL comparator object from a Felix comparison function.</span>
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] stl_comparator[T] (cmp:T * T -&gt; bool) =&gt; 
+<span class="lineno" id=line30></span>      _make_comparator[T, T*T, T*T-&gt;bool] (cmp)
+<span class="lineno" id=line31></span>    ;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="doccomment">Invoke stl sort with C++ comparator.</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> stl_sort[T]: stl_comparator[T] * +T * +T = <span class="fstring">"::std::sort($2, $3, $1);"</span> 
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::algorithm;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>    <span class="doccomment">Invoke stl sort with Felix comparison function.</span>
+<span class="lineno" id=line38></span>    <span class="qualifier" title="Function or procedure which should be inlined if possible">inline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> stl_sort[T] (cmp: T * T -&gt; bool, b: +T,  e:+T) =&gt; 
+<span class="lineno" id=line39></span>      stl_sort (stl_comparator cmp, b, e)
+<span class="lineno" id=line40></span>    ;
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="doccomment">Invoke stl sort default comparison function.</span>
+<span class="lineno" id=line43></span>    <span class="qualifier" title="Function or procedure which should be inlined if possible">inline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> stl_sort[T <span class="small_keyword" title="type-class constraint">with</span> Tord[T]] (b:+T, e:+T) =&gt; stl_sort ( (&lt; of (T * T)), b, e);
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>  }
+<span class="lineno" id=line46></span>  
+</pre></p></div><h1 id='Reference_counting_pointer._h'><img src='/share/src/web/images/minus.gif' id='Reference counting pointer.' onclick='toggle(this,"Reference_counting_pointer._d")' alt='+'/> 4 Reference counting pointer.</h1><div id='Reference_counting_pointer._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/c/shared_ptr.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> SharedPtr
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>     <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> shared_ptr[T] 
+<span class="lineno" id=line4></span>       = <span class="fstring">"::std::shared_ptr&lt;?1&gt;"</span>
+<span class="lineno" id=line5></span>       <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::memory
+<span class="lineno" id=line6></span>     ;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>     <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] shared_ptr[T] : 1 = <span class="fstring">"::std::shared_ptr&lt;?1&gt;()"</span>; <span class="comment">// nullptr</span>
+<span class="lineno" id=line9></span>     <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] shared_ptr[T] : &amp;T = <span class="fstring">"::std::shared_ptr&lt;?1&gt;($1)"</span>;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>     <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> reset[T] : &amp;shared_ptr[T] = <span class="fstring">"$1-&gt;reset();"</span>;
+<span class="lineno" id=line12></span>     <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> swap[T] : &amp;shared_ptr[T] * &amp;shared_ptr[T] = <span class="fstring">"$1-&gt;swap(*$2);"</span>;
+<span class="lineno" id=line13></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> get[T] : shared_ptr[T] -&gt; &amp;T = <span class="fstring">"$1.get()"</span>;
+<span class="lineno" id=line14></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref[T] : shared_ptr[T] -&gt; T = <span class="fstring">"*$1"</span>;
+<span class="lineno" id=line15></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> use_count[T] : shared_ptr[T] -&gt; <span class="library" title="binding of C long type">long</span> = <span class="fstring">"$1.use_count()"</span>;
+<span class="lineno" id=line16></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> unique[T] : shared_ptr[T] -&gt; bool = <span class="fstring">"$1.unique"</span>;
+<span class="lineno" id=line17></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_null[T] : shared_ptr[T] -&gt; bool = <span class="fstring">"(bool)$1"</span>;
+<span class="lineno" id=line18></span>  }
+</pre></p></div><h1 id='MMap_h'><img src='/share/src/web/images/minus.gif' id='MMap' onclick='toggle(this,"MMap_d")' alt='+'/> 5 MMap</h1><div id='MMap_d' style='display:block'>
+<p>Address mapping facility. Note: this is the posix function mmap().
+Windows has a similar capability we have not modelled yet.
+</p><pre class='inclusion'>
+share/lib/std/posix/mmap.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Mmap
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"mmap"</span>;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> """<span class="embedded_c">
+<span class="lineno" id=line6></span>      <span class="comment">// MAP_ANON is an older form of MAP_ANONYMOUS, and should be compatible
+<span class="lineno" id=line7></span>  </span>    #<span class="small_keyword">if</span> !defined(MAP_ANONYMOUS) &amp;&amp; defined(MAP_ANON)
+<span class="lineno" id=line8></span>      #  define MAP_ANONYMOUS MAP_ANON
+<span class="lineno" id=line9></span>      #<span class="preproc">endif</span>
+<span class="lineno" id=line10></span>    </span>""";
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="comment">// Offset into file, should be defined elsewhere</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> off_t = <span class="library" title="binding of C unsigned long type">ulong</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mmap_prot = <span class="fstring">"int"</span>;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[mmap_prot]{
+<span class="lineno" id=line17></span>       <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : mmap_prot * mmap_prot -&gt; bool = <span class="fstring">"$1==$2"</span>; 
+<span class="lineno" id=line18></span>    }
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bits[mmap_prot]{}
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[mmap_prot];
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Bits[mmap_prot];
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mmap_flags = <span class="fstring">"int"</span>;
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[mmap_flags]{
+<span class="lineno" id=line27></span>       <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : mmap_flags * mmap_flags -&gt; bool = <span class="fstring">"$1==$2"</span>; 
+<span class="lineno" id=line28></span>    }
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bits[mmap_flags]{}
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[mmap_flags];
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Bits[mmap_flags];
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>    <span class="comment">// protection options</span>
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> PROT_NONE  : mmap_prot;  <span class="comment">// Posix: inaccessible</span>
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> PROT_EXEC  : mmap_prot;  <span class="comment">// Posix: allow exec</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> PROT_READ  : mmap_prot;  <span class="comment">// Posix: allow read (and perhaps exec)</span>
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> PROT_WRITE : mmap_prot;  <span class="comment">// Posix: allow write (and perhaps write and exec)</span>
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>    <span class="comment">// Linux only</span>
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_DENYWRITE: mmap_flags; <span class="comment">// Linux only</span>
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="comment">// flags: mode</span>
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_FILE: mmap_flags;      <span class="comment">// Posix: Default mode: map a file</span>
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_ANONYMOUS: mmap_flags; <span class="comment">// Linux, OSX: Map from VM pool</span>
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>    <span class="comment">// flags: map address</span>
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_FIXED: mmap_flags;     <span class="comment">// Posix: Client tries to fix the mapping address, </span>
+<span class="lineno" id=line49></span>                              <span class="comment">// must set address argument non-NULL</span>
+<span class="lineno" id=line50></span>                              <span class="comment">// Implementation dependent</span>
+<span class="lineno" id=line51></span>                              <span class="comment">// Default: system chooses address is not specified</span>
+<span class="lineno" id=line52></span>                              <span class="comment">// must set address NULL </span>
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>    <span class="comment">// flags: sharing</span>
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_SHARED : mmap_flags;   <span class="comment">// Posix: write changes to backing store on msync</span>
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_PRIVATE : mmap_flags;  <span class="comment">// Posix: don't write changes ever</span>
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>    <span class="comment">// System dependent:</span>
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_HASSEMAPHORE: mmap_flags;
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_NORESERVE: mmap_flags;
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_LOCKED: mmap_flags;
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_GROWSDOWN: mmap_flags;
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_32BIT: mmap_flags;
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_POPULATE: mmap_flags;
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_NONBLOCK: mmap_flags;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="comment">// return value of mmap</span>
+<span class="lineno" id=line68></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> MAP_FAILED : <span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line69></span>  
+<span class="lineno" id=line70></span>    <span class="comment">// size of a page</span>
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _SC_PAGESIZE : <span class="library" title="binding of C long type">long</span> = <span class="fstring">"sysconf(_SC_PAGESIZE)"</span>;
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="comment">// establish a mapping</span>
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mmap:
+<span class="lineno" id=line75></span>      <span class="library" title="special binding of C void* type">address</span> * <span class="comment">//&lt; start address</span>
+<span class="lineno" id=line76></span>      <span class="library" title="binding of C size_t type">size</span> *    <span class="comment">//&lt; bytes to map</span>
+<span class="lineno" id=line77></span>      mmap_prot *     <span class="comment">//&lt; protection</span>
+<span class="lineno" id=line78></span>      mmap_flags *     <span class="comment">//&lt; flags</span>
+<span class="lineno" id=line79></span>      <span class="library" title="binding of C int type">int</span> *     <span class="comment">//&lt; file descriptor</span>
+<span class="lineno" id=line80></span>      off_t     <span class="comment">//&lt; offset into file, multiple of _SC_PAGESIZE</span>
+<span class="lineno" id=line81></span>      -&gt; <span class="library" title="special binding of C void* type">address</span>; <span class="comment">//&lt; start of reserved address space</span>
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>    <span class="comment">// unmap a region</span>
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> munmap: <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="binding of C size_t type">size</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>    <span class="comment">// save region to backing store (MAP_SHARED only)</span>
+<span class="lineno" id=line87></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> msync: <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="binding of C size_t type">size</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line88></span>  }
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

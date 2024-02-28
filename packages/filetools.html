@@ -1,0 +1,819 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>File Tools</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"File System Tools.",
+"File list <code>flx_ls</code>.",
+"File copy <code>flx_cp</code>.",
+"Searching for strings <code>flx_grep</code>.",
+"Replace substrings in a file.",
+"Batch Replace",
+"Renumbering."
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#File System Tools._h')"> <a href="#File_System_Tools._h">File System Tools.</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#File_list_<code>flx_ls</code>._h">File list <code>flx_ls</code>.</a></div>
+      <div class=m2><a href="#File_copy_<code>flx_cp</code>._h">File copy <code>flx_cp</code>.</a></div>
+      <div class=m2><a href="#Searching_for_strings_<code>flx_grep</code>._h">Searching for strings <code>flx_grep</code>.</a></div>
+      <div class=m2><a href="#Replace_substrings_in_a_file._h">Replace substrings in a file.</a></div>
+      <div class=m2><a href="#Batch_Replace_h">Batch Replace</a></div>
+      <div class=m2><a href="#Renumbering._h">Renumbering.</a></div>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='File_System_Tools._h'><img src='/share/src/web/images/minus.gif' id='File System Tools.' onclick='toggle(this,"File_System_Tools._d")' alt='+'/> 1 File System Tools.</h1><div id='File_System_Tools._d' style='display:block'>
+<p>The tools perform basic tasks the same way on all platforms.
+Our tools use RE2 (Perl) regular expressions for wildcarding instead
+of globs. All tools treat the file system as flat: directories
+don't exist. Structured filenames do. Tools creating files
+always auto-create directories for this reason.
+</p><p>Most of the tools are stubs wrapping core library
+functionality.
+</p><p>Note: the regular expressions must match completely.
+</p><h2 id='File_list_<code>flx_ls</code>._h'><img src='/share/src/web/images/minus.gif' id='File list <code>flx_ls</code>.' onclick='toggle(this,"File_list_<code>flx_ls</code>._d")' alt='+'/> 1.1 File list <code>flx_ls</code>.</h2><div id='File_list_<code>flx_ls</code>._d' style='display:block'>
+<p>List all files in a given master directory matching the
+specified pattern. The resulting list is relative
+to the master directory.
+</p><p>Note: regular expressions must match completely!
+</p><pre class='inclusion'>
+$PWD/src/tools/flx_ls.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> dbg(s:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span>={ <span class="library" title="Print a string to standard output with newline appended">println</span> s; <span class="small_keyword" title="return">return</span> s; }
+<span class="lineno" id=line2></span>  <span class="comment">//println$ System::args ();</span>
+<span class="lineno" id=line3></span>  <span class="comment">//println$ "argc=" + str System::argc;</span>
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a mutable variable">var</span> dir = 
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="conditional">if</span> System::argc &lt; 2 <span class="small_keyword" title="conditional">then</span> Directory::getcwd()
+<span class="lineno" id=line7></span>    <span class="small_keyword" title="conditional">else</span> System::argv 1
+<span class="lineno" id=line8></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line9></span>  ;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a mutable variable">var</span> regex = 
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="conditional">if</span> System::argc &lt; 3 <span class="small_keyword" title="conditional">then</span> <span class="fstring">".*"</span>
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="conditional">else</span> System::argv 2
+<span class="lineno" id=line14></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line15></span>  ;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="comment">//println$ "Dir=" dir;</span>
+<span class="lineno" id=line18></span>  <span class="comment">//println$ "Files in dir " + dir + "=";</span>
+<span class="lineno" id=line19></span>  <span class="library" title="call procedure on each element of data structure">iter</span> (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (s:<span class="library" title="binding of C++ string type">string</span>) { <span class="library" title="Print a string to standard output with newline appended">println</span> s; }) (FileSystem::regfilesin (dir, regex));
+</pre></p></div><h2 id='File_copy_<code>flx_cp</code>._h'><img src='/share/src/web/images/minus.gif' id='File copy <code>flx_cp</code>.' onclick='toggle(this,"File_copy_<code>flx_cp</code>._d")' alt='+'/> 1.2 File copy <code>flx_cp</code>.</h2><div id='File_copy_<code>flx_cp</code>._d' style='display:block'>
+<p>This tool copies files using regular expressions with
+a replacement pattern. The tool is safe in that it guarrantees
+the copy is one-to-one and the target files do not overlap
+the source files. If this condition isn't met the copy fails
+as a whole.
+</p><p>The copy is done like <code>flx_ls</code> scanning for structured
+filenames in a given master directory matching a given
+pattern. The destination replacement pattern is must include
+any required prefix (the master directory is only used for
+searching as an optimisation). The encoding <code>\n</code> where
+n is a digit from 0 to 9 represents a subgroup of the match.
+</p><p>Note: regular expressions must match completely!
+</p><pre class='inclusion'>
+$PWD/src/tools/flx_cp.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_cp"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> dbg(s:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span>={ <span class="library" title="Print a string to standard output with newline appended">println</span> s; <span class="small_keyword" title="return">return</span> s; }
+<span class="lineno" id=line4></span>  <span class="comment">//println$ System::args ();</span>
+<span class="lineno" id=line5></span>  <span class="comment">//println$ "argc=" + str System::argc;</span>
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a mutable variable">var</span> dir = <span class="fstring">""</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a mutable variable">var</span> regex = <span class="fstring">""</span>;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a mutable variable">var</span> target = <span class="fstring">""</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a mutable variable">var</span> live = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a mutable variable">var</span> verbose = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>  <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 1 <span class="small_keyword" title="upwards counting for loop">upto</span> System::argc <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a mutable variable">var</span> arg = System::argv i;
+<span class="lineno" id=line15></span>    <span class="small_keyword" title="conditional">if</span> arg == <span class="fstring">"--test"</span> <span class="small_keyword" title="imperative code begins">do</span> live = <span class="library" title="false value">false</span>; 
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="conditional">elif</span> arg == <span class="fstring">"-v"</span> <span class="small_keyword" title="logical disjunction">or</span> arg == <span class="fstring">"--verbose"</span> <span class="small_keyword" title="imperative code begins">do</span> verbose = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="conditional">elif</span> arg.[0] == <span class="library" title="binding of C char type">char</span> <span class="fstring">"-"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line18></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Unknown option '"</span> + arg+<span class="fstring">"'"</span>; 
+<span class="lineno" id=line19></span>      System::exit(1);
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="conditional">elif</span> dir == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> dir = arg;
+<span class="lineno" id=line21></span>    <span class="small_keyword" title="conditional">elif</span> regex == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> regex = arg;
+<span class="lineno" id=line22></span>    <span class="small_keyword" title="conditional">elif</span> target == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> target = arg;
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line24></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  <span class="small_keyword" title="conditional">if</span> dir == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing directory name (arg1)"</span>; System::exit(1);
+<span class="lineno" id=line27></span>  <span class="small_keyword" title="conditional">elif</span> regex == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing regex (arg2)"</span>; System::exit(1);
+<span class="lineno" id=line28></span>  <span class="small_keyword" title="conditional">elif</span> target == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing target (arg3)"</span>; System::exit(1);
+<span class="lineno" id=line29></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>  <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"#Dir='"</span> + dir + <span class="fstring">"', pattern='"</span>+regex+<span class="fstring">"', dst='"</span>+target+<span class="fstring">"'"</span>; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="big_keyword" title="Define a mutable variable">var</span> re = Re2::RE2 regex;
+<span class="lineno" id=line34></span>  CopyFiles::copyfiles (dir, re, target, live, verbose);
+<span class="lineno" id=line35></span>  System::exit(0);
+</pre></p><pre class='inclusion'>
+share/lib/std/felix/flx_cp.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> CopyFiles {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> processfiles 
+<span class="lineno" id=line3></span>      (<span class="big_keyword" title="Define a mutable variable">var</span> process: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; bool) 
+<span class="lineno" id=line4></span>      (basedir:<span class="library" title="binding of C++ string type">string</span>, re:RE2, tpat:<span class="library" title="binding of C++ string type">string</span>, live:bool, verbose:bool)
+<span class="lineno" id=line5></span>    {
+<span class="lineno" id=line6></span>       <span class="big_keyword" title="Define a mutable variable">var</span> ds = StrDict::strdict[<span class="library" title="binding of C++ string type">string</span>] ();
+<span class="lineno" id=line7></span>       <span class="big_keyword" title="Define a mutable variable">var</span> sd = StrDict::strdict[<span class="library" title="binding of C++ string type">string</span>] ();
+<span class="lineno" id=line8></span>       <span class="big_keyword" title="Define a mutable variable">var</span> dirs = StrDict::strdict[bool] ();
+<span class="lineno" id=line9></span>       <span class="big_keyword" title="Define a mutable variable">var</span> n = re.NumberOfCapturingGroups;
+<span class="lineno" id=line10></span>       <span class="big_keyword" title="Define a mutable variable">var</span> v = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece]$ (n+1).<span class="library" title="binding of C size_t type">size</span>, StringPiece <span class="fstring">""</span>;
+<span class="lineno" id=line11></span>  <span class="comment">//println$ "flx_cp:CopyFiles:processfiles regexp= " + re.pattern;</span>
+<span class="lineno" id=line12></span>       <span class="comment">// Process a single filename and add it to the pending copy queue</span>
+<span class="lineno" id=line13></span>       <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> addfile(f:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line14></span>       {
+<span class="lineno" id=line15></span>          <span class="small_keyword" title="conditional">if</span> Re2::Match(re, StringPiece f, 0, ANCHOR_BOTH, v.stl_begin, v.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>)
+<span class="lineno" id=line16></span>          <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line17></span>            <span class="big_keyword" title="Define a mutable variable">var</span> src = Filename::join (basedir, f);
+<span class="lineno" id=line18></span>            <span class="big_keyword" title="Define a mutable variable">var</span> replacements = Empty[<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line19></span>            <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> k <span class="small_keyword" title="membership operator, function mem">in</span> 0 <span class="small_keyword" title="upwards counting for loop">upto</span> n <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line20></span>              replacements = Cons ((<span class="fstring">"${"</span> + <span class="library" title="Convert a value to a string">str</span> k + <span class="fstring">"}"</span>,v.k.<span class="library" title="binding of C++ string type">string</span>), replacements);
+<span class="lineno" id=line21></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line22></span>            dst := search_and_replace replacements tpat;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>            <span class="comment">//println$ "Copy " + src + " -&gt; " + dst;</span>
+<span class="lineno" id=line25></span>            sd.add src dst;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>            <span class="small_keyword" title="conditional">if</span> ds.haskey dst <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line28></span>              eprintln$ <span class="fstring">"Duplicate target "</span> + dst;
+<span class="lineno" id=line29></span>              System::exit(1);
+<span class="lineno" id=line30></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line31></span>            ds.add dst src;
+<span class="lineno" id=line32></span>            <span class="library" title="call procedure on each element of data structure">iter</span>
+<span class="lineno" id=line33></span>              (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (x:<span class="library" title="binding of C++ string type">string</span>) { dirs.add x <span class="library" title="truth value">true</span>; })
+<span class="lineno" id=line34></span>              (Filename::directories dst)
+<span class="lineno" id=line35></span>            ;
+<span class="lineno" id=line36></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line37></span>       }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>       <span class="comment">// Recursively collect files within dir to be copied. dir is relative to basedir.</span>
+<span class="lineno" id=line40></span>       <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> rfi(dir: <span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line41></span>       {
+<span class="lineno" id=line42></span>         <span class="small_keyword" title="conditional">if</span> dir != <span class="fstring">"."</span> <span class="small_keyword" title="logical conjunction">and</span> dir != <span class="fstring">".."</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line43></span>         <span class="small_keyword" title="match statement or expression">match</span> Directory::filesin(Filename::join (basedir,dir)) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line44></span>         | #None  =&gt; ;
+<span class="lineno" id=line45></span>         | Some files =&gt;
+<span class="lineno" id=line46></span>           List::<span class="library" title="call procedure on each element of data structure">iter</span>
+<span class="lineno" id=line47></span>             (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (f:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line48></span>             { <span class="small_keyword" title="conditional">if</span> f != <span class="fstring">"."</span> <span class="small_keyword" title="logical conjunction">and</span> f != <span class="fstring">".."</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line49></span>                 <span class="big_keyword" title="Define a mutable variable">var</span> d = Filename::join (dir,f);
+<span class="lineno" id=line50></span>                 <span class="big_keyword" title="Define an immutable value">val</span> t = FileStat::filetype (Filename::join (basedir,d));
+<span class="lineno" id=line51></span>                 <span class="small_keyword" title="match statement or expression">match</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line52></span>                   | #REGULAR =&gt; addfile d;
+<span class="lineno" id=line53></span>                   | #DIRECTORY =&gt; rfi d;
+<span class="lineno" id=line54></span>                   | _ =&gt; ;
+<span class="lineno" id=line55></span>                 <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line56></span>               <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line57></span>             }
+<span class="lineno" id=line58></span>             )
+<span class="lineno" id=line59></span>             files
+<span class="lineno" id=line60></span>           ;
+<span class="lineno" id=line61></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line62></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line63></span>       }
+<span class="lineno" id=line64></span>       rfi (<span class="fstring">""</span>);
+<span class="lineno" id=line65></span>  
+<span class="lineno" id=line66></span>       <span class="comment">// Check that no source file is clobbered</span>
+<span class="lineno" id=line67></span>       <span class="small_keyword" title="match statement or expression">match</span> src, dst <span class="small_keyword" title="membership operator, function mem">in</span> sd.iterator <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line68></span>         <span class="small_keyword" title="conditional">if</span> sd.haskey dst <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line69></span>           eprintln$ <span class="fstring">"Target clobbers src: "</span> + dst;
+<span class="lineno" id=line70></span>           System::exit(1);
+<span class="lineno" id=line71></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line72></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>       <span class="comment">// Create target directories</span>
+<span class="lineno" id=line75></span>       <span class="small_keyword" title="match statement or expression">match</span> dir, _ <span class="small_keyword" title="membership operator, function mem">in</span> dirs.iterator <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line76></span>         <span class="comment">//if verbose do println$ "mkdir " + dir; done</span>
+<span class="lineno" id=line77></span>         <span class="small_keyword" title="conditional">if</span> live <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line78></span>           err:=Directory::mkdir(dir);
+<span class="lineno" id=line79></span>           <span class="small_keyword" title="conditional">if</span> err !=0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line80></span>             <span class="small_keyword" title="conditional">if</span> errno != EEXIST <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line81></span>               eprintln$ <span class="fstring">"Mkdir, err="</span> + strerror() + <span class="fstring">" .. ignoring"</span>;
+<span class="lineno" id=line82></span>             <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line83></span>           <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line84></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line85></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line86></span>  
+<span class="lineno" id=line87></span>       <span class="comment">// And finally, do the actual copying</span>
+<span class="lineno" id=line88></span>       <span class="small_keyword" title="match statement or expression">match</span> src, dst <span class="small_keyword" title="membership operator, function mem">in</span> sd.iterator <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line89></span>         <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output">print</span>$ <span class="fstring">"cp "</span> + src + <span class="fstring">"  "</span> + dst; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line90></span>         <span class="small_keyword" title="conditional">if</span> live <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line91></span>           <span class="small_keyword" title="conditional">if</span> process(src, dst) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line92></span>             <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">" #done"</span>; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line93></span>           <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line94></span>             eprintln <span class="fstring">"COPY FAILED"</span>;
+<span class="lineno" id=line95></span>             System::exit 1;
+<span class="lineno" id=line96></span>           <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line97></span>         <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line98></span>           <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  #proposed"</span>; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line99></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line100></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line101></span>    }
+<span class="lineno" id=line102></span>  
+<span class="lineno" id=line103></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> copyfiles(basedir:<span class="library" title="binding of C++ string type">string</span>, re:RE2, tpat:<span class="library" title="binding of C++ string type">string</span>, live:bool, verbose:bool) =&gt;
+<span class="lineno" id=line104></span>      processfiles (FileSystem::filecopy) (basedir, re, tpat, live, verbose)
+<span class="lineno" id=line105></span>    ;
+<span class="lineno" id=line106></span>  
+<span class="lineno" id=line107></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> copyfiles(basedir:<span class="library" title="binding of C++ string type">string</span>, re:<span class="library" title="binding of C++ string type">string</span>, tpat:<span class="library" title="binding of C++ string type">string</span>, live:bool, verbose:bool) =&gt;
+<span class="lineno" id=line108></span>      copyfiles(basedir, RE2 re, tpat, live, verbose)
+<span class="lineno" id=line109></span>    ;
+<span class="lineno" id=line110></span>  }
+</pre></p></div><h2 id='Searching_for_strings_<code>flx_grep</code>._h'><img src='/share/src/web/images/minus.gif' id='Searching for strings <code>flx_grep</code>.' onclick='toggle(this,"Searching_for_strings_<code>flx_grep</code>._d")' alt='+'/> 1.3 Searching for strings <code>flx_grep</code>.</h2><div id='Searching_for_strings_<code>flx_grep</code>._d' style='display:block'>
+<p>This tool works like grep except the files being searched
+use a master directory and regular expression for selection.
+Any line in any of those files matching the given regexp
+completely are listed.
+</p><pre class='inclusion'>
+$PWD/src/tools/flx_grep.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> dir = 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="conditional">if</span> System::argc &lt; 2 <span class="small_keyword" title="conditional">then</span> Directory::getcwd()
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="conditional">else</span> System::argv 1
+<span class="lineno" id=line4></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line5></span>  ;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fregex = 
+<span class="lineno" id=line8></span>    <span class="small_keyword" title="conditional">if</span> System::argc &lt; 3 <span class="small_keyword" title="conditional">then</span> <span class="fstring">".*"</span>
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="conditional">else</span> System::argv 2
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line11></span>  ;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Define a mutable variable">var</span> lregex = 
+<span class="lineno" id=line14></span>    <span class="small_keyword" title="conditional">if</span> System::argc &lt; 4 <span class="small_keyword" title="conditional">then</span> <span class="fstring">".*"</span>
+<span class="lineno" id=line15></span>    <span class="small_keyword" title="conditional">else</span> System::argv 3
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line17></span>  ;
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Define a mutable variable">var</span> grexp = RE2 lregex;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  <span class="comment">//println$ "Dir=" dir;</span>
+<span class="lineno" id=line22></span>  <span class="comment">//println$ "Files in dir " + dir + "=";</span>
+<span class="lineno" id=line23></span>  <span class="small_keyword" title="for loop">for</span> file <span class="small_keyword" title="membership operator, function mem">in</span> FileSystem::regfilesin (dir, fregex) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line24></span>  <span class="comment">//  println$ file;</span>
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a mutable variable">var</span> lines = load (Filename::join dir file);
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a mutable variable">var</span> count = 0;
+<span class="lineno" id=line27></span>    <span class="small_keyword" title="for loop">for</span> line <span class="small_keyword" title="membership operator, function mem">in</span> split (lines,<span class="library" title="binding of C char type">char</span> <span class="fstring">"\n"</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line28></span>      ++count;
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="conditional">if</span> line <span class="tex_symbol" title="\in">\(\in\)</span> grexp <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line30></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ file+<span class="fstring">":"</span>+<span class="library" title="Convert a value to a string">str</span> count+<span class="fstring">": "</span> line;
+<span class="lineno" id=line31></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line32></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line33></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>  
+</pre></p></div><h2 id='Replace_substrings_in_a_file._h'><img src='/share/src/web/images/minus.gif' id='Replace substrings in a file.' onclick='toggle(this,"Replace_substrings_in_a_file._d")' alt='+'/> 1.4 Replace substrings in a file.</h2><div id='Replace_substrings_in_a_file._d' style='display:block'>
+<p>This tool replaces patterns found in a single
+file with another pattern and outputs the result
+to standard output.
+</p><pre class='inclusion'>
+$PWD/src/tools/flx_replace.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> filename = System::argv 1;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> re = System::argv 2;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> r = System::argv 3;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="small_keyword" title="conditional">if</span> System::argc != 4 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line6></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Usage: flx_replace filename regexp replacement"</span>;
+<span class="lineno" id=line7></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"  replacement may contain \\1 \\2 etc for matching subgroups"</span>;
+<span class="lineno" id=line8></span>    System::exit 1;
+<span class="lineno" id=line9></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a mutable variable">var</span> x = load filename;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Define a mutable variable">var</span> cre = RE2 re;
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = search_and_replace (x, 0uz, cre, r);
+<span class="lineno" id=line15></span>  <span class="library" title="Print a string to standard output">print</span> <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line16></span>  
+</pre></p></div><h2 id='Batch_Replace_h'><img src='/share/src/web/images/minus.gif' id='Batch Replace' onclick='toggle(this,"Batch_Replace_d")' alt='+'/> 1.5 Batch Replace</h2><div id='Batch_Replace_d' style='display:block'>
+<p>This program combines <code>flx_cp</code> and <code>flx_replace</code> to perform
+a wildcarded safe copy of a set of files from one location
+to another with renaming, and also replaces any lines in
+any of the files matching some pattern with another string
+specified by a replacement.
+</p><pre class='inclusion'>
+$PWD/src/tools/flx_batch_replace.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_cp"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> dbg(s:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span>={ <span class="library" title="Print a string to standard output with newline appended">println</span> s; <span class="small_keyword" title="return">return</span> s; }
+<span class="lineno" id=line4></span>  <span class="comment">//println$ System::args ();</span>
+<span class="lineno" id=line5></span>  <span class="comment">//println$ "argc=" + str System::argc;</span>
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a mutable variable">var</span> dir = <span class="fstring">""</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a mutable variable">var</span> regex = <span class="fstring">""</span>;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a mutable variable">var</span> target = <span class="fstring">""</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a mutable variable">var</span> search = <span class="fstring">""</span>;
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a mutable variable">var</span> replace = <span class="fstring">""</span>;
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a mutable variable">var</span> live = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Define a mutable variable">var</span> verbose = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 1 <span class="small_keyword" title="upwards counting for loop">upto</span> System::argc <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a mutable variable">var</span> arg = System::argv i;
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="conditional">if</span> arg == <span class="fstring">"--test"</span> <span class="small_keyword" title="imperative code begins">do</span> live = <span class="library" title="false value">false</span>; 
+<span class="lineno" id=line18></span>    <span class="small_keyword" title="conditional">elif</span> arg == <span class="fstring">"-v"</span> <span class="small_keyword" title="logical disjunction">or</span> arg == <span class="fstring">"--verbose"</span> <span class="small_keyword" title="imperative code begins">do</span> verbose = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line19></span>    <span class="small_keyword" title="conditional">elif</span> arg.[0] == <span class="library" title="binding of C char type">char</span> <span class="fstring">"-"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line20></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Unknown option '"</span> + arg+<span class="fstring">"'"</span>; 
+<span class="lineno" id=line21></span>      System::exit(1);
+<span class="lineno" id=line22></span>    <span class="small_keyword" title="conditional">elif</span> dir == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> dir = arg;
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="conditional">elif</span> regex == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> regex = arg;
+<span class="lineno" id=line24></span>    <span class="small_keyword" title="conditional">elif</span> target == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> target = arg;
+<span class="lineno" id=line25></span>    <span class="small_keyword" title="conditional">elif</span> search == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> search = arg;
+<span class="lineno" id=line26></span>    <span class="small_keyword" title="conditional">elif</span> replace == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> replace = arg;
+<span class="lineno" id=line27></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line28></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>  <span class="small_keyword" title="conditional">if</span> dir == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing directory name (arg1)"</span>; System::exit(1);
+<span class="lineno" id=line31></span>  <span class="small_keyword" title="conditional">elif</span> regex == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing regex (arg2)"</span>; System::exit(1);
+<span class="lineno" id=line32></span>  <span class="small_keyword" title="conditional">elif</span> target == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing target (arg3)"</span>; System::exit(1);
+<span class="lineno" id=line33></span>  <span class="small_keyword" title="conditional">elif</span> search == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing search regex (arg4)"</span>; System::exit(1);
+<span class="lineno" id=line34></span>  <span class="small_keyword" title="conditional">elif</span> replace == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Missing replace spec (arg5)"</span>; System::exit(1);
+<span class="lineno" id=line35></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="small_keyword" title="conditional">if</span> verbose <span class="small_keyword" title="imperative code begins">do</span> <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"#Dir='"</span> + dir + <span class="fstring">"', pattern='"</span>+regex+<span class="fstring">"', dst='"</span>+target+<span class="fstring">"'"</span>; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  <span class="big_keyword" title="Define a mutable variable">var</span> searchre = RE2 search;
+<span class="lineno" id=line40></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> sandr (src: <span class="library" title="binding of C++ string type">string</span>, dst:<span class="library" title="binding of C++ string type">string</span>) = 
+<span class="lineno" id=line41></span>  {
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define a mutable variable">var</span> text = load src;
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = search_and_replace (text, 0uz, searchre, replace); 
+<span class="lineno" id=line44></span>    save (dst, <span class="small_keyword" title="value of function return used in post condition">result</span>);
+<span class="lineno" id=line45></span>    <span class="small_keyword" title="return">return</span> <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line46></span>  }
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>  <span class="big_keyword" title="Define a mutable variable">var</span> filere = Re2::RE2 regex;
+<span class="lineno" id=line49></span>  CopyFiles::processfiles sandr (dir, filere, target, live, verbose);
+<span class="lineno" id=line50></span>  System::exit(0);
+</pre></p></div><h2 id='Renumbering._h'><img src='/share/src/web/images/minus.gif' id='Renumbering.' onclick='toggle(this,"Renumbering._d")' alt='+'/> 1.6 Renumbering.</h2><div id='Renumbering._d' style='display:block'>
+<p>This tool analyses a single directory looking for files whose
+basename matches a pattern containing a number in a fixed
+position.
+</p><p>It then renumbers all the files with a number greater or equal
+to a specified value, adding or subtracting a certain amount
+to make space in the sequence or fill a gap in it.
+</p><p>It was designed for document renumbering, especially Felix
+tutorial documents, since the Felix webserver automatically
+calculates Next and Prev links when it asked to display
+an <code>fdoc</code> file with a numerical suffix of two digits.
+However it can be used on any sequenced file set.
+</p><pre class='inclusion'>
+$PWD/src/tools/flx_renumber.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// File renumbering</span>
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="small_keyword" title="conditional">if</span> System::argc &lt; 4 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line4></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Usage: rentut dir regexp first dst"</span>;
+<span class="lineno" id=line5></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"For tutorial try:"</span>;
+<span class="lineno" id=line6></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> r<span class="fstring">"  dir = 'src/web'"</span>;
+<span class="lineno" id=line7></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> r<span class="fstring">"  re = 'tut_(\d*)\\.fdoc'"</span>;
+<span class="lineno" id=line8></span>    System::exit(1);
+<span class="lineno" id=line9></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  s_dir := System::argv 1;
+<span class="lineno" id=line12></span>  s_re := System::argv 2;
+<span class="lineno" id=line13></span>  s_first := System::argv 3;
+<span class="lineno" id=line14></span>  s_moveto  := System::argv 4;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  first := <span class="library" title="binding of C size_t type">size</span> s_first;
+<span class="lineno" id=line17></span>  moveto := <span class="library" title="binding of C size_t type">size</span> s_moveto;
+<span class="lineno" id=line18></span>  re := RE2(s_re);
+<span class="lineno" id=line19></span>  <span class="small_keyword" title="conditional">if</span> first == moveto <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line20></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"src = dst, not moving anything"</span>;
+<span class="lineno" id=line21></span>    System::exit 0;
+<span class="lineno" id=line22></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Renumber files in "</span> + s_dir+ <span class="fstring">" matching "</span>+<span class="fstring">"'"</span>+s_re+<span class="fstring">"'"</span>+<span class="fstring">" from "</span> + <span class="library" title="Convert a value to a string">str</span> first + <span class="fstring">" to "</span> + <span class="library" title="Convert a value to a string">str</span> moveto;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  docs := FileSystem::regfilesin(s_dir, re);
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Define a mutable variable">var</span> files = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span> docs;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  <span class="comment">// direction: if first &lt; moveto, we're moving up, so we have to start at the end and work down.</span>
+<span class="lineno" id=line30></span>  <span class="comment">// if first &gt; moveto, we're moving down, so we have to start at the start and work up.</span>
+<span class="lineno" id=line31></span>  comparator := <span class="small_keyword" title="conditional">if</span> first &lt; moveto <span class="small_keyword" title="conditional">then</span> <span class="tex_symbol" title="\gt">\(\gt\)</span> of (<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>) <span class="small_keyword" title="conditional">else</span> <span class="tex_symbol" title="\lt">\(\lt\)</span> of (<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>) <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  sort comparator of (<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>) files;
+<span class="lineno" id=line34></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Files = "</span> + <span class="library" title="Convert a value to a string">str</span> files;
+<span class="lineno" id=line35></span>  <span class="big_keyword" title="Define a mutable variable">var</span> groups : <span class="library" title="array type, a tuple of all components the same type">array</span>[StringPiece,2];
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="library" title="call procedure on each element of data structure">iter</span> 
+<span class="lineno" id=line38></span>    (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span>(<span class="big_keyword" title="Define a mutable variable">var</span> f:<span class="library" title="binding of C++ string type">string</span>){
+<span class="lineno" id=line39></span>      <span class="library" title="Print a string to standard output with newline appended">println</span> f;
+<span class="lineno" id=line40></span>      res := Match(re, StringPiece f,0,ANCHOR_BOTH,<span class="hack">C_hack</span>::cast[+StringPiece] (&amp;groups),2);
+<span class="lineno" id=line41></span>      <span class="small_keyword" title="conditional">if</span> res <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line42></span>        <span class="comment">//println$ "Group 1 = " + str (groups.1);</span>
+<span class="lineno" id=line43></span>        n := <span class="library" title="binding of C size_t type">size</span> (<span class="library" title="Convert a value to a string">str</span> (groups.1));
+<span class="lineno" id=line44></span>        <span class="small_keyword" title="conditional">if</span> n &gt;= first <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line45></span>          m := n + moveto - first;
+<span class="lineno" id=line46></span>          s := f<span class="fstring">"%02d"</span> m.<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line47></span>          soffset := groups.1.data - (&amp;f).stl_begin;
+<span class="lineno" id=line48></span>          <span class="big_keyword" title="Define a mutable variable">var</span> newf = f;
+<span class="lineno" id=line49></span>          replace(&amp;newf,soffset.<span class="library" title="binding of C size_t type">size</span>,2uz,s);
+<span class="lineno" id=line50></span>          res2 := FileSystem::rename_file(
+<span class="lineno" id=line51></span>            Filename::join (s_dir,f),
+<span class="lineno" id=line52></span>            Filename::join (s_dir,newf)
+<span class="lineno" id=line53></span>          ); 
+<span class="lineno" id=line54></span>          <span class="small_keyword" title="conditional">if</span> res2 != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line55></span>            <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Rename "</span> + f + <span class="fstring">" -&gt; "</span> + newf + <span class="fstring">" failed"</span>;
+<span class="lineno" id=line56></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line57></span>            <span class="library" title="Print a string to standard output with newline appended">println</span>$ f + <span class="fstring">" -&gt; "</span> + newf;
+<span class="lineno" id=line58></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line59></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line60></span>          <span class="comment">// println$ str n + " Unchanged";</span>
+<span class="lineno" id=line61></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line62></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line63></span>        <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"NO match"</span>;
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line65></span>    }) 
+<span class="lineno" id=line66></span>  files;
+<span class="lineno" id=line67></span>  
+</pre></p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

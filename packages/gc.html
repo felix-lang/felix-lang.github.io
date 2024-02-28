@@ -1,0 +1,2878 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Memory Management</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"The Felix Garbage Collector.",
+"Thread Control Base",
+"Memory Management Abstraction Interface.",
+"Pointer data",
+"<tt>gc_shape_t</tt> types",
+"Standard Scanner",
+"Standard Finaliser",
+"Allocator Abstraction",
+"The collector abstraction",
+"Memory Management Abstraction Implementation.",
+"Collector interface.",
+"Collector Implementation",
+"Garbage Collector Interface",
+"Rtti introspection",
+"Low level Garbage Collector Access",
+"Bootstrap Build System",
+"Configuration Database Records"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#The Felix Garbage Collector._h')"> <a href="#The_Felix_Garbage_Collector._h">The Felix Garbage Collector.</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Thread_Control_Base_h">Thread Control Base</a></div>
+      <div class=m2><a href="#Memory_Management_Abstraction_Interface._h">Memory Management Abstraction Interface.</a></div>
+      <div class=m2><a href="#<tt>gc_shape_t</tt>_types_h"><tt>gc_shape_t</tt> types</a></div>
+      <div class=m2><a href="#Allocator_Abstraction_h">Allocator Abstraction</a></div>
+      <div class=m2><a href="#The_collector_abstraction_h">The collector abstraction</a></div>
+      <div class=m2><a href="#Memory_Management_Abstraction_Implementation._h">Memory Management Abstraction Implementation.</a></div>
+      <div class=m2><a href="#Collector_interface._h">Collector interface.</a></div>
+      <div class=m2><a href="#Collector_Implementation_h">Collector Implementation</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Garbage Collector Interface_h')"> <a href="#Garbage_Collector_Interface_h">Garbage Collector Interface</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Rtti introspection_h')"> <a href="#Rtti_introspection_h">Rtti introspection</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Low level Garbage Collector Access_h')"> <a href="#Low_level_Garbage_Collector_Access_h">Low level Garbage Collector Access</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Bootstrap Build System_h')"> <a href="#Bootstrap_Build_System_h">Bootstrap Build System</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Configuration Database Records_h')"> <a href="#Configuration_Database_Records_h">Configuration Database Records</a></div>
+      <div class=sm id=menu6>
+      </div>
+    <script>counter_max=6;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='The_Felix_Garbage_Collector._h'><img src='/share/src/web/images/minus.gif' id='The Felix Garbage Collector.' onclick='toggle(this,"The_Felix_Garbage_Collector._d")' alt='+'/> 1 The Felix Garbage Collector.</h1><div id='The_Felix_Garbage_Collector._d' style='display:block'>
+<p>Felix uses a garbage collector to provide secure automatic
+memory management.
+</p><p>For reasons of C and C++ compatibility, the allocator
+used is just <code>malloc</code>. Similarly, to ensure C and C++
+interoperability, Felix GC uses a naive mark and sweep
+algorithm instead of a faster and more modern copying 
+collector. C/C++ objects can't be moved easily and
+read or write barriers cannot be easily implemented.
+</p><p>The collector depends heavily on the <code>Judy1</code> and <code>JudyL</code>
+  ::flx::pthread::thread_control_base_t *tc;
+data structures. These are ultra-high performance stores
+which provide fast, scalable, O(1) linear scanning both
+up and down, as well as random access, deletion, and insertion.
+Judy's key disadvantage is that it only works with machine
+word size keys and (for <code>JudyL</code>) machine word size data.
+</p><p>The Felix collector is a hybrid. Heap allocated objects
+are associated with a shape object which provides a precise
+map of the location of all pointers in the object, accelerating
+the scan for reachable objects and reducing the number of
+unreachable objects that are not collected. On the other hand
+the machine stack of each thread is scanned conservatively,
+since Felix has no precise information on stack allocated data.
+</p><p>The GC can handle interior pointers. These are pointers to 
+an address past the starting point of an object. However
+Felix does not consider a pointer "one past the end" to
+be interior. Care must be taken not to increment pointers
+into arrays past the last element. This is a deliberate 
+design choice: a past the end pointer might be the head
+of a consecutively allocated object. Without this constraint
+an allocator might be forced to introduce padding.
+</p><p>The GC can also handle C pointers mixed in with
+Felix pointers, in other words, where an object has
+a designated slot for a pointer, either a Felix or C
+pointer may be used. It can do this because it keeps
+track of all objects it allocated.
+</p><p>The GC also assumes all objects are arrays of fixed
+maximum extent. It tracks the maximum number of elements
+the array might contain as well as the actual number used.
+JudyL arrays map addresses to the base shape, the array
+bound, and the actual usage, with missing keys designating 1 
+element in the last two cases.
+</p><p>The GC also supports finalisation. By default the finaliser
+of a C++ object is a function calling the object's type's
+destructor. This means a complex data structure such as an
+STL map can be used in Felix, provided the value type
+does not contain GC managed pointers (unless those pointers are 
+marked as roots). The finaliser calls
+the destructor to release storage, relieving the GC of the
+task of tracking the individual objects comprising the
+data structure.
+</p><p>Thus, the Felix GC is more efficient that one might
+expect because it does not need to track every allocation,
+nor scan every object. In addition, the programmer is free
+to use C style manual allocation and deallocation
+for many data types. Never-the-less the GC is required for
+some union types and some function and procedure closures.
+It is also useful for many function data structures including
+persistent purely functional lists.
+</p><p>We should note that the Felix GC does have one
+significant drawback: although it is thread safe,
+and performance suffers a bit from serialisation
+of allocations, collections require a voluntary world
+stop by all threads. There is no portable way to stop
+threads at arbitrary times, so if one thread requests
+a collection, all the threads must wait until the last
+one yields to the stop request, and then the collection
+is performed.
+</p><p>It is also essential to be aware that the world stop
+uses condition variables for synchronisation. Because of this
+unconstrained use of native synchronisation vehicles such
+as a mutex, semaphore, or condition variable is not possible.
+For example if one thread holds a mutex locked and a second
+thread is waiting, and the lock holder triggers a world
+stop, the waiting thread cannot respond, resulting in a deadlock.
+</p><p>The library provides safe alternative synchronisation machinery
+which is aware of the GC world stop.
+</p><h2 id='Thread_Control_Base_h'><img src='/share/src/web/images/minus.gif' id='Thread Control Base' onclick='toggle(this,"Thread_Control_Base_d")' alt='+'/> 1.1 Thread Control Base</h2><div id='Thread_Control_Base_d' style='display:block'>
+<p>Note: this is part of the <code>flx_pthread</code> library not the <code>flx_gc</code> library.
+But only the header file is required. The <code>thread_control_base_t</code>
+destructor is defined in <code>pthread_thread_control.cpp</code>.
+</p><p>The gc constuctor requires a <code>thread_control_base_t</code> pointer to be passed
+to it. The actual thread safe collector is defined in the pthread library.
+A non-thread version of the thread control base might be constructed
+for a single threaded Felix world instantiation but we do not currently
+provide one as pthreads are considered mandatory for Felix.
+</p><pre class='inclusion'>
+share/lib/rtl/pthread_thread_control_base.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __PTHREAD_THREAD_CONTROL_BASE_HPP__
+#<span class="preproc">define</span> __PTHREAD_THREAD_CONTROL_BASE_HPP__
+
+#<span class="preproc">include</span> <span class="fstring">"flx_pthread_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;vector&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+
+  <span class="big_keyword">enum</span> thread_kind_t {mainline,embedded,pthread,process,realtime,joinable, foreign};
+  <span class="qualifier">char</span> <span class="qualifier">const</span> *str(thread_kind_t);
+
+
+<span class="big_keyword">struct</span> thread_data_t {
+  thread_data_t(<span class="qualifier">void</span> *b, thread_kind_t k) : stack_base(b), stack_top(0), active(true), thread_kind(k) {}
+  thread_kind_t thread_kind;
+  <span class="qualifier">void</span> *stack_base;
+  <span class="qualifier">void</span> *stack_top;
+  bool active;
+};
+
+<span class="big_keyword">struct</span> memory_range_t {
+  memory_range_t(<span class="qualifier">void</span> *b_, <span class="qualifier">void</span> *e_) : b(b_), e(e_) {}
+  <span class="qualifier">void</span> *b;
+  <span class="qualifier">void</span> *e;
+};
+
+<span class="big_keyword">typedef</span> ::<span class="small_keyword">std</span>::vector&lt;memory_range_t&gt; memory_ranges_t;
+
+<span class="big_keyword">class</span> PTHREAD_EXTERN world_stop_notifier_t 
+{
+<span class="qualifier">public</span>:
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> notify_world_stop()=0;
+  <span class="qualifier">virtual</span> ~world_stop_notifier_t();
+};
+
+<span class="big_keyword">class</span> PTHREAD_EXTERN thread_control_base_t
+{
+<span class="qualifier">public</span>:
+  <span class="qualifier">virtual</span> bool get_debug() <span class="qualifier">const</span> =0;
+  <span class="qualifier">virtual</span> bool world_stop() = 0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> world_start() = 0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> resume() = 0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> suspend() = 0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> yield() = 0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> join_all() = 0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> set_realtime() = 0 ;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> add_thread(<span class="qualifier">void</span>*, thread_kind_t)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> remove_thread()=0;
+  <span class="qualifier">virtual</span> size_t thread_count()=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> register_world_stop_notifier(world_stop_notifier_t *)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> unregister_world_stop_notifier(world_stop_notifier_t *)=0;
+  <span class="qualifier">virtual</span> thread_data_t *get_thread_data_pointer()<span class="qualifier">const</span>=0;
+  <span class="qualifier">virtual</span> ~thread_control_base_t()=0;
+  <span class="qualifier">virtual</span>  memory_ranges_t *get_block_list() = 0; <span class="comment">// caller owns result and should delete it
+</span>};
+}}
+#<span class="preproc">endif</span>
+</pre></p></div><h2 id='Memory_Management_Abstraction_Interface._h'><img src='/share/src/web/images/minus.gif' id='Memory Management Abstraction Interface.' onclick='toggle(this,"Memory_Management_Abstraction_Interface._d")' alt='+'/> 1.2 Memory Management Abstraction Interface.</h2><div id='Memory_Management_Abstraction_Interface._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_gc.hpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">ifndef</span> __FLX_GC_H__
+#<span class="preproc">define</span> __FLX_GC_H__
+
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stddef.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_thread_control_base.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_compiler_support_bodies.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;chrono&gt;</span>
+
+<span class="comment">// we use an STL set to hold the collection of roots
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;set&gt;</span>
+
+<span class="big_keyword">namespace</span> flx {
+<span class="big_keyword">namespace</span> gc {
+<span class="big_keyword">namespace</span> generic {
+<span class="comment">// Here are the types we refer to:
+</span>
+<span class="big_keyword">struct</span> GC_EXTERN gc_shape_t;      <span class="comment">// the shape of collectable objects
+</span><span class="big_keyword">struct</span> GC_EXTERN collector_t;     <span class="comment">// the collector itself
+</span><span class="big_keyword">struct</span> GC_EXTERN allocator_t;     <span class="comment">// the allocator used
+</span><span class="big_keyword">struct</span> GC_EXTERN offset_data_t;   <span class="comment">// private data for offset scanner
+</span><span class="big_keyword">struct</span> GC_EXTERN pointer_data_t;  <span class="comment">// description of a pointer
+</span>
+</pre></p><h3 id='Pointer_data_h'><img src='/share/src/web/images/minus.gif' id='Pointer data' onclick='toggle(this,"Pointer_data_d")' alt='+'/> 1.2.1 Pointer data</h3><div id='Pointer_data_d' style='display:block'>
+<p>This structure is used to provide the client with information
+about a pointer. The <code>pointer</code> field is the pointer about which
+information has been requested. If this field is not interior to
+an object managed by the GC, the rest of the fields are zero.
+</p><p>Otherwise the <code>head</code> field contains the lowest address
+of the object, also known as the <em>base</em>or <em>head</em> address.
+The <code>max_elements</code> field contains a count of the maximum number of
+objects which can fit in the allocated store, that is, the <em>array bound</em>.
+The <code>used_elements</code> field contains a count of the number of array slots actually
+used. Finally the <code>shape</code> field contains a pointer to the <code>gc_shape_t</code>
+object for the element type. , that is, the <em>array bound</em>.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_gc.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> GC_EXTERN pointer_data_t
+{
+  <span class="qualifier">void</span> *pointer;                      <span class="comment">//< candidate pointer
+</span>  <span class="qualifier">void</span> *head;                         <span class="comment">//< head object
+</span>  size_t max_elements;         <span class="comment">//< allocated slots
+</span>  size_t used_elements;        <span class="comment">//< used slots
+</span>  gc_shape_t *shape;                  <span class="comment">//< shape
+</span>};
+
+</pre></p></div></div><h2 id='<tt>gc_shape_t</tt>_types_h'><img src='/share/src/web/images/minus.gif' id='<tt>gc_shape_t</tt> types' onclick='toggle(this,"<tt>gc_shape_t</tt>_types_d")' alt='+'/> 1.3 <tt>gc_shape_t</tt> types</h2><div id='<tt>gc_shape_t</tt>_types_d' style='display:block'>
+<p>Types required for the RTTI object.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_gc.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">enum</span> gc_shape_flags_t {
+  gc_flags_default    = 0,            <span class="comment">//< collectable and mobile
+</span>  gc_flags_immobile   = 1,            <span class="comment">//< cannot be moved
+</span>  gc_flags_persistent = 2,            <span class="comment">//< cannot be deallocated
+</span>  gc_flags_conservative = 4           <span class="comment">//< scan whole object conservatively
+</span>};
+
+<span class="comment">/// Describes runtime object shape.
+</span><span class="big_keyword">typedef</span> <span class="qualifier">void</span> finaliser_t (collector_t*, <span class="qualifier">void</span>*); 
+<span class="big_keyword">typedef</span> <span class="qualifier">void</span> *scanner_t(collector_t*, gc_shape_t *, <span class="qualifier">void</span> *, size_t, <span class="qualifier">int</span>);
+<span class="big_keyword">typedef</span> ::<span class="small_keyword">std</span>::string encoder_t (<span class="qualifier">void</span> *);
+<span class="big_keyword">typedef</span> ::<span class="small_keyword">std</span>::size_t decoder_t(<span class="qualifier">void</span> *, <span class="qualifier">char</span> *, ::<span class="small_keyword">std</span>::size_t);
+<span class="big_keyword">typedef</span> <span class="qualifier">void</span> copier_t (<span class="qualifier">void</span>*,<span class="qualifier">void</span>*);
+<span class="big_keyword">typedef</span> <span class="qualifier">void</span> dflt_init_t (<span class="qualifier">void</span>*);
+
+
+<span class="big_keyword">struct</span> GC_EXTERN gc_shape_t
+{
+  <span class="qualifier">char</span> <span class="qualifier">const</span> *cname;              <span class="comment">///< C++ typename
+</span>  ::<span class="small_keyword">std</span>::size_t count;            <span class="comment">///< static array element count
+</span>  ::<span class="small_keyword">std</span>::size_t amt;              <span class="comment">///< bytes allocated
+</span>  finaliser_t *finaliser;         <span class="comment">///< finalisation function
+</span>  ValueType *fcops;               <span class="comment">///< first class ops
+</span><span class="comment">/*
+  copier_t *copy_init;
+  copier_t *move_init;
+  copier_t *copy_assign;
+  copier_t *move_assign;
+**</span>/
+  <span class="qualifier">void</span> <span class="qualifier">const</span> *<span class="qualifier">private</span>_data;       <span class="comment">///< private data passed to scanner
+</span>  scanner_t *scanner;             <span class="comment">///< scanner function 
+</span>  encoder_t *encoder;             <span class="comment">///< encoder function 
+</span>  decoder_t *decoder;             <span class="comment">///< encoder function 
+</span>  gc_shape_flags_t flags;         <span class="comment">///< flags
+</span>  size_t allocations;
+  size_t deallocations;
+};
+
+<span class="comment">// STL CONTAINER SCANNER
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> C&gt;
+<span class="qualifier">void</span> *stl_container_scanner(
+  ::flx::gc::generic::collector_t *gc, 
+  ::flx::gc::generic::gc_shape_t *container_shape, 
+  <span class="qualifier">void</span> *location, 
+  size_t nobjects, 
+  <span class="qualifier">int</span> recdepth)
+{
+  auto object_shape = ((::flx::gc::generic::gc_shape_t * *)(container_shape-&gt;<span class="qualifier">private</span>_data))[0];
+  auto object_scanner = object_shape-&gt;scanner;
+  printf(<span class="fstring">"stl_container_scanner,\n  loc=%p shape=%s@%p, size=%ld,\n  value shape=%s@%p value_scanner=%p\n"</span>, 
+    location, 
+    container_shape-&gt;cname, container_shape, ((C*)location)-&gt;size(),
+    object_shape-&gt;cname, object_shape,
+    object_scanner
+  );
+  <span class="small_keyword">if</span> (object_scanner) {
+    auto &amp; container = *(C*)location;
+    <span class="small_keyword">for</span> (auto &amp; v : container) {
+      printf(<span class="fstring">"    .. invoking element scanner for address %p\n"</span>, &amp;v);
+      object_scanner (gc,object_shape,&amp;v,1,recdepth+1);
+    }
+  }
+  <span class="small_keyword">return</span> nullptr;
+}
+
+
+GC_EXTERN <span class="qualifier">extern</span> gc_shape_t _ptr_<span class="qualifier">void</span>_map;
+
+</pre></p><h3 id='Standard_Scanner_h'><img src='/share/src/web/images/minus.gif' id='Standard Scanner' onclick='toggle(this,"Standard_Scanner_d")' alt='+'/> 1.3.1 Standard Scanner</h3><div id='Standard_Scanner_d' style='display:block'>
+<p>The standard scanner <code>scan_by_offsets</code> uses an array 
+containing offsets into an object where pointers are located.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_gc.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> GC_EXTERN offset_entry_t {
+  ::<span class="small_keyword">std</span>::size_t offset;
+  <span class="qualifier">void</span> *descriptor; <span class="comment">// TO BE FIXED
+</span>};
+
+<span class="big_keyword">struct</span> GC_EXTERN offset_data_t
+{
+  ::<span class="small_keyword">std</span>::size_t n_offsets;
+  offset_entry_t <span class="qualifier">const</span> *offsets;
+};
+
+GC_EXTERN scanner_t scan_by_offsets;
+
+</pre></p></div><h3 id='Standard_Finaliser_h'><img src='/share/src/web/images/minus.gif' id='Standard Finaliser' onclick='toggle(this,"Standard_Finaliser_d")' alt='+'/> 1.3.2 Standard Finaliser</h3><div id='Standard_Finaliser_d' style='display:block'>
+<p>The standard finaliser is a template which destoys an object
+using the C++ destructor. In the RTTI object if the
+finaliser is zero, this means the compiler knew the
+object was a POD type with a trivial destructor,
+and the zero allows the collector to skip the call
+to a do nothing finaliser function.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_gc.hpp</pre>
+<p><pre class='cppbg'>
+<span class="comment">/*
+ * The following template is provided as a standard wrapper
+ * for C++ class destructors. The term std_finaliser<T>
+ * denotes a function pointer to the wrapper for the destructor
+ * of class T, which can be used as a finaliser in the shape
+ * descriptor of a T. The client is cautioned than the order
+ * of finalisation may not be what is expected. Finalisers
+ * should be provided for all C++ objects managed by the Felix
+ * collector and not refering to Felix objects,
+ * but which contain pointers to other objects that need
+ * to be deleted when the main object is destroyed;
+ * for example a string class managing an array of char
+ * requires its destructor be invoked to delete the managed
+ * array, and so a finaliser wrapping the destructor must
+ * be provided.
+ *
+ * C data types may, of course, also require destruction,
+ * and Felix therefore can provide programmers with
+ * the convenience of C++ destructors, even for C data types.
+ **</span>/
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+<span class="qualifier">void</span> <span class="small_keyword">std</span>_finaliser(collector_t*, <span class="qualifier">void</span> *t)
+{
+  <span class="qualifier">static</span>_cast&lt;T*&gt;(t) -&gt; ~T();
+}
+
+</pre></p></div></div><h2 id='Allocator_Abstraction_h'><img src='/share/src/web/images/minus.gif' id='Allocator Abstraction' onclick='toggle(this,"Allocator_Abstraction_d")' alt='+'/> 1.4 Allocator Abstraction</h2><div id='Allocator_Abstraction_d' style='display:block'>
+<p>The allocator is used by the gc to allocate and deallocate
+heap storage. Although abstract, the standard allocator
+use <code>malloc</code> and <code>free</code> and this is assumed by a lot
+of code in the RTL and is an advertised property of the
+Felix system. Nevertheless providing an abstraction helps
+with software organisation.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_gc.hpp</pre>
+<p><pre class='cppbg'><span class="comment">/// Allocator abstraction.
+</span>
+<span class="big_keyword">struct</span> allocator_t {
+  bool debug;
+  allocator_t():debug(false){}
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> *allocate(::<span class="small_keyword">std</span>::size_t)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *)=0;
+  <span class="qualifier">virtual</span> ~allocator_t();
+  <span class="qualifier">void</span> set_debug(bool d){debug=d;}
+};
+
+</pre></p></div><h2 id='The_collector_abstraction_h'><img src='/share/src/web/images/minus.gif' id='The collector abstraction' onclick='toggle(this,"The_collector_abstraction_d")' alt='+'/> 1.5 The collector abstraction</h2><div id='The_collector_abstraction_d' style='display:block'>
+<p>Finally the actual garbage collector abstraction.
+</p><p>The abstraction is essential to allow a common interface
+to the single threaded and thread safe collectors.
+The thread safe collector is just a wrapper around the 
+unsafe collector with appropriate locking.
+</p><p>Those familiar with C++ object oriented techniques,
+may be surprised to learn their understanding of how
+to use virtual methods is almost certainly completely
+and utterly wrong! This is partly due to incorrect
+advice in almost every book published on the subject,
+and online advice from so-called experts including
+member of the committee itself.
+</p><p>The collector we present rigidly follows the correct
+rules which result in a quite complex structure.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_gc.hpp</pre>
+<p><pre class='cppbg'>
+<span class="comment">/// Collector abstraction.
+</span><span class="big_keyword">struct</span> GC_EXTERN collector_t
+{
+  bool debug;
+  bool report_gcstats;
+  <span class="qualifier">void</span> *module_registry; 
+  <span class="qualifier">void</span> set_debug(bool d, bool stats){debug=d;report_gcstats=stats;}
+  collector_t();
+  <span class="qualifier">virtual</span> ~collector_t();
+  <span class="qualifier">virtual</span> ::flx::pthread::thread_control_base_t *get_thread_control()<span class="qualifier">const</span> =0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> register_pointer(<span class="qualifier">void</span> *q, <span class="qualifier">int</span> reclimit)=0;
+  ::<span class="small_keyword">std</span>::chrono::time_point&lt;::<span class="small_keyword">std</span>::chrono::high_resolution_clock&gt; start_time;
+  ::<span class="small_keyword">std</span>::chrono::duration&lt;<span class="qualifier">double</span>&gt; gc_time;
+
+  <span class="qualifier">virtual</span> bool inrange(<span class="qualifier">void</span> *)<span class="qualifier">const</span> =0;
+  <span class="comment">// These routines just provide statistics.
+</span>  size_t get_allocation_count()<span class="qualifier">const</span> {
+    <span class="small_keyword">return</span> v_get_allocation_count();
+  }
+
+  size_t get_root_count()<span class="qualifier">const</span> {
+    <span class="small_keyword">return</span> v_get_root_count();
+  }
+
+  size_t get_allocation_amt()<span class="qualifier">const</span> {
+    <span class="small_keyword">return</span> v_get_allocation_amt();
+  }
+
+  <span class="comment">// Hooks for the supplied allocator, which operate in
+</span>  <span class="comment">// terms of shape objects rather than raw memory amounts.
+</span>  <span class="qualifier">void</span> *allocate(gc_shape_t *shape, size_t x) {
+    <span class="small_keyword">return</span> v_allocate(shape,x);
+  }
+
+  <span class="comment">// The mark and sweep collector algorithm.
+</span>  size_t collect() {
+    <span class="comment">//fprintf(stderr, "Collecting\n");
+</span>    ::<span class="small_keyword">std</span>::chrono::time_point&lt; ::<span class="small_keyword">std</span>::chrono::high_resolution_clock&gt; start_time, end_time;
+    start_time = ::<span class="small_keyword">std</span>::chrono::high_resolution_clock::now();
+    size_t x = v_collect();
+    end_time = ::<span class="small_keyword">std</span>::chrono::high_resolution_clock::now();
+    ::<span class="small_keyword">std</span>::chrono::duration&lt;<span class="qualifier">double</span>&gt; elapsed = end_time - start_time;
+
+    <span class="small_keyword">if</span> (debug)
+      fprintf(stderr, <span class="fstring">"Collecting DONE in %10.5f seconds\n"</span>, elapsed.count());
+    gc_time += elapsed;
+    <span class="small_keyword">return</span> x;
+  }
+
+  <span class="comment">// Routines to add and remove roots.
+</span>  <span class="qualifier">void</span> add_root(<span class="qualifier">void</span> *memory) {
+    v_add_root(memory);
+  }
+
+  <span class="qualifier">void</span> remove_root(<span class="qualifier">void</span> *memory) {
+    v_remove_root(memory);
+  }
+
+  <span class="qualifier">void</span> free_all_mem() {
+    <span class="comment">//fprintf(stderr,"Dispatching to free all mem\n");
+</span>    v_free_all_mem();
+  }
+
+  <span class="qualifier">void</span> finalise(<span class="qualifier">void</span> *frame) {
+    v_finalise(frame);
+  }
+
+  <span class="comment">// Integrity check for the data structure being managed.
+</span>  <span class="comment">// array management
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> set_used(<span class="qualifier">void</span> *memory, size_t)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> incr_used(<span class="qualifier">void</span> *memory, ptrdiff_t)=0;
+  <span class="qualifier">virtual</span> size_t get_used(<span class="qualifier">void</span> *memory)=0;
+  <span class="qualifier">virtual</span> size_t get_count(<span class="qualifier">void</span> *memory)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> *create_empty_array( gc_shape_t *shape, size_t count)=0;
+
+  <span class="qualifier">virtual</span> pointer_data_t get_pointer_data(<span class="qualifier">void</span> *)=0;
+<span class="qualifier">private</span>:
+  <span class="qualifier">virtual</span> size_t v_get_allocation_count()<span class="qualifier">const</span>=0;
+  <span class="qualifier">virtual</span> size_t v_get_root_count()<span class="qualifier">const</span>=0;
+  <span class="qualifier">virtual</span> size_t v_get_allocation_amt()<span class="qualifier">const</span>=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> *v_allocate(gc_shape_t *shape, size_t)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> v_finalise(<span class="qualifier">void</span> *fp)=0;
+  <span class="qualifier">virtual</span> size_t v_collect()=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> v_add_root(<span class="qualifier">void</span> *memory)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> v_remove_root(<span class="qualifier">void</span> *memory)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> v_free_all_mem()=0;
+
+  <span class="comment">// It doesn't make any sense to copy collector objects
+</span>  <span class="comment">// about.
+</span>  <span class="qualifier">void</span> operator=(collector_t <span class="qualifier">const</span>&amp;);
+  collector_t(collector_t <span class="qualifier">const</span>&amp;);
+};
+
+<span class="comment">// The gc_profile_t is a grab bag of controls related to the collector.
+</span><span class="big_keyword">struct</span> GC_EXTERN gc_profile_t {
+  bool debug_driver;
+  bool debug_allocations;     <span class="comment">///< allocator debug on/off
+</span>  bool debug_collections;     <span class="comment">///< collector debug on/off
+</span>  bool report_collections;    <span class="comment">///< collector debug on/off
+</span>  bool report_gcstats;        <span class="comment">///< print final gc statistics
+</span>  bool allow_collection_anywhere; <span class="comment">///< enable collect on allocate
+</span>
+  size_t gc_freq;      <span class="comment">///< how often to collect
+</span>  size_t gc_counter;   <span class="comment">///< counter to check if time to collect
+</span>
+  size_t min_mem;      <span class="comment">///< min memory before collection
+</span>  size_t max_mem;      <span class="comment">///< throw out of memory if above here
+</span>  size_t threshhold;   <span class="comment">///< collection trigger point
+</span>  <span class="qualifier">double</span> free_factor;         <span class="comment">///< reset threshhold to used memory
+</span>                              <span class="comment">///< by this factor after collection
+</span>
+  size_t collections;  <span class="comment">///< number of collections done
+</span>  bool finalise;              <span class="comment">///< whether Felix should collect on exit
+</span>  flx::gc::generic::collector_t *collector;
+
+  size_t maybe_collect(); <span class="comment">///< function which maybe collects
+</span>  size_t actually_collect(); <span class="comment">///< function which actually collects
+</span>
+  <span class="qualifier">void</span> *allocate(
+    flx::gc::generic::gc_shape_t *shape,
+    size_t count,
+    bool allow_gc
+  );
+
+  gc_profile_t (
+    bool debug_driver_,
+    bool debug_allocations_,
+    bool debug_collections_,
+    bool report_collections_,
+    bool report_gcstats_,
+    bool allow_collection_anywhere_,
+    size_t gc_freq_,
+    size_t min_mem_,
+    size_t max_mem_,
+    <span class="qualifier">double</span> free_factor_,
+    bool finalise_,
+    flx::gc::generic::collector_t *collector
+  );
+  ~gc_profile_t();
+};
+
+}}} <span class="comment">// end namespaces
+</span>
+<span class="comment">/*
+ * The following two routines are used to provide
+ * C++ type safe heap allocation. There are no corresponding
+ * delete routines, please use the destroy function.
+ *
+ * Note these routines are now placed
+ * in the global namespace to accomodate Metrowerks
+ * compiler on Mac OS.
+ **</span>/
+GC_EXTERN <span class="qualifier">void</span> *operator new
+(
+  ::<span class="small_keyword">std</span>::size_t,
+  flx::gc::generic::gc_profile_t &amp;,
+  flx::gc::generic::gc_shape_t &amp;,
+  bool
+);
+
+<span class="comment">/*
+ * Define an empty delete to make msvc happy.
+ **</span>/
+GC_EXTERN <span class="qualifier">void</span> operator delete(
+  <span class="qualifier">void</span>*,
+  flx::gc::generic::gc_profile_t &amp;,
+  flx::gc::generic::gc_shape_t &amp;,
+  bool
+);
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/gc/flx_gc_private.hpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">define</span> _ROUNDUP(i,n) ((i + n - 1) / n * n)
+#<span class="preproc">define</span> _ALIGN(i) _ROUNDUP(i,FLX_MAX_ALIGN)
+
+</pre></p></div><h2 id='Memory_Management_Abstraction_Implementation._h'><img src='/share/src/web/images/minus.gif' id='Memory Management Abstraction Implementation.' onclick='toggle(this,"Memory_Management_Abstraction_Implementation._d")' alt='+'/> 1.6 Memory Management Abstraction Implementation.</h2><div id='Memory_Management_Abstraction_Implementation._d' style='display:block'>
+<pre class='inclusion'>
+share/src/gc/flx_gc.cpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdio&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cassert&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc_private.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;Judy.h&gt;</span>
+
+<span class="comment">// for std::max
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;algorithm&gt;</span>
+
+#<span class="preproc">ifdef</span> max
+#undef max
+#<span class="preproc">endif</span>
+
+
+
+<span class="big_keyword">namespace</span> flx {
+<span class="big_keyword">namespace</span> gc {
+<span class="big_keyword">namespace</span> generic {
+gc_shape_t _ptr_<span class="qualifier">void</span>_map = {
+  <span class="fstring">"void"</span>,
+  0,0,
+  0, <span class="comment">// no finaliser
+</span>  0, <span class="comment">// fcops
+</span>  0,
+  0,
+  0,
+  0,
+  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+allocator_t::~allocator_t(){}
+collector_t::~collector_t(){
+  <span class="small_keyword">if</span> (report_gcstats)
+  {
+    ::<span class="small_keyword">std</span>::chrono::duration&lt;<span class="qualifier">double</span>&gt; elapsed = 
+      ::<span class="small_keyword">std</span>::chrono::high_resolution_clock::now() - start_time
+    ;
+    fprintf(stderr, <span class="fstring">"Deleting collector total time = %4.5f seconds, gc time = %4.5f = %3.2f%%\n"</span>, 
+      elapsed.count(), gc_time.count(), gc_time.count() * 100.0 / elapsed.count()
+    );
+  }
+}
+
+collector_t::collector_t() 
+  : debug(false)
+  , report_gcstats(false)
+  , module_registry(0)
+  , gc_time(0.0)
+  , start_time(::<span class="small_keyword">std</span>::chrono::high_resolution_clock::now())
+{}
+
+gc_profile_t::gc_profile_t (
+  bool debug_driver_,
+  bool debug_allocations_,
+  bool debug_collections_,
+  bool report_collections_,
+  bool report_gcstats_,
+  bool allow_collection_anywhere_,
+  size_t gc_freq_,
+  size_t min_mem_,
+  size_t max_mem_,
+  <span class="qualifier">double</span> free_factor_,
+  bool finalise_,
+  flx::gc::generic::collector_t *collector_
+) :
+  debug_driver(debug_driver_),
+  debug_allocations(debug_allocations_),
+  debug_collections(debug_collections_),
+  report_collections(report_collections_),
+  report_gcstats(report_gcstats_),
+  allow_collection_anywhere(allow_collection_anywhere_),
+  gc_freq(gc_freq_),
+  gc_counter(0),
+  min_mem(min_mem_),
+  max_mem(max_mem_),
+  threshhold(min_mem_),
+  free_factor(free_factor_),
+  collections(0),
+  finalise(finalise_),
+  collector(collector_)
+{
+}
+
+gc_profile_t::~gc_profile_t() { }
+
+size_t gc_profile_t::maybe_collect() {
+  ++gc_counter;
+  <span class="small_keyword">if</span>(debug_collections) fprintf(stderr,<span class="fstring">"Maybe collect?\n"</span>);
+  <span class="small_keyword">if</span> (gc_counter &lt; gc_freq) <span class="small_keyword">return</span> 0;
+  <span class="small_keyword">if</span>(collector-&gt;get_allocation_amt() &lt; threshhold) <span class="small_keyword">return</span> 0;
+  <span class="small_keyword">return</span> actually_collect();
+}
+
+size_t gc_profile_t::actually_collect() {
+  <span class="small_keyword">if</span>(debug_collections || report_collections) 
+    fprintf(stderr,<span class="fstring">"[flx_gc:gc_profile_t] actually_collect\n"</span>);
+  gc_counter = 0;
+  size_t collected = collector-&gt;collect();
+  size_t allocated = collector-&gt;get_allocation_amt();
+  <span class="small_keyword">if</span> (allocated &gt; max_mem) throw flx::rtl::flx_out_of_memory_t();
+  threshhold = <span class="small_keyword">std</span>::max ( min_mem,
+    (size_t) (free_factor * (<span class="qualifier">double</span>)allocated))
+  ;
+  <span class="small_keyword">if</span>(debug_collections || report_collections)
+  {
+    size_t objs = collector-&gt;get_allocation_count();
+    size_t roots = collector-&gt;get_root_count();
+    fprintf(stderr, 
+      <span class="fstring">"actually collected %zu objects, still allocated: %zu roots, %zu objects, %zu bytes\n"</span>,
+      collected, roots, objs, allocated
+    );
+  }
+  <span class="small_keyword">return</span> collected;
+}
+
+<span class="qualifier">void</span> *gc_profile_t::allocate(
+  flx::gc::generic::gc_shape_t *shape,
+  size_t count,
+  bool allow_gc
+)
+{
+  <span class="qualifier">void</span> *p = 0;
+  ::<span class="small_keyword">std</span>::size_t amt = count * shape-&gt;amt * shape-&gt;count;
+  bool tried_collection = false;
+
+  <span class="comment">// if we would exceed the threshhold and collection is allowed, do it
+</span>  <span class="small_keyword">if</span> (amt + collector-&gt;get_allocation_amt() &gt; threshhold &amp;&amp; allow_collection_anywhere &amp;&amp; allow_gc)
+  {
+    <span class="small_keyword">if</span> (report_collections)
+      fprintf(stderr,<span class="fstring">"[flx_gc:gc_profile_t] Threshhold %zu would be exceeded, collecting\n"</span>, threshhold);
+    actually_collect();
+    <span class="small_keyword">if</span> (report_collections)
+      fprintf(stderr,<span class="fstring">"[flx_gc:gc_profile_t] New Threshhold %zu\n"</span>, threshhold);
+    tried_collection = true;
+  }
+
+  <span class="comment">// now try the allocation
+</span>  try {
+    p = collector -&gt; allocate(shape,count);
+  }
+  <span class="comment">// if we ran out of physical memory
+</span>  catch (flx::rtl::flx_out_of_memory_t&amp; exn) 
+  { 
+    <span class="small_keyword">if</span> (debug_allocations || debug_collections || report_collections)
+      fprintf(stderr,<span class="fstring">"[flx_gc:gc_profile_t] Out of physical memory\n"</span>);
+
+    <span class="small_keyword">if</span> (allow_collection_anywhere &amp;&amp; allow_gc &amp;&amp; !tried_collection)
+    {
+      actually_collect();
+      tried_collection = true;
+      try {
+        p = collector -&gt; allocate(shape,count);
+      }
+      catch (flx::rtl::flx_out_of_memory_t&amp; exn) <span class="comment">// fatal error
+</span>      {
+         fprintf(stderr,<span class="fstring">"[flx_gc:gc_profile_t] Allocation failed [after forced collection]\n"</span>);
+         throw exn;
+      }
+    }
+    else 
+    {
+      fprintf(stderr,<span class="fstring">"[flx_gc:gc_profile_t] Allocation failed [collection not allowed or already tried]\n"</span>);
+      throw exn; <span class="comment">// fatal error
+</span>    }
+  }
+
+  assert (p);
+  <span class="small_keyword">return</span> p;
+}
+
+<span class="comment">/*
+ *  This is the default scanner for compiler generated RTTI objects.
+ *  It uses an array of offsets into the object to tell where the pointers are.
+ *  We must pass this routine the collector, the RTTI shape of the object,
+ *  a pointer to the head (lowest byte) of the object, a count of the number
+ *  of copies of the object are present consecutively, and a recursion limit.
+ *
+ *  The count is there because all Felix heap objects are varrays, even if they're
+ *  merely length 1. Note that this dynamic array count is the number of used
+ *  slots in the varray not the allocated length. Note also the elements of the
+ *  varray can themselves be arrays with static lengths. The actual RTTI object
+ *  describes a single element of the inner static length array, so we have to
+ *  multiply the RTTI static length by the dynamic length.
+ **</span>/
+<span class="qualifier">void</span> *scan_by_offsets(collector_t *collector, gc_shape_t *shape, <span class="qualifier">void</span> *p, size_t dyncount, <span class="qualifier">int</span> reclimit)
+{
+  Word_t fp = (Word_t)p;
+
+  <span class="comment">// calculate the absolute number of used array slots
+</span>  size_t n_used = dyncount  * shape-&gt;count;
+
+  <span class="comment">// find the array of offsets
+</span>  offset_data_t <span class="qualifier">const</span> *data = (offset_data_t <span class="qualifier">const</span> *)shape-&gt;<span class="qualifier">private</span>_data;
+  ::<span class="small_keyword">std</span>::size_t n_offsets = data-&gt;n_offsets;
+  offset_entry_t <span class="qualifier">const</span> *offsets = data-&gt;offsets;
+
+  <span class="comment">//fprintf(stderr, "scan by offsets: shape %s has %d offsets\n", shape->cname, (int)n_offsets);
+</span>  <span class="comment">// if the number of used slots is one and there is only one offset
+</span>  <span class="comment">// then there is only one possible pointer in the object at the specified offset
+</span>  <span class="comment">// so just return the value stored at that offset immediately
+</span>  <span class="small_keyword">if</span> (n_used * n_offsets == 1) <span class="comment">// tail rec optimisation
+</span>  {
+    offset_entry_t oe =((offset_entry_t*)offsets)[0];
+    <span class="qualifier">void</span> *loc = (<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)fp + oe.offset;
+    gc_shape_t *descriptor = (gc_shape_t*)oe.descriptor;
+    <span class="small_keyword">if</span>(descriptor) {
+      scanner_t *scanner = descriptor-&gt;scanner;
+      <span class="small_keyword">if</span>(scanner) scanner (collector, descriptor, loc, 1, reclimit - 1);
+      <span class="comment">// do nothing if no scanner
+</span>    }
+    else {
+      <span class="qualifier">void</span> *q = *(<span class="qualifier">void</span>**)loc; <span class="comment">// fetch
+</span>      <span class="small_keyword">if</span>(q) <span class="small_keyword">return</span> q; <span class="comment">// tail rec optimisation
+</span>      <span class="comment">// do nothing if null
+</span>    }
+  }
+  else
+  <span class="comment">// otherwise we have to scan through all the offsets in every array element
+</span>  <span class="small_keyword">for</span>(size_t j=0; j&lt;n_used; ++j)
+  {
+    <span class="small_keyword">for</span>(<span class="qualifier">unsigned</span> <span class="qualifier">int</span> i=0; i&lt;n_offsets; ++i)
+    {
+      offset_entry_t oe =((offset_entry_t*)offsets)[i];
+      <span class="qualifier">void</span> *loc = (<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)fp + oe.offset;
+      gc_shape_t *descriptor = (gc_shape_t*)oe.descriptor;
+      <span class="small_keyword">if</span>(descriptor) {
+        scanner_t *scanner = descriptor-&gt;scanner;
+        <span class="small_keyword">if</span>(scanner) scanner (collector, descriptor, loc, 1, reclimit - 1);
+        <span class="comment">// do nothing if no scanner
+</span>      }
+      else {
+        <span class="qualifier">void</span> *q = *(<span class="qualifier">void</span>**)loc; <span class="comment">// fetch
+</span>        <span class="comment">//fprintf(stderr, "scan by offsets %s, #%d, offset %zu, address %p, value %p\n", 
+</span>        <span class="comment">//  shape->cname, i, offsets[i], pq, q);
+</span>        <span class="comment">// instead of returning the pointer, register it for later processing
+</span>        <span class="small_keyword">if</span>(collector-&gt;inrange(q))
+        {
+          collector-&gt;register_pointer(q, reclimit);
+        }
+      }
+    }
+    <span class="comment">// on to the next array element
+</span>    fp=(Word_t)(<span class="qualifier">void</span>*)((<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)fp+shape-&gt;amt);
+  }
+  <span class="comment">// return 0 to indicate we registered pointers, instead of returning just one.
+</span>  <span class="small_keyword">return</span> 0;
+}
+
+}}} <span class="comment">// end namespaces
+</span>
+<span class="comment">// in global namespace now ..
+</span><span class="comment">//
+</span><span class="comment">// NOTE: Felix arrays are two dimensional. The shape.amt field is the size of
+</span><span class="comment">// one element. The shape.count field is the number of elements for a static
+</span><span class="comment">// array type. The dynamic length is for varrays, it is stored in a judy array
+</span><span class="comment">// associated with the array address. If there is nothing in the judy array,
+</span><span class="comment">// the dynamic length is one. C++ operator new allocates arrays of dynamic length 1. 
+</span><span class="comment">//
+</span><span class="qualifier">void</span> *operator new(
+  <span class="small_keyword">std</span>::size_t amt,
+  flx::gc::generic::gc_profile_t &amp;gcp,
+  flx::gc::generic::gc_shape_t &amp;shape,
+  bool allow_gc
+)
+{
+  <span class="small_keyword">if</span> (amt != shape.amt * shape.count)
+  {
+    fprintf(stderr,<span class="fstring">"Shape size error: allocator size = %zu\n"</span>,amt);
+    fprintf(stderr,<span class="fstring">"Shape %s element size = %zu, element count = %zu\n"</span>,shape.cname,shape.amt,shape.count);
+    abort();
+  }
+  <span class="qualifier">void</span> *p = gcp.allocate(&amp;shape,1,allow_gc); <span class="comment">// dynamic array count = 1
+</span>  <span class="small_keyword">return</span> p;
+}
+
+<span class="qualifier">void</span> operator delete(
+  <span class="qualifier">void</span>*,
+  flx::gc::generic::gc_profile_t &amp;,
+  flx::gc::generic::gc_shape_t &amp;,
+  bool
+)
+{
+}
+</pre></p></div><h2 id='Collector_interface._h'><img src='/share/src/web/images/minus.gif' id='Collector interface.' onclick='toggle(this,"Collector_interface._d")' alt='+'/> 1.7 Collector interface.</h2><div id='Collector_interface._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_collector.hpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">ifndef</span> __FLX_COLLECTOR_H__
+#<span class="preproc">define</span> __FLX_COLLECTOR_H__
+#<span class="preproc">include</span> <span class="fstring">&lt;cstddef&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;map&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_thread.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;Judy.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx {
+<span class="big_keyword">namespace</span> gc {
+<span class="big_keyword">namespace</span> collector {
+using <span class="big_keyword">namespace</span> generic;
+
+<span class="big_keyword">struct</span> GC_EXTERN malloc_free;
+<span class="big_keyword">struct</span> GC_EXTERN tracing_allocator;
+<span class="big_keyword">struct</span> GC_EXTERN flx_collector_t;
+
+<span class="comment">/// Allocator using malloc and free.
+</span><span class="big_keyword">struct</span> GC_EXTERN malloc_free : <span class="qualifier">public</span> <span class="qualifier">virtual</span> allocator_t
+{
+  <span class="qualifier">void</span> *allocate(::<span class="small_keyword">std</span>::size_t);
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *);
+  ~malloc_free();
+};
+
+<span class="comment">/// Allocator which saves allocations and deallocations
+</span><span class="comment">/// to a file, delegating operations to a servant allocator
+</span><span class="big_keyword">struct</span> GC_EXTERN tracing_allocator : <span class="qualifier">public</span> <span class="qualifier">virtual</span> allocator_t
+{
+  allocator_t *servant;
+  FILE *tracefile;
+  tracing_allocator(FILE *, allocator_t *);
+  <span class="qualifier">void</span> *allocate(::<span class="small_keyword">std</span>::size_t);
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *);
+  ~tracing_allocator();
+};
+
+
+<span class="big_keyword">struct</span> mark_thread_context_t
+{
+  flx_collector_t *collector;
+  pthread::memory_ranges_t *px;
+  <span class="qualifier">int</span> reclimit;
+};
+
+
+<span class="comment">/// Naive Mark and Sweep Collector.
+</span><span class="big_keyword">struct</span> GC_EXTERN flx_collector_t : <span class="qualifier">public</span> collector_t
+{
+  flx_collector_t(allocator_t *, flx::pthread::thread_control_base_t *, <span class="qualifier">int</span> _gcthreads, FILE *tf);
+  ~flx_collector_t();
+
+  <span class="comment">// RF: added to allow implementation of non-leaky drivers.
+</span>  <span class="qualifier">void</span> impl_free_all_mem(); <span class="comment">// clear all roots, sweep.
+</span>
+  <span class="qualifier">void</span> set_used(<span class="qualifier">void</span> *memory, size_t);
+  <span class="qualifier">void</span> incr_used(<span class="qualifier">void</span> *memory, ptrdiff_t);
+  size_t get_used(<span class="qualifier">void</span> *memory);
+  size_t get_count(<span class="qualifier">void</span> *memory);
+  <span class="qualifier">void</span> *create_empty_array( gc_shape_t *shape, size_t count);
+  gc_shape_t *get_shape(<span class="qualifier">void</span> *memory);
+  flx::pthread::thread_control_base_t *get_thread_control()<span class="qualifier">const</span>;
+  <span class="qualifier">void</span> register_pointer(<span class="qualifier">void</span> *q, <span class="qualifier">int</span> reclimit);
+  ::flx::gc::generic::pointer_data_t get_pointer_data(<span class="qualifier">void</span> *);
+
+<span class="qualifier">protected</span>:
+
+  <span class="comment">/// allocator
+</span>  <span class="qualifier">void</span> *impl_allocate(gc_shape_t *ptr_map, size_t);
+
+  <span class="comment">/// collector (returns number of objects collected)
+</span>  size_t impl_collect();
+
+  <span class="comment">// add and remove roots
+</span>  <span class="qualifier">void</span> impl_add_root(<span class="qualifier">void</span> *memory);
+  <span class="qualifier">void</span> impl_remove_root(<span class="qualifier">void</span> *memory);
+
+  <span class="comment">//
+</span>  <span class="qualifier">void</span> check();
+
+  <span class="comment">// statistics
+</span>  size_t impl_get_allocation_count()<span class="qualifier">const</span>;
+  size_t impl_get_root_count()<span class="qualifier">const</span>;
+  size_t impl_get_allocation_amt()<span class="qualifier">const</span>;
+  <span class="qualifier">void</span> impl_finalise(<span class="qualifier">void</span> *fp);
+
+<span class="qualifier">private</span>:
+  <span class="comment">/// allocator
+</span>  <span class="qualifier">void</span> *v_allocate(gc_shape_t *ptr_map, size_t);
+
+  <span class="comment">/// collector (returns number of objects collected)
+</span>  size_t v_collect();
+
+  <span class="comment">// add and remove roots
+</span>  <span class="qualifier">void</span> v_add_root(<span class="qualifier">void</span> *memory);
+  <span class="qualifier">void</span> v_remove_root(<span class="qualifier">void</span> *memory);
+  <span class="qualifier">void</span> v_free_all_mem();
+
+  <span class="comment">// statistics
+</span>  size_t v_get_allocation_count()<span class="qualifier">const</span>;
+  size_t v_get_root_count()<span class="qualifier">const</span>;
+  size_t v_get_allocation_amt()<span class="qualifier">const</span>;
+
+<span class="qualifier">private</span>:
+  <span class="qualifier">void</span> judyerror(<span class="qualifier">char</span> <span class="qualifier">const</span>*);
+  size_t allocation_count;
+  size_t root_count;
+  size_t allocation_amt;
+
+  uintptr_t minptr;
+  uintptr_t maxptr;
+
+  bool inrange(<span class="qualifier">void</span> *p)<span class="qualifier">const</span> { <span class="small_keyword">return</span> minptr &lt;= uintptr_t(p) &amp;&amp; uintptr_t(p) &lt; maxptr; }
+  <span class="qualifier">void</span> unlink(<span class="qualifier">void</span> *frame);
+  <span class="qualifier">void</span> v_finalise(<span class="qualifier">void</span> *frame);
+  <span class="qualifier">void</span> post_delete(<span class="qualifier">void</span> *frame);
+  <span class="qualifier">void</span> delete_frame(<span class="qualifier">void</span> *frame);
+  size_t reap();
+
+  <span class="comment">// top level mark, calls mark_single or mark_multi
+</span>  <span class="qualifier">void</span> mark(pthread::memory_ranges_t*);
+
+  <span class="comment">// single threaded mark
+</span>  <span class="qualifier">void</span> mark_single(pthread::memory_ranges_t*, <span class="qualifier">int</span>);
+
+  <span class="comment">// multithreaded mark: single thread enters and creates
+</span>  <span class="comment">// worker threads which run mark_thread routine below
+</span>  <span class="qualifier">void</span> mark_multi(pthread::memory_ranges_t*,<span class="qualifier">int</span> reclimit, <span class="qualifier">int</span> nthreads);
+
+<span class="qualifier">public</span>: <span class="comment">// unfortunately, due to dispatch machinery
+</span>  <span class="comment">// worker thread
+</span>  <span class="qualifier">void</span> mark_thread(mark_thread_context_t *);
+
+<span class="qualifier">private</span>:
+  <span class="qualifier">int</span> gcthreads;
+  size_t sweep(); <span class="comment">// calls scan_object
+</span>
+  <span class="big_keyword">typedef</span> <span class="small_keyword">std</span>::map&lt;<span class="qualifier">void</span> *,size_t, <span class="small_keyword">std</span>::less&lt;<span class="qualifier">void</span> *&gt; &gt; rootmap_t;
+  rootmap_t roots;
+  bool parity;
+  allocator_t *allocator;
+  flx::pthread::thread_control_base_t *thread_control;
+
+
+  <span class="comment">// JudyL array and error object
+</span>  <span class="qualifier">void</span> *j_shape;
+  <span class="qualifier">void</span> *j_nalloc;
+  <span class="qualifier">void</span> *j_nused;
+  FILE *tracefile;
+<span class="qualifier">public</span>:
+  <span class="big_keyword">struct</span> memdata_t {
+    <span class="qualifier">void</span> *head;
+    gc_shape_t *pshape;
+    size_t nbytes;
+  };
+  <span class="qualifier">void</span> scan_object(<span class="qualifier">void</span> *memory, <span class="qualifier">int</span> reclimit);
+  memdata_t check_interior (<span class="qualifier">void</span> *memory);
+
+  ::<span class="small_keyword">std</span>::mutex j_tmp_lock;
+  ::<span class="small_keyword">std</span>::condition_variable j_tmp_cv;
+  <span class="qualifier">int</span> j_tmp_waiting;
+  <span class="qualifier">void</span> *j_tmp;
+  JError_t je;
+};
+
+}}} <span class="comment">// end namespaces
+</span>#<span class="preproc">endif</span>
+
+</pre></p></div><h2 id='Collector_Implementation_h'><img src='/share/src/web/images/minus.gif' id='Collector Implementation' onclick='toggle(this,"Collector_Implementation_d")' alt='+'/> 1.8 Collector Implementation</h2><div id='Collector_Implementation_d' style='display:block'>
+<p>Tracefile used for performance simulations on Judy
+alternatives. Tracefile codes:
+</p><p><pre class="prefmtbg">Format: 
+
+opcode filecode: address
+
+Op Codes
+
+G: Get
+F: First
+N: Next
+L: Last
+I: Insert
+D: Delete
+C: Delete whole array
+
+File codes:
+
+S: shape JudyL
+A: allocated JudyL
+U: used JudyL
+T: temporary Judy1
+
+</pre></p><pre class='inclusion'>
+share/src/gc/flx_collector.cpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;map&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;limits.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cassert&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdio&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstddef&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_collector.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc_private.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;stdint.h&gt;</span>
+#<span class="preproc">define</span> lobit(p) (p &amp; (uintptr_t)1u)
+#<span class="preproc">define</span> hibits(p) (p &amp; ~(uintptr_t)1u)
+#<span class="preproc">define</span> SHAPE(p) ((gc_shape_t *)hibits(p))
+
+<span class="comment">//#include "flx_rtl.hpp"
+</span><span class="big_keyword">namespace</span> flx {
+<span class="big_keyword">namespace</span> gc {
+<span class="big_keyword">namespace</span> collector {
+
+<span class="qualifier">static</span> <span class="qualifier">int</span> mcount FLX_UNUSED = 0;
+
+malloc_free::~malloc_free(){}
+
+<span class="qualifier">void</span> *malloc_free::allocate(::<span class="small_keyword">std</span>::size_t amt)
+{
+  <span class="qualifier">void</span> *p = malloc(amt);
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"[gc] Malloc %zd bytes, address = %p\n"</span>,amt,p);
+  <span class="small_keyword">if</span>(p)<span class="small_keyword">return</span> p;
+  else {
+    fprintf(stderr,<span class="fstring">"[gc] Felix: Malloc out of memory, blk=%zu\n"</span>,amt);
+    throw flx::rtl::flx_out_of_memory_t();
+  }
+}
+
+<span class="qualifier">void</span> malloc_free::deallocate(<span class="qualifier">void</span> *p)
+{
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"[gc] Free %p\n"</span>,p);
+  free(p);
+}
+
+tracing_allocator::tracing_allocator (
+  FILE *tf, 
+  allocator_t *slave) 
+: tracefile(tf), servant(slave) {}
+
+<span class="qualifier">void</span> *tracing_allocator::allocate (::<span class="small_keyword">std</span>::size_t amt)
+{
+   <span class="qualifier">void</span> *memory = servant-&gt;allocate(amt);
+   fprintf(tracefile,<span class="fstring">"A: %p\n"</span>,memory);
+   <span class="small_keyword">return</span> memory;
+}
+
+<span class="qualifier">void</span> tracing_allocator::deallocate (<span class="qualifier">void</span> *p)
+{
+   fprintf(tracefile,<span class="fstring">"D: %p\n"</span>,p);
+   servant-&gt;deallocate(p);
+}
+
+tracing_allocator::~tracing_allocator() { 
+  fclose(tracefile); 
+  delete servant; 
+  fprintf(stderr, <span class="fstring">"[gc] Allocation tracing terminated, file closed, slave allocator deleted\n"</span>); 
+}
+
+
+<span class="qualifier">void</span> *flx_collector_t::v_allocate(gc_shape_t *ptr_map, size_t x) {
+  <span class="small_keyword">return</span> impl_allocate(ptr_map, x);
+}
+
+<span class="qualifier">void</span> flx_collector_t::v_finalise(<span class="qualifier">void</span> *frame) {
+  impl_finalise(frame);
+}
+
+size_t flx_collector_t::v_collect() {
+  <span class="comment">// NO MUTEX
+</span>  <span class="small_keyword">return</span> impl_collect();
+}
+
+<span class="qualifier">void</span> flx_collector_t::v_add_root(<span class="qualifier">void</span> *memory) {
+  impl_add_root(memory);
+}
+
+<span class="qualifier">void</span> flx_collector_t::v_remove_root(<span class="qualifier">void</span> *memory) {
+  impl_remove_root(memory);
+}
+
+<span class="qualifier">void</span> flx_collector_t::v_free_all_mem() {
+  <span class="comment">//fprintf(stderr, "Dispatching to impl free all mem\n");
+</span>  impl_free_all_mem();
+}
+
+size_t flx_collector_t::v_get_allocation_count()<span class="qualifier">const</span> {
+  <span class="small_keyword">return</span> impl_get_allocation_count();
+}
+
+size_t flx_collector_t::v_get_root_count()<span class="qualifier">const</span> {
+  <span class="small_keyword">return</span> impl_get_root_count();
+}
+
+size_t flx_collector_t::v_get_allocation_amt()<span class="qualifier">const</span> {
+  <span class="small_keyword">return</span> impl_get_allocation_amt();
+}
+
+size_t flx_collector_t::impl_get_allocation_count()<span class="qualifier">const</span>
+{
+  <span class="small_keyword">return</span> allocation_count;
+}
+
+size_t flx_collector_t::impl_get_root_count()<span class="qualifier">const</span>
+{
+  <span class="small_keyword">return</span> root_count;
+}
+
+size_t flx_collector_t::impl_get_allocation_amt()<span class="qualifier">const</span>
+{
+  <span class="small_keyword">return</span> allocation_amt;
+}
+
+
+flx_collector_t::flx_collector_t(
+  allocator_t *a, 
+  pthread::thread_control_base_t *tc,
+  <span class="qualifier">int</span> _gcthreads,
+  FILE *tf
+)
+  :
+  allocation_count(0)
+  ,root_count(0)
+  ,allocation_amt(0)
+  ,parity(false)
+  ,allocator(a)
+  ,thread_control(tc)
+  ,j_shape(0)
+  ,j_nalloc(0)
+  ,j_nused(0)
+  ,j_tmp(0)
+  ,minptr(~uintptr_t(0))
+  ,maxptr(0)
+  ,tracefile(tf)
+  ,gcthreads(_gcthreads)
+{
+  <span class="small_keyword">if</span>(tf)
+    fprintf(stderr, <span class="fstring">"[flx_collector_t] Tracefile active\n"</span>);
+}
+
+flx::pthread::thread_control_base_t *flx_collector_t::get_thread_control()<span class="qualifier">const</span>
+{
+  <span class="small_keyword">return</span> thread_control;
+}
+
+<span class="qualifier">void</span> flx_collector_t::judyerror(<span class="qualifier">char</span> <span class="qualifier">const</span> *loc)
+{
+  fprintf(stderr, <span class="fstring">"[gc] JUDY ERROR %d in %s\n"</span>,je.je_Errno,loc);
+  abort();
+}
+
+<span class="qualifier">void</span> * flx_collector_t::impl_allocate(gc_shape_t *shape, size_t nobj)
+{
+  <span class="comment">// calculate how much memory to request
+</span>  ::<span class="small_keyword">std</span>::size_t amt = nobj * shape-&gt;amt * shape-&gt;count;
+  <span class="comment">//fprintf(stderr, "req amt = %zu\n",amt);
+</span>  <span class="small_keyword">if</span>(amt &amp; 1) ++amt; <span class="comment">// round up to even number
+</span>  <span class="comment">//fprintf(stderr, "rounded req amt = %zu\n",amt);
+</span>
+  <span class="comment">// allocate a block
+</span>  <span class="qualifier">void</span> *fp = (<span class="qualifier">void</span> *)allocator-&gt;allocate(amt);
+  assert(fp); <span class="comment">// Got some memory!
+</span>
+  <span class="comment">//++shape->allocations;
+</span>
+  <span class="comment">// for use when things go wrong
+</span>  <span class="qualifier">char</span> error_buffer[2048];
+  snprintf(error_buffer, 2047, 
+    <span class="fstring">"[gc] Allocated %p, shape=%s[%zd][%zu][#a=%zu,#d=%zu]\n"</span>, 
+    fp,shape-&gt;cname,shape-&gt;count,nobj,shape-&gt;allocations,shape-&gt;deallocations);
+
+  Word_t *p = (Word_t*)(<span class="qualifier">void</span>*)JudyLIns(&amp;j_shape,(Word_t)fp,&amp;je);
+  <span class="small_keyword">if</span>(tracefile) 
+     fprintf(tracefile,<span class="fstring">"IS: %p\n"</span>,fp);
+  *p = ((Word_t)(<span class="qualifier">void</span>*)shape) | (parity &amp; 1);
+  <span class="small_keyword">if</span> (nobj != (uintptr_t)1) <span class="comment">// array
+</span>  {
+<span class="comment">//fprintf(stderr, "Inserting into j_nalloc=%p\n",j_nalloc);
+</span>    Word_t *p = (Word_t*)(<span class="qualifier">void</span>*)JudyLIns(&amp;j_nalloc,(Word_t)fp,&amp;je);
+<span class="comment">//fprintf(stderr, "  new j_nalloc=%p\n",j_nalloc);
+</span><span class="comment">//fprintf(stderr, "  slot for insert=%p\n",p);
+</span>    <span class="small_keyword">if</span>(tracefile) 
+       fprintf(tracefile,<span class="fstring">"IA: %p\n"</span>,fp);
+    *p = nobj;
+  }
+
+  size_t n_objects = get_count(fp);
+  <span class="small_keyword">if</span> (nobj != n_objects) 
+  {
+
+    fprintf(stderr, 
+        <span class="fstring">"Insertion into j_nalloc (%p) failed: address %p, [nobj=%zu != get_count(fp)=%zu]\n"</span>,
+        j_nalloc, fp, nobj, n_objects);
+    
+    { <span class="comment">// get_count(fp) conflates size 1 with NULL pointer, the following will disambiguate
+</span>      Word_t *p = (Word_t*)(<span class="qualifier">void</span>*)JudyLGet(j_nalloc,(Word_t)fp,&amp;je);
+      fprintf(stderr, 
+          <span class="fstring">"  p==NULL: %s\n"</span>, 
+          ((p == NULL) ? <span class="fstring">"true"</span> : <span class="fstring">"false"</span>) );
+    }
+
+    <span class="comment">// finally output error_buffer if there's an error
+</span>    fprintf(stderr, <span class="fstring">"%s"</span>, error_buffer);
+
+    assert (nobj == n_objects);
+  }
+
+  <span class="comment">// update statistics
+</span>  allocation_count++;
+  allocation_amt += amt;
+  <span class="comment">//fprintf(stderr,"ADDING %zu to allocation amt, result %zu\n",amt,allocation_amt);
+</span>  <span class="comment">// return client memory pointer
+</span>  minptr=::<span class="small_keyword">std</span>::min(minptr,uintptr_t(fp));
+  maxptr=::<span class="small_keyword">std</span>::max(maxptr,uintptr_t(fp)+amt);
+  <span class="small_keyword">return</span> fp;
+}
+
+<span class="comment">// NOTE: although 1 is the default if there is no entry,
+</span><span class="comment">// it is allowed to have an entry with 1
+</span><span class="comment">// indeed, set_used always creates an entry
+</span><span class="qualifier">void</span> flx_collector_t::set_used(<span class="qualifier">void</span> *memory, size_t n)
+{
+  <span class="small_keyword">if</span> (memory == NULL &amp;&amp; n==0) <span class="small_keyword">return</span>;
+  assert(memory);
+
+  <span class="comment">// this check is expensive, but set_used is not used often
+</span>  assert(n&lt;=get_count(memory));
+  <span class="comment">//fprintf(stderr,"Set used of %p to %zu\n",memory,n);
+</span>  Word_t *p = (Word_t*)(<span class="qualifier">void</span>*)JudyLGet(j_nused,(Word_t)memory,&amp;je);
+  <span class="small_keyword">if</span>(tracefile) 
+    fprintf(tracefile,<span class="fstring">"GU: %p\n"</span>,memory);
+  <span class="small_keyword">if</span>(p==(Word_t*)PPJERR)judyerror(<span class="fstring">"set_used"</span>);
+  <span class="small_keyword">if</span>(p==NULL)
+  {
+    <span class="comment">//fprintf(stderr,"set_used: No recorded usage! Creating store for data\n");
+</span>    p = (Word_t*)(<span class="qualifier">void</span>*)JudyLIns(&amp;j_nused,(Word_t)memory,&amp;je);
+    <span class="small_keyword">if</span>(tracefile) 
+       fprintf(tracefile,<span class="fstring">"IU: %p\n"</span>,memory);
+  }
+  <span class="comment">//fprintf(stderr,"Slot for %p usage is address %p\n",memory,p);
+</span>  *p = (Word_t)n;
+}
+
+<span class="qualifier">void</span> flx_collector_t::incr_used(<span class="qualifier">void</span> *memory, ptrdiff_t n)
+{
+  <span class="small_keyword">if</span> (n==0) <span class="small_keyword">return</span>;
+  assert(memory);
+  <span class="comment">//fprintf(stderr,"Incr used of %p by %zu\n",memory,n);
+</span>  <span class="comment">//assert(get_used(memory) + n <= get_count(memory));
+</span>  ptrdiff_t newused = (ptrdiff_t)get_used(memory) + n;
+  <span class="small_keyword">if</span> (newused &lt; 0 || newused &gt; get_count(memory)) {
+    fprintf(stderr,<span class="fstring">"Address %p count %d used %d increment %d\n"</span>,
+      memory,(<span class="qualifier">int</span>)get_count(memory), (<span class="qualifier">int</span>)get_used(memory),(<span class="qualifier">int</span>)n);
+    fprintf(stderr,<span class="fstring">"Type %s\n"</span>,get_shape(memory)-&gt;cname);
+    assert(false);
+  }
+
+  Word_t *p = (Word_t*)(<span class="qualifier">void</span>*)JudyLGet(j_nused,(Word_t)memory,&amp;je);
+  <span class="small_keyword">if</span>(tracefile) 
+    fprintf(tracefile,<span class="fstring">"GU: %p\n"</span>,memory);
+  <span class="small_keyword">if</span>(p==(Word_t*)PPJERR)judyerror(<span class="fstring">"incr_used"</span>);
+  <span class="small_keyword">if</span>(p==NULL)
+  {
+    <span class="comment">//fprintf(stderr,"incr_used: No recorded usage! Creating store for data\n");
+</span>    p = (Word_t*)(<span class="qualifier">void</span>*)JudyLIns(&amp;j_nused,(Word_t)memory,&amp;je);
+    <span class="small_keyword">if</span>(tracefile) 
+      fprintf(tracefile,<span class="fstring">"IU: %p\n"</span>,memory);
+    <span class="small_keyword">if</span>(p==(Word_t*)PPJERR)judyerror(<span class="fstring">"incr_used: new slot"</span>);
+    *p = newused;
+  }
+  else *p=newused;
+}
+
+<span class="comment">// actual number of used slots in an array
+</span>size_t flx_collector_t::get_used(<span class="qualifier">void</span> *memory)
+{
+  <span class="small_keyword">if</span>(memory==NULL) <span class="small_keyword">return</span> 0;
+  <span class="comment">//fprintf(stderr, "Get used of %p\n",memory);
+</span>  Word_t *p = (Word_t*)(<span class="qualifier">void</span>*)JudyLGet(j_nused,(Word_t)memory,&amp;je);
+  <span class="small_keyword">if</span>(tracefile) 
+    fprintf(tracefile,<span class="fstring">"GU: %p\n"</span>,memory);
+  <span class="small_keyword">if</span>(p==(Word_t*)PPJERR)judyerror(<span class="fstring">"get_used"</span>);
+  <span class="comment">//fprintf(stderr, "Used slot at address %p\n",p);
+</span>  size_t z = p!=NULL?*p:1; <span class="comment">// defaults to 1 for non-array support
+</span>  <span class="comment">//fprintf(stderr,"Used of %p is %zu\n",memory,z);
+</span>  <span class="small_keyword">return</span> z;
+}
+
+<span class="comment">// max number of available slots in an array
+</span>size_t flx_collector_t::get_count(<span class="qualifier">void</span> *memory)
+{
+  <span class="small_keyword">if</span>(memory==NULL) <span class="small_keyword">return</span> 0;
+  <span class="comment">//fprintf(stderr, "Get count of %p\n",memory);
+</span>  Word_t *p = (Word_t*)(<span class="qualifier">void</span>*)JudyLGet(j_nalloc,(Word_t)memory,&amp;je);
+  <span class="small_keyword">if</span>(tracefile) 
+    fprintf(tracefile,<span class="fstring">"GA: %p\n"</span>,memory);
+  <span class="small_keyword">if</span>(p==(Word_t*)PPJERR)judyerror(<span class="fstring">"get_count"</span>);
+  <span class="comment">//fprintf(stderr, "Count slot at address %p\n",p);
+</span>  size_t z = p!=NULL?*p:1; <span class="comment">// defaults to 1 for non-array support
+</span>  <span class="comment">//fprintf(stderr,"Count of %p is %zu\n\n",memory,z);
+</span>  <span class="small_keyword">return</span> z;
+}
+
+<span class="comment">// REQUIRES memory to be head pointer (not interior)
+</span>gc_shape_t *flx_collector_t::get_shape(<span class="qualifier">void</span> *memory)
+{
+  <span class="small_keyword">if</span>(memory == NULL) <span class="small_keyword">return</span> &amp;::flx::gc::generic::_ptr_<span class="qualifier">void</span>_map;
+  assert(memory);
+  <span class="comment">//fprintf(stderr, "Get shape of %p\n",memory);
+</span>  Word_t *pshape= (Word_t*)JudyLGet(j_shape,(Word_t)memory,&amp;je);
+  <span class="small_keyword">if</span>(tracefile) 
+    fprintf(tracefile,<span class="fstring">"GS: %p\n"</span>,memory);
+  <span class="small_keyword">if</span>(pshape==(Word_t*)PPJERR)judyerror(<span class="fstring">"get_shape"</span>);
+  <span class="small_keyword">if</span>(pshape==NULL) { 
+    fprintf(stderr,<span class="fstring">"get_shape %p found NULL\n"</span>,memory);
+    abort();
+  }
+  <span class="small_keyword">return</span> (gc_shape_t *)(*pshape &amp; (~(uintptr_t)1));
+}
+
+<span class="qualifier">void</span> *flx_collector_t::create_empty_array(
+  flx::gc::generic::gc_shape_t *shape,
+  size_t count
+)
+{
+  <span class="small_keyword">if</span> (count==0) <span class="small_keyword">return</span> NULL;
+  <span class="qualifier">void</span> *p = allocate(shape,count);
+  assert(p);
+  set_used (p, 0); <span class="comment">// make sure to override default 1 slot usage
+</span>  <span class="small_keyword">if</span>(get_used(p) != 0 || get_count(p) != count) {
+    fprintf(stderr,<span class="fstring">"create empty array type %s address %p request count=%zu, actual count=%zu ,used=%zu\n"</span>,
+     p,shape-&gt;cname, count, get_count(p), get_used(p));
+    fprintf(stderr, <span class="fstring">"FATAL CONSTRUCTOR FAILURE\n"</span>);
+    assert (false);
+  }
+  <span class="small_keyword">return</span> p;
+}
+
+
+<span class="qualifier">void</span> flx_collector_t::impl_finalise(<span class="qualifier">void</span> *fp)
+{
+  assert(fp!=NULL);
+  <span class="comment">//fprintf(stderr, "Finaliser for %p\n", fp);
+</span>  gc_shape_t *shape = get_shape(fp); <span class="comment">// inefficient, since we already know the shape!
+</span>  <span class="comment">//fprintf(stderr, "Got shape %p=%s\n", shape,shape->cname);
+</span>  <span class="qualifier">void</span> (*finaliser)(collector_t*, <span class="qualifier">void</span>*) = shape-&gt;finaliser;
+  <span class="comment">//fprintf(stderr, "Got finaliser %p\n", finaliser);
+</span>  <span class="small_keyword">if</span> (finaliser)
+  {
+    <span class="qualifier">unsigned</span> <span class="qualifier">char</span> *cp = (<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)fp;
+    size_t n_used = get_used(fp) * shape-&gt;count;
+    size_t eltsize = shape-&gt;amt;
+    <span class="comment">//fprintf(stderr, "Finalising at %p for type %s %zu objects each size %zu\n", cp, shape->cname, n_used, eltsize);
+</span>    <span class="small_keyword">for</span>(size_t j = 0; j&lt;n_used; ++j)
+    {
+      (*finaliser)(this,(<span class="qualifier">void</span>*)cp);
+      cp += eltsize;
+    }
+  }
+}
+
+<span class="qualifier">void</span> flx_collector_t::unlink(<span class="qualifier">void</span> *fp)
+{
+  <span class="comment">// check we have a pointer to an object
+</span>  assert(fp!=NULL);
+
+  <span class="comment">// call the finaliser if there is one
+</span>  <span class="comment">//fprintf(stderr,"Unlink: Calling finaliser for %p\n",fp);
+</span>  impl_finalise(fp);
+
+  allocation_count--;
+  gc_shape_t *shape = get_shape(fp);
+  size_t n_objects = get_count(fp);
+  size_t nobj = shape -&gt; count * n_objects;
+  ::<span class="small_keyword">std</span>::size_t size = shape-&gt;amt * nobj;
+  <span class="small_keyword">if</span> (size &amp; 1) ++size;
+  <span class="comment">//fprintf(stderr, "Uncounting %zu bytes\n", size);
+</span>  allocation_amt -= size;
+
+  <span class="comment">// unlink the frame from the collectors list
+</span>  <span class="comment">//fprintf(stderr,"Removing address from Judy lists\n");
+</span>  JudyLDel(&amp;j_shape, (Word_t)fp, &amp;je);
+  JudyLDel(&amp;j_nused, (Word_t)fp, &amp;je);
+  JudyLDel(&amp;j_nalloc, (Word_t)fp, &amp;je);
+  <span class="small_keyword">if</span>(tracefile) {
+    fprintf(tracefile,<span class="fstring">"DS: %p\n"</span>,fp);
+    fprintf(tracefile,<span class="fstring">"DA: %p\n"</span>,fp);
+    fprintf(tracefile,<span class="fstring">"DU: %p\n"</span>,fp);
+  }
+  <span class="comment">//fprintf(stderr,"Finished unlinking\n");
+</span>}
+
+<span class="qualifier">void</span> flx_collector_t::post_delete(<span class="qualifier">void</span> *fp)
+{
+  Judy1Set(&amp;j_tmp,(Word_t)fp,&amp;je);
+  <span class="small_keyword">if</span>(tracefile)
+    fprintf(tracefile,<span class="fstring">"IT: %p\n"</span>,fp);
+
+}
+
+<span class="qualifier">void</span> flx_collector_t::delete_frame(<span class="qualifier">void</span> *fp)
+{
+  allocator-&gt;deallocate(fp);
+}
+
+size_t flx_collector_t::reap ()
+{
+  size_t count = 0;
+  Word_t next=(Word_t)NULL;
+  <span class="qualifier">int</span> res = Judy1First(j_tmp,&amp;next,&amp;je);
+  <span class="small_keyword">if</span>(tracefile)
+    fprintf(tracefile,<span class="fstring">"FT: %p\n"</span>,next);
+  <span class="small_keyword">while</span>(res) {
+    delete_frame((<span class="qualifier">void</span>*)next);
+    ++count;
+    res = Judy1Next(j_tmp,&amp;next,&amp;je);
+    <span class="small_keyword">if</span>(tracefile)
+      fprintf(tracefile,<span class="fstring">"NT: %p\n"</span>,next);
+  }
+  Judy1FreeArray(&amp;j_tmp,&amp;je);
+  <span class="small_keyword">if</span>(tracefile)
+    fprintf(tracefile,<span class="fstring">"CT:\n"</span>);
+  <span class="small_keyword">if</span>(debug) 
+  {
+    fprintf(stderr,<span class="fstring">"[gc] Reaped %zu objects\n"</span>,count);
+    fprintf(stderr,<span class="fstring">"[gc] Still allocated %zu objects occupying %zu bytes\n"</span>, get_allocation_count(), get_allocation_amt());
+  }
+  <span class="small_keyword">return</span> count;
+}
+
+
+<span class="comment">//#include <valgrind/memcheck.h>
+</span>
+<span class="comment">/* This is the top level mark routine
+ * Its job is to mark all objects that are reachable
+ * so a subsequent reaping phase can delete all
+ * the objects that are NOT marked
+ *
+ * This mark bit is the low bit of the RTTI shape object pointer
+ * stored in the j_shape Judy1Array.
+ *
+ * The meaning of this bit alternates between calls to the collector.
+ * Initially all objects are considered garbage and the flag is toggled
+ * to indicate the object is reachable.
+ *
+ * On the next pass the reachable value is reconsidered to mean
+ * garbage and the flag toggled again. This saves a pass over
+ * all objects marking them garbage before then tracing roots
+ * to find which ones are not.
+ **</span>/
+
+<span class="qualifier">void</span> flx_collector_t::mark(pthread::memory_ranges_t *px)
+{
+  <span class="comment">// The recursion limit is a stopper so recursions
+</span>  <span class="comment">// won't blow the machine stack and also wipe out the cache
+</span>  <span class="comment">// regularly. Our overall routine is iterative with limited
+</span>  <span class="comment">// recursion. The recursions are faster but the iteration
+</span>  <span class="comment">// can handle data type like lists of millions of elements
+</span>  <span class="comment">// which would otherwise recurse millions of times.
+</span>  <span class="comment">//
+</span>  <span class="qualifier">int</span> reclimit = 64;
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"[gc] Collector: Running mark\n"</span>);
+
+  <span class="comment">// sanity check
+</span>  assert (root_count == roots.size());
+
+  <span class="comment">// the j_tmp Judy1 array is just a set of pointers which
+</span>  <span class="comment">// we have not yet examined. When we find pointers we stash
+</span>  <span class="comment">// them in this set rather than examining them immediately.
+</span>  <span class="comment">// Later we come back and examine them. This buffers the recursion
+</span>  <span class="comment">// a bit. The set has to be empty initially.
+</span>  assert(j_tmp == 0);
+  <span class="small_keyword">if</span> (gcthreads &lt; 2)
+    mark_single(px,reclimit);
+  else 
+    mark_multi(px,reclimit,gcthreads);
+}
+
+<span class="qualifier">static</span> <span class="qualifier">void</span> run_mark_thread(mark_thread_context_t *mtc)
+{
+  mtc-&gt;collector-&gt;mark_thread(mtc); 
+}
+
+<span class="qualifier">void</span> flx_collector_t::mark_multi(pthread::memory_ranges_t *px,<span class="qualifier">int</span> reclimit, <span class="qualifier">int</span> nthreads)
+{
+<span class="comment">//fprintf(stderr, "starting %d mark threads\n", nthreads);
+</span>  j_tmp_waiting = 0;
+  mark_thread_context_t mtc {this,px, reclimit};
+  ::<span class="small_keyword">std</span>::vector&lt; ::<span class="small_keyword">std</span>::thread&gt; mark_threads;
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i=0; i&lt;gcthreads; ++i)
+    mark_threads.push_back (::<span class="small_keyword">std</span>::thread (run_mark_thread, &amp;mtc));
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i=0; i&lt;gcthreads; ++i)
+    mark_threads[i].join();
+<span class="comment">//fprintf(stderr, "multithread mark finished\n");
+</span>}
+
+<span class="comment">// this method is run simultaneously by multiple threads
+</span><span class="qualifier">void</span> flx_collector_t::mark_thread(mark_thread_context_t *mtc)
+{
+<span class="comment">//fprintf(stderr, "multithread mark thread running\n");
+</span>  <span class="qualifier">int</span> reclimit = mtc-&gt;reclimit;
+  pthread::memory_ranges_t *px  = mtc-&gt;px;
+  <span class="comment">// px is a set of memory ranges representing the stacks
+</span>  <span class="comment">// of all pthreads including this one at the point the
+</span>  <span class="comment">// collector got invoked. All the other threads than this
+</span>  <span class="comment">// one must be stopped. The stack are found by recording the
+</span>  <span class="comment">// base stack value when launching the thread, and using
+</span>  <span class="comment">// the value when a thread stops to allow collection as the
+</span>  <span class="comment">// high value. The stack contains all the machine registers
+</span>  <span class="comment">// at this point too, since we used a long_jmp into a local
+</span>  <span class="comment">// variable to put the registers on the stack.
+</span>  <span class="small_keyword">if</span>(px)
+  {
+    <span class="comment">// for all pthreads
+</span>    <span class="small_keyword">std</span>::vector&lt;pthread::memory_range_t&gt;::iterator end = (*px).end();
+    <span class="small_keyword">for</span>(
+      <span class="small_keyword">std</span>::vector&lt;pthread::memory_range_t&gt;::iterator i = (*px).begin();
+      i != end;
+      ++i
+    )
+    {
+      <span class="comment">// get the stack extent for one pthread
+</span>      pthread::memory_range_t range = *i;
+      <span class="small_keyword">if</span>(debug)
+      {
+        size_t n = (<span class="qualifier">char</span>*)range.e - (<span class="qualifier">char</span>*)range.b;
+        fprintf(stderr, <span class="fstring">"[gc] Conservate scan of memory %p-&gt;%p, %zu bytes\n"</span>,range.b, range.e, n);
+      }
+      <span class="comment">//VALGRIND_MAKE_MEM_DEFINED(range.b, (char*)range.e-(char*)range.b);
+</span>      <span class="qualifier">void</span> *end = range.e;
+      <span class="comment">// for all machine words on the stack
+</span>      <span class="comment">// this WILL FAIL if the stack isn't an exact multiple
+</span>      <span class="comment">// of the size of a machine word
+</span>      <span class="small_keyword">for</span> ( <span class="qualifier">void</span> *i = range.b; i != end; i = (<span class="qualifier">void</span>*)((<span class="qualifier">void</span>**)i+1))
+      {
+        <span class="comment">//if(debug)
+</span>        <span class="comment">// fprintf(stderr, "[gc] Check if *%p=%p is a pointer\n",i,*(void**)i);
+</span>        <span class="comment">// conservative scan of every word on every stack
+</span>        scan_object(*(<span class="qualifier">void</span>**)i, reclimit);
+      }
+      <span class="small_keyword">if</span>(debug)
+        fprintf(stderr, <span class="fstring">"[gc] DONE: Conservate scan of memory %p-&gt;%p\n"</span>,range.b, range.e);
+    }
+  }
+
+  <span class="comment">// Now scan all the registered roots
+</span>  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr, <span class="fstring">"[gc] Scanning roots\n"</span>);
+  rootmap_t::iterator <span class="qualifier">const</span> end = roots.end();
+  <span class="small_keyword">for</span>(
+    rootmap_t::iterator i = roots.begin();
+    i != end;
+    ++i
+  )
+  {
+    <span class="small_keyword">if</span>(debug)
+      fprintf(stderr, <span class="fstring">"[gc] Scanning root %p\n"</span>, (*i).first);
+    scan_object((*i).first, reclimit);
+  }
+
+  <span class="comment">// Now, scan the temporary set in j_tmp  until it is empty
+</span>  <span class="comment">// When we're processing an object with scan_object
+</span>  <span class="comment">// if its an actual Felix object we mark it reachable
+</span>  <span class="comment">// and then scan all the pointers in it: usually those pointers
+</span>  <span class="comment">// are not scanned immediately by scan object but simply put
+</span>  <span class="comment">// into the set j_tmp to schedule them for scanning.
+</span>  <span class="comment">//
+</span>  <span class="comment">// Note: Judy1First finds the first key greater than or equal to the given one,
+</span>  <span class="comment">// it returns 0 if there is no such key.
+</span>  Word_t toscan;
+  <span class="qualifier">int</span> res;
+again:
+  {
+    ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt; dummy(j_tmp_lock);
+retry:
+    toscan = 0;
+    res = Judy1First(j_tmp,&amp;toscan,&amp;je); <span class="comment">// get one object scheduled for scanning
+</span>    <span class="small_keyword">if</span> (!res) {
+       ++j_tmp_waiting;
+       <span class="small_keyword">if</span> (j_tmp_waiting == gcthreads) {
+         j_tmp_cv.notify_all();
+         <span class="small_keyword">goto</span> endoff;
+       }
+       j_tmp_cv.wait(dummy);
+       --j_tmp_waiting;
+       <span class="small_keyword">goto</span> retry;
+    }
+    Judy1Unset(&amp;j_tmp,toscan,&amp;je);         <span class="comment">// remove it immediately
+</span>  }
+  scan_object((<span class="qualifier">void</span>*)toscan, reclimit);  <span class="comment">// scan it, it will either be marked or discarded
+</span>  <span class="small_keyword">goto</span> again;
+
+endoff:
+  assert(j_tmp == 0);                  
+
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr, <span class="fstring">"[gc] Done Scanning roots\n"</span>);
+}
+
+
+
+<span class="qualifier">void</span> flx_collector_t::mark_single(pthread::memory_ranges_t *px, <span class="qualifier">int</span> reclimit)
+{
+  <span class="comment">// px is a set of memory ranges representing the stacks
+</span>  <span class="comment">// of all pthreads including this one at the point the
+</span>  <span class="comment">// collector got invoked. All the other threads than this
+</span>  <span class="comment">// one must be stopped. The stack are found by recording the
+</span>  <span class="comment">// base stack value when launching the thread, and using
+</span>  <span class="comment">// the value when a thread stops to allow collection as the
+</span>  <span class="comment">// high value. The stack contains all the machine registers
+</span>  <span class="comment">// at this point too, since we used a long_jmp into a local
+</span>  <span class="comment">// variable to put the registers on the stack.
+</span>  <span class="small_keyword">if</span>(px)
+  {
+    <span class="comment">// for all pthreads
+</span>    <span class="small_keyword">std</span>::vector&lt;pthread::memory_range_t&gt;::iterator end = (*px).end();
+    <span class="small_keyword">for</span>(
+      <span class="small_keyword">std</span>::vector&lt;pthread::memory_range_t&gt;::iterator i = (*px).begin();
+      i != end;
+      ++i
+    )
+    {
+      <span class="comment">// get the stack extent for one pthread
+</span>      pthread::memory_range_t range = *i;
+      <span class="small_keyword">if</span>(debug)
+      {
+        size_t n = (<span class="qualifier">char</span>*)range.e - (<span class="qualifier">char</span>*)range.b;
+        fprintf(stderr, <span class="fstring">"[gc] Conservate scan of memory %p-&gt;%p, %zu bytes\n"</span>,range.b, range.e, n);
+      }
+      <span class="comment">//VALGRIND_MAKE_MEM_DEFINED(range.b, (char*)range.e-(char*)range.b);
+</span>      <span class="qualifier">void</span> *end = range.e;
+      <span class="comment">// for all machine words on the stack
+</span>      <span class="comment">// this WILL FAIL if the stack isn't an exact multiple
+</span>      <span class="comment">// of the size of a machine word
+</span>      <span class="small_keyword">for</span> ( <span class="qualifier">void</span> *i = range.b; i != end; i = (<span class="qualifier">void</span>*)((<span class="qualifier">void</span>**)i+1))
+      {
+        <span class="comment">//if(debug)
+</span>        <span class="comment">// fprintf(stderr, "[gc] Check if *%p=%p is a pointer\n",i,*(void**)i);
+</span>        <span class="comment">// conservative scan of every word on every stack
+</span>        scan_object(*(<span class="qualifier">void</span>**)i, reclimit);
+      }
+      <span class="small_keyword">if</span>(debug)
+        fprintf(stderr, <span class="fstring">"[gc] DONE: Conservate scan of memory %p-&gt;%p\n"</span>,range.b, range.e);
+    }
+  }
+
+  <span class="comment">// Now scan all the registered roots
+</span>  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr, <span class="fstring">"[gc] Scanning roots\n"</span>);
+  rootmap_t::iterator <span class="qualifier">const</span> end = roots.end();
+  <span class="small_keyword">for</span>(
+    rootmap_t::iterator i = roots.begin();
+    i != end;
+    ++i
+  )
+  {
+    <span class="small_keyword">if</span>(debug)
+      fprintf(stderr, <span class="fstring">"[gc] Scanning root %p\n"</span>, (*i).first);
+    scan_object((*i).first, reclimit);
+  }
+
+  <span class="comment">// Now, scan the temporary set in j_tmp  until it is empty
+</span>  <span class="comment">// When we're processing an object with scan_object
+</span>  <span class="comment">// if its an actual Felix object we mark it reachable
+</span>  <span class="comment">// and then scan all the pointers in it: usually those pointers
+</span>  <span class="comment">// are not scanned immediately by scan object but simply put
+</span>  <span class="comment">// into the set j_tmp to schedule them for scanning.
+</span>  <span class="comment">//
+</span>  <span class="comment">// Note: Judy1First finds the first key greater than or equal to the given one,
+</span>  <span class="comment">// it returns 0 if there is no such key.
+</span>  Word_t toscan = 0;
+  <span class="qualifier">int</span> res = Judy1First(j_tmp,&amp;toscan,&amp;je); <span class="comment">// get one object scheduled for scanning
+</span>  <span class="comment">//if(tracefile)
+</span>  <span class="comment">//  fprintf(tracefile,"FT: %p\n",toscan);
+</span>  <span class="small_keyword">while</span>(res) {
+    Judy1Unset(&amp;j_tmp,toscan,&amp;je);         <span class="comment">// remove it immediately
+</span>    <span class="small_keyword">if</span>(tracefile)
+      fprintf(tracefile,<span class="fstring">"DT: %p\n"</span>,toscan);
+    scan_object((<span class="qualifier">void</span>*)toscan, reclimit);  <span class="comment">// scan it, it will either be marked or discarded
+</span>    toscan = 0;
+    res = Judy1First(j_tmp,&amp;toscan,&amp;je); 
+    <span class="small_keyword">if</span>(tracefile)
+      fprintf(tracefile,<span class="fstring">"FT: %p\n"</span>,toscan);
+  }                                     
+  assert(j_tmp == 0);                  
+
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr, <span class="fstring">"[gc] Done Scanning roots\n"</span>);
+}
+
+
+
+size_t flx_collector_t::sweep()
+{
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"[gc] Collector: Sweep, garbage bit value=%d\n"</span>,(<span class="qualifier">int</span>)parity);
+  size_t sweeped = 0;
+  <span class="qualifier">void</span> *current = NULL;
+  Word_t *pshape = (Word_t*)JudyLFirst(j_shape,(Word_t*)&amp;current,&amp;je); <span class="comment">// GE
+</span>  <span class="small_keyword">if</span>(tracefile) 
+    fprintf(tracefile,<span class="fstring">"FS: %p\n"</span>,current);
+  <span class="small_keyword">if</span>(pshape==(Word_t*)PPJERR)judyerror(<span class="fstring">"sweep"</span>);
+
+  <span class="small_keyword">while</span>(pshape!=NULL)
+  {
+    <span class="small_keyword">if</span>((*pshape &amp; (uintptr_t)1) == (parity &amp; (uintptr_t)1))
+    {
+      <span class="small_keyword">if</span>(debug)
+        fprintf(stderr,<span class="fstring">"[gc] Garbage   %p=%s[%zd][%zu/%zu] [#a=%zu,#d=%zu]\n"</span>,
+          current,
+          SHAPE(*pshape)-&gt;cname,
+          SHAPE(*pshape)-&gt;count,
+          get_used(current), 
+          get_count(current),
+          SHAPE(*pshape)-&gt;allocations,
+          SHAPE(*pshape)-&gt;deallocations
+        );
+      ++ sweeped;
+      <span class="comment">//fprintf(stderr,"Incr deallocation count ..\n");
+</span>      <span class="comment">//++((gc_shape_t *)(*pshape & ~(uintptr_t)1))->deallocations;
+</span>      <span class="comment">//fprintf(stderr,"Unlinking ..\n");
+</span>      unlink(current);
+      <span class="comment">//fprintf(stderr,"Posting delete ..\n");
+</span>      post_delete(current);
+      <span class="comment">//fprintf(stderr,"Reaping done\n");
+</span>    }
+    else
+    {
+      <span class="small_keyword">if</span>(debug)
+        fprintf(stderr,<span class="fstring">"[gc] Reachable %p=%s[%zd][%zu/%zu] [#a=%zu,#d=%zu]\n"</span>,
+          current,
+          SHAPE(*pshape)-&gt;cname,
+          SHAPE(*pshape)-&gt;count,
+          get_used(current), 
+          get_count(current),
+          SHAPE(*pshape)-&gt;allocations,
+          SHAPE(*pshape)-&gt;deallocations
+        );
+    }
+
+    <span class="comment">//fprintf(stderr,"Calling Judy for next object\n");
+</span>    pshape = (Word_t*)JudyLNext(j_shape,(Word_t*)(<span class="qualifier">void</span>*)&amp;current,&amp;je); <span class="comment">// GT
+</span>    <span class="small_keyword">if</span>(tracefile) 
+      fprintf(tracefile,<span class="fstring">"NS: %p\n"</span>,current);
+    <span class="comment">//fprintf(stderr,"Judy got next object %p\n",pshape);
+</span>  }
+
+  parity = !parity;
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"[gc] Sweeped %zu\n"</span>,sweeped);
+  <span class="small_keyword">return</span> reap();
+}
+
+<span class="qualifier">void</span> flx_collector_t::impl_add_root(<span class="qualifier">void</span> *memory)
+{
+  <span class="small_keyword">if</span>(!memory)
+  {
+    fprintf(stderr, <span class="fstring">"[gc] GC ERROR: ADD NULL ROOT\n"</span>);
+    abort();
+  }
+  rootmap_t::iterator iter = roots.find(memory);
+  <span class="small_keyword">if</span>(iter == roots.end())
+  {
+    <span class="small_keyword">std</span>::pair&lt;<span class="qualifier">void</span> *<span class="qualifier">const</span>, size_t&gt; entry(memory,(uintptr_t)1);
+    <span class="small_keyword">if</span>(debug) 
+      fprintf(stderr,<span class="fstring">"[gc] Add root %p=%s\n"</span>, memory,get_shape(memory)-&gt;cname);
+    roots.insert (entry);
+    root_count++;
+  }
+  else {
+    <span class="small_keyword">if</span>(debug) 
+      fprintf(stderr,<span class="fstring">"[gc] Increment root %p to %zu\n"</span>, memory, (*iter).second+1);
+    ++(*iter).second;
+  }
+}
+
+<span class="qualifier">void</span> flx_collector_t::impl_remove_root(<span class="qualifier">void</span> *memory)
+{
+  rootmap_t::iterator iter = roots.find(memory);
+  <span class="small_keyword">if</span>(iter == roots.end())
+  {
+    fprintf(stderr, <span class="fstring">"[gc] GC ERROR: REMOVE ROOT %p WHICH IS NOT ROOT\n"</span>, memory);
+    abort();
+  }
+  <span class="small_keyword">if</span>((*iter).second == (uintptr_t)1)
+  {
+    <span class="small_keyword">if</span>(debug) 
+      fprintf(stderr,<span class="fstring">"[gc] Remove root %p\n"</span>, memory);
+    roots.erase(iter);
+    root_count--;
+  }
+  else {
+    <span class="small_keyword">if</span>(debug) 
+      fprintf(stderr,<span class="fstring">"[gc] Decrement root %p to %zu\n"</span>, memory, (*iter).second-1);
+    --(*iter).second;
+  }
+}
+
+<span class="comment">/* This is the fun bit!
+ * Register pointer is called by scan object, indirectly
+ * via the custom scanner.
+ * It then recursively calls scan_object on that pointer,
+ * providing a standard recursive descent.
+ *
+ * HOWEVER if the recursion limit is reached during this process,
+ * instead of recursing it just stashes the pointer in the
+ * j_tmp collection for later processing.
+ *
+ * So recursions over small tree structures proceed as normal,
+ * but when you get a long list or array to handle the recursion
+ * is stopped before it blows the stack, and the data is just stashed
+ * for later processing by the top level iterative loop
+ **</span>/
+
+<span class="comment">// unfortunately requires a dynamic test to determine
+</span><span class="comment">// if we're using the threaded mark routine or not
+</span><span class="qualifier">void</span> flx_collector_t::register_pointer(<span class="qualifier">void</span> *q, <span class="qualifier">int</span> reclimit)
+{
+  <span class="small_keyword">if</span> (inrange(q)) {
+    <span class="small_keyword">if</span>(reclimit==0) 
+    {
+      <span class="small_keyword">if</span>(gcthreads&gt;1) 
+      {
+        ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt; dummy(j_tmp_lock);
+        Judy1Set(&amp;j_tmp,(Word_t)q,&amp;je);
+        j_tmp_cv.notify_one();
+      } 
+      else {
+        Judy1Set(&amp;j_tmp,(Word_t)q,&amp;je);
+      }
+      <span class="small_keyword">if</span>(tracefile)
+        fprintf(tracefile,<span class="fstring">"IT: %p\n"</span>,q);
+    }
+    else scan_object(q, reclimit-1);
+  }
+}
+
+::flx::gc::generic::pointer_data_t flx_collector_t::get_pointer_data (<span class="qualifier">void</span> *p)
+{
+  ::flx::gc::generic::pointer_data_t pdat;
+  pdat.head = NULL;
+  pdat.max_elements = 0;
+  pdat.used_elements = 0;
+  pdat.shape = NULL;
+  pdat.pointer = p;
+ 
+  Word_t cand = (Word_t)p;
+  Word_t head = cand;
+  Word_t *ppshape = (Word_t*)JudyLLast(j_shape,&amp;head, &amp;je);
+  <span class="small_keyword">if</span>(tracefile) 
+    fprintf(tracefile,<span class="fstring">"LS: %p\n"</span>,head);
+  <span class="small_keyword">if</span>(ppshape==(Word_t*)PPJERR)judyerror(<span class="fstring">"get_pointer_data"</span>);
+  <span class="small_keyword">if</span>(ppshape == NULL) <span class="small_keyword">return</span> pdat; <span class="comment">// no lower object
+</span>  gc_shape_t *pshape = SHAPE(*ppshape);
+  size_t max_slots = get_count((<span class="qualifier">void</span>*)head);
+  size_t used_slots = get_used((<span class="qualifier">void</span>*)head);
+  size_t n = max_slots * pshape-&gt;count * pshape-&gt;amt;
+  <span class="small_keyword">if</span>(cand &gt;= (Word_t)(<span class="qualifier">void</span>*)((<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)(<span class="qualifier">void</span>*)head+n)) <span class="small_keyword">return</span> pdat; <span class="comment">// not interior
+</span>  pdat.head = (<span class="qualifier">void</span>*)head;
+  pdat.max_elements = max_slots;
+  pdat.used_elements = used_slots;
+  pdat.shape = pshape;
+  <span class="small_keyword">return</span> pdat;
+}
+
+<span class="comment">/* Given some word siuze value p, we have to decide what it is.
+ * If its a pointer into an allocated object, since we got here
+ * that object is reachable so we ensure that object is marked
+ * reachable so it won't be reaped
+ **</span>/
+
+<span class="comment">// if a pointer is interior, then
+</span><span class="comment">// if marked reachable already return NULL,NULL
+</span><span class="comment">// else mark as reachable and return head,shape
+</span>flx_collector_t::memdata_t flx_collector_t::check_interior (<span class="qualifier">void</span> *p)
+{
+  Word_t reachable = (parity &amp; (uintptr_t)1) ^ (uintptr_t)1;
+  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"[gc] Scan object %p, reachable bit value = %d\n"</span>,p,(<span class="qualifier">int</span>)reachable);
+
+  <span class="comment">// Now find the shape of the object into which the pointer points,
+</span>  <span class="comment">// if it is a Felix allocated object. First, we use JudyLLast
+</span>  <span class="comment">// which finds the value less than or equal to the given key.
+</span>  <span class="small_keyword">if</span> (!inrange(p)) <span class="small_keyword">return</span> memdata_t{NULL,NULL,0};
+  Word_t cand = (Word_t)p;
+  Word_t head=cand;
+  Word_t *ppshape = (Word_t*)JudyLLast(j_shape,&amp;head,&amp;je);
+  <span class="small_keyword">if</span>(ppshape==(Word_t*)PPJERR)judyerror(<span class="fstring">"check_interior"</span>);
+
+  <span class="comment">// if the pointer returned by Judy is NULL, there is no
+</span>  <span class="comment">// allocated object at or lower then the given address so exit
+</span>  <span class="small_keyword">if</span>(ppshape == NULL) <span class="small_keyword">return</span> memdata_t{NULL,NULL,0}; <span class="comment">// no lower object
+</span>  <span class="comment">/*
+  if(debug)
+  {
+    fprintf(stderr,"Found candidate object %p, &shape=%p, shape(1) %p\n",(void*)fp,(void*)w,(void*)(*w));
+    fprintf(stderr," .. type=%s!\n",((gc_shape_t*)(*w & ~(uintptr_t)1))->cname);
+  }
+  **</span>/
+
+  <span class="comment">// if the object lower then the given pointer is already
+</span>  <span class="comment">// marked reachable, there's nothing to do (all the pointers
+</span>  <span class="comment">// it reaches should also be marked) so just exit.
+</span>  <span class="small_keyword">if</span>( (*ppshape &amp; (uintptr_t)1) == reachable) <span class="small_keyword">return</span> memdata_t {NULL,NULL,0};   <span class="comment">// already handled
+</span>
+  <span class="comment">// get the actual shape of the candidate object
+</span>  <span class="comment">// don't forget to mask out the low bit which is the reachability flag
+</span>  gc_shape_t *pshape = SHAPE(*ppshape);
+
+  <span class="comment">// calculate the length of the candidate object in bytes
+</span>  size_t exterior_count = get_count((<span class="qualifier">void</span>*)head);
+  size_t n = exterior_count * pshape-&gt;count * pshape-&gt;amt;
+
+  <span class="comment">// if our pointer is greater than or equal to the "one past the end"
+</span>  <span class="comment">// pointer of the object, it is not a pointer interior to that object
+</span>  <span class="comment">// but a foreign pointer and must be ignored
+</span>  <span class="small_keyword">if</span>(cand &gt;= (Word_t)(<span class="qualifier">void</span>*)((<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)(<span class="qualifier">void</span>*)head+n)) <span class="small_keyword">return</span> memdata_t{NULL,NULL,0}; <span class="comment">// not interior
+</span>  <span class="small_keyword">if</span>(debug)
+    fprintf(stderr,<span class="fstring">"[gc] MARKING object %p, shape %p, type=%s\n"</span>,(<span class="qualifier">void</span>*)head,pshape,pshape-&gt;cname);
+
+  <span class="comment">// otherwise we have an iterior or head pointer to the object
+</span>  <span class="comment">// so set the reachable flag in the judy shape array
+</span>  *ppshape = (*ppshape &amp; ~(uintptr_t)1) | reachable;
+  <span class="small_keyword">return</span> memdata_t {(<span class="qualifier">void</span>*)head,pshape,n};
+}
+
+<span class="qualifier">void</span> flx_collector_t::scan_object(<span class="qualifier">void</span> *p, <span class="qualifier">int</span> reclimit)
+{
+
+  <span class="comment">// CAN p be NULL?? If so a fast exit could be done
+</span>  <span class="comment">// no point if it can't be null though
+</span>
+  <span class="comment">// The reachability flag is the low bit object type pointer.
+</span>  <span class="comment">// The sense of the flag alternative between 0 and 1 meaning
+</span>  <span class="comment">// reachable on successive collections. This is an optimisation
+</span>  <span class="comment">// which saves marking all object unreachable first, then marking
+</span>  <span class="comment">// the reachable ones reachable. We just use the previous reachable
+</span>  <span class="comment">// marking to mean unreachable next time, then flip the bit for each
+</span>  <span class="comment">// reachable object. The value parity records the sense and is flipped
+</span>  <span class="comment">// at the start of each GC pass.
+</span>  <span class="comment">//Word_t reachable = (parity & (uintptr_t)1) ^ (uintptr_t)1;
+</span>again:
+   memdata_t memdata = check_interior(p);
+   <span class="small_keyword">if</span>(memdata.head == NULL) <span class="small_keyword">return</span>;
+<span class="comment">/*
+  //if(debug)
+  //  fprintf(stderr,"[gc] Scan object %p, reachable bit value = %d\n",p,(int)reachable);
+
+  // Now find the shape of the object into which the pointer points,
+  // if it is a Felix allocated object. First, we use JudyLLast
+  // which finds the value less than or equal to the given key.
+  if (!inrange(p)) return;
+  Word_t cand = (Word_t)p;
+  Word_t head=cand;
+  Word_t *ppshape = (Word_t*)JudyLLast(j_shape,&head,&je);
+  if(ppshape==(Word_t*)PPJERR)judyerror("scan_object");
+
+  // if the pointer returned by Judy is NULL, there is no
+  // allocated object at or lower then the given address so exit
+  if(ppshape == NULL) return; // no lower object
+  
+  //if(debug)
+  //{
+  //  fprintf(stderr,"Found candidate object %p, &shape=%p, shape(1) %p\n",(void*)fp,(void*)w,(void*)(*w));
+  //  fprintf(stderr," .. type=%s!\n",((gc_shape_t*)(*w & ~(uintptr_t)1))->cname);
+  //}
+  //
+
+  // if the object lower then the given pointer is already
+  // marked reachable, there's nothing to do (all the pointers
+  // it reaches should also be marked) so just exit.
+  if( (*ppshape & (uintptr_t)1) == reachable) return;   // already handled
+
+  // get the actual shape of the candidate object
+  // don't forget to mask out the low bit which is the reachability flag
+  gc_shape_t *pshape = SHAPE(*ppshape);
+
+  // calculate the length of the candidate object in bytes
+  size_t n = get_count((void*)head) * pshape->count * pshape->amt;
+
+  // if our pointer is greater than or equal to the "one past the end"
+  // pointer of the object, it is not a pointer interior to that object
+  // but a foreign pointer and must be ignored
+  if(cand >= (Word_t)(void*)((unsigned char*)(void*)head+n)) return; // not interior
+  if(debug)
+    fprintf(stderr,"[gc] MARKING object %p, shape %p, type=%s\n",(void*)head,pshape,pshape->cname);
+
+  // otherwise we have an iterior or head pointer to the object
+  // so set the reachable flag in the judy shape array
+  *ppshape = (*ppshape & ~(uintptr_t)1) | reachable;
+**</span>/
+
+  <span class="comment">// Now we have to look for pointers contained in the object
+</span> 
+  <span class="comment">// The first branch here is not used at the moment,
+</span>  <span class="comment">// and is a hard coded way to do a conservative scan on the object
+</span>
+  <span class="small_keyword">if</span>(memdata.pshape-&gt;flags &amp; gc_flags_conservative)
+  {
+    size_t n_used = get_used((<span class="qualifier">void</span>*)memdata.head) * memdata.pshape-&gt;count;
+    <span class="comment">// end of object, rounded down to size of a void*
+</span>    <span class="qualifier">void</span> **end = (<span class="qualifier">void</span>**)(
+      (<span class="qualifier">unsigned</span> <span class="qualifier">char</span>*)(<span class="qualifier">void</span>*)memdata.head +
+      n_used * memdata.nbytes / sizeof(<span class="qualifier">void</span>*) * sizeof(<span class="qualifier">void</span>*)
+    );
+    <span class="small_keyword">for</span> ( <span class="qualifier">void</span> **i = (<span class="qualifier">void</span>**)memdata.head; i != end; i = i+1)
+    {
+      <span class="small_keyword">if</span>(debug)
+      <span class="comment">//  fprintf(stderr, "Check if *%p=%p is a pointer\n",i,*(void**)i);
+</span>      <span class="small_keyword">if</span>(reclimit==0) {
+
+<span class="comment">// LOCK REQUIRED XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+</span>        Judy1Set(&amp;j_tmp,(Word_t)*i,&amp;je);
+<span class="comment">// END LOCK XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+</span>        <span class="small_keyword">if</span>(tracefile)
+          fprintf(tracefile,<span class="fstring">"IT: %p\n"</span>,*i);
+      }
+      else
+        scan_object(*i,reclimit -1);
+    }
+  }
+
+  <span class="comment">// This is the normal processing.
+</span>  else
+  {
+    <span class="comment">// Calculate the dynamic count of used elements in the object.
+</span>    <span class="comment">// All Felix objects are varrays which have an allocated and used
+</span>    <span class="comment">// element count. The RTTI object always describes one element.
+</span>    size_t dyncount = get_used((<span class="qualifier">void</span>*)memdata.head);
+
+    <span class="comment">// if don't have a scanner for the object it is atomic,
+</span>    <span class="comment">// that is it contains no pointers.
+</span>    <span class="comment">// Otherwise call the scanner.
+</span>    <span class="small_keyword">if</span>(memdata.pshape-&gt;scanner) {
+      <span class="qualifier">void</span> *r = memdata.pshape-&gt;scanner(this, memdata.pshape,memdata.head,dyncount,reclimit);
+      <span class="comment">// If the scanner returns a non-zero value it is the sole pointer
+</span>      <span class="comment">// in the object. So reset our argument and jump to the start of
+</span>      <span class="comment">// this routine: self-tail-recursion optimisation.
+</span>      <span class="small_keyword">if</span> (r) { p = r; <span class="small_keyword">goto</span> again; }
+      <span class="comment">// Otherwise the scanner has registered the pointers it found that
+</span>      <span class="comment">// need further examination. We do not do that examination here
+</span>      <span class="comment">// recursively, or inside the scanner, because it might blow the stack.
+</span>      <span class="comment">// Instead we just return, so a flat iteration loop can grab things
+</span>      <span class="comment">// out of the registered pointer buffer and drive the process
+</span>      <span class="comment">// with a flat loop.
+</span>    }
+  }
+}
+
+
+
+size_t flx_collector_t::impl_collect()
+{
+  <span class="comment">// THIS IS A BIT OF A HACK
+</span>  <span class="comment">// but world_stop() is bugged!!
+</span>  <span class="comment">// This is a temporary fix.
+</span>  FLX_SAVE_REGS;
+  <span class="small_keyword">if</span> (thread_control == NULL || thread_control-&gt;world_stop())
+  {
+    <span class="comment">//if(debug)
+</span>    <span class="comment">//  fprintf(stderr,"[gc] Collecting, thread %lx\n", (size_t)flx::pthread::get_current_native_thread());
+</span>    pthread::memory_ranges_t * mr = thread_control? thread_control -&gt; get_block_list() : NULL;
+    mark(mr);
+    delete mr;
+    size_t collected = sweep();
+    <span class="small_keyword">if</span>(thread_control) thread_control-&gt;world_start();
+    <span class="comment">//if(debug)
+</span>    <span class="comment">//  fprintf(stderr,"[gc] FINISHED collect, thread %lx\n", (size_t)flx::pthread::get_current_native_thread());
+</span>    <span class="small_keyword">return</span> collected;
+  }
+  else {
+    <span class="small_keyword">if</span>(debug)
+      fprintf(stderr,<span class="fstring">"[gc] RACE: someone else is collecting, just yield\n"</span>);
+    <span class="small_keyword">if</span>(thread_control)thread_control-&gt;yield();
+    <span class="small_keyword">return</span> 0ul;
+  }
+}
+
+<span class="qualifier">void</span> flx_collector_t::impl_free_all_mem()
+{
+  <span class="comment">//fprintf(stderr,"impl_free_all_mem -- freeing roots\n");
+</span>  roots.clear();
+  root_count = 0;
+  <span class="comment">//fprintf(stderr,"freeing all heap with sweep()\n");
+</span>  sweep();
+}
+
+flx_collector_t::~flx_collector_t()
+{
+   <span class="small_keyword">if</span>(tracefile) {
+     fclose(tracefile);
+     fprintf(stderr,<span class="fstring">"Closed FLX_TRACE_GC file\n"</span>);
+   }
+
+  <span class="comment">//THIS IS VERY DANGEROUS! What if don't want to collect
+</span>  <span class="comment">//the garbage for efficiency reasons???
+</span>  <span class="comment">//
+</span>  <span class="comment">// ELIDED .. already caused a bug!
+</span>  <span class="comment">//
+</span>  <span class="comment">//free_all_mem();
+</span>}
+
+}}} <span class="comment">// end namespaces
+</span>
+</pre></p></div></div><h1 id='Garbage_Collector_Interface_h'><img src='/share/src/web/images/minus.gif' id='Garbage Collector Interface' onclick='toggle(this,"Garbage_Collector_Interface_d")' alt='+'/> 2 Garbage Collector Interface</h1><div id='Garbage_Collector_Interface_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/gc.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Generic garbage collector interface.</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">This class provides a generic interface to the GC,</span>
+<span class="lineno" id=line4></span>  <span class="doccomment">that is, one that is independent of the GC representation.</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Gc
+<span class="lineno" id=line6></span>  {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> _collect: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"ptf-&gt; gcp-&gt;actually_collect()"</span>
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Invoke the garbage collector.</span>
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> collect() { 
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="conditional">if</span> Env::getenv <span class="fstring">"FLX_REPORT_COLLECTIONS"</span> != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line13></span>        eprintln <span class="fstring">"[Gc::collect] Program requests collection"</span>; 
+<span class="lineno" id=line14></span>        <span class="big_keyword" title="Define a mutable variable">var</span> collected = _collect();
+<span class="lineno" id=line15></span>        eprintln$ <span class="fstring">"[Gc::collect] Collector collected "</span> + collected.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" objects"</span>;
+<span class="lineno" id=line16></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line17></span>        <span class="hack">C_hack</span>::ignore(_collect());
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line19></span>    }
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="doccomment">Get the total number of bytes currently allocated.</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> gc_get_allocation_amt : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C size_t type">size</span>= <span class="fstring">"ptf-&gt; gcp-&gt;collector-&gt;get_allocation_amt()"</span>
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>;
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="doccomment">Get the total number of objects currently allocated.</span>
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> gc_get_allocation_count : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"ptf-&gt; gcp-&gt;collector-&gt;get_allocation_count()"</span>
+<span class="lineno" id=line27></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>    <span class="doccomment">Get the total number of roots.</span>
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> gc_get_root_count : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"ptf-&gt; gcp-&gt;collector-&gt;get_root_count()"</span>
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> add_root: <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"ptf-&gt; gcp-&gt;collector-&gt;add_root ($1);"</span>
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> remove_root: <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"ptf-&gt; gcp-&gt;collector-&gt;remove_root ($1);"</span>
+<span class="lineno" id=line37></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>;
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  }
+</pre></p></div><h1 id='Rtti_introspection_h'><img src='/share/src/web/images/minus.gif' id='Rtti introspection' onclick='toggle(this,"Rtti_introspection_d")' alt='+'/> 3 Rtti introspection</h1><div id='Rtti_introspection_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/felix/rtti.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Rtti {
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>    <span class="doccomment">The type of the collector.</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> collector_t = <span class="fstring">"::flx::gc::generic::collector_t*"</span>;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="doccomment">The type of an RTTI record.</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> gc_shape_t = <span class="fstring">"::flx::gc::generic::gc_shape_t*"</span>;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ==: gc_shape_t * gc_shape_t -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> isNULL: gc_shape_t -&gt; bool = <span class="fstring">"$1==0"</span>;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> gc_shape_flags_t = <span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define an immutable value">val</span> gc_flags_default = 0;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define an immutable value">val</span> gc_flags_immobile = 1;
+<span class="lineno" id=line14></span>      <span class="big_keyword" title="Define an immutable value">val</span> gc_flags_persistent = 2;
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Define an immutable value">val</span> gc_flags_conservative = 4;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="doccomment">The type of a finalisation function.</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> gc_finaliser_t = collector_t * <span class="library" title="special binding of C void* type">address</span> --&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> gc_encoder_t = <span class="library" title="special binding of C void* type">address</span> --&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> gc_decoder_t = <span class="library" title="special binding of C void* type">address</span> * +<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C size_t type">size</span> --&gt; <span class="library" title="binding of C size_t type">size</span>;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> fcops_t = <span class="fstring">"ValueType*"</span>;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_fcops : gc_shape_t -&gt; fcops_t = <span class="fstring">"$1-&gt;fcops"</span>;
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> isNULL: fcops_t -&gt; bool = <span class="fstring">"$1==0"</span>;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> object_size: fcops_t -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1-&gt;object_size()"</span>;
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> object_alignment: fcops_t -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1-&gt;object_alignment()"</span>;
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dflt_init : fcops_t * <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"$1-&gt;dflt_init($2);"</span>;
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> destroy : fcops_t * <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"$1-&gt;destroy($2);"</span>;
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> copy_init : fcops_t * <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"$1-&gt;copy_init($2,$3);"</span>;
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> move_init : fcops_t * <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"$1-&gt;move_init($2,$3);"</span>;
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> copy_assign: fcops_t * <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"$1-&gt;copy_assign($2,$3);"</span>;
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> move_assign: fcops_t * <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"$1-&gt;move_assign($2,$3);"</span>;
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>    <span class="doccomment">The C++ name of the Felix type.</span>
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> cname: gc_shape_t -&gt; +<span class="library" title="binding of C char type">char</span> = <span class="fstring">"$1-&gt;cname"</span>;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="doccomment">The static number of elements in an array type.</span>
+<span class="lineno" id=line39></span>    <span class="doccomment">Note this is not the size of a varray!</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> number_of_elements: gc_shape_t -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1-&gt;count"</span>;
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="doccomment">Number of bytes in one element.</span>
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> bytes_per_element: gc_shape_t -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1-&gt;amt"</span>;
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>    <span class="doccomment">The finaliser function.</span>
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="qualifier" title="names C routine which finalises an object">finaliser</span>: gc_shape_t -&gt; gc_finaliser_t  = <span class="fstring">"$1-&gt;finaliser"</span>;
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>    <span class="doccomment">The encoder function.</span>
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="serialisation encoder">encoder</span> : gc_shape_t -&gt; gc_encoder_t = <span class="fstring">"$1-&gt;encoder"</span>;
+<span class="lineno" id=line50></span>  
+<span class="lineno" id=line51></span>    <span class="doccomment">The decoder function.</span>
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="serialisation decoder">decoder</span>: gc_shape_t -&gt; gc_decoder_t = <span class="fstring">"$1-&gt;decoder"</span>;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>    <span class="doccomment">Check for offset data</span>
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> uses_offset_table : gc_shape_t -&gt; bool = <span class="fstring">"$1-&gt;scanner == ::flx::gc::generic::scan_by_offsets"</span>;
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> offset_entry_t = <span class="fstring">"::flx::gc::generic::offset_entry_t"</span>;
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> offset: offset_entry_t -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.offset"</span>;
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pshape: offset_entry_t -&gt; gc_shape_t = <span class="fstring">"$1.descriptor"</span>; <span class="comment">// could be NULL</span>
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_primitive: offset_entry_t -&gt; bool = <span class="fstring">"$1.descriptor == nullptr"</span>;
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>    <span class="doccomment">The number of pointers in the base type.</span>
+<span class="lineno" id=line64></span>    <span class="doccomment">If the type is an array that's the element type.</span>
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> _unsafe_n_offsets: gc_shape_t -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"((::flx::gc::generic::offset_data_t const *)($1-&gt;private_data))-&gt;n_offsets"</span>;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> n_offsets (shape: gc_shape_t) : <span class="library" title="binding of C size_t type">size</span> =&gt; 
+<span class="lineno" id=line68></span>      <span class="small_keyword" title="conditional">if</span> uses_offset_table shape <span class="small_keyword" title="conditional">then</span> _unsafe_n_offsets shape <span class="small_keyword" title="conditional">else</span> 0uz
+<span class="lineno" id=line69></span>    ;
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>    <span class="doccomment">Pointer to the offset table.</span>
+<span class="lineno" id=line72></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> _unsafe_offsets: gc_shape_t -&gt; +offset_entry_t = 
+<span class="lineno" id=line73></span>        <span class="fstring">"const_cast&lt; ::flx::gc::generic::offset_entry_t*&gt;(((::flx::gc::generic::offset_data_t const *)($1-&gt;private_data))-&gt;offsets)"</span>;
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> offsets (shape: gc_shape_t) : +offset_entry_t =&gt; 
+<span class="lineno" id=line76></span>      <span class="comment">// some types have no offset array because they have no pointers,</span>
+<span class="lineno" id=line77></span>      <span class="comment">// some types have no offset array because we don't know them</span>
+<span class="lineno" id=line78></span>      <span class="comment">// these should be DISTIUNGUISHED but this code is a hack</span>
+<span class="lineno" id=line79></span>      <span class="comment">// in fact the scanner, ONLY, knows the type of the private data</span>
+<span class="lineno" id=line80></span>      <span class="comment">// the serialiser is using it too, so this is a design fault</span>
+<span class="lineno" id=line81></span>      <span class="small_keyword" title="conditional">if</span> uses_offset_table shape <span class="small_keyword" title="conditional">then</span> _unsafe_offsets shape <span class="small_keyword" title="conditional">else</span> <span class="hack">C_hack</span>::cast[+offset_entry_t] 0 
+<span class="lineno" id=line82></span>    ;
+<span class="lineno" id=line83></span>   
+<span class="lineno" id=line84></span>    <span class="doccomment">Flags.</span>
+<span class="lineno" id=line85></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> flags: gc_shape_t -&gt; gc_shape_flags_t = <span class="fstring">"$1-&gt;flags"</span>;
+<span class="lineno" id=line86></span>  
+<span class="lineno" id=line87></span>    <span class="doccomment">Global head of the compiled shape list.</span>
+<span class="lineno" id=line88></span>    <span class="doccomment">This is actually the first type, since they're linked together.</span>
+<span class="lineno" id=line89></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> shape_list_head : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; gc_shape_t = <span class="fstring">"ptf-&gt; shape_list_head"</span>;
+<span class="lineno" id=line90></span>  
+<span class="lineno" id=line91></span>    <span class="doccomment">C++ type_info for the type.</span>
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> type_info = <span class="fstring">"::std::type_info"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;typeinfo&gt;</span></span>";
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>    <span class="doccomment">C++ source name of the type.</span>
+<span class="lineno" id=line95></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> name : type_info -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::std::string($1.name())"</span>;
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>    <span class="doccomment">C++ Type_info of a type.</span>
+<span class="lineno" id=line98></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> typeid[T]: type_info = <span class="fstring">"typeid(?1)"</span>;
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>    <span class="comment">// PLATFORM DEPENDENT, REQUIRES cxxabi.h.</span>
+<span class="lineno" id=line101></span>    <span class="comment">// Only sure to work for gcc.</span>
+<span class="lineno" id=line102></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _gxx_demangle: <span class="library" title="binding of C++ string type">string</span> * &amp;<span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"""{
+<span class="lineno" id=line103></span>      int status;
+<span class="lineno" id=line104></span>      char *tmp=abi::__cxa_demangle($1.c_str(), 0,0, &amp;status);
+<span class="lineno" id=line105></span>      string s= string(tmp);
+<span class="lineno" id=line106></span>      std::free(tmp);
+<span class="lineno" id=line107></span>      *$2= s;
+<span class="lineno" id=line108></span>      }
+<span class="lineno" id=line109></span>    """</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> "<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">&lt;cxxabi.h&gt;</span></span>";
+<span class="lineno" id=line110></span>  
+<span class="lineno" id=line111></span>    <span class="doccomment">For gcc only, the C++ name a mangled name represents.</span>
+<span class="lineno" id=line112></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> gxx_demangle(s:<span class="library" title="binding of C++ string type">string</span>) :<span class="library" title="binding of C++ string type">string</span> = 
+<span class="lineno" id=line113></span>    {
+<span class="lineno" id=line114></span>      <span class="big_keyword" title="Define a mutable variable">var</span> r: <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line115></span>      _gxx_demangle(s, &amp;r);
+<span class="lineno" id=line116></span>      <span class="small_keyword" title="return">return</span> r;
+<span class="lineno" id=line117></span>    }
+<span class="lineno" id=line118></span>  
+<span class="lineno" id=line119></span>  }
+</pre></p></div><h1 id='Low_level_Garbage_Collector_Access_h'><img src='/share/src/web/images/minus.gif' id='Low level Garbage Collector Access' onclick='toggle(this,"Low_level_Garbage_Collector_Access_d")' alt='+'/> 4 Low level Garbage Collector Access</h1><div id='Low_level_Garbage_Collector_Access_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/felix/flx_gc.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Collector
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Open a module or class">open</span> Rtti;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a structure">struct</span> pointer_data_t
+<span class="lineno" id=line5></span>    {
+<span class="lineno" id=line6></span>       pointer: <span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line7></span>       head: <span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line8></span>       max_elements: <span class="library" title="binding of C size_t type">size</span>;  <span class="comment">// dynamic slots</span>
+<span class="lineno" id=line9></span>       used_elements: <span class="library" title="binding of C size_t type">size</span>; <span class="comment">// dynamic slots used</span>
+<span class="lineno" id=line10></span>       shape:gc_shape_t;
+<span class="lineno" id=line11></span>    }; 
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> raw_pointer_data_t = <span class="fstring">"::flx::gc::generic::pointer_data_t"</span> ;
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_raw_pointer_data: <span class="library" title="special binding of C void* type">address</span> -&gt; raw_pointer_data_t = 
+<span class="lineno" id=line15></span>      <span class="fstring">"ptf-&gt; gcp-&gt;collector-&gt;get_pointer_data($1)"</span>
+<span class="lineno" id=line16></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>
+<span class="lineno" id=line17></span>    ;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_pointer_data (p:<span class="library" title="special binding of C void* type">address</span>) =&gt; <span class="hack">C_hack</span>::reinterpret[pointer_data_t](get_raw_pointer_data p);
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_felix_pointer (pd: pointer_data_t) =&gt; <span class="small_keyword" title="logical negation">not</span> (isNULL pd.head);
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_head_pointer (pd: pointer_data_t) =&gt; pd.pointer == pd.head; 
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> repeat_count (pd: pointer_data_t) =&gt; pd.used_elements *  pd.shape.number_of_elements;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> allocated_bytes (pd: pointer_data_t) =&gt; pd.max_elements * 
+<span class="lineno" id=line24></span>      pd.shape.number_of_elements * pd.shape.bytes_per_element
+<span class="lineno" id=line25></span>    ;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="doccomment">Diagnostic routine, dump pointer data and</span>
+<span class="lineno" id=line28></span>    <span class="doccomment">computed values.</span>
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> print_pointer_data (pd: pointer_data_t)
+<span class="lineno" id=line30></span>    {
+<span class="lineno" id=line31></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Candidate pointer = "</span> + pd.pointer.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line32></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Valid="</span> + pd.Collector::is_felix_pointer.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line33></span>      <span class="small_keyword" title="conditional">if</span> pd.Collector::is_felix_pointer <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line34></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Is head="</span> + pd.Collector::is_head_pointer.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line35></span>        <span class="big_keyword" title="Define a mutable variable">var</span> shape = pd.shape;
+<span class="lineno" id=line36></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Element type =  "</span> + shape.cname.<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line37></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Pod[has no finaliser] = "</span> + shape.<span class="qualifier" title="names C routine which finalises an object">finaliser</span>.<span class="library" title="special binding of C void* type">address</span>.isNULL.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line38></span>        <span class="big_keyword" title="Define a mutable variable">var</span> bpe = shape.bytes_per_element;
+<span class="lineno" id=line39></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Bytes per element = "</span> + bpe.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line40></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Static array length = "</span> + shape.number_of_elements.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line41></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Dynamic array length = "</span> + pd.used_elements.<span class="library" title="Convert a value to a string">str</span>; 
+<span class="lineno" id=line42></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Max dynamic array length = "</span> + pd.max_elements.<span class="library" title="Convert a value to a string">str</span>; 
+<span class="lineno" id=line43></span>        <span class="big_keyword" title="Define a mutable variable">var</span> nelts = pd.used_elements * shape.number_of_elements;
+<span class="lineno" id=line44></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Aggregate number of used elements "</span> + nelts.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line45></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Store to serialise: "</span> + (nelts * bpe) . <span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line47></span>    }
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="doccomment">Diagnostic routine, print info about a pointer.</span>
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> print_pointer_data (p:<span class="library" title="special binding of C void* type">address</span>) 
+<span class="lineno" id=line51></span>    {
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pd = Collector::get_pointer_data p;
+<span class="lineno" id=line53></span>      print_pointer_data (pd);
+<span class="lineno" id=line54></span>    }
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> print_pointer_data[T] (p:&amp;T) =&gt; print_pointer_data (<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] p);
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> print_pointer_data[T] (p:cptr[T]) =&gt; print_pointer_data (<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] p);
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> print_pointer_data[T] (p:+T) =&gt; print_pointer_data (<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] p);
+<span class="lineno" id=line58></span>  
+<span class="lineno" id=line59></span>  }
+</pre></p></div><h1 id='Bootstrap_Build_System_h'><img src='/share/src/web/images/minus.gif' id='Bootstrap Build System' onclick='toggle(this,"Bootstrap_Build_System_d")' alt='+'/> 5 Bootstrap Build System</h1><div id='Bootstrap_Build_System_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/buildsystem/flx_gc.py</pre>
+<p><pre class="prefmtbg">import fbuild
+from fbuild.functools import call
+from fbuild.path import Path
+from fbuild.record import Record
+from fbuild.builders.file import copy
+
+import buildsystem
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    path = Path(phase.ctx.buildroot/'share'/'src/gc')
+    dst = 'host/lib/rtl/flx_gc'
+    srcs = Path.glob(path / '*.cpp')
+    includes = [
+        phase.ctx.buildroot / 'host/lib/rtl',
+        phase.ctx.buildroot / 'share/lib/rtl',
+    ]
+    macros = ['BUILD_FLX_GC']
+    libs = [
+        call('buildsystem.judy.build_runtime', phase),
+        call('buildsystem.flx_exceptions.build_runtime', phase),
+    ]
+
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.static for lib in libs]),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.shared for lib in libs]))
+</pre></p></div><h1 id='Configuration_Database_Records_h'><img src='/share/src/web/images/minus.gif' id='Configuration Database Records' onclick='toggle(this,"Configuration_Database_Records_d")' alt='+'/> 6 Configuration Database Records</h1><div id='Configuration_Database_Records_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/src/config/unix/flx_gc.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_gc
+Platform: Unix 
+Description: Felix default garbage collector (Unix)
+provides_dlib: -lflx_gc_dynamic
+provides_slib: -lflx_gc_static
+includes: '"flx_gc.hpp"'
+library: flx_gc
+macros: BUILD_FLX_GC
+Requires: judy flx_exceptions pthread
+srcdir: src/gc
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/flx_gc.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_gc
+Platform: Windows
+Description: Felix default garbage collector (Windows)
+provides_dlib: /DEFAULTLIB:flx_gc_dynamic
+provides_slib: /DEFAULTLIB:flx_gc_static
+includes: '"flx_gc.hpp"'
+Requires: judy
+library: flx_gc
+macros: BUILD_FLX_GC
+Requires: judy flx_exceptions pthread
+srcdir: src/gc
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+share/lib/rtl/flx_gc_config.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_GC_CONFIG_H__
+#<span class="preproc">define</span> __FLX_GC_CONFIG_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">ifdef</span> BUILD_FLX_GC
+#<span class="preproc">define</span> GC_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> GC_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

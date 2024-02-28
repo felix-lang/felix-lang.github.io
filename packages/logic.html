@@ -1,0 +1,593 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Logic</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Boolean Logic",
+"Predicate combinators."
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Boolean Logic_h')"> <a href="#Boolean_Logic_h">Boolean Logic</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Predicate combinators._h')"> <a href="#Predicate_combinators._h">Predicate combinators.</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Boolean_Logic_h'><img src='/share/src/web/images/minus.gif' id='Boolean Logic' onclick='toggle(this,"Boolean_Logic_d")' alt='+'/> 1 Boolean Logic</h1><div id='Boolean_Logic_d' style='display:block'>
+<p>We have two kinds of boolean, cbool is the binding to C/C++
+bool type which is usually a single byte.
+</p><p>The other kind, bool, is a synonym for type 2, which is
+a compact linear type and will use a a 64 bit word.
+</p><p>We provide the same operations on both, since as values
+they're compatible. However the Felix bool is the standard
+type.
+</p><p>Pointers to these two types are not compatible.
+Although a sole bool is much bigger than a cbool,
+64 bools can fit in a single machine word, as opposed
+to only 8 cbools.
+</p><pre class='inclusion'>
+share/lib/std/scalar/bool.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> bool = 2;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cbool = <span class="fstring">"bool"</span> <span class="big_keyword" title="specify requirements">requires</span> index TYPE_cbool; 
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Bool
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> bool:cbool=<span class="fstring">"$1"</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="doccomment">Short cut and via closure</span>
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> andthen (x: bool, y:1-&gt;bool) : bool =&gt; 
+<span class="lineno" id=line10></span>      <span class="small_keyword" title="conditional">if</span> x <span class="small_keyword" title="conditional">then</span> #y <span class="small_keyword" title="conditional">else</span> <span class="library" title="false value">false</span>
+<span class="lineno" id=line11></span>    ;
+<span class="lineno" id=line12></span>   
+<span class="lineno" id=line13></span>    <span class="doccomment">Short cut and via closure</span>
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> orelse (x: bool, y:1-&gt;bool) : bool =&gt; 
+<span class="lineno" id=line15></span>      <span class="small_keyword" title="conditional">if</span> x <span class="small_keyword" title="conditional">then</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="conditional">else</span> #y
+<span class="lineno" id=line16></span>    ;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>     <span class="doccomment">Disjunction: logical and.</span>
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> land: bool * bool -&gt; bool = <span class="fstring">"$1&amp;&amp;$2"</span>;      <span class="comment">// x and y</span>
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="doccomment">Negated and.</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> nand: bool * bool -&gt; bool = <span class="fstring">"!($1&amp;&amp;$2)"</span>;   <span class="comment">// not (x and y)</span>
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="doccomment">Conjunction: logical or.</span>
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> lor: bool * bool -&gt; bool = <span class="fstring">"$1||$2"</span>;       <span class="comment">// x or y</span>
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="doccomment">Negated or.</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> nor: bool * bool -&gt; bool = <span class="fstring">"!($1||$2)"</span>;    <span class="comment">// not (x or y)</span>
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>    <span class="doccomment">Logical exclusive or.</span>
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> xor: bool * bool -&gt; bool = <span class="fstring">"$1!=$2"</span>;       <span class="comment">// (x or y) and not (x and y)</span>
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="doccomment">Logical negation.</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> lnot: bool -&gt; bool = <span class="fstring">"!$1"</span>;                <span class="comment">// not x</span>
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    <span class="doccomment">Logical implication.</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="logical implication">implies</span>: bool * bool -&gt; bool = <span class="fstring">"!$1||$2"</span>;  <span class="comment">// not x or y</span>
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="doccomment">Mutating or.</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> |= : &amp;bool * bool = <span class="fstring">"*$1|=$2;"</span>;  
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="doccomment">Mutating and.</span>
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> &amp;= : &amp;bool * bool = <span class="fstring">"*$1&amp;=$2;"</span>;  
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>    <span class="comment">// Elide double negations.</span>
+<span class="lineno" id=line46></span>    <span class="comment">//reduce dneg(x:bool): lnot (lnot x) =&gt; x;       </span>
+<span class="lineno" id=line47></span>    <span class="comment">// Elide double negations.</span>
+<span class="lineno" id=line48></span>    <span class="comment">//reduce dneg(x:bool,y:bool): lnot (nand(x,y)) =&gt; land(x,y); </span>
+<span class="lineno" id=line49></span>    <span class="comment">// Elide double negations.</span>
+<span class="lineno" id=line50></span>    <span class="comment">//reduce dneg(x:bool,y:bool): lnot (nor(x,y)) =&gt; lor(x,y);</span>
+<span class="lineno" id=line51></span>  }
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>  <span class="doccomment">Standard operations on cboolean type.</span>
+<span class="lineno" id=line54></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> CBool
+<span class="lineno" id=line55></span>  {
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> cbool:bool=<span class="fstring">"$1"</span>;
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> cfalse: cbool=<span class="fstring">"false"</span>;
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ctrue: cbool=<span class="fstring">"true"</span>;
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>    <span class="doccomment">Short cut and via closure</span>
+<span class="lineno" id=line61></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> andthen (x: cbool, y:1-&gt;cbool) : cbool =&gt; 
+<span class="lineno" id=line62></span>      <span class="small_keyword" title="conditional">if</span> x <span class="small_keyword" title="conditional">then</span> #y <span class="small_keyword" title="conditional">else</span> cfalse
+<span class="lineno" id=line63></span>    ;
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>    <span class="doccomment">Short cut and via closure</span>
+<span class="lineno" id=line66></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> orelse (x: cbool, y:1-&gt;cbool) : cbool =&gt; 
+<span class="lineno" id=line67></span>      <span class="small_keyword" title="conditional">if</span> x <span class="small_keyword" title="conditional">then</span> ctrue <span class="small_keyword" title="conditional">else</span> #y
+<span class="lineno" id=line68></span>    ;
+<span class="lineno" id=line69></span>   
+<span class="lineno" id=line70></span>    <span class="doccomment">Disjunction: logical and.</span>
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> land: cbool * cbool -&gt; cbool = <span class="fstring">"$1&amp;&amp;$2"</span>;      <span class="comment">// x and y</span>
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="doccomment">Negated and.</span>
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> nand: cbool * cbool -&gt; cbool = <span class="fstring">"!($1&amp;&amp;$2)"</span>;   <span class="comment">// not (x and y)</span>
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    <span class="doccomment">Conjunction: logical or.</span>
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> lor: cbool * cbool -&gt; cbool = <span class="fstring">"$1||$2"</span>;       <span class="comment">// x or y</span>
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>    <span class="doccomment">Negated or.</span>
+<span class="lineno" id=line80></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> nor: cbool * cbool -&gt; cbool = <span class="fstring">"!($1||$2)"</span>;    <span class="comment">// not (x or y)</span>
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>    <span class="doccomment">Logical exclusive or.</span>
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> xor: cbool * cbool -&gt; cbool = <span class="fstring">"$1!=$2"</span>;       <span class="comment">// (x or y) and not (x and y)</span>
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>    <span class="doccomment">Logical negation.</span>
+<span class="lineno" id=line86></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> lnot: cbool -&gt; cbool = <span class="fstring">"!$1"</span>;                <span class="comment">// not x</span>
+<span class="lineno" id=line87></span>  
+<span class="lineno" id=line88></span>    <span class="doccomment">Logical implication.</span>
+<span class="lineno" id=line89></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="logical implication">implies</span>: cbool * cbool -&gt; cbool = <span class="fstring">"!$1||$2"</span>;  <span class="comment">// not x or y</span>
+<span class="lineno" id=line90></span>  
+<span class="lineno" id=line91></span>    <span class="doccomment">Mutating or.</span>
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> |= : &amp;cbool * cbool = <span class="fstring">"*$1|=$2;"</span>;  
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>    <span class="doccomment">Mutating and.</span>
+<span class="lineno" id=line95></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> &amp;= : &amp;cbool * cbool = <span class="fstring">"*$1&amp;=$2;"</span>;  
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>    <span class="comment">// Elide double negations.</span>
+<span class="lineno" id=line98></span>    <span class="comment">//reduce dneg(x:cbool): lnot (lnot x) =&gt; x;       </span>
+<span class="lineno" id=line99></span>    <span class="comment">// Elide double negations.</span>
+<span class="lineno" id=line100></span>    <span class="comment">//reduce dneg(x:cbool,y:cbool): lnot (nand(x,y)) =&gt; land(x,y); </span>
+<span class="lineno" id=line101></span>    <span class="comment">// Elide double negations.</span>
+<span class="lineno" id=line102></span>    <span class="comment">//reduce dneg(x:cbool,y:cbool): lnot (nor(x,y)) =&gt; lor(x,y);</span>
+<span class="lineno" id=line103></span>  }
+<span class="lineno" id=line104></span>  
+<span class="lineno" id=line105></span>  
+<span class="lineno" id=line106></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> FloatAddgrp[bool] {
+<span class="lineno" id=line107></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> zero () =&gt; 0 :&gt;&gt; bool;
+<span class="lineno" id=line108></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> - (x:bool) =&gt; (sub (2, <span class="small_keyword" title="Integer index of value of a sum type">caseno</span> x)) :&gt;&gt; bool;
+<span class="lineno" id=line109></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> + (x:bool, y:bool) : bool =&gt; (add ((<span class="small_keyword" title="Integer index of value of a sum type">caseno</span> x , <span class="small_keyword" title="Integer index of value of a sum type">caseno</span> y)) % 2) :&gt;&gt; bool;
+<span class="lineno" id=line110></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> - (x:bool, y:bool) : bool =&gt; (add (2, sub(<span class="small_keyword" title="Integer index of value of a sum type">caseno</span> x , <span class="small_keyword" title="Integer index of value of a sum type">caseno</span> y)) % 2) :&gt;&gt; bool;
+<span class="lineno" id=line111></span>  }
+<span class="lineno" id=line112></span>  
+<span class="lineno" id=line113></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[bool] {
+<span class="lineno" id=line114></span>    <span class="doccomment">Convert bool to string.</span>
+<span class="lineno" id=line115></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (b:bool) : <span class="library" title="binding of C++ string type">string</span> =&gt; <span class="small_keyword" title="conditional">if</span> b <span class="small_keyword" title="conditional">then</span> <span class="fstring">"true"</span> <span class="small_keyword" title="conditional">else</span> <span class="fstring">"false"</span> <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line116></span>  }
+<span class="lineno" id=line117></span>  
+<span class="lineno" id=line118></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[bool] {
+<span class="lineno" id=line119></span>    <span class="doccomment">Total ordering of bools, false &lt; true.</span>
+<span class="lineno" id=line120></span>    <span class="doccomment">Note that x &lt; y is equivalent to x implies y.</span>
+<span class="lineno" id=line121></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : bool * bool -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line122></span>  }
+<span class="lineno" id=line123></span>  
+<span class="lineno" id=line124></span>  <span class="big_keyword" title="Open a module or class">open</span> Tord[bool];
+<span class="lineno" id=line125></span>  <span class="big_keyword" title="Open a module or class">open</span> Show[bool];
+<span class="lineno" id=line126></span>  <span class="big_keyword" title="Open a module or class">open</span> Addgrp[bool];
+<span class="lineno" id=line127></span>  
+<span class="lineno" id=line128></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[cbool] {
+<span class="lineno" id=line129></span>    <span class="doccomment">Convert cbool to string.</span>
+<span class="lineno" id=line130></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (b:cbool) : <span class="library" title="binding of C++ string type">string</span> =&gt; <span class="small_keyword" title="conditional">if</span> b <span class="small_keyword" title="conditional">then</span> <span class="fstring">"ctrue"</span> <span class="small_keyword" title="conditional">else</span> <span class="fstring">"cfalse"</span> <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line131></span>  }
+<span class="lineno" id=line132></span>  
+<span class="lineno" id=line133></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[cbool] {
+<span class="lineno" id=line134></span>    <span class="doccomment">Total ordering of cbools, false &lt; true.</span>
+<span class="lineno" id=line135></span>    <span class="doccomment">Note that x &lt; y is equivalent to x implies y.</span>
+<span class="lineno" id=line136></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : cbool * cbool -&gt; cbool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line137></span>  }
+<span class="lineno" id=line138></span>  
+<span class="lineno" id=line139></span>  <span class="big_keyword" title="Open a module or class">open</span> Tord[cbool];
+<span class="lineno" id=line140></span>  <span class="big_keyword" title="Open a module or class">open</span> Show[cbool];
+<span class="lineno" id=line141></span>  
+</pre></p></div><h1 id='Predicate_combinators._h'><img src='/share/src/web/images/minus.gif' id='Predicate combinators.' onclick='toggle(this,"Predicate_combinators._d")' alt='+'/> 2 Predicate combinators.</h1><div id='Predicate_combinators._d' style='display:block'>
+<p>A <em>predicate</em> is any function returning
+a boolean argument. Predicates are also relations
+by simply providing a tuple argument.
+</p><p>This is a simple class allowing predicates to be combined
+directly using symbolic operators to form new predicates, using logical 
+conjunction <code>and</code>, disjunction <code>or</code>, implication <code>implies</code>
+and negation <code>not</code>. The parser maps these operator onto the 
+functions <code>land</code>, <code>lor</code>, <code>implies</code>, and <code>lnot</code> respectively.
+</p><pre class='inclusion'>
+share/lib/std/algebra/predicate.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// Some operations on predicates.</span>
+<span class="lineno" id=line3></span>  <span class="comment">// These also automatically apply to relations, but just taking</span>
+<span class="lineno" id=line4></span>  <span class="comment">// the argument as a tuple.</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Predicate[T]
+<span class="lineno" id=line7></span>  {
+<span class="lineno" id=line8></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> land (f:T-&gt;bool,g:T-&gt;bool) =&gt;
+<span class="lineno" id=line9></span>       <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:T) =&gt; f x <span class="small_keyword" title="logical conjunction">and</span> g x
+<span class="lineno" id=line10></span>     ;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> lor (f:T-&gt;bool,g:T-&gt;bool) =&gt;
+<span class="lineno" id=line13></span>       <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:T) =&gt; f x <span class="small_keyword" title="logical disjunction">or</span> g x
+<span class="lineno" id=line14></span>     ;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="logical implication">implies</span> (f:T-&gt;bool,g:T-&gt;bool) =&gt;
+<span class="lineno" id=line17></span>       <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:T) =&gt; f x <span class="small_keyword" title="logical implication">implies</span> g x
+<span class="lineno" id=line18></span>     ;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> lnot (f:T-&gt;bool) =&gt;
+<span class="lineno" id=line21></span>       <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:T) =&gt; <span class="small_keyword" title="logical negation">not</span> (f x)
+<span class="lineno" id=line22></span>     ;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>  }
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

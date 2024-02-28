@@ -1,0 +1,1144 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>ncurses binding</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Test cases"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Test cases_h')"> <a href="#Test_cases_h">Test cases</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<p>Expected to run on Unix platforms only.
+</p><pre class='inclusion'>
+share/lib/std/io/ncurses.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// This library is licenced under FFAU</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Ncurses 
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"ncurses"</span>;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> WINDOW = <span class="fstring">"WINDOW*"</span>;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> SCREEN = <span class="fstring">"SCREEN*"</span>;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> NCURSES_SCREEN_CB = <span class="fstring">"NCURSE_SCREEN_CB"</span>;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> NCURSES_WINDOW_CB = <span class="fstring">"NCURSE_WINDOW_CB"</span>;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> NCURSES_ATTR_T = <span class="fstring">"NCURSES_ATTR_T"</span>;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="comment">// hackery!</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> attr_t = <span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> chtype = <span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> chtype : <span class="library" title="binding of C int type">int</span> = <span class="fstring">"(unsigned int)$1"</span>; 
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> chtype : <span class="library" title="binding of C char type">char</span> = <span class="fstring">"(unsigned int)$1"</span>; 
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C char type">char</span> : chtype = <span class="fstring">"(char)$1"</span>;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span> : chtype = <span class="fstring">"(int)$1"</span>;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> stdscr : WINDOW = <span class="fstring">"stdscr"</span>;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> addch: chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> addchnstr: &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> addchstr: &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> addnstr: &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> addstr: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> attroff: NCURSES_ATTR_T -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> attron: NCURSES_ATTR_T -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> attrset: NCURSES_ATTR_T -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> attr_get: &amp;attr_t * &amp;<span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> attr_off: attr_t * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> attr_on: attr_t * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> attr_set: attr_t * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> baudrate: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> beep : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> bkgd: chtype -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> bkgdset: chtype -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> border: chtype * chtype * chtype * chtype * chtype * chtype * chtype * chtype -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> box: WINDOW * chtype * chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> can_change_color: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; bool;   <span class="comment">// implemented </span>
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> cbreak: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> chgat: <span class="library" title="binding of C int type">int</span> * attr_t * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> clear: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> clearok: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> clrtobot: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> clrtoeol: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> color_content: <span class="library" title="binding of C short type">short</span> * &amp;<span class="library" title="binding of C short type">short</span> * &amp;<span class="library" title="binding of C short type">short</span> * &amp;<span class="library" title="binding of C short type">short</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> color_set: <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> COLOR_PAIR: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> copywin: WINDOW * WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> curs_set: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> def_prog_mode: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> def_shell_mode: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> delay_output: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> delch: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> delscreen: SCREEN ;   <span class="comment">// implemented </span>
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> delwin: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> deleteln: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> derwin: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; WINDOW; <span class="comment">// implemented </span>
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> doupdate: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dupwin: WINDOW -&gt; WINDOW;   <span class="comment">// implemented </span>
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> echo: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;     <span class="comment">// implemented </span>
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> echochar: chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> erase: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> endwin: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> erasechar: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C char type">char</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> filter: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> flash: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> flushinp: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line68></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getbkgd: WINDOW -&gt; chtype;   <span class="comment">// generated</span>
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getch: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line70></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getnstr: +<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getstr: +<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line72></span>  <span class="comment">//  gen getwin: &amp;FILE -&gt; WINDOW;   // implemented </span>
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> halfdelay: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> has_colors: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; bool;    <span class="comment">// implemented </span>
+<span class="lineno" id=line75></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> has_ic: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; bool;    <span class="comment">// implemented </span>
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> has_il: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; bool;    <span class="comment">// implemented </span>
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> hline: chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> idcok: WINDOW * bool -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line79></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> idlok: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line80></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> immedok: WINDOW * bool -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line81></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> inch: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; chtype;    <span class="comment">// generated</span>
+<span class="lineno" id=line82></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> inchnstr: &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> inchstr: &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> initscr: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; WINDOW;    <span class="comment">// implemented </span>
+<span class="lineno" id=line85></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> init_color: <span class="library" title="binding of C short type">short</span> * <span class="library" title="binding of C short type">short</span> * <span class="library" title="binding of C short type">short</span> * <span class="library" title="binding of C short type">short</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line86></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> init_pair: <span class="library" title="binding of C short type">short</span> * <span class="library" title="binding of C short type">short</span> * <span class="library" title="binding of C short type">short</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line87></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> innstr: &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line88></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> insch: chtype -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line89></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> insdelln: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line90></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> insertln: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line91></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> insnstr: &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> insstr: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line93></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> instr: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line94></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> intrflush: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line95></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> isendwin: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; bool;    <span class="comment">// implemented </span>
+<span class="lineno" id=line96></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_linetouched: WINDOW * <span class="library" title="binding of C int type">int</span> -&gt; bool;  <span class="comment">// implemented </span>
+<span class="lineno" id=line97></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_wintouched: WINDOW -&gt; bool;   <span class="comment">// implemented </span>
+<span class="lineno" id=line98></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> keyname: <span class="library" title="binding of C int type">int</span> -&gt; &amp;<span class="library" title="binding of C char type">char</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line99></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> keypad: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line100></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> killchar: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C char type">char</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line101></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> leaveok: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line102></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> longname: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; &amp;<span class="library" title="binding of C char type">char</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line103></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> meta: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line104></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> move: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line105></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvaddch: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line106></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvaddchnstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line107></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvaddchstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line108></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvaddnstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line109></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvaddstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line110></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvchgat: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * attr_t * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line111></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvcur: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line112></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvdelch: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line113></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvderwin: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line114></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvgetch: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line115></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvgetnstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * +<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line116></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvgetstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * +<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line117></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvhline: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line118></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinch: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; chtype;   <span class="comment">// generated</span>
+<span class="lineno" id=line119></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinchnstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line120></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinchstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line121></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinnstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line122></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinsch: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line123></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinsnstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line124></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinsstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line125></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvinstr: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line126></span>  <span class="comment">//extern NCURSES_EXPORT(int) mvprintw (int * int * &amp;char * ...)  // implemented </span>
+<span class="lineno" id=line127></span>  <span class="comment">//  GCC_PRINTFLIKE(3 * 4);</span>
+<span class="lineno" id=line128></span>  <span class="comment">//extern NCURSES_EXPORT(int) mvscanw (int * int * &amp;char * ...) // implemented </span>
+<span class="lineno" id=line129></span>  <span class="comment">//  GCC_SCANFLIKE(3 * 4);</span>
+<span class="lineno" id=line130></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> mvprintw: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(void)mvprintw($1,$2,"%s",$1.c_str());'</span>;
+<span class="lineno" id=line131></span>  
+<span class="lineno" id=line132></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvvline: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line133></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwaddch: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line134></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwaddchnstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;<span class="comment">// generated</span>
+<span class="lineno" id=line135></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwaddchstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line136></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwaddnstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line137></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwaddstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line138></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwchgat: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * attr_t * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;<span class="comment">// generated</span>
+<span class="lineno" id=line139></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwdelch: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line140></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwgetch: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line141></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwgetnstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * +<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line142></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwgetstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * +<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line143></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwhline: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line144></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwin: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line145></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinch: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; chtype;   <span class="comment">// generated</span>
+<span class="lineno" id=line146></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinchnstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line147></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinchstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line148></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinnstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line149></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinsch: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line150></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinsnstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line151></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinsstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line152></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwinstr: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line153></span>  <span class="comment">//extern NCURSES_EXPORT(int) mvwprintw (&amp;WINDOW * int * int * &amp;char * ...) // implemented </span>
+<span class="lineno" id=line154></span>  <span class="comment">//  GCC_PRINTFLIKE(4 * 5);</span>
+<span class="lineno" id=line155></span>  <span class="comment">//extern NCURSES_EXPORT(int) mvwscanw (WINDOW * int * int * &amp;char * ...) // implemented </span>
+<span class="lineno" id=line156></span>  <span class="comment">//  GCC_SCANFLIKE(4 * 5);</span>
+<span class="lineno" id=line157></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> mvwprintw: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(void)mvwprintw($1,$2,$3,"%s",$4.c_str());'</span>;
+<span class="lineno" id=line158></span>  
+<span class="lineno" id=line159></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mvwvline: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line160></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> napms: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;     <span class="comment">// implemented </span>
+<span class="lineno" id=line161></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> newpad: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; WINDOW;    <span class="comment">// implemented </span>
+<span class="lineno" id=line162></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> newterm: <span class="library" title="binding of C++ string type">string</span> * ifile * ofile -&gt; SCREEN = <span class="fstring">"newterm(strdup($1.c_str()),$2,$3)"</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line163></span>    <span class="comment">//gen newterm: &amp;char * &amp;FILE * &amp;FILE -&gt; &amp;SCREEN; // implemented </span>
+<span class="lineno" id=line164></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> newwin: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; WINDOW;   <span class="comment">// implemented </span>
+<span class="lineno" id=line165></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> nl: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;     <span class="comment">// implemented </span>
+<span class="lineno" id=line166></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> nocbreak: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line167></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> nodelay: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line168></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> noecho: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line169></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> nonl: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;     <span class="comment">// implemented </span>
+<span class="lineno" id=line170></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> noqiflush: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line171></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> noraw: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line172></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> notimeout: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line173></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> overlay: &amp;WINDOW * WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line174></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> overwrite: &amp;WINDOW * WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line175></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pair_content: <span class="library" title="binding of C short type">short</span> * &amp;<span class="library" title="binding of C short type">short</span> * &amp;<span class="library" title="binding of C short type">short</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line176></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> PAIR_NUMBER: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line177></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pechochar: WINDOW * chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line178></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pnoutrefresh: &amp;WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;<span class="comment">// implemented </span>
+<span class="lineno" id=line179></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> prefresh: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line180></span>  <span class="comment">//extern NCURSES_EXPORT(int) printw (&amp;char * ...)   // implemented </span>
+<span class="lineno" id=line181></span>  <span class="comment">//  GCC_PRINTFLIKE(1 * 2);</span>
+<span class="lineno" id=line182></span>  
+<span class="lineno" id=line183></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> printw : <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(void)printw("%s",$1.c_str());'</span>;
+<span class="lineno" id=line184></span>  
+<span class="lineno" id=line185></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> putwin: WINDOW * &amp;FILE -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line186></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> qiflush: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line187></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> raw: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;     <span class="comment">// implemented </span>
+<span class="lineno" id=line188></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> redrawwin: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line189></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> refresh: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line190></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> resetty: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line191></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> reset_prog_mode: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line192></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> reset_shell_mode: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line193></span>  <span class="comment">//   gen ripoffline (int * int: *)(WINDOW * int) -&gt; int; // implemented </span>
+<span class="lineno" id=line194></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> savetty: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line195></span>  <span class="comment">//extern NCURSES_EXPORT(int) scanw (&amp;char * ...)  // implemented </span>
+<span class="lineno" id=line196></span>  <span class="comment">//  GCC_SCANFLIKE(1 * 2);</span>
+<span class="lineno" id=line197></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> scr_dump: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line198></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> scr_init: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line199></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> scrl: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;     <span class="comment">// generated</span>
+<span class="lineno" id=line200></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> scroll: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line201></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> scrollok: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line202></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> scr_restore: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line203></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> scr_set: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line204></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> setscrreg: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line205></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> set_term: &amp;SCREEN -&gt; &amp;SCREEN;   <span class="comment">// implemented </span>
+<span class="lineno" id=line206></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_attroff: chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line207></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_attr_off: attr_t * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated:WIDEC</span>
+<span class="lineno" id=line208></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_attron: chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line209></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_attr_on: attr_t * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated:WIDEC</span>
+<span class="lineno" id=line210></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_attrset: chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line211></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_attr: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; attr_t;    <span class="comment">// implemented </span>
+<span class="lineno" id=line212></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_attr_set: attr_t * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line213></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_clear: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line214></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_color: <span class="library" title="binding of C short type">short</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line215></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_init: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line216></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_label: <span class="library" title="binding of C int type">int</span> -&gt; &amp;<span class="library" title="binding of C char type">char</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line217></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_noutrefresh: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line218></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_refresh: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line219></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_restore: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line220></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_set: <span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line221></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slk_touch: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line222></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> standout: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line223></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> standend: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line224></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> start_color: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line225></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> subpad: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; WINDOW; <span class="comment">// implemented </span>
+<span class="lineno" id=line226></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> subwin: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; WINDOW; <span class="comment">// implemented </span>
+<span class="lineno" id=line227></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> syncok: WINDOW * bool -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line228></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> termattrs: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; chtype;    <span class="comment">// implemented </span>
+<span class="lineno" id=line229></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> termname: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; &amp;<span class="library" title="binding of C char type">char</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line230></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> timeout: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line231></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> touchline: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line232></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> touchwin: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line233></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> typeahead: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line234></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> ungetch: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line235></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> untouchwin: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line236></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> use_env: bool -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line237></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> vidattr: chtype -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line238></span>  <span class="comment">//  gen vidputs (chtype * int: *)(int) -&gt; int;  // implemented </span>
+<span class="lineno" id=line239></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> vline: chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// generated</span>
+<span class="lineno" id=line240></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> vwprintw: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="hack">C_hack</span>::va_list -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line241></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> vw_printw: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="hack">C_hack</span>::va_list -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line242></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> vwscanw: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="hack">C_hack</span>::va_list -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line243></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> vw_scanw: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="hack">C_hack</span>::va_list -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line244></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> waddch: WINDOW * chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line245></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> waddchnstr: WINDOW * &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line246></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> waddchstr: WINDOW * &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line247></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> waddnstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line248></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> waddstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line249></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> waddstr: WINDOW * <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(void)waddstr($1,$2.c_str());'</span>;
+<span class="lineno" id=line250></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wattron: WINDOW * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line251></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wattroff: WINDOW * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line252></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wattrset: WINDOW * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line253></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wattr_get: WINDOW * &amp;attr_t * &amp;<span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line254></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wattr_on: WINDOW * attr_t * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line255></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wattr_off: WINDOW * attr_t * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line256></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wattr_set: WINDOW * attr_t * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line257></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wbkgd: WINDOW * chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line258></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wbkgdset: WINDOW * chtype -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line259></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wborder: WINDOW * chtype * chtype * chtype * chtype * chtype * chtype * chtype * chtype -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line260></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wchgat: WINDOW * <span class="library" title="binding of C int type">int</span> * attr_t * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;<span class="comment">// implemented </span>
+<span class="lineno" id=line261></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wclear: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line262></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wclrtobot: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line263></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wclrtoeol: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line264></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wcolor_set: &amp;WINDOW * <span class="library" title="binding of C short type">short</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line265></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wcursyncup: WINDOW -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line266></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wdelch: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line267></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wdeleteln: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line268></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wechochar: WINDOW * chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line269></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> werase: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line270></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wgetch: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line271></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wgetnstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line272></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wgetstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line273></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> whline: WINDOW * chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line274></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winch: WINDOW -&gt; chtype;    <span class="comment">// implemented </span>
+<span class="lineno" id=line275></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winchnstr: WINDOW * &amp;chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line276></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winchstr: WINDOW * &amp;chtype -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line277></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winnstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line278></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winsch: WINDOW * chtype -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line279></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winsdelln: WINDOW * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line280></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winsertln: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line281></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winsnstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// implemented </span>
+<span class="lineno" id=line282></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winsstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// generated</span>
+<span class="lineno" id=line283></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> winstr: WINDOW * &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line284></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wmove: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line285></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wnoutrefresh: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line286></span>  <span class="comment">//extern NCURSES_EXPORT(int) wprintw (WINDOW * &amp;char * ...)  // implemented </span>
+<span class="lineno" id=line287></span>  <span class="comment">//  GCC_PRINTFLIKE(2 * 3);</span>
+<span class="lineno" id=line288></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> wprintw: WINDOW * <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'(void)wprintw($1,$2.c_str());'</span>;
+<span class="lineno" id=line289></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wredrawln: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line290></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wrefresh: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line291></span>  <span class="comment">//extern NCURSES_EXPORT(int) wscanw (WINDOW * &amp;char * ...) // implemented </span>
+<span class="lineno" id=line292></span>  <span class="comment">//  GCC_SCANFLIKE(2 * 3);</span>
+<span class="lineno" id=line293></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wscrl: WINDOW * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line294></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wsetscrreg: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line295></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wstandout: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line296></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wstandend: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line297></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wsyncdown: WINDOW -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line298></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wsyncup: WINDOW -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line299></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wtimeout: WINDOW * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>;   <span class="comment">// implemented </span>
+<span class="lineno" id=line300></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wtouchln: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line301></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wvline: WINDOW * chtype * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line302></span>  
+<span class="lineno" id=line303></span>  <span class="comment">/*
+<span class="lineno" id=line304></span>   * These are also declared in &lt;term.h&gt;:
+<span class="lineno" id=line305></span>   */</span>
+<span class="lineno" id=line306></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> tigetflag: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line307></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> tigetnum: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line308></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> tigetstr: &amp;<span class="library" title="binding of C char type">char</span> -&gt; &amp;<span class="library" title="binding of C char type">char</span>;  <span class="comment">// implemented </span>
+<span class="lineno" id=line309></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> putp: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;    <span class="comment">// implemented </span>
+<span class="lineno" id=line310></span>  
+<span class="lineno" id=line311></span>  <span class="comment">//#if NCURSES_TPARM_VARARGS</span>
+<span class="lineno" id=line312></span>  <span class="comment">//  gen tparm: &amp;char * ... -&gt; &amp;char; /* &amp;special/</span>
+<span class="lineno" id=line313></span>  <span class="comment">//#else</span>
+<span class="lineno" id=line314></span>  <span class="comment">//  gen tparm: &amp;char * long * long * long * long * long * long * long * long * long -&gt; &amp;char; /* &amp;special/</span>
+<span class="lineno" id=line315></span>  <span class="comment">//  gen tparm_varargs: &amp;char * ... -&gt; &amp;char; /* &amp;special/</span>
+<span class="lineno" id=line316></span>  <span class="comment">//#endif</span>
+<span class="lineno" id=line317></span>  
+<span class="lineno" id=line318></span>  <span class="comment">/*
+<span class="lineno" id=line319></span>   * These functions are not in X/Open * but we use them in macro definitions:
+<span class="lineno" id=line320></span>   */</span>
+<span class="lineno" id=line321></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getattrs: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line322></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getcurx: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line323></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getcury: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line324></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getbegx: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line325></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getbegy: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line326></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getmaxx: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line327></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getmaxy: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line328></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getparx: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line329></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getpary: WINDOW -&gt; <span class="library" title="binding of C int type">int</span>;   <span class="comment">// generated</span>
+<span class="lineno" id=line330></span>  
+<span class="lineno" id=line331></span>  <span class="comment">/*
+<span class="lineno" id=line332></span>   * vid_attr() was implemented originally based on a draft of X/Open curses.
+<span class="lineno" id=line333></span>   */</span>
+<span class="lineno" id=line334></span>  <span class="comment">//#ifndef _XOPEN_SOURCE_EXTENDED</span>
+<span class="lineno" id=line335></span>  <span class="comment">//#define vid_attr(a * pair * opts) vidattr(a)</span>
+<span class="lineno" id=line336></span>  <span class="comment">//#endif</span>
+<span class="lineno" id=line337></span>  
+<span class="lineno" id=line338></span>  <span class="comment">/*
+<span class="lineno" id=line339></span>   * These functions are extensions - not in X/Open Curses.
+<span class="lineno" id=line340></span>   */</span>
+<span class="lineno" id=line341></span>  <span class="comment">//typedef int (*NCURSES_WINDOW_CB)(WINDOW * address);</span>
+<span class="lineno" id=line342></span>  <span class="comment">//typedef int (*NCURSES_SCREEN_CB)(&amp;SCREEN * address);</span>
+<span class="lineno" id=line343></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_term_resized: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; bool;
+<span class="lineno" id=line344></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> keybound: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; &amp;<span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line345></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> curses_version: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; &amp;<span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line346></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> assume_default_colors: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line347></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> define_key: &amp;<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line348></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> key_defined: &amp;<span class="library" title="binding of C char type">char</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line349></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> keyok: <span class="library" title="binding of C int type">int</span> * bool -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line350></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> resize_term: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line351></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> resizeterm: <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line352></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> set_escdelay: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line353></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> set_tabsize: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line354></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> use_default_colors: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line355></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> use_extended_names: bool -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line356></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> use_legacy_coding: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line357></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> use_screen: SCREEN * NCURSES_SCREEN_CB * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line358></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> use_window: WINDOW * NCURSES_WINDOW_CB * <span class="library" title="special binding of C void* type">address</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line359></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wresize: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line360></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> nofilter:1;
+<span class="lineno" id=line361></span>  
+<span class="lineno" id=line362></span>  <span class="comment">/*
+<span class="lineno" id=line363></span>   * These extensions provide access to information stored in the WINDOW even
+<span class="lineno" id=line364></span>   * when NCURSES_OPAQUE is set:
+<span class="lineno" id=line365></span>   */</span>
+<span class="lineno" id=line366></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wgetparent: WINDOW -&gt; WINDOW; <span class="comment">// generated</span>
+<span class="lineno" id=line367></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_cleared: WINDOW -&gt; bool; <span class="comment">// generated</span>
+<span class="lineno" id=line368></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_idcok: WINDOW -&gt; bool;  <span class="comment">// generated</span>
+<span class="lineno" id=line369></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_idlok: WINDOW -&gt; bool;  <span class="comment">// generated</span>
+<span class="lineno" id=line370></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_immedok: WINDOW -&gt; bool; <span class="comment">// generated</span>
+<span class="lineno" id=line371></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_keypad: WINDOW -&gt; bool;  <span class="comment">// generated</span>
+<span class="lineno" id=line372></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_leaveok: WINDOW -&gt; bool; <span class="comment">// generated</span>
+<span class="lineno" id=line373></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_nodelay: WINDOW -&gt; bool; <span class="comment">// generated</span>
+<span class="lineno" id=line374></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_notimeout: WINDOW -&gt; bool; <span class="comment">// generated</span>
+<span class="lineno" id=line375></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_scrollok: WINDOW -&gt; bool; <span class="comment">// generated</span>
+<span class="lineno" id=line376></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> is_syncok: WINDOW -&gt; bool;  <span class="comment">// generated</span>
+<span class="lineno" id=line377></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wgetscrreg: WINDOW * &amp;<span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>; <span class="comment">// generated</span>
+<span class="lineno" id=line378></span>  
+<span class="lineno" id=line379></span>    <span class="comment">// Colours</span>
+<span class="lineno" id=line380></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> 
+<span class="lineno" id=line381></span>      COLOR_BLACK,
+<span class="lineno" id=line382></span>      COLOR_RED,
+<span class="lineno" id=line383></span>      COLOR_GREEN,
+<span class="lineno" id=line384></span>      COLOR_YELLOW,
+<span class="lineno" id=line385></span>      COLOR_BLUE,
+<span class="lineno" id=line386></span>      COLOR_MAGENTA,
+<span class="lineno" id=line387></span>      COLOR_CYAN,
+<span class="lineno" id=line388></span>      COLOR_WHITE : <span class="library" title="binding of C short type">short</span>
+<span class="lineno" id=line389></span>    ;
+<span class="lineno" id=line390></span>  
+<span class="lineno" id=line391></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> A_NORMAL : attr_t;
+<span class="lineno" id=line392></span>  
+<span class="lineno" id=line393></span>    <span class="comment">// Mouse stuff</span>
+<span class="lineno" id=line394></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> mmask_t = <span class="fstring">"mmask_t"</span>;
+<span class="lineno" id=line395></span>    <span class="big_keyword" title="Provide a model for an existing C struct">cstruct</span> MEVENT {
+<span class="lineno" id=line396></span>      id:<span class="library" title="binding of C short type">short</span>;
+<span class="lineno" id=line397></span>      x:<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line398></span>      y:<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line399></span>      z:<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line400></span>      bstate: mmask_t;
+<span class="lineno" id=line401></span>    };
+<span class="lineno" id=line402></span>  
+<span class="lineno" id=line403></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON1_RELEASED        : mmask_t;
+<span class="lineno" id=line404></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON1_PRESSED         : mmask_t;
+<span class="lineno" id=line405></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON1_CLICKED         : mmask_t;
+<span class="lineno" id=line406></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON1_DOUBLE_CLICKED  : mmask_t;
+<span class="lineno" id=line407></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON1_TRIPLE_CLICKED  : mmask_t;
+<span class="lineno" id=line408></span>  
+<span class="lineno" id=line409></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON2_RELEASED        : mmask_t;
+<span class="lineno" id=line410></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON2_PRESSED         : mmask_t;
+<span class="lineno" id=line411></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON2_CLICKED         : mmask_t;
+<span class="lineno" id=line412></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON2_DOUBLE_CLICKED  : mmask_t;
+<span class="lineno" id=line413></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON2_TRIPLE_CLICKED  : mmask_t;
+<span class="lineno" id=line414></span>  
+<span class="lineno" id=line415></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON3_RELEASED        : mmask_t;
+<span class="lineno" id=line416></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON3_PRESSED         : mmask_t;
+<span class="lineno" id=line417></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON3_CLICKED         : mmask_t;
+<span class="lineno" id=line418></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON3_DOUBLE_CLICKED  : mmask_t;
+<span class="lineno" id=line419></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON3_TRIPLE_CLICKED  : mmask_t;
+<span class="lineno" id=line420></span>  
+<span class="lineno" id=line421></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON4_RELEASED        : mmask_t;
+<span class="lineno" id=line422></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON4_PRESSED         : mmask_t;
+<span class="lineno" id=line423></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON4_CLICKED         : mmask_t;
+<span class="lineno" id=line424></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON4_DOUBLE_CLICKED  : mmask_t;
+<span class="lineno" id=line425></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON4_TRIPLE_CLICKED  : mmask_t;
+<span class="lineno" id=line426></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON_CTRL             : mmask_t;
+<span class="lineno" id=line427></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON_SHIFT            : mmask_t;
+<span class="lineno" id=line428></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> BUTTON_ALT              : mmask_t;
+<span class="lineno" id=line429></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ALL_MOUSE_EVENTS        : mmask_t;
+<span class="lineno" id=line430></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> REPORT_MOUSE_POSITION   : mmask_t;
+<span class="lineno" id=line431></span>  
+<span class="lineno" id=line432></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> getmouse: &amp;MEVENT -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line433></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> ungetmouse: &amp;MEVENT -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line434></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mousemask: mmask_t * &amp;mmask_t -&gt; mmask_t;
+<span class="lineno" id=line435></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wenclose: WINDOW * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> -&gt; bool;
+<span class="lineno" id=line436></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mouseinterval: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line437></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> wmouse_trafo: WINDOW * &amp;<span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C int type">int</span> * bool -&gt; bool;
+<span class="lineno" id=line438></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> mouse_trafo: &amp;<span class="library" title="binding of C int type">int</span> * &amp;<span class="library" title="binding of C int type">int</span> * bool -&gt; bool;
+<span class="lineno" id=line439></span>  
+<span class="lineno" id=line440></span>  <span class="comment">/* VT100 symbols begin here */</span>
+<span class="lineno" id=line441></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_ULCORNER    : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line442></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_LLCORNER    : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line443></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_URCORNER    : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line444></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_LRCORNER    : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line445></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_LTEE        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line446></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_RTEE        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line447></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BTEE        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line448></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_TTEE        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line449></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_HLINE       : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line450></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_VLINE       : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line451></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_PLUS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line452></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_S1          : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line453></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_S9          : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line454></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_DIAMOND     : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line455></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_CKBOARD     : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line456></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_DEGREE      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line457></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_PLMINUS     : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line458></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BULLET      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line459></span>  <span class="comment">/* Teletype 5410v1 symbols begin here */</span>
+<span class="lineno" id=line460></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_LARROW      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line461></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_RARROW      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line462></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_DARROW      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line463></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_UARROW      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line464></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BOARD       : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line465></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_LANTERN     : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line466></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BLOCK       : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line467></span>  <span class="comment">/*
+<span class="lineno" id=line468></span>   * These aren't documented, but a lot of System Vs have them anyway
+<span class="lineno" id=line469></span>   * (you can spot pprryyzz{{||}} in a lot of AT&amp;T terminfo strings).
+<span class="lineno" id=line470></span>   * The ACS_names may not match AT&amp;T's, our source didn't know them.
+<span class="lineno" id=line471></span>   */</span>
+<span class="lineno" id=line472></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_S3          : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line473></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_S7          : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line474></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_LEQUAL      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line475></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_GEQUAL      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line476></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_PI          : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line477></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_NEQUAL      : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line478></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_STERLING    : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line479></span>  
+<span class="lineno" id=line480></span>  <span class="comment">/*
+<span class="lineno" id=line481></span>   * Line drawing ACS names are of the form ACS_trbl, where t is the top, r
+<span class="lineno" id=line482></span>   * is the right, b is the bottom, and l is the left.  t, r, b, and l might
+<span class="lineno" id=line483></span>   * be B (blank), S (single), D (double), or T (thick).  The subset defined
+<span class="lineno" id=line484></span>   * here only uses B and S.
+<span class="lineno" id=line485></span>   */</span>
+<span class="lineno" id=line486></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BSSB        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line487></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_SSBB        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line488></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BBSS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line489></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_SBBS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line490></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_SBSS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line491></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_SSSB        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line492></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_SSBS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line493></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BSSS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line494></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_BSBS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line495></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_SBSB        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line496></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ACS_SSSS        : <span class="library" title="binding of C char type">char</span>;
+<span class="lineno" id=line497></span>  <span class="comment">/*
+<span class="lineno" id=line498></span>   * Pseudo-character tokens outside ASCII range.  The curses wgetch() function
+<span class="lineno" id=line499></span>   * will return any given one of these only if the corresponding k- capability
+<span class="lineno" id=line500></span>   * is defined in your terminal's terminfo entry.
+<span class="lineno" id=line501></span>   *
+<span class="lineno" id=line502></span>   * Some keys (KEY_A1, etc) are arranged like this:
+<span class="lineno" id=line503></span>   *	a1     up    a3
+<span class="lineno" id=line504></span>   *	left   b2    right
+<span class="lineno" id=line505></span>   *	c1     down  c3
+<span class="lineno" id=line506></span>   *
+<span class="lineno" id=line507></span>   * A few key codes do not depend upon the terminfo entry.
+<span class="lineno" id=line508></span>   */</span>
+<span class="lineno" id=line509></span>  
+<span class="lineno" id=line510></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_CODE_YES    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line511></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_MIN     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line512></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_BREAK    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line513></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SRESET    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line514></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_RESET    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line515></span>  <span class="comment">/*
+<span class="lineno" id=line516></span>   * These definitions were generated by /var/tmp/ncurses.roots/ncurses/ncurses/include/MKkey_defs.sh /var/tmp/ncurses.roots/ncurses/ncurses/include/Caps
+<span class="lineno" id=line517></span>   */</span>
+<span class="lineno" id=line518></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_DOWN    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line519></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_UP     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line520></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_LEFT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line521></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_RIGHT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line522></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_HOME    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line523></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_BACKSPACE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line524></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F0     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line525></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F1     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(1)'</span>;
+<span class="lineno" id=line526></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F2     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(2)'</span>;
+<span class="lineno" id=line527></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F3     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(3)'</span>;
+<span class="lineno" id=line528></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F4     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(4)'</span>;
+<span class="lineno" id=line529></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F5     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(5)'</span>;
+<span class="lineno" id=line530></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F6     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(6)'</span>;
+<span class="lineno" id=line531></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F7     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(7)'</span>;
+<span class="lineno" id=line532></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F8     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(8)'</span>;
+<span class="lineno" id=line533></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F9     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(9)'</span>;
+<span class="lineno" id=line534></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F10     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(10)'</span>;
+<span class="lineno" id=line535></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F11    : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(11)'</span>;
+<span class="lineno" id=line536></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_F12     : <span class="library" title="binding of C int type">int</span> = <span class="fstring">'KEY_F(12)'</span>;
+<span class="lineno" id=line537></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_DL     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line538></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_IL     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line539></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_DC     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line540></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_IC     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line541></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_EIC     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line542></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_CLEAR    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line543></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_EOS     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line544></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_EOL     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line545></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SF     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line546></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SR     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line547></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_NPAGE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line548></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_PPAGE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line549></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_STAB    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line550></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_CTAB    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line551></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_CATAB    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line552></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_ENTER    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line553></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_PRINT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line554></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_LL     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line555></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_A1     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line556></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_A3     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line557></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_B2     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line558></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_C1     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line559></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_C3     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line560></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_BTAB    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line561></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_BEG     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line562></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_CANCEL    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line563></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_CLOSE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line564></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_COMMAND    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line565></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_COPY    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line566></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_CREATE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line567></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_END     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line568></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_EXIT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line569></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_FIND    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line570></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_HELP    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line571></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_MARK    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line572></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_MESSAGE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line573></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_MOVE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line574></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_NEXT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line575></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_OPEN    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line576></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_OPTIONS    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line577></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_PREVIOUS    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line578></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_REDO    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line579></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_REFERENCE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line580></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_REFRESH    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line581></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_REPLACE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line582></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_RESTART    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line583></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_RESUME    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line584></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SAVE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line585></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SBEG    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line586></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SCANCEL    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line587></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SCOMMAND    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line588></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SCOPY    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line589></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SCREATE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line590></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SDC     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line591></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SDL     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line592></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SELECT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line593></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SEND    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line594></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SEOL    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line595></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SEXIT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line596></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SFIND    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line597></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SHELP    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line598></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SHOME    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line599></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SIC     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line600></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SLEFT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line601></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SMESSAGE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line602></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SMOVE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line603></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SNEXT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line604></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SOPTIONS    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line605></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SPREVIOUS    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line606></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SPRINT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line607></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SREDO    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line608></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SREPLACE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line609></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SRIGHT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line610></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SRSUME    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line611></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SSAVE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line612></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SSUSPEND    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line613></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SUNDO    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line614></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_SUSPEND    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line615></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_UNDO    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line616></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_MOUSE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line617></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_RESIZE    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line618></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_EVENT    : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line619></span>  
+<span class="lineno" id=line620></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> KEY_MAX     : <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line621></span>  
+<span class="lineno" id=line622></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> LINES:1-&gt;<span class="library" title="binding of C int type">int</span> = <span class="fstring">"LINES"</span>;
+<span class="lineno" id=line623></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> COLS:1-&gt;<span class="library" title="binding of C int type">int</span> = <span class="fstring">"COLS"</span>;
+<span class="lineno" id=line624></span>  }
+</pre></p><h1 id='Test_cases_h'><img src='/share/src/web/images/minus.gif' id='Test cases' onclick='toggle(this,"Test_cases_d")' alt='+'/> 1 Test cases</h1><div id='Test_cases_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/src/examples/ncurses_01.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/io/ncurses"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> Ncurses;
+<span class="lineno" id=line3></span>  <span class="doccomment">write output to a dummy file descriptor</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a mutable variable">var</span> term = FileSystem::pipe();
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a mutable variable">var</span> ttype = <span class="fstring">"vt100"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fdo = FileSystem::fdopen_output(term.(0));
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fdi = FileSystem::fdopen_input(term.(1));
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a mutable variable">var</span> s = newterm(ttype,fdi,fdo); <span class="comment">// get a screen</span>
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a mutable variable">var</span> w = newpad(80,24); <span class="comment">// get a window</span>
+<span class="lineno" id=line10></span>  wprintw(w,<span class="fstring">"Hello World !!!"</span>); <span class="comment">// Hi	</span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a mutable variable">var</span> r = refresh();
+<span class="lineno" id=line12></span>  delscreen(s);
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Run time assertion">assert</span> r == 0;
+</pre></p><pre class='inclusion'>
+$PWD/src/examples/ncurses_02.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/io/ncurses"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="hack">C_hack</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Open a module or class">open</span> Ncurses;
+<span class="lineno" id=line4></span>  <span class="doccomment">write output to a dummy file descriptor</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a mutable variable">var</span> w = initscr(); <span class="comment">// get a screen</span>
+<span class="lineno" id=line6></span>  wprintw(w,<span class="fstring">"Hello World !!!\nNow Press a key."</span>); <span class="comment">// Hi	</span>
+<span class="lineno" id=line7></span>  ignore(refresh());
+<span class="lineno" id=line8></span>  ignore(wgetch(w));
+<span class="lineno" id=line9></span>  ignore(endwin());
+</pre></p><pre class='inclusion'>
+$PWD/src/examples/ncurses_03.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">/* Example derived from http://www.tldp.org/HOWTO/NCURSES-Programming-HOWTO */</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/io/ncurses"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Open a module or class">open</span> Ncurses;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="hack">C_hack</span>;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    w := initscr();          <span class="comment">// Start curses mode</span>
+<span class="lineno" id=line7></span>    ignore(cbreak());        <span class="comment">// Line buffering disabled, Pass on</span>
+<span class="lineno" id=line8></span>  		           <span class="comment">// everty thing to me</span>
+<span class="lineno" id=line9></span>    ignore(keypad(w, <span class="library" title="truth value">true</span>)); <span class="comment">// I need that nifty F1</span>
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a mutable variable">var</span> height = 4;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a mutable variable">var</span> width = 8;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a mutable variable">var</span> starty = (LINES() - height) / 2;	<span class="comment">// Calculating for a center placement</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a mutable variable">var</span> startx = (COLS() - width) / 2;	<span class="comment">// of the window</span>
+<span class="lineno" id=line15></span>    wprintw(w,<span class="fstring">"Movement: Arrows, Size: F2 F3 F4 F5, Exit: F1"</span>);
+<span class="lineno" id=line16></span>    ignore(refresh());
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a mutable variable">var</span> my_win = create_newwin(height, width, starty, startx);
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ch = getch();
+<span class="lineno" id=line19></span>    LEFT := <span class="library" title="binding of C int type">int</span>$ord$<span class="library" title="binding of C char type">char</span>$ <span class="fstring">'j'</span>; RIGHT := <span class="library" title="binding of C int type">int</span>$ord$<span class="library" title="binding of C char type">char</span>$ <span class="fstring">'k'</span>;
+<span class="lineno" id=line20></span>    UP := <span class="library" title="binding of C int type">int</span>$ord$<span class="library" title="binding of C char type">char</span>$ <span class="fstring">'i'</span>; DOWN := <span class="library" title="binding of C int type">int</span>$ord$<span class="library" title="binding of C char type">char</span>$ <span class="fstring">'m'</span>;
+<span class="lineno" id=line21></span>    <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> ch == KEY_F1 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="match statement or expression">match</span> ch <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line23></span>      |$(KEY_LEFT) =&gt; 
+<span class="lineno" id=line24></span>        destroy_win(my_win); startx = startx - 1;
+<span class="lineno" id=line25></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line26></span>      |$(KEY_RIGHT) =&gt;
+<span class="lineno" id=line27></span>        destroy_win(my_win); startx = startx + 1;
+<span class="lineno" id=line28></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line29></span>      |$(KEY_UP) =&gt;
+<span class="lineno" id=line30></span>        destroy_win(my_win); starty = starty - 1;
+<span class="lineno" id=line31></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line32></span>      |$(KEY_DOWN) =&gt;
+<span class="lineno" id=line33></span>        destroy_win(my_win); starty = starty + 1;
+<span class="lineno" id=line34></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line35></span>      |$(KEY_F2) =&gt; 
+<span class="lineno" id=line36></span>        destroy_win(my_win); width = <span class="small_keyword" title="conditional">if</span> width &gt; 2 <span class="small_keyword" title="conditional">then</span> width - 1 <span class="small_keyword" title="conditional">else</span> width <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line37></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line38></span>      |$(KEY_F3) =&gt;
+<span class="lineno" id=line39></span>        destroy_win(my_win); width = <span class="small_keyword" title="conditional">if</span> COLS() &gt; width <span class="small_keyword" title="conditional">then</span> width + 1 <span class="small_keyword" title="conditional">else</span> width <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line40></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line41></span>      |$(KEY_F4) =&gt;
+<span class="lineno" id=line42></span>        destroy_win(my_win); height = <span class="small_keyword" title="conditional">if</span> height &gt; 2 <span class="small_keyword" title="conditional">then</span> height - 1 <span class="small_keyword" title="conditional">else</span> height <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line43></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line44></span>      |$(KEY_F5) =&gt;
+<span class="lineno" id=line45></span>        destroy_win(my_win); height = <span class="small_keyword" title="conditional">if</span> LINES() &gt; height <span class="small_keyword" title="conditional">then</span> height + 1 <span class="small_keyword" title="conditional">else</span> height <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line46></span>        my_win = create_newwin(height, width, starty,startx);
+<span class="lineno" id=line47></span>      |_ =&gt; {}();
+<span class="lineno" id=line48></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line49></span>      ch = getch();
+<span class="lineno" id=line50></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line51></span>    ignore(endwin());			<span class="comment">/* End curses mode		  */</span>
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> create_newwin(height:<span class="library" title="binding of C int type">int</span>, width:<span class="library" title="binding of C int type">int</span>, starty:<span class="library" title="binding of C int type">int</span>, startx:<span class="library" title="binding of C int type">int</span>) = {
+<span class="lineno" id=line56></span>    local_win := newwin(height, width, starty, startx);
+<span class="lineno" id=line57></span>    ignore(box(local_win, 0ui , 0ui));	<span class="comment">/* 0, 0 gives default characters 
+<span class="lineno" id=line58></span>  					 * for the vertical and horizontal
+<span class="lineno" id=line59></span>  					 * lines			*/</span>
+<span class="lineno" id=line60></span>    ignore(wrefresh(local_win));		<span class="comment">/* Show that box 		*/</span>
+<span class="lineno" id=line61></span>    <span class="small_keyword" title="return">return</span> local_win;
+<span class="lineno" id=line62></span>  }
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> destroy_win(local_win:WINDOW) {	
+<span class="lineno" id=line65></span>    <span class="comment">/* box(local_win, ' ', ' '); : This won't produce the desired
+<span class="lineno" id=line66></span>     * result of erasing the window. It will leave it's four corners 
+<span class="lineno" id=line67></span>     * and so an ugly remnant of window. 
+<span class="lineno" id=line68></span>     */</span>
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a mutable variable">var</span> borderch = <span class="library" title="binding of C unsigned int type">uint</span>$ord$<span class="library" title="binding of C char type">char</span>$ <span class="fstring">' '</span>;
+<span class="lineno" id=line70></span>    ignore(wborder(local_win,borderch ,borderch ,borderch ,borderch,
+<span class="lineno" id=line71></span>                   borderch,borderch ,borderch ,borderch));
+<span class="lineno" id=line72></span>    <span class="comment">/* The parameters taken are 
+<span class="lineno" id=line73></span>     * 1. win: the window on which to operate
+<span class="lineno" id=line74></span>     * 2. ls: character to be used for the left side of the window 
+<span class="lineno" id=line75></span>     * 3. rs: character to be used for the right side of the window 
+<span class="lineno" id=line76></span>     * 4. ts: character to be used for the top side of the window 
+<span class="lineno" id=line77></span>     * 5. bs: character to be used for the bottom side of the window 
+<span class="lineno" id=line78></span>     * 6. tl: character to be used for the top left corner of the window 
+<span class="lineno" id=line79></span>     * 7. tr: character to be used for the top right corner of the window 
+<span class="lineno" id=line80></span>     * 8. bl: character to be used for the bottom left corner of the window 
+<span class="lineno" id=line81></span>     * 9. br: character to be used for the bottom right corner of the window
+<span class="lineno" id=line82></span>     */</span>
+<span class="lineno" id=line83></span>    ignore(wrefresh(local_win));
+<span class="lineno" id=line84></span>    ignore(delwin(local_win));
+<span class="lineno" id=line85></span>  }
+<span class="lineno" id=line86></span>  
+</pre></p><pre class='inclusion'>
+$PWD/src/config/unix/ncurses.fpc</pre>
+<p><pre class="prefmtbg">Description: ncurses library
+provides_slib: -lncurses
+provides_dlib: -lncurses
+includes: '"ncurses.h"'
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

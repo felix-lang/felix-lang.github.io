@@ -1,0 +1,1323 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Core Algebraic Structures.</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Synopsis.",
+"Description.",
+"Functions.",
+"Assertions",
+"Sets.",
+"Set forms.",
+"Cartesian Product of set_forms.",
+"Containers.",
+"Orders",
+"Equivalence Relation.",
+"Partial Order",
+"Bounded Partial Order",
+"Total Order",
+"Bounded Total Orders.",
+"Sequences",
+"Groupoids.",
+"Approximate Additive Group",
+"Additive Group",
+"Approximate Multiplicative Semi-Group With Unit.",
+"Multiplicative Semi-Group With Unit.",
+"Rings",
+"Approximate Unit Ring.",
+"Ring",
+"Approximate Division Ring",
+"Division Ring",
+"Integral.",
+"Bitwise operations",
+"Integer",
+"Float kinds",
+"Trigonometric Functions.",
+"Approximate Reals.",
+"Complex numbers",
+"Summation and Product Quantifiers.",
+"Monad"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Synopsis._h')"> <a href="#Synopsis._h">Synopsis.</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Description._h')"> <a href="#Description._h">Description.</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#Functions._h">Functions.</a></div>
+      <div class=m2><a href="#Assertions_h">Assertions</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Sets._h')"> <a href="#Sets._h">Sets.</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Set forms._h')"> <a href="#Set_forms._h">Set forms.</a></div>
+      <div class=sm id=menu4>
+      <div class=m2><a href="#Cartesian_Product_of_set_forms._h">Cartesian Product of set_forms.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Containers._h')"> <a href="#Containers._h">Containers.</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Orders_h')"> <a href="#Orders_h">Orders</a></div>
+      <div class=sm id=menu6>
+      <div class=m2><a href="#Equivalence_Relation._h">Equivalence Relation.</a></div>
+      <div class=m2><a href="#Partial_Order_h">Partial Order</a></div>
+      <div class=m2><a href="#Bounded_Partial_Order_h">Bounded Partial Order</a></div>
+      <div class=m2><a href="#Total_Order_h">Total Order</a></div>
+      <div class=m2><a href="#Bounded_Total_Orders._h">Bounded Total Orders.</a></div>
+      <div class=m2><a href="#Sequences_h">Sequences</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Groupoids._h')"> <a href="#Groupoids._h">Groupoids.</a></div>
+      <div class=sm id=menu7>
+      <div class=m2><a href="#Approximate_Additive_Group_h">Approximate Additive Group</a></div>
+      <div class=m2><a href="#Additive_Group_h">Additive Group</a></div>
+      <div class=m2><a href="#Approximate_Multiplicative_Semi-Group_With_Unit._h">Approximate Multiplicative Semi-Group With Unit.</a></div>
+      <div class=m2><a href="#Multiplicative_Semi-Group_With_Unit._h">Multiplicative Semi-Group With Unit.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Rings_h')"> <a href="#Rings_h">Rings</a></div>
+      <div class=sm id=menu8>
+      <div class=m2><a href="#Approximate_Unit_Ring._h">Approximate Unit Ring.</a></div>
+      <div class=m2><a href="#Ring_h">Ring</a></div>
+      <div class=m2><a href="#Approximate_Division_Ring_h">Approximate Division Ring</a></div>
+      <div class=m2><a href="#Division_Ring_h">Division Ring</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#Integral._h')"> <a href="#Integral._h">Integral.</a></div>
+      <div class=sm id=menu9>
+      <div class=m2><a href="#Bitwise_operations_h">Bitwise operations</a></div>
+      <div class=m2><a href="#Integer_h">Integer</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#Float kinds_h')"> <a href="#Float_kinds_h">Float kinds</a></div>
+      <div class=sm id=menu10>
+      <div class=m2><a href="#Trigonometric_Functions._h">Trigonometric Functions.</a></div>
+      <div class=m2><a href="#Approximate_Reals._h">Approximate Reals.</a></div>
+      <div class=m2><a href="#Complex_numbers_h">Complex numbers</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu11','#Summation and Product Quantifiers._h')"> <a href="#Summation_and_Product_Quantifiers._h">Summation and Product Quantifiers.</a></div>
+      <div class=sm id=menu11>
+      </div>
+      <div class=m1 onclick="mshow('menu12','#Monad_h')"> <a href="#Monad_h">Monad</a></div>
+      <div class=sm id=menu12>
+      </div>
+    <script>counter_max=12;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Synopsis._h'><img src='/share/src/web/images/minus.gif' id='Synopsis.' onclick='toggle(this,"Synopsis._d")' alt='+'/> 1 Synopsis.</h1><div id='Synopsis._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/predicate"</span>;        <span class="comment">// in logic.fdoc</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/set"</span>;              <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/container"</span>;        <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/equiv"</span>;            <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/partialorder"</span>;     <span class="comment">// in algebra.fdoc  </span>
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/totalorder"</span>;       <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/sequence"</span>;         <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/group"</span>;            <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/ring"</span>;             <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/bits"</span>;             <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/integer"</span>;          <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/trig"</span>;             <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/real"</span>;             <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/complex"</span>;          <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/monad"</span>;            <span class="comment">// in algebra.fdoc</span>
+<span class="lineno" id=line16></span>  
+</pre></p></div><h1 id='Description._h'><img src='/share/src/web/images/minus.gif' id='Description.' onclick='toggle(this,"Description._d")' alt='+'/> 2 Description.</h1><div id='Description._d' style='display:block'>
+<p>In this section we provide abstract definitions of some basic
+mathematical stuctures which will be used to specify
+operations on numeric types.
+</p><p>We use polymorphic classes to do this. A class is introduced by
+the <code>class</code> keyword followed by its name, then a list
+of type variables in square brackets. Then the body is
+presented enclosed in curly braces.
+</p><p>Two kinds of specification are allowed in a polymorphic class:
+function definitions and assertions.
+</p><h2 id='Functions._h'><img src='/share/src/web/images/minus.gif' id='Functions.' onclick='toggle(this,"Functions._d")' alt='+'/> 2.1 Functions.</h2><div id='Functions._d' style='display:block'>
+<p>There are two kinds of function definitions. A function
+or procedure specified with the adjective <code>virtual</code>
+may have a specialisation provided in an instance declaration.
+Virtual functions may have definitions, in which case the
+definition is merely a default. It can be replaced in a specialising
+instance. However the definition should be taken as a semantic
+specification which the specialisation should adhere too.
+</p><p>The set of virtual functions of a polymorphic class is known
+as the <em>basis</em> of the class.
+</p><p>A non-virtual function can be defined in terms of virtual functions
+and other non-virtual functions.  Non virtual functions cannot be 
+specialised by the programmer.  Instead, they are automatically specialised 
+by the system for an instance.
+</p></div><h2 id='Assertions_h'><img src='/share/src/web/images/minus.gif' id='Assertions' onclick='toggle(this,"Assertions_d")' alt='+'/> 2.2 Assertions</h2><div id='Assertions_d' style='display:block'>
+<p>A polymorphic class may also contain assertions. These are
+function like specifications which specify semantic constraints.
+</p><p>An <code>axiom</code> specifies a basic assertion, it specifies a class property in 
+terms of relations between the class functions. Since Felix only
+supports first order assertional logic, higher order semantics
+must be specified in comments.
+</p><p>If a class contains virtual functions with definitions,
+the definition is also considered as axiomatic.
+</p><p>The set of all axioms, including those in comments,
+is known as the <em>assertional basis</em> or <em>semantic specification</em>
+of the class.  Additionally some reductions may be or imply an
+extension of the semantic basis.
+</p><p>A <code>lemma</code> is an assertion which can be derived from the semantic
+specifications by logical reasoning. In particular, lemmas in
+principle should be self-evident, simple and useful and able
+to be deduced by an automatic theorm proving program.
+</p><p>A <code>theorem</code> is a more complicated derived assertion,
+which would be too hard to prove with an automatic theorem
+prover. Instead, it should be derivable with a proof 
+assistant (such as Coq), given various unspecified 
+strategies, tactics and hints.
+</p></div></div><h1 id='Sets._h'><img src='/share/src/web/images/minus.gif' id='Sets.' onclick='toggle(this,"Sets._d")' alt='+'/> 3 Sets.</h1><div id='Sets._d' style='display:block'>
+<p>A <em>set</em> is any type with a membership predicate \(\in\)
+spelled <code>\in</code>. You can also use function <code>mem</code>. The parser
+also maps <code>in</code> to operator <code>\in</code>.
+</p><p>We also provide a reversed form \(\owns\) spelled <code>\owns</code>,
+and negated forms \(ni\) spelled <code>\ni</code> or <code>\notin</code>.
+</p><p>Three combinators are provided as well, \(\cap\) spelled <code>cap</code>
+provides intersection, \(\cup\) spelled <code>\cup</code> provides
+the usual set union, and \(\setminus\) spelled <code>\setminus</code>
+the asymmetic set difference or subtraction.
+</p><p>Note that sets are not necessarily finite.
+</p><pre class='inclusion'>
+share/lib/std/algebra/set.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// note: eq is not necessarily required for a membership test</span>
+<span class="lineno" id=line2></span>  <span class="comment">// for example: string member of regexp doesn't require</span>
+<span class="lineno" id=line3></span>  <span class="comment">// string equality</span>
+<span class="lineno" id=line4></span>  <span class="comment">// Set need not be finite (example regexp again)</span>
+<span class="lineno" id=line5></span>  <span class="comment">// A list is a set, despite the duplications</span>
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a type class">class</span> Set[c,t] {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem (elt:t, container:c):bool =&gt; elt <span class="tex_symbol" title="\in">\(\in\)</span> container;
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\in">\(\in\)</span> : t * c-&gt; bool;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\owns">\(\owns\)</span> (container:c, elt:t) =&gt; elt <span class="tex_symbol" title="\in">\(\in\)</span> container;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ni">\(\ni\)</span> (container:c, elt:t) =&gt; elt <span class="tex_symbol" title="\in">\(\in\)</span> container;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\notin">\(\notin\)</span> (elt:t, container:c) =&gt; <span class="small_keyword" title="logical negation">not</span> (elt <span class="tex_symbol" title="\in">\(\in\)</span> container);
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cup">\(\cup\)</span>[c2 <span class="small_keyword" title="type-class constraint">with</span> Set[c2,t]] 
+<span class="lineno" id=line14></span>      (x:c, y:c2) =&gt; 
+<span class="lineno" id=line15></span>      { e : t | e <span class="tex_symbol" title="\in">\(\in\)</span> x <span class="small_keyword" title="logical disjunction">or</span> e <span class="tex_symbol" title="\in">\(\in\)</span> y }
+<span class="lineno" id=line16></span>    ;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cap">\(\cap\)</span>[c2 <span class="small_keyword" title="type-class constraint">with</span> Set[c2,t]] 
+<span class="lineno" id=line19></span>      (x:c, y:c2) =&gt; 
+<span class="lineno" id=line20></span>      { e : t | e <span class="tex_symbol" title="\in">\(\in\)</span> x <span class="small_keyword" title="logical conjunction">and</span> e <span class="tex_symbol" title="\in">\(\in\)</span> y }
+<span class="lineno" id=line21></span>    ;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\setminus">\(\setminus\)</span>[c2 <span class="small_keyword" title="type-class constraint">with</span> Set[c2,t]] 
+<span class="lineno" id=line24></span>      (x:c, y:c2) =&gt; 
+<span class="lineno" id=line25></span>      { e : t | e <span class="tex_symbol" title="\in">\(\in\)</span> x <span class="small_keyword" title="logical conjunction">and</span> e <span class="tex_symbol" title="\notin">\(\notin\)</span> y }
+<span class="lineno" id=line26></span>    ;
+<span class="lineno" id=line27></span>  }
+<span class="lineno" id=line28></span>  
+</pre></p></div><h1 id='Set_forms._h'><img src='/share/src/web/images/minus.gif' id='Set forms.' onclick='toggle(this,"Set_forms._d")' alt='+'/> 4 Set forms.</h1><div id='Set_forms._d' style='display:block'>
+<p>A <code>set_form</code> is a record type with a single 
+member <code>has_elt</code> which returns true if it's argument
+is intended as a member of some particular set.
+</p><p>We construe a set_form as a Set by providing an
+instance.
+</p><p>A set_form is basically just the membership predicate remodelled
+as a noun by encapsulating the predicate in a closure and
+thereby abstracting it.
+</p><pre class='inclusion'>
+share/lib/std/algebra/set.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define an object interface">interface</span> set_form[T] { has_elt: T -&gt; bool; }
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Set[set_form[T], T] {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\in">\(\in\)</span> (elt:T, s:set_form[T]) =&gt; s.has_elt elt;
+<span class="lineno" id=line5></span>  }
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Open a module or class">open</span>[T] Set[set_form[T],T];
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="comment">// INVERSE image of a set under a function</span>
+<span class="lineno" id=line9></span>  <span class="comment">// For a function f: t -&gt; t2, an element e</span>
+<span class="lineno" id=line10></span>  <span class="comment">// is in a restriction of the domain t if its</span>
+<span class="lineno" id=line11></span>  <span class="comment">// image in t2 is in the specified set.</span>
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> invimg[t,c2,t2 <span class="small_keyword" title="type-class constraint">with</span> Set[c2,t2]] 
+<span class="lineno" id=line13></span>    (f:t-&gt;t2, x:c2) : set_form[t] =&gt;
+<span class="lineno" id=line14></span>    { e : t | (f e) <span class="tex_symbol" title="\in">\(\in\)</span> x }
+<span class="lineno" id=line15></span>  ;
+<span class="lineno" id=line16></span>  
+</pre></p><h2 id='Cartesian_Product_of_set_forms._h'><img src='/share/src/web/images/minus.gif' id='Cartesian Product of set_forms.' onclick='toggle(this,"Cartesian_Product_of_set_forms._d")' alt='+'/> 4.1 Cartesian Product of set_forms.</h2><div id='Cartesian_Product_of_set_forms._d' style='display:block'>
+<p>This uses some advanced instantiation technology
+to allow you to define the cartesian product of a
+sequence of sets using the infix TeX operator \(\otimes\)
+which is spelled <code>\otimes</code>. There's also a left associative
+binary operator \(\times\) spelled <code>\times</code>.
+</p><pre class='inclusion'>
+share/lib/std/algebra/set.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\times">\(\times\)</span>[U,V] (x:set_form[U],y:set_form[V]) =&gt; 
+<span class="lineno" id=line3></span>    { u,v : U * V | u <span class="tex_symbol" title="\in">\(\in\)</span> x <span class="small_keyword" title="logical conjunction">and</span> v <span class="tex_symbol" title="\in">\(\in\)</span> y }
+<span class="lineno" id=line4></span>  ;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\otimes">\(\otimes\)</span>[U,V] (x:set_form[U],y:set_form[V]) =&gt; 
+<span class="lineno" id=line7></span>    { u,v : U * V | u <span class="tex_symbol" title="\in">\(\in\)</span> x <span class="small_keyword" title="logical conjunction">and</span> v <span class="tex_symbol" title="\in">\(\in\)</span> y }
+<span class="lineno" id=line8></span>  ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\otimes">\(\otimes\)</span>[U,V,W] (head:set_form[U], tail:set_form[V*W]) =&gt;
+<span class="lineno" id=line11></span>    { u,v,w : U * V * W | u <span class="tex_symbol" title="\in">\(\in\)</span> head <span class="small_keyword" title="logical conjunction">and</span> (v,w) <span class="tex_symbol" title="\in">\(\in\)</span> tail }
+<span class="lineno" id=line12></span>  ;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\otimes">\(\otimes\)</span>[NH,OH,OT] (head:set_form[NH], tail:set_form[OH**OT]) =&gt;
+<span class="lineno" id=line15></span>    { h,,(oh,,ot) : NH ** (OH ** OT) | h <span class="tex_symbol" title="\in">\(\in\)</span> head <span class="small_keyword" title="logical conjunction">and</span> (oh,,ot) <span class="tex_symbol" title="\in">\(\in\)</span> tail }
+<span class="lineno" id=line16></span>  ;
+<span class="lineno" id=line17></span>  
+</pre></p></div></div><h1 id='Containers._h'><img src='/share/src/web/images/minus.gif' id='Containers.' onclick='toggle(this,"Containers._d")' alt='+'/> 5 Containers.</h1><div id='Containers._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/container.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// roughly, a finite Set</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Container [c,v]
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Set[c,v];
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: c -&gt; <span class="library" title="binding of C size_t type">size</span>;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\Vert">\(\Vert\)</span> (x:c) =&gt; <span class="library" title="number of elements in data structure">len</span> x;
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty(x: c): bool =&gt; <span class="library" title="number of elements in data structure">len</span> x == <span class="library" title="binding of C size_t type">size</span>(0);
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  
+</pre></p></div><h1 id='Orders_h'><img src='/share/src/web/images/minus.gif' id='Orders' onclick='toggle(this,"Orders_d")' alt='+'/> 6 Orders</h1><div id='Orders_d' style='display:block'>
+<h2 id='Equivalence_Relation._h'><img src='/share/src/web/images/minus.gif' id='Equivalence Relation.' onclick='toggle(this,"Equivalence_Relation._d")' alt='+'/> 6.1 Equivalence Relation.</h2><div id='Equivalence_Relation._d' style='display:block'>
+<p>An <a href="https://en.wikipedia.org/wiki/Equivalence_relation">equivalence</a> relation 
+is a <a href="https://en.wikipedia.org/wiki/Reflexive_relation">reflexive</a>, 
+<a href="https://en.wikipedia.org/wiki/Symmetric_relation">symmetric</a>,
+<a href="https://en.wikipedia.org/wiki/Transitive_relation">transitive</a>
+relation. It is one of the most fundamental concepts in
+mathematics. One can show that for any set \(S\), for any
+element \(s \in  S\), the subset \(\lbrack s\rbrack\) of \(S\) 
+consisting of all elements equivalent to \(s\) are also
+equivalent to each other, and not equivalent to any other
+element outside that set.
+</p><p>Therefore, every equivalence relation on a set \(S\) specifies 
+a <a href="https://en.wikipedia.org/wiki/Partition_of_a_set">partition</a> 
+of \(S\) which is a set of subsets of \(S\)
+known as <a href="https://en.wikipedia.org/wiki/Equivalence_class">equivalence classes</a>, 
+or just plain classes,
+such that no two classes have a common
+intersection, and the union of the classes spans the whole set.
+</p><p>In other words a partition consists of 
+a <a href="https://en.wikipedia.org/wiki/Disjoint_union">disjoint union</a>
+of subsets.
+</p><p>The most fundamential relation in computing which is required
+to be an equivalence relation is the equality operator.
+In particular, it allows us to have distinct encodings of
+a value, but still consider them equal semantically,
+and to provide an operational measure of that equivalence.
+</p><p>As a simple example, consider that the rational numbers
+\(1/2\) and \(2/4\) have distinct encodings but none-the-less
+are semantically equivalent.
+</p><p>An online reference on <a href="http://en.wikibooks.org/wiki/Abstract_Algebra/Equivalence_relations_and_congruence_classes">Wikibooks</a>
+</p><pre class='inclusion'>
+share/lib/std/algebra/equiv.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// equality: technically, equivalence relation</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Eq[t] {
+<span class="lineno" id=line3></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : t * t -&gt; bool;
+<span class="lineno" id=line4></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> != (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x == y);
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> reflex(x:t): x == x;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> sym(x:t, y:t): (x == y) == (y == x);
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> trans(x:t, y:t, z:t): x == y <span class="small_keyword" title="logical conjunction">and</span> y == z <span class="small_keyword" title="logical implication">implies</span> x == z;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> eq(x:t, y:t)=&gt; x == y;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ne(x:t, y:t)=&gt; x != y;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ne">\(\ne\)</span>(x:t, y:t)=&gt; x != y;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\neq">\(\neq\)</span>(x:t, y:t)=&gt; x != y;
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  
+</pre></p></div><h2 id='Partial_Order_h'><img src='/share/src/web/images/minus.gif' id='Partial Order' onclick='toggle(this,"Partial_Order_d")' alt='+'/> 6.2 Partial Order</h2><div id='Partial_Order_d' style='display:block'>
+<p>A proper <a href="https://en.wikipedia.org/wiki/Partially_ordered_set">partial order</a> 
+\(\subset\) spelled <code>\subset</code>
+is a transitive, 
+<a href="https://en.wikipedia.org/wiki/Antisymmetric_relation">antisymmetric</a> 
+<a href="https://en.wikipedia.org/wiki/Reflexive_relation">irreflexive</a> relation.
+</p><p>We also provide an improper operator \(\subseteq\) 
+spelled <code>\subseteq</code> which is transitive, antisymmetric,
+and reflexive, for which either the partial order
+or equivalence operator <code>==</code> applies.
+</p><p>The choice of operators is motivated by the canonical
+exemplar of subset containment relations.
+</p><pre class='inclusion'>
+share/lib/std/algebra/partialorder.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// partial order</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Pord[t]{
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[t];
+<span class="lineno" id=line4></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subset">\(\subset\)</span>: t * t -&gt; bool;
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supset">\(\supset\)</span>(x:t,y:t):bool =&gt;y <span class="tex_symbol" title="\subset">\(\subset\)</span> x;
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\subset">\(\subset\)</span> y <span class="small_keyword" title="logical disjunction">or</span> x == y;
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supseteq">\(\supseteq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\supset">\(\supset\)</span> y <span class="small_keyword" title="logical disjunction">or</span> x == y;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subseteqq">\(\subseteqq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supseteqq">\(\supseteqq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\supseteq">\(\supseteq\)</span> y;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsubseteq">\(\nsubseteq\)</span>(x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y);
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsupseteq">\(\nsupseteq\)</span>(x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\supseteq">\(\supseteq\)</span> y);
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsubseteqq">\(\nsubseteqq\)</span>(x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y);
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsupseteqq">\(\nsupseteqq\)</span>(x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\supseteq">\(\supseteq\)</span> y);
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supsetneq">\(\supsetneq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\supset">\(\supset\)</span> y;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supsetneqq">\(\supsetneqq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\supset">\(\supset\)</span> y;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supsetneq">\(\supsetneq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\supset">\(\supset\)</span> y;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supsetneqq">\(\supsetneqq\)</span>(x:t,y:t):bool =&gt; x <span class="tex_symbol" title="\supset">\(\supset\)</span> y;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> trans(x:t, y:t, z:t): <span class="tex_symbol" title="\subset">\(\subset\)</span>(x,y) <span class="small_keyword" title="logical conjunction">and</span> <span class="tex_symbol" title="\subset">\(\subset\)</span>(y,z) <span class="small_keyword" title="logical implication">implies</span> <span class="tex_symbol" title="\subset">\(\subset\)</span>(x,z);
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> antisym(x:t, y:t): <span class="tex_symbol" title="\subset">\(\subset\)</span>(x,y) <span class="small_keyword" title="logical disjunction">or</span> <span class="tex_symbol" title="\subset">\(\subset\)</span>(y,x) <span class="small_keyword" title="logical disjunction">or</span> x == y;
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> reflex(x:t, y:t): <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span>(x,y) <span class="small_keyword" title="logical conjunction">and</span> <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span>(y,x) <span class="small_keyword" title="logical implication">implies</span> x == y;
+<span class="lineno" id=line25></span>  }
+</pre></p></div><h2 id='Bounded_Partial_Order_h'><img src='/share/src/web/images/minus.gif' id='Bounded Partial Order' onclick='toggle(this,"Bounded_Partial_Order_d")' alt='+'/> 6.3 Bounded Partial Order</h2><div id='Bounded_Partial_Order_d' style='display:block'>
+<p>A partial order may bave an upper or lower bound known as the supremum
+and infimum, respectively. If these values are in the type, they are called
+the maximum and minimum, respectively.
+</p><pre class='inclusion'>
+share/lib/std/algebra/partialorder.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> UpperBoundPartialOrder[T] {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Pord[T];
+<span class="lineno" id=line3></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> upperbound: 1 -&gt; T;
+<span class="lineno" id=line4></span>  }
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a type class">class</span> LowerBoundPartialOrder[T] {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Pord[T];
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> lowerbound: 1 -&gt; T;
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a type class">class</span> BoundPartialOrder[T] {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> LowerBoundPartialOrder[T];
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> UpperBoundPartialOrder[T];
+<span class="lineno" id=line12></span>  }
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  
+</pre></p></div><h2 id='Total_Order_h'><img src='/share/src/web/images/minus.gif' id='Total Order' onclick='toggle(this,"Total_Order_d")' alt='+'/> 6.4 Total Order</h2><div id='Total_Order_d' style='display:block'>
+<p>A <a href="https://en.wikipedia.org/wiki/Total_order">total order</a> is a 
+partial order with a <a href="https://en.wikipedia.org/wiki/Total_relation">totality law</a>.
+</p><p>However we do not derive it from our partial order because
+we use different comparison operators. Here we use the
+standard ascii art comparison operators commonly found
+in programming languages along with the more beautiful
+TeX operators used in mathematical papers.
+</p><p>The spelling of the TeX operators can be found by
+holding the mouse over the symbol briefly.
+</p><pre class='inclusion'>
+share/lib/std/algebra/totalorder.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// total order</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Tord[t]{
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[t];
+<span class="lineno" id=line4></span>    <span class="comment">// defined in terms of &lt;, argument order swap, and boolean negation</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="comment">// less</span>
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : t * t -&gt; bool;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> lt (x:t,y:t): bool=&gt; x &lt; y;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\lt">\(\lt\)</span> (x:t,y:t): bool=&gt; x &lt; y;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\lneq">\(\lneq\)</span> (x:t,y:t): bool=&gt; x &lt; y;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\lneqq">\(\lneqq\)</span> (x:t,y:t): bool=&gt; x &lt; y;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> trans(x:t, y:t, z:t): x &lt; y <span class="small_keyword" title="logical conjunction">and</span> y &lt; z <span class="small_keyword" title="logical implication">implies</span> x &lt; z;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> antisym(x:t, y:t): x &lt; y <span class="small_keyword" title="logical disjunction">or</span> y &lt; x <span class="small_keyword" title="logical disjunction">or</span> x == y;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> reflex(x:t, y:t): x &lt; y <span class="small_keyword" title="logical conjunction">and</span> y &lt;= x <span class="small_keyword" title="logical implication">implies</span> x == y;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> totality(x:t, y:t): x &lt;= y <span class="small_keyword" title="logical disjunction">or</span> y &lt;= x;
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="comment">// greater</span>
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &gt;(x:t,y:t):bool =&gt; y &lt; x;
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> gt(x:t,y:t):bool =&gt; y &lt; x;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\gt">\(\gt\)</span>(x:t,y:t):bool =&gt; y &lt; x;
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\gneq">\(\gneq\)</span>(x:t,y:t):bool =&gt; y &lt; x;
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\gneqq">\(\gneqq\)</span>(x:t,y:t):bool =&gt; y &lt; x;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="comment">// less equal</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt;= (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (y &lt; x);
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> le (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (y &lt; x);
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\le">\(\le\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (y &lt; x);
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\leq">\(\leq\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (y &lt; x);
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\leqq">\(\leqq\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (y &lt; x);
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\leqslant">\(\leqslant\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (y &lt; x);
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    <span class="comment">// greater equal</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &gt;= (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ge (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ge">\(\ge\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\geq">\(\geq\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\geqq">\(\geqq\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\geqslant">\(\geqslant\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>    <span class="comment">// negated, strike-through</span>
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ngtr">\(\ngtr\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nless">\(\nless\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt; y);
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ngeq">\(\ngeq\)</span> (x:t,y:t):bool =&gt; x &lt; y;
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ngeqq">\(\ngeqq\)</span> (x:t,y:t):bool =&gt; x &lt; y;
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ngeqslant">\(\ngeqslant\)</span> (x:t,y:t):bool =&gt; x &lt; y;
+<span class="lineno" id=line51></span>  
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nleq">\(\nleq\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt;= y);
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nleqq">\(\nleqq\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt;= y);
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nleqslant">\(\nleqslant\)</span> (x:t,y:t):bool =&gt; <span class="small_keyword" title="logical negation">not</span> (x &lt;= y);
+<span class="lineno" id=line55></span>    
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>    <span class="comment">// maxima and minima</span>
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> max(x:t,y:t):t=&gt; <span class="small_keyword" title="conditional">if</span> x &lt; y <span class="small_keyword" title="conditional">then</span> y <span class="small_keyword" title="conditional">else</span> x <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\vee">\(\vee\)</span>(x:t,y:t) =&gt; max (x,y);
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> min(x:t,y:t):t =&gt; <span class="small_keyword" title="conditional">if</span> x &lt; y <span class="small_keyword" title="conditional">then</span> x <span class="small_keyword" title="conditional">else</span> y <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\wedge">\(\wedge\)</span>(x:t,y:t):t =&gt; min (x,y);
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>  }
+</pre></p></div><h2 id='Bounded_Total_Orders._h'><img src='/share/src/web/images/minus.gif' id='Bounded Total Orders.' onclick='toggle(this,"Bounded_Total_Orders._d")' alt='+'/> 6.5 Bounded Total Orders.</h2><div id='Bounded_Total_Orders._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/totalorder.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> UpperBoundTotalOrder[T] {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Tord[T];
+<span class="lineno" id=line3></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> maxval: 1 -&gt; T = <span class="fstring">"::std::numeric_limits&lt;?1&gt;::max()"</span>;
+<span class="lineno" id=line4></span>  }
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a type class">class</span> LowerBoundTotalOrder[T] {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Tord[T];
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> minval: 1 -&gt; T = <span class="fstring">"::std::numeric_limits&lt;?1&gt;::min()"</span>;
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a type class">class</span> BoundTotalOrder[T] {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> LowerBoundTotalOrder[T];
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> UpperBoundTotalOrder[T];
+<span class="lineno" id=line12></span>  }
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  
+</pre></p></div><h2 id='Sequences_h'><img src='/share/src/web/images/minus.gif' id='Sequences' onclick='toggle(this,"Sequences_d")' alt='+'/> 6.6 Sequences</h2><div id='Sequences_d' style='display:block'>
+<p>Sequences are discrete total orders.
+</p><pre class='inclusion'>
+share/lib/std/algebra/sequence.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// Forward iterable</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> ForwardSequence[T] {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Tord[T];
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: T -&gt; T;
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr: &amp;T;
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr: &amp;T;
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="comment">// Bidirectional</span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a type class">class</span> BidirectionalSequence[T] {
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> ForwardSequence[T];
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: T -&gt; T;
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr: &amp;T;
+<span class="lineno" id=line15></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr: &amp;T;
+<span class="lineno" id=line16></span>  }
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>  <span class="comment">// Bounded Random access totally ordered</span>
+<span class="lineno" id=line19></span>  <span class="comment">// int should be any integer type really .. fix later</span>
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Define a type class">class</span> RandomSequence[T] {
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> BidirectionalSequence[T];
+<span class="lineno" id=line22></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> advance : <span class="library" title="binding of C int type">int</span> * T -&gt; T;
+<span class="lineno" id=line23></span>  }
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  <span class="comment">// Bounded totally ordered forward iterable</span>
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Define a type class">class</span> BoundForwardSequence[T] {
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> ForwardSequence[T];
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> UpperBoundTotalOrder[T];
+<span class="lineno" id=line29></span>  }
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>  <span class="comment">// Bounded totally ordered bidirectional</span>
+<span class="lineno" id=line32></span>  <span class="big_keyword" title="Define a type class">class</span> BoundBidirectionalSequence[T] {
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> BidirectionalSequence[T];
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> BoundTotalOrder[T];
+<span class="lineno" id=line35></span>  }
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="comment">// Bounded Random access totally ordered</span>
+<span class="lineno" id=line38></span>  <span class="big_keyword" title="Define a type class">class</span> BoundRandomSequence[T] {
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> RandomSequence[T];
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> BoundBidirectionalSequence[T];
+<span class="lineno" id=line41></span>  }
+<span class="lineno" id=line42></span>  
+</pre></p></div></div><h1 id='Groupoids._h'><img src='/share/src/web/images/minus.gif' id='Groupoids.' onclick='toggle(this,"Groupoids._d")' alt='+'/> 7 Groupoids.</h1><div id='Groupoids._d' style='display:block'>
+<h2 id='Approximate_Additive_Group_h'><img src='/share/src/web/images/minus.gif' id='Approximate Additive Group' onclick='toggle(this,"Approximate_Additive_Group_d")' alt='+'/> 7.1 Approximate Additive Group</h2><div id='Approximate_Additive_Group_d' style='display:block'>
+<p>An approximate additive group is a type for which
+there is a symmetric binary addition operator, a zero element,
+and for which there is an additive inverse or negation operator.
+</p><p>It is basically an additive group without the associativity
+requirement, and is intended to apply to floating point
+numbers.
+</p><p>Note we use the <code>inherit</code> statement to include
+the functions from class <code>Eq</code>.
+</p><pre class='inclusion'>
+share/lib/std/algebra/group.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Additive symmetric float-approximate group, symbol +.</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">Note: associativity is not assumed.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> FloatAddgrp[t] {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[t];
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> zero: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; t;
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + : t * t -&gt; t;
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> neg : t -&gt; t;
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> prefix_plus : t -&gt; t = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> - (x:t,y:t):t =&gt; x + -y;
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> += (px:&amp;t,y:t) { px &lt;- *px + y; }
+<span class="lineno" id=line11></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> -= (px:&amp;t,y:t) { px &lt;- *px - y; }
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> sym (x:t,y:t): x+y == y+x;
+<span class="lineno" id=line14></span>  <span class="comment">/*
+<span class="lineno" id=line15></span>    reduce id (x:t): x+zero() =&gt; x;
+<span class="lineno" id=line16></span>    reduce id (x:t): zero()+x =&gt; x;
+<span class="lineno" id=line17></span>    reduce inv(x:t): x - x =&gt; zero();
+<span class="lineno" id=line18></span>    reduce inv(x:t): - (-x) =&gt; x;
+<span class="lineno" id=line19></span>  */</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> add(x:t,y:t)=&gt; x + y;
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> plus(x:t)=&gt; +x;
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> sub(x:t,y:t)=&gt; x - y;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pluseq(px:&amp;t, y:t) {  += (px,y); }
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span>  minuseq(px:&amp;t, y:t) { -= (px,y); }
+<span class="lineno" id=line25></span>  }
+</pre></p></div><h2 id='Additive_Group_h'><img src='/share/src/web/images/minus.gif' id='Additive Group' onclick='toggle(this,"Additive_Group_d")' alt='+'/> 7.2 Additive Group</h2><div id='Additive_Group_d' style='display:block'>
+<p>A proper additive group is derived from <code>FloatAddgrp</code>
+with associativity added.
+</p><pre class='inclusion'>
+share/lib/std/algebra/group.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Additive symmetric group, symbol +.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Addgrp[t] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FloatAddgrp[t];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> assoc (x:t,y:t,z:t): (x + y) + z == x + (y + z);
+<span class="lineno" id=line5></span>    <span class="comment">//reduce inv(x:t,y:t): x + y - y =&gt; x;</span>
+<span class="lineno" id=line6></span>  }
+<span class="lineno" id=line7></span>  
+</pre></p></div><h2 id='Approximate_Multiplicative_Semi-Group_With_Unit._h'><img src='/share/src/web/images/minus.gif' id='Approximate Multiplicative Semi-Group With Unit.' onclick='toggle(this,"Approximate_Multiplicative_Semi-Group_With_Unit._d")' alt='+'/> 7.3 Approximate Multiplicative Semi-Group With Unit.</h2><div id='Approximate_Multiplicative_Semi-Group_With_Unit._d' style='display:block'>
+<p>An approximate multiplicative semigroup is a set with a symmetric
+binary multiplication operator and a unit. 
+</p><pre class='inclusion'>
+share/lib/std/algebra/group.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Multiplicative symmetric float-approximate semi group with unit symbol *.</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">Note: associativity is not assumed.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> FloatMultSemi1[t] {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[t];
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> muleq(px:&amp;t, y:t) { *= (px,y); }
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mul(x:t, y:t) =&gt; x * y;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> sqr(x:t) =&gt; x * x;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> cube(x:t) =&gt; x * x * x;
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> one: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; t;
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> * : t * t -&gt; t;
+<span class="lineno" id=line11></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> *= (px:&amp;t, y:t) { px &lt;- *px * y; }
+<span class="lineno" id=line12></span>  <span class="comment">/*
+<span class="lineno" id=line13></span>    reduce id (x:t): x*one() =&gt; x;
+<span class="lineno" id=line14></span>    reduce id (x:t): one()*x =&gt; x;
+<span class="lineno" id=line15></span>  */</span>
+<span class="lineno" id=line16></span>  }
+<span class="lineno" id=line17></span>  
+</pre></p></div><h2 id='Multiplicative_Semi-Group_With_Unit._h'><img src='/share/src/web/images/minus.gif' id='Multiplicative Semi-Group With Unit.' onclick='toggle(this,"Multiplicative_Semi-Group_With_Unit._d")' alt='+'/> 7.4 Multiplicative Semi-Group With Unit.</h2><div id='Multiplicative_Semi-Group_With_Unit._d' style='display:block'>
+<p>A multiplicative semigroup with unit is an approximate
+multiplicative semigroup with unit and associativity
+and satisfies the cancellation law.
+</p><pre class='inclusion'>
+share/lib/std/algebra/group.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Multiplicative semi group with unit.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> MultSemi1[t] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FloatMultSemi1[t];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> assoc (x:t,y:t,z:t): (x * y) * z == x * (y * z);
+<span class="lineno" id=line5></span>    <span class="comment">//reduce cancel (x:t,y:t,z:t): x * z ==  y * z =&gt; x == y;</span>
+<span class="lineno" id=line6></span>  }
+<span class="lineno" id=line7></span>  
+</pre></p></div></div><h1 id='Rings_h'><img src='/share/src/web/images/minus.gif' id='Rings' onclick='toggle(this,"Rings_d")' alt='+'/> 8 Rings</h1><div id='Rings_d' style='display:block'>
+<h2 id='Approximate_Unit_Ring._h'><img src='/share/src/web/images/minus.gif' id='Approximate Unit Ring.' onclick='toggle(this,"Approximate_Unit_Ring._d")' alt='+'/> 8.1 Approximate Unit Ring.</h2><div id='Approximate_Unit_Ring._d' style='display:block'>
+<p>An approximate ring is a set which has addition and
+multiplication satisfying the rules for approximate
+additive group and multiplicative semigroup respectively.
+</p><pre class='inclusion'>
+share/lib/std/algebra/ring.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Float-approximate ring.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> FloatRing[t] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FloatAddgrp[t];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FloatMultSemi1[t];
+<span class="lineno" id=line5></span>  }
+<span class="lineno" id=line6></span>  
+</pre></p></div><h2 id='Ring_h'><img src='/share/src/web/images/minus.gif' id='Ring' onclick='toggle(this,"Ring_d")' alt='+'/> 8.2 Ring</h2><div id='Ring_d' style='display:block'>
+<p>A ring is a type which is a both an additive group and
+multiplicative semigroup with unit, and which in
+addition satisfies the distributive law.
+</p><pre class='inclusion'>
+share/lib/std/algebra/ring.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Ring.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Ring[t] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Addgrp[t];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> MultSemi1[t];
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Specify core semantics">axiom</span> distrib (x:t,y:t,z:t): x * ( y + z) == x * y + x * z;
+<span class="lineno" id=line6></span>  }
+</pre></p></div><h2 id='Approximate_Division_Ring_h'><img src='/share/src/web/images/minus.gif' id='Approximate Division Ring' onclick='toggle(this,"Approximate_Division_Ring_d")' alt='+'/> 8.3 Approximate Division Ring</h2><div id='Approximate_Division_Ring_d' style='display:block'>
+<p>An approximate division ring is an approximate ring with unit
+with a division operator.
+</p><pre class='inclusion'>
+share/lib/std/algebra/ring.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Float-approximate division ring.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> FloatDring[t] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FloatRing[t];
+<span class="lineno" id=line4></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> / : t * t -&gt; t; <span class="comment">// pre t != 0</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\over">\(\over\)</span> (x:t,y:t) =&gt; x / y;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> /= : &amp;t * t;
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> % : t * t -&gt; t;
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> %= : &amp;t * t;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> div(x:t, y:t) =&gt; x / y;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mod(x:t, y:t) =&gt; x % y;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\bmod">\(\bmod\)</span>(x:t, y:t) =&gt; x % y;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> recip (x:t) =&gt; #one / x;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> diveq(px:&amp;t, y:t) { /= (px,y); }
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> modeq(px:&amp;t, y:t) { %= (px,y); }
+<span class="lineno" id=line18></span>  }
+<span class="lineno" id=line19></span>  
+</pre></p></div><h2 id='Division_Ring_h'><img src='/share/src/web/images/minus.gif' id='Division Ring' onclick='toggle(this,"Division_Ring_d")' alt='+'/> 8.4 Division Ring</h2><div id='Division_Ring_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/ring.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Division ring.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Dring[t] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Ring[t];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FloatDring[t];
+<span class="lineno" id=line5></span>  }
+<span class="lineno" id=line6></span>  
+</pre></p></div></div><h1 id='Integral._h'><img src='/share/src/web/images/minus.gif' id='Integral.' onclick='toggle(this,"Integral._d")' alt='+'/> 9 Integral.</h1><div id='Integral._d' style='display:block'>
+<h2 id='Bitwise_operations_h'><img src='/share/src/web/images/minus.gif' id='Bitwise operations' onclick='toggle(this,"Bitwise_operations_d")' alt='+'/> 9.1 Bitwise operations</h2><div id='Bitwise_operations_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/bits.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Bitwise operators.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Bits[t] {
+<span class="lineno" id=line4></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> \^ : t * t -&gt; t = <span class="fstring">"(?1)($1^$2)"</span>;
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> \| : t * t -&gt; t = <span class="fstring">"$1|$2"</span>;
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> \&amp; : t * t -&gt; t = <span class="fstring">"$1&amp;$2"</span>;
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> ~: t -&gt; t = <span class="fstring">"(?1)(~$1)"</span>;
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ^= : &amp;t * t = <span class="fstring">"*$1^=$2;"</span>;
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> |= : &amp;t * t = <span class="fstring">"*$1|=$2;"</span>;
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> &amp;= : &amp;t * t = <span class="fstring">"*$1&amp;=$2;"</span>;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> bxor(x:t,y:t)=&gt; x \^ y;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> bor(x:t,y:t)=&gt; x \| y;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> band(x:t,y:t)=&gt; x \&amp; y;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> bnot(x:t)=&gt; ~ x;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  }
+</pre></p></div><h2 id='Integer_h'><img src='/share/src/web/images/minus.gif' id='Integer' onclick='toggle(this,"Integer_d")' alt='+'/> 9.2 Integer</h2><div id='Integer_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/integer.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Integers.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Integer[t] {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Tord[t];
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Dring[t];
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> RandomSequence[t];
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt;&lt; : t * t -&gt; t = <span class="fstring">"$1&lt;&lt;$2"</span>;
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> &gt;&gt; : t * t -&gt; t = <span class="fstring">"$1&gt;&gt;$2"</span>;
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> &lt;&lt;= : &amp;t * t = <span class="fstring">"*$1&lt;&lt;=$2;"</span>;
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> &gt;&gt;= : &amp;t * t = <span class="fstring">"*$1&gt;&gt;=$2;"</span>;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> shl(x:t,y:t)=&gt; x &lt;&lt; y;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> shr(x:t,y:t)=&gt; x &gt;&gt; y;
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="doccomment">Signed Integers.</span>
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Define a type class">class</span> Signed_integer[t] {
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Integer[t];
+<span class="lineno" id=line19></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sgn: t -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line20></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> abs: t -&gt; t;
+<span class="lineno" id=line21></span>  }
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  <span class="doccomment">Unsigned Integers.</span>
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Define a type class">class</span> Unsigned_integer[t] {
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Integer[t];
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Bits[t];
+<span class="lineno" id=line27></span>  }
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>  
+</pre></p></div></div><h1 id='Float_kinds_h'><img src='/share/src/web/images/minus.gif' id='Float kinds' onclick='toggle(this,"Float_kinds_d")' alt='+'/> 10 Float kinds</h1><div id='Float_kinds_d' style='display:block'>
+<h2 id='Trigonometric_Functions._h'><img src='/share/src/web/images/minus.gif' id='Trigonometric Functions.' onclick='toggle(this,"Trigonometric_Functions._d")' alt='+'/> 10.1 Trigonometric Functions.</h2><div id='Trigonometric_Functions._d' style='display:block'>
+<p>Trigonometric functions are shared by
+real and complex numbers.
+</p><pre class='inclusion'>
+share/lib/std/algebra/trig.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Float-approximate trigonometric functions.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Trig[t] {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> FloatDring[t];
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="comment">// NOTE: most of the axioms here WILL FAIL because they require</span>
+<span class="lineno" id=line7></span>    <span class="comment">// exact equality, but they're only going to succeed with approximate</span>
+<span class="lineno" id=line8></span>    <span class="comment">// equality, whatever that means. This needs to be fixed!</span>
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="comment">// circular</span>
+<span class="lineno" id=line11></span>    <span class="comment">// ref http://en.wikipedia.org/wiki/Circular_functions </span>
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="comment">// core trig</span>
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sin: t -&gt; t;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\sin">\(\sin\)</span> (x:t)=&gt; sin x;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cos: t -&gt; t;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cos">\(\cos\)</span> (x:t)=&gt; cos x;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> tan (x:t)=&gt; sin x / cos x;
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\tan">\(\tan\)</span> (x:t)=&gt; tan x;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="comment">// reciprocals</span>
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sec (x:t)=&gt; recip (cos x);
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\sec">\(\sec\)</span> (x:t)=&gt; sec x;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> csc (x:t)=&gt; recip (sin x);
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\csc">\(\csc\)</span> (x:t)=&gt; csc x;
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cot (x:t)=&gt; recip (tan x);
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cot">\(\cot\)</span> (x:t)=&gt; cot x;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="comment">// inverses</span>
+<span class="lineno" id=line34></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> asin: t -&gt; t;
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\arcsin">\(\arcsin\)</span> (x:t) =&gt; asin x;
+<span class="lineno" id=line36></span>   
+<span class="lineno" id=line37></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> acos: t -&gt; t;
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\arccos">\(\arccos\)</span> (x:t) =&gt; acos x;
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> atan: t -&gt; t;
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\arctan">\(\arctan\)</span> (x:t) =&gt; atan x;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> asec (x:t) =&gt; acos ( recip x);
+<span class="lineno" id=line44></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> acsc (x:t) =&gt; asin ( recip x);
+<span class="lineno" id=line45></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> acot (x:t) =&gt; atan ( recip x);
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>    <span class="comment">// hyperbolic</span>
+<span class="lineno" id=line48></span>    <span class="comment">// ref http://en.wikipedia.org/wiki/Hyperbolic_functions</span>
+<span class="lineno" id=line49></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sinh: t -&gt; t;
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\sinh">\(\sinh\)</span> (x:t) =&gt; sinh x;
+<span class="lineno" id=line51></span>  
+<span class="lineno" id=line52></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cosh: t -&gt; t;
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cosh">\(\cosh\)</span> (x:t) =&gt; cosh x;
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> tanh (x:t) =&gt; sinh x / cosh x;
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\tanh">\(\tanh\)</span> (x:t) =&gt; tanh x;
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>    <span class="comment">// reciprocals</span>
+<span class="lineno" id=line59></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sech (x:t) =&gt; recip (cosh x);
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\sech">\(\sech\)</span> (x:t) =&gt; sech x;
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> csch (x:t) =&gt; recip (sinh x);
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\csch">\(\csch\)</span> (x:t) =&gt; csch x;
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> coth (x:t) =&gt; recip (tanh x); 
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\coth">\(\coth\)</span> (x:t) =&gt; coth x;
+<span class="lineno" id=line67></span>  
+<span class="lineno" id=line68></span>    <span class="comment">// inverses</span>
+<span class="lineno" id=line69></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> asinh: t -&gt; t;
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> acosh: t -&gt; t;
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> atanh: t -&gt; t;
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> asech (x:t) =&gt; acosh ( recip x);
+<span class="lineno" id=line76></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> acsch (x:t) =&gt; asinh ( recip x );
+<span class="lineno" id=line77></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> acoth (x:t) =&gt; atanh ( recip x );
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>    <span class="comment">// exponential</span>
+<span class="lineno" id=line80></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> exp: t -&gt; t;
+<span class="lineno" id=line81></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\exp">\(\exp\)</span> (x:t) =&gt; exp x;
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>    <span class="comment">// log</span>
+<span class="lineno" id=line84></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> log: t -&gt; t;
+<span class="lineno" id=line85></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\log">\(\log\)</span> (x:t) =&gt; log x;
+<span class="lineno" id=line86></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ln (x:t) =&gt; log x;
+<span class="lineno" id=line87></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ln">\(\ln\)</span> (x:t) =&gt; log x;
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>    <span class="comment">// power</span>
+<span class="lineno" id=line90></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> pow: t * t -&gt; t;
+<span class="lineno" id=line91></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> pow (a:t, b:<span class="library" title="binding of C int type">int</span>) : t =&gt; pow (a, <span class="hack">C_hack</span>::cast[t] b);
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ^ (x:t,y:t) =&gt; pow (x,y);
+<span class="lineno" id=line93></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ^ (x:t,y:<span class="library" title="binding of C int type">int</span>) =&gt; pow (x,y);
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>  }
+<span class="lineno" id=line97></span>  
+<span class="lineno" id=line98></span>  <span class="doccomment">Finance and Statistics.</span>
+<span class="lineno" id=line99></span>  <span class="big_keyword" title="Define a type class">class</span> Special[t] {
+<span class="lineno" id=line100></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> erf: t -&gt; t;
+<span class="lineno" id=line101></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> erfc: t -&gt; t;
+<span class="lineno" id=line102></span>  }
+<span class="lineno" id=line103></span>  
+</pre></p></div><h2 id='Approximate_Reals._h'><img src='/share/src/web/images/minus.gif' id='Approximate Reals.' onclick='toggle(this,"Approximate_Reals._d")' alt='+'/> 10.2 Approximate Reals.</h2><div id='Approximate_Reals._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/real.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Float-approximate real numbers.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Real[t] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Tord[t];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Trig[t];
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Special[t];
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> embed: <span class="library" title="binding of C int type">int</span> -&gt; t;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> log10: t -&gt; t;
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> abs: t -&gt; t;
+<span class="lineno" id=line10></span>   
+<span class="lineno" id=line11></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sqrt: t -&gt; t;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\sqrt">\(\sqrt\)</span> (x:t) =&gt; sqrt x;
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> ceil: t -&gt; t;
+<span class="lineno" id=line14></span>      <span class="comment">// tex \lceil \rceil defined in grammar</span>
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> floor: t -&gt; t;
+<span class="lineno" id=line17></span>      <span class="comment">// tex \lfloor \rfloor defined in grammar</span>
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> trunc: t -&gt; t;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="comment">// this trig function is included here because it</span>
+<span class="lineno" id=line22></span>    <span class="comment">// is not available for complex numbers</span>
+<span class="lineno" id=line23></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> atan2: t * t -&gt; t;
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  }
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  
+</pre></p></div><h2 id='Complex_numbers_h'><img src='/share/src/web/images/minus.gif' id='Complex numbers' onclick='toggle(this,"Complex_numbers_d")' alt='+'/> 10.3 Complex numbers</h2><div id='Complex_numbers_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/complex.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Float-approximate Complex.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Complex[t,r] {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[t];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Special[t];
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Trig[t];
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> real: t -&gt; r;
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> imag: t -&gt; r;
+<span class="lineno" id=line8></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> abs: t -&gt; r;
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> arg: t -&gt; r;
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> sqrt: t -&gt; r;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + : r * t -&gt; t;
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + : t * r -&gt; t;
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> - : r * t -&gt; t;
+<span class="lineno" id=line15></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> - : t * r -&gt; t;
+<span class="lineno" id=line16></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> * : t * r -&gt; t;
+<span class="lineno" id=line17></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> * : r * t -&gt; t;
+<span class="lineno" id=line18></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> / : t * r -&gt; t;
+<span class="lineno" id=line19></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> / : r * t -&gt; t;
+<span class="lineno" id=line20></span>  }
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  
+</pre></p></div></div><h1 id='Summation_and_Product_Quantifiers._h'><img src='/share/src/web/images/minus.gif' id='Summation and Product Quantifiers.' onclick='toggle(this,"Summation_and_Product_Quantifiers._d")' alt='+'/> 11 Summation and Product Quantifiers.</h1><div id='Summation_and_Product_Quantifiers._d' style='display:block'>
+<p>To be moved. Folds over streams.
+</p><pre class='inclusion'>
+share/lib/std/algebra/group.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Quantifiers_add_mul {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\sum">\(\sum\)</span>[T,C <span class="small_keyword" title="type-class constraint">with</span> FloatAddgrp[T], Streamable[C,T]] (a:C):T = 
+<span class="lineno" id=line3></span>    {
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a mutable variable">var</span> init = #zero[T];
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="for loop">for</span> x <span class="small_keyword" title="membership operator, function mem">in</span> a perform init = init + x;
+<span class="lineno" id=line6></span>      <span class="small_keyword" title="return">return</span> init;
+<span class="lineno" id=line7></span>    }
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\prod">\(\prod\)</span>[T,C <span class="small_keyword" title="type-class constraint">with</span> FloatMultSemi1[T], Streamable[C,T]] (a:C):T = 
+<span class="lineno" id=line10></span>    {
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a mutable variable">var</span> init = #one[T];
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="for loop">for</span> x <span class="small_keyword" title="membership operator, function mem">in</span> a perform init = init * x;
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="return">return</span> init;
+<span class="lineno" id=line14></span>    }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\sum">\(\sum\)</span>[T <span class="small_keyword" title="type-class constraint">with</span> FloatAddgrp[T]] (f:1-&gt;<span class="library" title="option type: Some x or None">opt</span>[T])  = 
+<span class="lineno" id=line17></span>    {
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a mutable variable">var</span> init = #zero[T];
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="for loop">for</span> x <span class="small_keyword" title="membership operator, function mem">in</span> f perform init = init + x;
+<span class="lineno" id=line20></span>      <span class="small_keyword" title="return">return</span> init;
+<span class="lineno" id=line21></span>    }
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\prod">\(\prod\)</span>[T <span class="small_keyword" title="type-class constraint">with</span> FloatMultSemi1[T]] (f:1-&gt;<span class="library" title="option type: Some x or None">opt</span>[T])  = 
+<span class="lineno" id=line24></span>    {
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a mutable variable">var</span> init = #one[T];
+<span class="lineno" id=line26></span>      <span class="small_keyword" title="for loop">for</span> x <span class="small_keyword" title="membership operator, function mem">in</span> f perform init = init * x;
+<span class="lineno" id=line27></span>      <span class="small_keyword" title="return">return</span> init;
+<span class="lineno" id=line28></span>    }
+<span class="lineno" id=line29></span>   
+<span class="lineno" id=line30></span>  }
+<span class="lineno" id=line31></span>  
+</pre></p></div><h1 id='Monad_h'><img src='/share/src/web/images/minus.gif' id='Monad' onclick='toggle(this,"Monad_d")' alt='+'/> 12 Monad</h1><div id='Monad_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/algebra/monad.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Monad [M: TYPE-&gt;TYPE] {
+<span class="lineno" id=line3></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> ret[a]: a -&gt; M a;
+<span class="lineno" id=line4></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> bind[a,b]: M a * (a -&gt; M b) -&gt; M b;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> join[a] (n: M (M a)): M a =&gt; bind (n , (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:M a):M a=&gt;x));
+<span class="lineno" id=line6></span>  }
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

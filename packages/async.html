@@ -1,0 +1,1141 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Asynchronous I/O and thread scheduling</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"The Asychronous Support System",
+"The Asynchronous I/O interface.",
+"Config"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#The Asychronous Support System_h')"> <a href="#The_Asychronous_Support_System_h">The Asychronous Support System</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#The_Asynchronous_I/O_interface._h">The Asynchronous I/O interface.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Config_h')"> <a href="#Config_h">Config</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='The_Asychronous_Support_System_h'><img src='/share/src/web/images/minus.gif' id='The Asychronous Support System' onclick='toggle(this,"The_Asychronous_Support_System_d")' alt='+'/> 1 The Asychronous Support System</h1><div id='The_Asychronous_Support_System_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_async_world.hpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">ifndef</span> __flx_async_world_H_
+#<span class="preproc">define</span> __flx_async_world_H_
+
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_collector.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_sync.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> run {
+
+<span class="comment">// This class handles pthreads and asynchronous I/O
+</span><span class="comment">// It shares operations with sync_sched by interleaving
+</span><span class="comment">// based on state variables.
+</span><span class="comment">//
+</span><span class="comment">// NOTE: currently async_sched is NOT garbage collected
+</span><span class="comment">// Hence, the synchronous scheduler it creates must
+</span><span class="comment">// be made a GC root
+</span><span class="big_keyword">struct</span> RTL_EXTERN async_sched
+{
+  <span class="comment">// weak pointer
+</span>  <span class="big_keyword">struct</span> flx_world *world;
+
+  <span class="comment">// weak pointer
+</span>  ::flx::pthread::thread_data_t *thread_data;
+
+  bool debug_driver;
+
+
+  <span class="comment">// weak pointer
+</span>  ::flx::gc::generic::gc_profile_t *gcp;
+
+  <span class="comment">// Strong pointer
+</span>  sync_sched *ss;  <span class="comment">// (d, gcp, active), (ft, request), (pc, fs)
+</span>
+  async_sched(
+    flx_world *world_arg, 
+    bool d, 
+    ::flx::gc::generic::gc_profile_t *g, 
+    fthread_list *a
+  );
+  ~async_sched();
+
+  ::flx::pthread::thread_kind_t get_thread_kind() <span class="qualifier">const</span>;
+  <span class="qualifier">int</span> prun();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_spawn_pthread();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_spawn_process();
+  <span class="qualifier">void</span> spawn_impl(fthread_list*, ::flx::pthread::thread_kind_t);
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_general();
+
+  <span class="qualifier">void</span> external_multi_swrite(::flx::rtl::schannel_t *, <span class="qualifier">void</span> *data);
+<span class="qualifier">private</span>:
+  bool nonblocking_schedule_queued_fthreads();
+};
+
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t async_sched_ptr_map;
+
+
+}} <span class="comment">// namespaces
+</span>#<span class="preproc">endif</span> <span class="comment">//__flx_async_world_H_
+</span></pre></p><pre class='inclusion'>
+share/src/rtl/flx_async_world.cpp</pre>
+<p><pre class='cppbg'>
+
+#<span class="preproc">include</span> <span class="fstring">"flx_world.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_async_world.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_sync.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;assert.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> pthread {
+
+<span class="qualifier">char</span> <span class="qualifier">const</span> *str(thread_kind_t k) {
+  switch (k) {
+  case mainline: <span class="small_keyword">return</span> <span class="fstring">"mainline"</span>;
+  case embedded: <span class="small_keyword">return</span> <span class="fstring">"embedded"</span>;
+  case pthread: <span class="small_keyword">return</span> <span class="fstring">"pthread"</span>;
+  case process: <span class="small_keyword">return</span> <span class="fstring">"process"</span>;
+  case realtime: <span class="small_keyword">return</span> <span class="fstring">"realtime"</span>;
+  case joinable: <span class="small_keyword">return</span> <span class="fstring">"joinable"</span>;
+  case foreign: <span class="small_keyword">return</span> <span class="fstring">"foreign"</span>;
+  }
+}}}
+
+using <span class="big_keyword">namespace</span> ::flx::rtl;
+using <span class="big_keyword">namespace</span> ::flx::pthread;
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> run {
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// SHAPE for async_sched 
+</span><span class="comment">// ********************************************************
+</span>
+<span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t async_sched_offsets[1]={
+    {offsetof(async_sched,ss),nullptr}
+};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> async_sched_offset_data = { 1, async_sched_offsets };
+
+::flx::gc::generic::gc_shape_t async_sched_ptr_map = {
+  <span class="fstring">"flx::run::async_sched"</span>,
+  1,sizeof(async_sched),
+  0, <span class="comment">// no finaliser,
+</span>  0, <span class="comment">// fcops
+</span>  &amp;async_sched_offset_data, 
+  ::flx::gc::generic::scan_by_offsets,
+  0,0, <span class="comment">// no serialisation as yet
+</span>  ::flx::gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched: Thread kind pretty printer
+</span><span class="comment">// ***************************************************
+</span>
+thread_kind_t async_sched::get_thread_kind() <span class="qualifier">const</span> { 
+  <span class="small_keyword">return</span> thread_data-&gt;thread_kind;
+}
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched: CONSTRUCTOR
+</span><span class="comment">// ***************************************************
+</span>
+async_sched::async_sched(
+    flx_world *world_arg, 
+    bool d, 
+    ::flx::gc::generic::gc_profile_t *g, 
+    fthread_list *a
+  ) : 
+    world(world_arg), 
+    debug_driver(d), 
+    gcp(g),
+    thread_data(nullptr)
+  { 
+    ss = new(*gcp,sync_sched_ptr_map, false) sync_sched(debug_driver, gcp, a); 
+    ++a-&gt;fibre_count;
+    ++a-&gt;busy_count;
+    <span class="small_keyword">if</span> (debug_driver)
+      fprintf(stderr, <span class="fstring">"prun %p: async scheduler, creating and rooting synchronous scheduler! threads=1,busy=1\n"</span>,(<span class="qualifier">void</span>*)mythrid());
+  }
+
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched: DESTRUCTOR
+</span><span class="comment">// ***************************************************
+</span>async_sched::~async_sched() {
+  try
+  {
+    --ss-&gt;active-&gt;fibre_count;
+    <span class="small_keyword">if</span> (debug_driver)
+      fprintf(stderr, <span class="fstring">"prun %p: Terminating async scheduler, threads=%d\n"</span>,(<span class="qualifier">void</span>*)mythrid(), ss-&gt;active-&gt;fibre_count.load());
+    <span class="small_keyword">if</span> (debug_driver)
+      fprintf(stderr, <span class="fstring">"prun %p: async scheduler, fibre queue length %d, async_cound=%d\n"</span>,
+         (<span class="qualifier">void</span>*)mythrid(), ss-&gt;active-&gt;size(), ss-&gt;active-&gt;async_count);
+    <span class="small_keyword">if</span> (debug_driver)
+      fprintf(stderr, <span class="fstring">"prun %p: async scheduler returns!\n"</span>,(<span class="qualifier">void</span>*)mythrid());
+  }
+  catch (...) { fprintf(stderr, <span class="fstring">"Unknown exception deleting async!\n"</span>); }
+}
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched: Thread procedure
+</span><span class="comment">// ACTUAL procedure run by OS for a new thread  
+</span><span class="comment">// ***************************************************
+</span><span class="qualifier">static</span> <span class="qualifier">void</span> prun_pthread_entry(<span class="qualifier">void</span> *data) {
+  async_sched *d = (async_sched*)data;
+  d-&gt;prun();
+}
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched: SPAWNING
+</span><span class="comment">// ***************************************************
+</span>
+<span class="comment">// SPAWNING A NEW FELIX PTHREAD
+</span><span class="comment">// CREATES ITS OWN PRIVATE ASYNC SCHEDULER 
+</span><span class="comment">// CREATES ITS OWN PRIVATE SYNC SCHEDULER
+</span><span class="comment">// SHARES WORLD INCLUDING COLLECTOR
+</span><span class="comment">// REGISTERS IN THREAD_CONTROL
+</span><span class="qualifier">void</span> async_sched::<span class="small_keyword">do</span>_spawn_process()
+{
+  spawn_impl (ss-&gt;active,process);
+}
+<span class="qualifier">void</span> async_sched::<span class="small_keyword">do</span>_spawn_pthread()
+{
+  fthread_list *pactive = new(*gcp, ::flx::run::fthread_list_ptr_map,false) fthread_list(gcp);
+  spawn_impl (pactive,::flx::pthread::pthread);
+}
+
+<span class="qualifier">void</span> async_sched::spawn_impl(fthread_list *pactive, thread_kind_t thread_kind) {
+
+  fthread_t *ftx = ss-&gt;request-&gt;svc_fthread_req.fthread;
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"[prun %p: spawn_pthread] Spawn pthread %p\n"</span>, (<span class="qualifier">void</span>*)mythrid(), ftx);
+  {
+    spinguard dummy(&amp;(pactive-&gt;active_lock));
+    <span class="comment">// SHOULD THIS BE HERE?? The async scheduler isn't created yet.
+</span>    <span class="comment">// maybe we should do this "properly" after it is (in the next statement!)
+</span>    <span class="comment">// NO NO! This is ALL BAD! Some OTHER thread might run this routine!
+</span>    pactive-&gt;push_front(ftx);
+  }
+  <span class="qualifier">void</span> *data = new  (*gcp, async_sched_ptr_map, false) async_sched(world,debug_driver, gcp, pactive);
+
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"[prun %p: spawn_pthread] Starting new pthread, thread counter= %zu\n"</span>,
+      (<span class="qualifier">void</span>*)mythrid(), gcp-&gt;collector-&gt;get_thread_control()-&gt;thread_count());
+
+  {
+    <span class="comment">// We use a hard (not Felix aware) lock here
+</span>    <span class="comment">// because the Felix system is in an incoherent state
+</span>    <span class="comment">// between the OS thread spawn, and the thread's registration
+</span>    ::<span class="small_keyword">std</span>::mutex spawner_lock;
+    ::<span class="small_keyword">std</span>::condition_variable_any spawner_cond;
+    bool spawner_flag = false;
+    ::<span class="small_keyword">std</span>::unique_lock&lt; ::<span class="small_keyword">std</span>::mutex&gt; locktite(spawner_lock);
+
+    <span class="comment">// THIS LINE ACTUALLY CREATES A NEW PTHREAD
+</span>    flx_detached_thread_t().init(prun_pthread_entry, data, gcp-&gt;collector-&gt;get_thread_control(), 
+      &amp;spawner_lock, &amp;spawner_cond,
+      &amp;spawner_flag, thread_kind
+    );
+
+    <span class="small_keyword">if</span> (debug_driver)
+      fprintf(stderr,
+        <span class="fstring">"[prun: spawn_pthread] Thread %p waiting for spawned thread to register itself\n"</span>,
+        (<span class="qualifier">void</span>*)get_current_native_thread());
+
+    <span class="small_keyword">while</span> (!spawner_flag)
+      spawner_cond.wait(spawner_lock);
+
+    <span class="small_keyword">if</span> (debug_driver)
+      fprintf(stderr,
+        <span class="fstring">"[prun: spawn_pthread] Thread %p notes spawned thread has registered itself\n"</span>,
+        (<span class="qualifier">void</span>*)get_current_native_thread());
+  }
+}
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched: ASYNC REQUEST DISPATCH
+</span><span class="comment">// ***************************************************
+</span><span class="qualifier">void</span> async_sched::<span class="small_keyword">do</span>_general()
+{
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"&lt;%p&gt;[prun: svc_general] from fthread=%p\n"</span>, (<span class="qualifier">void</span>*)mythrid(),ss-&gt;ft);
+
+  <span class="small_keyword">if</span>(debug_driver)
+    fprintf(stderr, <span class="fstring">"[prun %p: svc_general] async=%p, ptr_create_async_hooker=%p\n"</span>, 
+      (<span class="qualifier">void</span>*)mythrid(), ss-&gt;active-&gt; async,
+      world-&gt;c-&gt;ptr_create_async_hooker)
+    ;
+  <span class="small_keyword">if</span> (!ss-&gt;active-&gt;async) 
+  {
+    ss-&gt;active-&gt;async = world-&gt;create_demux();
+  }
+  ++ss-&gt;active-&gt;async_count;
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr,
+       <span class="fstring">"&lt;%p&gt;[prun: svc_general] Async system created: %p, count %zu\n"</span>,
+       (<span class="qualifier">void</span>*)mythrid(),ss-&gt;active-&gt;async,ss-&gt;active-&gt;async_count);
+  ::flx::async::flx_driver_request_base *dreq =  ss-&gt;request-&gt;svc_general_req.pgeneral;
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"&lt;%p&gt;[prun: svc_general] Request object %p\n"</span>, (<span class="qualifier">void</span>*)mythrid(),dreq);
+
+  <span class="comment">// requests are now ALWAYS considered asynchronous
+</span>  <span class="comment">// even if the request handler reschedules them immediately
+</span>  ss-&gt;active-&gt;async-&gt;handle_request(dreq, ss-&gt;ft);
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"&lt;%p&gt;[prun: svc_general] Request object %p captured fthread %p \n"</span>, (<span class="qualifier">void</span>*)mythrid(),dreq, ss-&gt;ft);
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"&lt;%p&gt;[prun: svc_general] Request object %p\n"</span>, (<span class="qualifier">void</span>*)mythrid(),dreq);
+  gcp-&gt;collector-&gt;add_root(ss-&gt;ft);
+  ss-&gt;ft = 0; 
+  <span class="small_keyword">if</span>(debug_driver)
+    fprintf(stderr,<span class="fstring">"&lt;%p&gt;[prun: svc_general] request dispatched..\n"</span>,(<span class="qualifier">void</span>*)mythrid());
+}
+
+<span class="comment">// calls thread_control_t::yield which does a world stop check
+</span><span class="qualifier">static</span> <span class="qualifier">void</span> sleep(thread_control_base_t *tc, size_t ns) 
+{
+  assert(tc);
+  tc-&gt;yield();
+  ::<span class="small_keyword">std</span>::this_thread::sleep_<span class="small_keyword">for</span>(::<span class="small_keyword">std</span>::chrono::nanoseconds(ns));
+  ::<span class="small_keyword">std</span>::this_thread::yield();
+}
+
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched:  MASTER SCHEDULER
+</span><span class="comment">// ***************************************************
+</span><span class="qualifier">int</span> async_sched::prun() {
+   <span class="comment">// Set the cached weak pointer to the thread data
+</span>   thread_data = gcp-&gt;collector-&gt;get_thread_control()-&gt;get_thread_data_pointer();
+   thread_kind_t thread_kind = thread_data-&gt;thread_kind;
+sync_run:
+  <span class="comment">// RUN SYNCHRONOUS SCHEDULER
+</span>  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"prun %s %p: sync_run\n"</span>, str(thread_kind),(<span class="qualifier">void</span>*)mythrid());
+
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"prun %s %p: Before running: Sync state is %s\n"</span>, str(thread_kind),(<span class="qualifier">void</span>*)mythrid(),
+      ss-&gt;get_fpc_desc());
+
+  sync_sched::fstate_t fs = ss-&gt;frun();
+
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr, <span class="fstring">"prun %s %p: After running: Sync state is %s/%s\n"</span>, str(thread_kind),(<span class="qualifier">void</span>*)mythrid(),
+      ss-&gt;get_fstate_desc(fs), ss-&gt;get_fpc_desc());
+
+  switch(fs)
+  {
+    <span class="comment">// HANDLE DELEGATED SERVICE REQUESTS
+</span>    case sync_sched::delegated:
+      <span class="small_keyword">if</span> (debug_driver)
+        fprintf(stderr, <span class="fstring">"sync_sched %p:delegated request %d\n"</span>, str(thread_kind),(<span class="qualifier">void</span>*)mythrid(), ss-&gt;request-&gt;svc_req);
+      switch (ss-&gt;request-&gt;svc_req) 
+      {
+        case svc_spawn_pthread: <span class="small_keyword">do</span>_spawn_pthread(); <span class="small_keyword">goto</span> sync_run;
+        case svc_spawn_process: <span class="small_keyword">do</span>_spawn_process(); <span class="small_keyword">goto</span> sync_run;
+
+        case svc_general: <span class="small_keyword">do</span>_general(); <span class="small_keyword">goto</span> sync_run;
+
+        default:
+          fprintf(stderr,
+            <span class="fstring">"prun: Unknown service request code 0x%x\n"</span>, ss-&gt;request-&gt;svc_req);
+          abort();
+      }
+
+    <span class="comment">// SCHEDULE ANY ASYNCHRONOUSLY QUEUED FTHREADS
+</span>    case sync_sched::blocked: <span class="comment">// ran out of active threads - are there any in the async queue?
+</span>      --ss-&gt;active-&gt;busy_count;
+      switch (thread_kind) 
+      {
+        case mainline:
+        case ::flx::pthread::pthread:
+          <span class="comment">// gain exclusive control
+</span>          <span class="small_keyword">while</span>(!ss-&gt;active-&gt;qisblocked.test_and_set());
+          <span class="small_keyword">if</span> (ss-&gt;active-&gt;async_count &gt; 0) 
+          {
+            <span class="small_keyword">if</span> (debug_driver)
+              fprintf(stderr, <span class="fstring">"prun: %s %p Async blocking\n"</span>, str(thread_kind), (<span class="qualifier">void</span>*)mythrid());
+            ss-&gt;ft = ss-&gt;active-&gt;async-&gt;dequeue(); <span class="comment">// get fibre
+</span>            <span class="small_keyword">if</span> (debug_driver)
+              fprintf(stderr, <span class="fstring">"prun: %s %p Async fetched fibre %p\n"</span>, str(thread_kind), (<span class="qualifier">void</span>*)mythrid(), ss-&gt;ft);
+
+            gcp-&gt;collector-&gt;remove_root(ss-&gt;ft); <span class="comment">// transfer ownership
+</span>            --ss-&gt;active-&gt;async_count; <span class="comment">// accounting
+</span>            ss-&gt;active-&gt;qisblocked.clear(); <span class="comment">// release control
+</span>            ++ss-&gt;active-&gt;busy_count;
+            <span class="small_keyword">goto</span> sync_run; <span class="comment">// do work
+</span>          }
+          <span class="small_keyword">if</span> (ss-&gt;active-&gt;busy_count.load() == 0) {
+            <span class="comment">// no work to do, no jobs pending, and no workers to make work, so return
+</span>            <span class="small_keyword">if</span> (debug_driver)
+              fprintf(stderr, <span class="fstring">"prun: %s %p Async returning\n"</span>, str(thread_kind), (<span class="qualifier">void</span>*)mythrid());
+            <span class="small_keyword">return</span> 0;
+          }
+          else  <span class="comment">// some processes are busy, they might make work so delay and retry later
+</span>          {
+            ss-&gt;active-&gt;qisblocked.clear(); <span class="comment">// release control
+</span>            <span class="comment">// DELAY
+</span>            <span class="small_keyword">if</span> (debug_driver)
+              fprintf(stderr, <span class="fstring">"prun: %s %p Async delaying fibre_count=%d, busy_count=%d\n"</span>, 
+                str(thread_kind), (<span class="qualifier">void</span>*)mythrid(), ss-&gt;active-&gt;fibre_count.load(),ss-&gt;active-&gt;busy_count.load());
+            sleep(gcp-&gt;collector-&gt;get_thread_control(), 10.00); <span class="comment">// nanoseconds
+</span>            ++ss-&gt;active-&gt;busy_count;
+            <span class="small_keyword">goto</span> sync_run;
+          }
+
+        case process:
+          <span class="small_keyword">if</span> (ss-&gt;active-&gt;qisblocked.test_and_set()) 
+          {
+            <span class="small_keyword">if</span> (ss-&gt;active-&gt;async_count &gt; 0) 
+            {
+              <span class="small_keyword">if</span> (debug_driver)
+                fprintf(stderr, <span class="fstring">"prun: %s %p Async WAIT\n"</span>, str(thread_kind), (<span class="qualifier">void</span>*)mythrid());
+              auto ftp = ss-&gt;active-&gt;async-&gt;maybe_dequeue(); <span class="comment">// get fibre
+</span>              <span class="small_keyword">if</span>(ftp != nullptr) {
+                ss-&gt;push_front(ftp);
+                gcp-&gt;collector-&gt;remove_root(ftp); <span class="comment">// transfer ownership
+</span>                --ss-&gt;active-&gt;async_count; <span class="comment">// accounting
+</span>              }
+              ss-&gt;active-&gt;qisblocked.clear(); <span class="comment">// release control
+</span>              ++ss-&gt;active-&gt;busy_count;
+              <span class="small_keyword">goto</span> sync_run; <span class="comment">// do work
+</span>            }
+            <span class="small_keyword">if</span> (ss-&gt;active-&gt;busy_count.load() == 0) {
+              <span class="comment">// no work to do, no jobs pending, and no workers to make work, so return
+</span>              <span class="small_keyword">if</span> (debug_driver)
+                fprintf(stderr, <span class="fstring">"prun: %s %p Async returning\n"</span>, str(thread_kind), (<span class="qualifier">void</span>*)mythrid());
+              <span class="small_keyword">return</span> 0;
+            }
+          }
+
+          <span class="comment">// DELAY
+</span>          sleep(gcp-&gt;collector-&gt;get_thread_control(), 10.00); <span class="comment">// nanoseconds
+</span>          ++ss-&gt;active-&gt;busy_count;
+          <span class="small_keyword">goto</span> sync_run;
+
+        case embedded:
+          <span class="small_keyword">if</span> (ss-&gt;active-&gt;qisblocked.test_and_set())
+            <span class="small_keyword">if</span>(nonblocking_schedule_queued_fthreads()) <span class="small_keyword">goto</span> sync_run;
+          <span class="small_keyword">return</span> ss-&gt;active-&gt;async_count;
+       }
+
+    default:
+      fprintf(stderr, <span class="fstring">"prun: Unknown frun return status 0x%4x\n"</span>, fs);
+      abort();
+  } <span class="comment">// switch
+</span>
+}
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched:  COMPLETED ASYNC RETRIEVAL
+</span><span class="comment">// ***************************************************
+</span>
+<span class="comment">// this routine is used when there are no fthreads left on the
+</span><span class="comment">// sync scheduler list
+</span><span class="comment">//
+</span><span class="comment">// assuming async is enabled, it checks to see if there are
+</span><span class="comment">// pending async jobs. If so and the block flag is set,
+</span><span class="comment">// it blocks the pthread until at least one of the pending jobs completes.
+</span><span class="comment">// The routine returns true of some async jobs completed and put on
+</span><span class="comment">// the sync scheduler active list.
+</span>
+<span class="comment">// As it is, this routine cannot be called with block_flag set
+</span><span class="comment">// by multiple threads. First, critical sections are not protected.
+</span><span class="comment">// However even if they were, if two threads block with async->dequeue,
+</span><span class="comment">// then one might empty all the pending fibres out and return,
+</span><span class="comment">// leaving all the rest of the thread locked up.
+</span>
+<span class="comment">// One solution is to simply poll to see if there's anything
+</span><span class="comment">// read to fetch. If so fetch it, fine. If not, return, wait a bit,
+</span><span class="comment">// and try again. This introduces an uncomfortable lag though.
+</span><span class="comment">//
+</span><span class="comment">// Another solution is to have the first thread block,
+</span><span class="comment">// and then have the other threads suspend with a condition variable.
+</span><span class="comment">// They check:
+</span><span class="comment">//  (a) there is no stuff on the active list
+</span><span class="comment">//  (b) there is stuff on the async list
+</span><span class="comment">//  (c) there is no thread already waiting on the async list
+</span><span class="comment">// If these conditions are met the thread goes to sleep and waits
+</span><span class="comment">// for a signal.
+</span><span class="comment">//
+</span><span class="comment">// Note if there is no thread waiting but (a) and (b) are met,
+</span><span class="comment">// the thread can dive in and become the waiter.
+</span>
+
+bool async_sched::nonblocking_schedule_queued_fthreads() {
+  <span class="small_keyword">if</span> (debug_driver) {
+    fprintf(stderr,
+      <span class="fstring">"prun %s %p: out of active synchronous threads, trying async, pending=%zu\n"</span>, str(get_thread_kind()), (<span class="qualifier">void</span>*)mythrid(), ss-&gt;active-&gt;async_count);
+  }
+  <span class="qualifier">int</span> scheduled_some = 0;
+  <span class="small_keyword">if</span> (ss-&gt;active-&gt;async &amp;&amp; ss-&gt;active-&gt;async_count &gt; 0) {
+      fthread_t* ftp = ss-&gt;active-&gt;async-&gt;maybe_dequeue();
+      <span class="small_keyword">while</span> (ftp) {
+        <span class="small_keyword">if</span> (debug_driver)
+          fprintf(stderr, <span class="fstring">"prun %p:ret mode: Async Retrieving fthread %p\n"</span>, (<span class="qualifier">void</span>*)mythrid(), ftp);
+        gcp-&gt;collector-&gt;remove_root(ftp);
+        ss-&gt;push_front(ftp);
+        --ss-&gt;active-&gt;async_count;
+        ++scheduled_some;
+        ftp = ss-&gt;active-&gt;async-&gt;maybe_dequeue();
+    }
+  }
+  <span class="small_keyword">return</span> scheduled_some != 0;
+}
+
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// Async_sched:  EXTERNAL MULTIWRITE HOOK
+</span><span class="comment">// ***************************************************
+</span>
+<span class="qualifier">void</span> async_sched::external_multi_swrite(::flx::rtl::schannel_t *chan, <span class="qualifier">void</span> *data)
+  {
+    ss-&gt;external_multi_swrite (chan,data);
+  }
+
+
+}} <span class="comment">// namespaces
+</span>
+</pre></p><h2 id='The_Asynchronous_I/O_interface._h'><img src='/share/src/web/images/minus.gif' id='The Asynchronous I/O interface.' onclick='toggle(this,"The_Asynchronous_I/O_interface._d")' alt='+'/> 1.1 The Asynchronous I/O interface.</h2><div id='The_Asynchronous_I/O_interface._d' style='display:block'>
+<p>The embedding system depends on the interface but
+not the implementation.
+ 
+</p><pre class='inclusion'>
+share/lib/rtl/flx_async.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_ASYNC_H__
+#<span class="preproc">define</span> __FLX_ASYNC_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_bound_queue.hpp"</span>
+
+#<span class="preproc">ifdef</span> BUILD_ASYNC
+#<span class="preproc">define</span> ASYNC_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> ASYNC_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+
+<span class="comment">// GLOBAL NAMESPACE!
+</span>
+<span class="big_keyword">class</span> ASYNC_EXTERN async_hooker {
+<span class="qualifier">public</span>:
+  <span class="qualifier">virtual</span> flx::rtl::fthread_t *dequeue()=0;
+  <span class="qualifier">virtual</span> flx::rtl::fthread_t *maybe_dequeue()=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> handle_request(::flx::async::flx_driver_request_base *data, flx::rtl::fthread_t *ss)=0;
+  <span class="qualifier">virtual</span> ~async_hooker();
+};
+
+<span class="big_keyword">typedef</span>
+async_hooker *
+create_async_hooker_t
+(
+  ::flx::pthread::thread_control_base_t*,
+  <span class="qualifier">int</span> n0,   <span class="comment">// bound on resumable thread queue
+</span>  <span class="qualifier">int</span> n1,   <span class="comment">// bound on general input job queue
+</span>  <span class="qualifier">int</span> m1,   <span class="comment">// number of threads in job pool
+</span>  <span class="qualifier">int</span> n2,   <span class="comment">// bound on async fileio job queue
+</span>  <span class="qualifier">int</span> m2    <span class="comment">// number of threads doing async fileio
+</span>);
+
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> {
+ASYNC_EXTERN async_hooker *
+create_async_hooker
+(
+  ::flx::pthread::thread_control_base_t*,
+  <span class="qualifier">int</span> n0,   <span class="comment">// bound on resumable thread queue
+</span>  <span class="qualifier">int</span> n1,   <span class="comment">// bound on general input job queue
+</span>  <span class="qualifier">int</span> m1,   <span class="comment">// number of threads in job pool
+</span>  <span class="qualifier">int</span> n2,   <span class="comment">// bound on async fileio job queue
+</span>  <span class="qualifier">int</span> m2    <span class="comment">// number of threads doing async fileio
+</span>);
+}
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> async {
+<span class="big_keyword">struct</span> ASYNC_EXTERN finote_t
+{
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> signal()=0;
+  <span class="qualifier">virtual</span> ~finote_t();
+};
+
+<span class="big_keyword">class</span> ASYNC_EXTERN wakeup_fthread_t : <span class="qualifier">public</span> finote_t
+{
+  ::flx::rtl::fthread_t *f;
+  ::flx::pthread::bound_queue_t *q;
+<span class="qualifier">public</span>:
+  wakeup_fthread_t(::flx::pthread::bound_queue_t *q_a, ::flx::rtl::fthread_t *f_a);
+  <span class="qualifier">void</span> signal () { q-&gt;enqueue(f); }
+};
+
+
+<span class="big_keyword">class</span> ASYNC_EXTERN flx_driver_request_base {
+    finote_t *fn;
+    <span class="qualifier">virtual</span> bool start_async_op_impl() = 0;
+<span class="qualifier">public</span>:
+    flx_driver_request_base();
+    <span class="qualifier">virtual</span> ~flx_driver_request_base(); <span class="comment">// so destructors work
+</span>
+    <span class="comment">// returns finished flag (async may fail or immediately finish)
+</span>    <span class="qualifier">void</span> start_async_op(finote_t *fn_a);
+    <span class="qualifier">void</span> notify_finished();
+};
+
+}}
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/flx_async/flx_async.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_async.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_bound_queue.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cassert&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+
+using <span class="big_keyword">namespace</span> ::flx::rtl;
+using <span class="big_keyword">namespace</span> ::flx::pthread;
+using <span class="big_keyword">namespace</span> ::flx::async;
+
+async_hooker::~async_hooker(){ }
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> async {
+
+<span class="comment">// FINISHED NOTIFIER
+</span>finote_t::~finote_t(){}
+
+<span class="comment">// DERIVED NOTIFIER WHICH DOES FTHREAD WAKEUP
+</span><span class="comment">// BY ENQUEUING THE FTHREAD INTO THE READY QUEUE 
+</span>wakeup_fthread_t::wakeup_fthread_t(
+  ::flx::pthread::bound_queue_t *q_a, 
+  ::flx::rtl::fthread_t *f_a) 
+: f(f_a), q(q_a) {}
+
+<span class="comment">// ASYNC HOOKER IMPLEMENTATION STAGE 1
+</span><span class="comment">// Introduces new virtual get_ready_queue().
+</span><span class="big_keyword">class</span> async_hooker_impl : <span class="qualifier">public</span> async_hooker {
+<span class="qualifier">public</span>:
+  <span class="qualifier">virtual</span> bound_queue_t *get_ready_queue()=0;
+  ~async_hooker_impl() {}
+  <span class="qualifier">void</span> handle_request(flx::async::flx_driver_request_base *pgeneral,fthread_t *ss)
+  {
+    flx::async::flx_driver_request_base* dreq = pgeneral;
+    finote_t *fn = new wakeup_fthread_t(get_ready_queue(),ss);
+    dreq-&gt;start_async_op(fn);
+  }
+};
+
+
+<span class="comment">// ASYNC HOOKER IMPLEMENTATION STAGE 2
+</span><span class="comment">// Provides the ready queue and the dequeuing operations
+</span><span class="big_keyword">class</span> proto_async : <span class="qualifier">public</span> async_hooker_impl
+{
+    bound_queue_t async_ready;
+
+<span class="qualifier">public</span>:
+   proto_async(thread_control_base_t *tc, <span class="qualifier">int</span> n0, <span class="qualifier">int</span> n1, <span class="qualifier">int</span> m1, <span class="qualifier">int</span> n2, <span class="qualifier">int</span> m2) :
+     async_ready(tc,n0)
+   {}
+
+  ~proto_async(){}
+
+  bound_queue_t *get_ready_queue() { <span class="small_keyword">return</span> &amp;async_ready; }
+
+  fthread_t* dequeue()
+  {
+    <span class="small_keyword">return</span> (fthread_t*)async_ready.dequeue();
+  }
+  fthread_t* maybe_dequeue()
+  {
+    <span class="small_keyword">return</span> (fthread_t*)async_ready.maybe_dequeue();
+  }
+};
+
+
+<span class="comment">// DRIVER REQUEST BASE
+</span><span class="comment">// THIS IS USED TO BUILD REQUESTS
+</span><span class="comment">// PROVIDES DEFAULT NOTIFY_FINISHED ROUTINE WHICH USE FINOTE SIGNAL
+</span><span class="comment">// DO ASYNC OP JUST CALLS DRIVED CLASS DO_ASYNC_OP_IMPL
+</span>flx_driver_request_base::flx_driver_request_base() : fn(0) {}
+flx_driver_request_base::~flx_driver_request_base() {}       <span class="comment">// so destructors work
+</span>
+<span class="qualifier">void</span> flx_driver_request_base:: start_async_op(finote_t *fn_a)
+{
+  <span class="comment">//fprintf(stderr,"start async op %p, set fn = %p\n",this,fn_a);
+</span>  assert(fn==0);
+  fn = fn_a;
+  bool completed =  start_async_op_impl();
+  <span class="small_keyword">if</span>(completed)
+  {
+    fprintf(stderr,<span class="fstring">"instant complete\n"</span>);
+    notify_finished();
+  }
+  else
+  {
+    <span class="comment">//fprintf(stderr,"Pending\n");
+</span>  }
+}
+
+<span class="qualifier">void</span> flx_driver_request_base:: notify_finished()
+{
+  <span class="comment">//fprintf(stderr, "faio_req=%p, Notify finished %p\n", this,fn);
+</span>  assert(fn!=0);
+  finote_t *fin = fn;
+  fn=0;
+  fin-&gt;signal();
+  delete fin;
+  <span class="comment">//fprintf(stderr, "faio_req=%p, FINISHED\n",this);
+</span>}
+
+}}
+
+async_hooker *create_async_hooker(thread_control_base_t *tc, <span class="qualifier">int</span> n0,<span class="qualifier">int</span> n1,<span class="qualifier">int</span> m1,<span class="qualifier">int</span> n2,<span class="qualifier">int</span> m2) {
+  <span class="small_keyword">return</span> new ::flx::async::proto_async(tc,n0,n1,m1,n2,m2);
+}
+
+
+</pre></p></div></div><h1 id='Config_h'><img src='/share/src/web/images/minus.gif' id='Config' onclick='toggle(this,"Config_d")' alt='+'/> 2 Config</h1><div id='Config_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/src/config/unix/flx_async.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_async
+Description: Async hook
+provides_dlib: -lflx_async_dynamic
+provides_slib: -lflx_async_static
+includes: '"flx_async.hpp"'
+Requires: flx_pthread flx_gc flx 
+macros: BUILD_ASYNC
+library: flx_async
+srcdir: src/flx_async
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/flx_async.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_async
+Description: Async hook
+provides_dlib: /DEFAULTLIB:flx_async_dynamic
+provides_slib: /DEFAULTLIB:flx_async_static
+includes: '"flx_async.hpp"'
+Requires: flx_pthread flx_gc flx 
+macros: BUILD_ASYNC
+library: flx_async
+srcdir: src/flx_async
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+$PWD/buildsystem/flx_async.py</pre>
+<p><pre class="prefmtbg">import fbuild
+from fbuild.functools import call
+from fbuild.path import Path
+from fbuild.record import Record
+from fbuild.builders.file import copy
+
+import buildsystem
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    path = Path (phase.ctx.buildroot/'share'/'src/flx_async')
+    #buildsystem.copy_hpps_to_rtl(phase.ctx,
+    #    path / 'flx_async.hpp',
+    #)
+
+    dst = 'host/lib/rtl/flx_async'
+    suffix = '.so'
+    srcs = [phase.ctx.buildroot/'share'/'src/flx_async/flx_async.cpp']
+    includes = [
+        phase.ctx.buildroot / 'host/lib/rtl',
+        phase.ctx.buildroot / 'share/lib/rtl'
+    ]
+    macros = ['BUILD_ASYNC']
+    libs = [
+        call('buildsystem.flx_pthread.build_runtime', phase),
+        call('buildsystem.flx_gc.build_runtime', phase),
+    ]
+
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.static for lib in libs]),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.shared for lib in libs]))
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

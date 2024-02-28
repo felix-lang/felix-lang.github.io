@@ -1,0 +1,913 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Regular Expressions</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"RE2 Bootstrap Builder",
+"String handling",
+"RE2 regexps",
+"Regular definitions",
+"Lexer",
+"Config"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#RE2 Bootstrap Builder_h')"> <a href="#RE2_Bootstrap_Builder_h">RE2 Bootstrap Builder</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#String handling_h')"> <a href="#String_handling_h">String handling</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#RE2 regexps_h')"> <a href="#RE2_regexps_h">RE2 regexps</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Regular definitions_h')"> <a href="#Regular_definitions_h">Regular definitions</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Lexer_h')"> <a href="#Lexer_h">Lexer</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Config_h')"> <a href="#Config_h">Config</a></div>
+      <div class=sm id=menu6>
+      </div>
+    <script>counter_max=6;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='RE2_Bootstrap_Builder_h'><img src='/share/src/web/images/minus.gif' id='RE2 Bootstrap Builder' onclick='toggle(this,"RE2_Bootstrap_Builder_d")' alt='+'/> 1 RE2 Bootstrap Builder</h1><div id='RE2_Bootstrap_Builder_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/buildsystem/re2.py</pre>
+<p><pre class="prefmtbg">
+import fbuild
+from fbuild.functools import call
+from fbuild.path import Path
+from fbuild.record import Record
+
+import buildsystem
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    path = Path(phase.ctx.buildroot/'share'/'src/re2/re2')
+
+    buildsystem.copy_to(phase.ctx, phase.ctx.buildroot / "share/lib/rtl/re2", [
+        path / 're2/re2.h',
+        path / 're2/set.h',
+        path / 're2/stringpiece.h',
+        path / 're2/variadic_function.h',
+        ]
+     )
+
+    dst = 'host/lib/rtl/flx_re2'
+    srcs = [
+        path / 're2/bitstate.cc',
+        path / 're2/compile.cc',
+        path / 're2/dfa.cc',
+        path / 're2/filtered_re2.cc',
+        path / 're2/mimics_pcre.cc',
+        path / 're2/nfa.cc',
+        path / 're2/onepass.cc',
+        path / 're2/parse.cc',
+        path / 're2/perl_groups.cc',
+        path / 're2/prefilter.cc',
+        path / 're2/prefilter_tree.cc',
+        path / 're2/prog.cc',
+        path / 're2/re2.cc',
+        path / 're2/regexp.cc',
+        path / 're2/set.cc',
+        path / 're2/simplify.cc',
+        path / 're2/tostring.cc',
+        path / 're2/unicode_casefold.cc',
+        path / 're2/unicode_groups.cc',
+        path / 'util/arena.cc',
+        #path / 'util/benchmark.cc',
+        path / 'util/hash.cc',
+        #path / 'util/pcre.cc',
+        #path / 'util/random.cc',
+        path / 'util/rune.cc',
+        path / 'util/stringpiece.cc',
+        path / 'util/stringprintf.cc',
+        path / 'util/strutil.cc',
+        #path / 'util/thread.cc',
+        path / 'util/valgrind.cc',
+     ]
+    includes = [
+      phase.ctx.buildroot / 'share/lib/rtl',
+      phase.ctx.buildroot / 'host/lib/rtl',
+      path ]
+    macros = ['BUILD_RE2'] + (['WIN32', 'NOMINMAX'],[])[not 'win32' in phase.platform]
+    cflags = ([], ['-Wno-sign-compare'])[not 'win32' in phase.platform]
+    lflags = []
+    libs = []
+    external_libs = []
+
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            cflags=cflags,
+            libs=libs,
+            external_libs=external_libs,
+            lflags=lflags),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            cflags=cflags,
+            libs=libs,
+            external_libs=external_libs,
+            lflags=lflags))
+</pre></p></div><h1 id='String_handling_h'><img src='/share/src/web/images/minus.gif' id='String handling' onclick='toggle(this,"String_handling_d")' alt='+'/> 2 String handling</h1><div id='String_handling_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/regex/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/regex/re2"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/regex/tre"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/regex/regdef"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/regex/lexer"</span>;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  
+</pre></p></div><h1 id='RE2_regexps_h'><img src='/share/src/web/images/minus.gif' id='RE2 regexps' onclick='toggle(this,"RE2_regexps_d")' alt='+'/> 3 RE2 regexps</h1><div id='RE2_regexps_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/regex/re2.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"stl/stl_map"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="doccomment">Binding of Google RE2 regexp library.</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Re2 {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"re2"</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="comment">// This is an almost full binding of Google's re2 package.</span>
+<span class="lineno" id=line9></span>  <span class="comment">// We do not support conversions of digits strings to integers</span>
+<span class="lineno" id=line10></span>  <span class="comment">//</span>
+<span class="lineno" id=line11></span>  <span class="comment">// TODO: we need to check the lvalue handling here</span>
+<span class="lineno" id=line12></span>  <span class="comment">// The RE2, Options classes aren't copyable, so we may have</span>
+<span class="lineno" id=line13></span>  <span class="comment">// to use pointers</span>
+<span class="lineno" id=line14></span>  <span class="comment">//</span>
+<span class="lineno" id=line15></span>  <span class="comment">// TODO: named group extractor</span>
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="comment">// hackery because ::re2::RE2 isn't copyable, so we have to use a pointer</span>
+<span class="lineno" id=line18></span>    <span class="comment">// but we need the shape of RE2 to create on the heap</span>
+<span class="lineno" id=line19></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> RE2_serial = """<span class="embedded_c">
+<span class="lineno" id=line20></span>    <span class="qualifier">static</span> ::<span class="small_keyword">std</span>::string RE2_encoder(<span class="qualifier">void</span> *p) { 
+<span class="lineno" id=line21></span>      <span class="small_keyword">return</span> (*(::<span class="small_keyword">std</span>::shared_ptr&lt; ::re2::RE2&gt;*)p)-&gt;pattern(); 
+<span class="lineno" id=line22></span>    }
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="qualifier">static</span> size_t RE2_decoder (<span class="qualifier">void</span> *p, <span class="qualifier">char</span> *s, size_t i) { 
+<span class="lineno" id=line25></span>      <span class="qualifier">char</span> tmp[sizeof(::<span class="small_keyword">std</span>::string)];
+<span class="lineno" id=line26></span>      i = ::flx::gc::generic::string_decoder (&amp;tmp,s,i);
+<span class="lineno" id=line27></span>      new(p) ::<span class="small_keyword">std</span>::shared_ptr&lt; ::re2::RE2&gt; (new ::re2::RE2 (*(::<span class="small_keyword">std</span>::string*)(&amp;tmp)));
+<span class="lineno" id=line28></span>      ::destroy((::<span class="small_keyword">std</span>::string*)&amp;tmp);
+<span class="lineno" id=line29></span>      <span class="small_keyword">return</span> i;
+<span class="lineno" id=line30></span>    }
+<span class="lineno" id=line31></span>    </span>"""; 
+<span class="lineno" id=line32></span>  <span class="comment">/*
+<span class="lineno" id=line33></span>    private type RE2_ = "::re2::RE2" 
+<span class="lineno" id=line34></span>    ;
+<span class="lineno" id=line35></span>  */</span>
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> RE2 = <span class="fstring">"::std::shared_ptr&lt; ::re2::RE2&gt;"</span> 
+<span class="lineno" id=line37></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx11_headers::memory,
+<span class="lineno" id=line38></span>      RE2_serial, <span class="small_keyword" title="serialisation encoder">encoder</span> <span class="fstring">"RE2_encoder"</span>, <span class="small_keyword" title="serialisation decoder">decoder</span> <span class="fstring">"RE2_decoder"</span>
+<span class="lineno" id=line39></span>    ;
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> _ctor_RE2 : <span class="library" title="binding of C++ string type">string</span> -&gt; RE2 = <span class="fstring">"::std::shared_ptr&lt; ::re2::RE2&gt;(new RE2($1))"</span>;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> StringPiece = <span class="fstring">"::re2::StringPiece"</span>;
+<span class="lineno" id=line45></span>      <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> StringPiece: &amp;<span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::re2::StringPiece(*$1)"</span>; <span class="comment">// Argument must be reference to variable!</span>
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> StringPiece: <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::re2::StringPiece($1)"</span>; <span class="comment">// DANGEROUS DEPRECATE</span>
+<span class="lineno" id=line47></span>      <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> StringPiece: <span class="library" title="Type with one values (), the empty tuple">unit</span> = <span class="fstring">"::re2::StringPiece()"</span>;
+<span class="lineno" id=line48></span>      <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> StringPiece: StringPiece = <span class="fstring">"::re2::StringPiece($1)"</span>; <span class="comment">// copy constructor</span>
+<span class="lineno" id=line49></span>      <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> StringPiece: +<span class="library" title="binding of C char type">char</span> * !ints = <span class="fstring">"::re2::StringPiece($1,$2)"</span>; <span class="comment">// array and length</span>
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> StringPiece (x:<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C char type">char</span>]) =&gt; StringPiece(x.stl_begin,x.<span class="library" title="number of elements in data structure">len</span>);
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C++ string type">string</span>: StringPiece = <span class="fstring">"$1.as_string()"</span>;
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: StringPiece -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"(size_t)$1.length()"</span>;
+<span class="lineno" id=line53></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> data: StringPiece -&gt; +<span class="library" title="binding of C char type">char</span> = <span class="fstring">"(char*)$1.data()"</span>; <span class="comment">// cast away const</span>
+<span class="lineno" id=line54></span>   
+<span class="lineno" id=line55></span>   
+<span class="lineno" id=line56></span>      <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[StringPiece,<span class="library" title="binding of C char type">char</span>] {
+<span class="lineno" id=line57></span>        <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: StringPiece -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line58></span>      }
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[StringPiece] {
+<span class="lineno" id=line60></span>        <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : StringPiece * StringPiece -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line61></span>      }
+<span class="lineno" id=line62></span>      <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[StringPiece] {
+<span class="lineno" id=line63></span>        <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : StringPiece * StringPiece -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line64></span>      }
+<span class="lineno" id=line65></span>      <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[StringPiece] {
+<span class="lineno" id=line66></span>        <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: StringPiece -&gt; <span class="library" title="binding of C++ string type">string</span> =<span class="fstring">"$1.as_string()"</span>;
+<span class="lineno" id=line67></span>      }
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> subscript (x:StringPiece, s:slice[<span class="library" title="binding of C int type">int</span>]):StringPiece =&gt;
+<span class="lineno" id=line70></span>      <span class="small_keyword" title="match statement or expression">match</span> s <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line71></span>      | #Slice_all =&gt; x
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>      | Slice_from (start) =&gt; 
+<span class="lineno" id=line74></span>        <span class="comment">// unsafe, FIXME</span>
+<span class="lineno" id=line75></span>        StringPiece (x.data + start.<span class="library" title="binding of C size_t type">size</span>, x.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span> - start)
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>      | Slice_to_incl (xend) =&gt;
+<span class="lineno" id=line78></span>        <span class="comment">// unsafe, FIXME</span>
+<span class="lineno" id=line79></span>        StringPiece (x.data, xend + 1)
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>      | Slice_to_excl (xend) =&gt; 
+<span class="lineno" id=line82></span>        <span class="comment">// unsafe, FIXME</span>
+<span class="lineno" id=line83></span>        StringPiece (x.data, xend)
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>      | Slice_range_incl (start, xend) =&gt; 
+<span class="lineno" id=line86></span>        <span class="comment">// unsafe, FIXME</span>
+<span class="lineno" id=line87></span>        StringPiece (x.data + start.<span class="library" title="binding of C size_t type">size</span>, xend - start+1)
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>      | Slice_range_excl (start, xend) =&gt; 
+<span class="lineno" id=line90></span>        <span class="comment">// unsafe, FIXME</span>
+<span class="lineno" id=line91></span>        StringPiece (x.data + start, xend - start)
+<span class="lineno" id=line92></span>  
+<span class="lineno" id=line93></span>      | Slice_one (index) =&gt;
+<span class="lineno" id=line94></span>        <span class="comment">// unsafe, FIXME</span>
+<span class="lineno" id=line95></span>        StringPiece (x.data + index, 1)
+<span class="lineno" id=line96></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line97></span>    ;
+<span class="lineno" id=line98></span>  
+<span class="lineno" id=line99></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> Arg = <span class="fstring">"::re2::Arg"</span>;
+<span class="lineno" id=line100></span>  
+<span class="lineno" id=line101></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> Encoding = <span class="fstring">"::re2::RE2::Encoding"</span>;
+<span class="lineno" id=line102></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> EncodingUTF8: Encoding = <span class="fstring">"::re2::RE2::EncodingUTF8"</span>;
+<span class="lineno" id=line103></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> EncodingLatin1: Encoding = <span class="fstring">"::re2::RE2::EncodingLatin1"</span>;
+<span class="lineno" id=line104></span>  
+<span class="lineno" id=line105></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> RE2Options = <span class="fstring">"::re2::RE2::Options"</span>;
+<span class="lineno" id=line106></span>  
+<span class="lineno" id=line107></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> Copy: RE2Options * RE2Options = <span class="fstring">"$1.Copy($2);"</span>;
+<span class="lineno" id=line108></span>  
+<span class="lineno" id=line109></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> encoding: RE2Options -&gt; Encoding = <span class="fstring">"$1.encoding()"</span>;
+<span class="lineno" id=line110></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_encoding: RE2Options * Encoding = <span class="fstring">"$1.set_encoding($2);"</span>;
+<span class="lineno" id=line111></span>      
+<span class="lineno" id=line112></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> posix_syntax: RE2Options -&gt; bool = <span class="fstring">"$1.posix_syntax()"</span>;
+<span class="lineno" id=line113></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_posix_syntax: RE2Options * bool = <span class="fstring">"$1.set_posix_syntax($2);"</span>;
+<span class="lineno" id=line114></span>  
+<span class="lineno" id=line115></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> longest_match: RE2Options -&gt; bool = <span class="fstring">"$1.longest_match()"</span>;
+<span class="lineno" id=line116></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_longest_match: RE2Options * bool = <span class="fstring">"$1.set_longest_match($2);"</span>;
+<span class="lineno" id=line117></span>      
+<span class="lineno" id=line118></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> log_errors: RE2Options -&gt; bool = <span class="fstring">"$1.log_errors()"</span>;
+<span class="lineno" id=line119></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_log_errors: RE2Options * bool = <span class="fstring">"$1.set_log_errors($2);"</span>;
+<span class="lineno" id=line120></span>      
+<span class="lineno" id=line121></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> max_mem: RE2Options -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1.max_mem()"</span>;
+<span class="lineno" id=line122></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_max_mem: RE2Options * <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1.set_max_mem($2);"</span>;
+<span class="lineno" id=line123></span>      
+<span class="lineno" id=line124></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="big_keyword" title="define literal">literal</span>: RE2Options -&gt; bool = <span class="fstring">"$1.literal()"</span>;
+<span class="lineno" id=line125></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_literal: RE2Options * bool = <span class="fstring">"$1.set_literal($2);"</span>;
+<span class="lineno" id=line126></span>  
+<span class="lineno" id=line127></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> never_nl: RE2Options -&gt; bool = <span class="fstring">"$1.never_nl()"</span>;
+<span class="lineno" id=line128></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_never_nl: RE2Options * bool = <span class="fstring">"$1.set_never_nl($2);"</span>;
+<span class="lineno" id=line129></span>      
+<span class="lineno" id=line130></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> case_sensitive: RE2Options -&gt; bool = <span class="fstring">"$1.case_sensitive()"</span>;
+<span class="lineno" id=line131></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_case_sensitive: RE2Options * bool = <span class="fstring">"$1.set_case_sensitive($2);"</span>;
+<span class="lineno" id=line132></span>      
+<span class="lineno" id=line133></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> perl_classes: RE2Options -&gt; bool = <span class="fstring">"$1.perl_classes()"</span>;
+<span class="lineno" id=line134></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_perl_classes: RE2Options * bool = <span class="fstring">"$1.set_perl_classes($2);"</span>;
+<span class="lineno" id=line135></span>      
+<span class="lineno" id=line136></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> word_boundary: RE2Options -&gt; bool = <span class="fstring">"$1.word_boundary()"</span>;
+<span class="lineno" id=line137></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_word_boundary: RE2Options * bool = <span class="fstring">"$1.set_word_boundary($2);"</span>;
+<span class="lineno" id=line138></span>      
+<span class="lineno" id=line139></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> one_line: RE2Options -&gt; bool = <span class="fstring">"$1.one_line()"</span>;
+<span class="lineno" id=line140></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_one_line: RE2Options * bool = <span class="fstring">"$1.set_one_line($2);"</span>;
+<span class="lineno" id=line141></span>  
+<span class="lineno" id=line142></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> ParseFlags: RE2Options -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1.ParseFlags()"</span>;
+<span class="lineno" id=line143></span>     
+<span class="lineno" id=line144></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> ErrorCode = <span class="fstring">"::re2::RE2::ErrorCode"</span>;
+<span class="lineno" id=line145></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> NoError : ErrorCode = <span class="fstring">"::re2::RE2::NoError"</span>;
+<span class="lineno" id=line146></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorInternal: ErrorCode = <span class="fstring">"::re2::RE2::ErrorInternal"</span>;
+<span class="lineno" id=line147></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorBadEscape : ErrorCode = <span class="fstring">"::re2::RE2::ErrorBadEscape"</span>;
+<span class="lineno" id=line148></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorBadCharClass : ErrorCode = <span class="fstring">"::re2::RE2::ErrorBadCharClass"</span>;
+<span class="lineno" id=line149></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorBadCharRange : ErrorCode = <span class="fstring">"::re2::RE2::ErrorBadCharRange"</span>;
+<span class="lineno" id=line150></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorMissingBracket : ErrorCode = <span class="fstring">"::re2::RE2::ErrorMissingBracket"</span>;
+<span class="lineno" id=line151></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorMissingParen : ErrorCode = <span class="fstring">"::re2::RE2::ErrorMissingParen"</span>;
+<span class="lineno" id=line152></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorTrailingBackslash : ErrorCode = <span class="fstring">"::re2::RE2::ErrorTrailingBackslash"</span>;
+<span class="lineno" id=line153></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorRepeatArgument : ErrorCode = <span class="fstring">"::re2::RE2::ErrorRepeatArgument"</span>;
+<span class="lineno" id=line154></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorRepeatSize : ErrorCode = <span class="fstring">"::re2::RE2::ErrorRepeatSize"</span>;
+<span class="lineno" id=line155></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorRepeatOp: ErrorCode = <span class="fstring">"::re2::RE2::ErrorRepeatOp"</span>;
+<span class="lineno" id=line156></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorBadPerlOp: ErrorCode = <span class="fstring">"::re2::RE2::ErrprBadPerlOp"</span>;
+<span class="lineno" id=line157></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorBadUTF8: ErrorCode = <span class="fstring">"::re2::RE2::ErrorBadUTF8"</span>;
+<span class="lineno" id=line158></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorBadNamedCapture: ErrorCode = <span class="fstring">"::re2::RE2::ErrorBadNamedCapture"</span>;
+<span class="lineno" id=line159></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ErrorPatternTooLarge: ErrorCode = <span class="fstring">"::re2::RE2::ErrorPatternTooLarge"</span>;
+<span class="lineno" id=line160></span>  
+<span class="lineno" id=line161></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> Anchor = <span class="fstring">"::re2::RE2::Anchor"</span>;
+<span class="lineno" id=line162></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> UNANCHORED: Anchor = <span class="fstring">"::re2::RE2::UNANCHORED"</span>;
+<span class="lineno" id=line163></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ANCHOR_START: Anchor = <span class="fstring">"::re2::RE2::ANCHOR_START"</span>;
+<span class="lineno" id=line164></span>      <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ANCHOR_BOTH: Anchor = <span class="fstring">"::re2::RE2::ANCHOR_BOTH"</span>;
+<span class="lineno" id=line165></span>  
+<span class="lineno" id=line166></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pattern: RE2 -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1-&gt;pattern()"</span>;
+<span class="lineno" id=line167></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[RE2] {
+<span class="lineno" id=line168></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (r:RE2) =&gt; r.pattern;
+<span class="lineno" id=line169></span>    }
+<span class="lineno" id=line170></span>  
+<span class="lineno" id=line171></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> error: RE2 -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1-&gt;error()"</span>;
+<span class="lineno" id=line172></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> error_code: RE2 -&gt; ErrorCode = <span class="fstring">"$1-&gt;error_code()"</span>;
+<span class="lineno" id=line173></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> error_arg: RE2 -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1-&gt;error_arg()"</span>;
+<span class="lineno" id=line174></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ok: RE2 -&gt; bool = <span class="fstring">"$1-&gt;ok()"</span>;
+<span class="lineno" id=line175></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ProgramSize: RE2 -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1-&gt;ProgramSize()"</span>;
+<span class="lineno" id=line176></span>  
+<span class="lineno" id=line177></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> GlobalReplace: &amp;<span class="library" title="binding of C++ string type">string</span> * RE2 * StringPiece -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::re2::RE2::GlobalReplace($1, *$2, $3)"</span>;
+<span class="lineno" id=line178></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> Extract: StringPiece * RE2 * StringPiece * &amp;<span class="library" title="binding of C++ string type">string</span> -&gt; bool = <span class="fstring">"::re2::RE2::Extract($1, *$2, $3, $4)"</span>;
+<span class="lineno" id=line179></span>  
+<span class="lineno" id=line180></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> QuoteMeta: StringPiece -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::re2::RE2::QuoteMeta($1)"</span>;
+<span class="lineno" id=line181></span>   
+<span class="lineno" id=line182></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> PossibleMatchRange: RE2 * &amp;<span class="library" title="binding of C++ string type">string</span> * &amp;<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C int type">int</span> -&gt; bool = <span class="fstring">"$1-&gt;PossibleMatchRange($2,$3,$3,$4)"</span>;
+<span class="lineno" id=line183></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> NumberOfCapturingGroups: RE2 -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1-&gt;NumberOfCapturingGroups()"</span>;
+<span class="lineno" id=line184></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> NamedCapturingGroups: RE2 -&gt; Stl_Map::stl_map[<span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C int type">int</span>] = <span class="fstring">"$1-&gt;NamedCapturingGroups()"</span>;
+<span class="lineno" id=line185></span>  
+<span class="lineno" id=line186></span>    <span class="comment">// this function is fully general, just needs an anchor</span>
+<span class="lineno" id=line187></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> Match: RE2 * StringPiece * <span class="library" title="binding of C int type">int</span> * Anchor * +StringPiece * <span class="library" title="binding of C int type">int</span> -&gt; bool = 
+<span class="lineno" id=line188></span>      <span class="fstring">"$1-&gt;Match($2, $3, $2.length(),$4, $5, $6)"</span>
+<span class="lineno" id=line189></span>     ;
+<span class="lineno" id=line190></span>  
+<span class="lineno" id=line191></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> Match(re:RE2, <span class="big_keyword" title="Define a mutable variable">var</span> s:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]] = {
+<span class="lineno" id=line192></span>      <span class="big_keyword" title="Define a mutable variable">var</span> emptystring = <span class="fstring">""</span>;
+<span class="lineno" id=line193></span>      <span class="big_keyword" title="Define a mutable variable">var</span> n = NumberOfCapturingGroups re;
+<span class="lineno" id=line194></span>      <span class="big_keyword" title="Define a mutable variable">var</span> v = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (n.<span class="library" title="binding of C size_t type">size</span>+1,StringPiece emptystring);
+<span class="lineno" id=line195></span>      <span class="big_keyword" title="Define a mutable variable">var</span> Match-result = Match (re, StringPiece s, 0, ANCHOR_BOTH, v.stl_begin, n+1);
+<span class="lineno" id=line196></span>      <span class="small_keyword" title="return">return</span> 
+<span class="lineno" id=line197></span>        <span class="small_keyword" title="conditional">if</span> Match-result <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line198></span>          Some$ <span class="library" title="return data structure with function applied to each value">map</span> <span class="library" title="binding of C++ string type">string</span> of (StringPiece) v
+<span class="lineno" id=line199></span>        <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line200></span>          None[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]]
+<span class="lineno" id=line201></span>      ;
+<span class="lineno" id=line202></span>    }
+<span class="lineno" id=line203></span>  
+<span class="lineno" id=line204></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> apply (re:RE2, s:<span class="library" title="binding of C++ string type">string</span>) =&gt; Match (re,s);
+<span class="lineno" id=line205></span>  
+<span class="lineno" id=line206></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> CheckRewriteString: RE2 * StringPiece * &amp;<span class="library" title="binding of C++ string type">string</span> -&gt; bool = <span class="fstring">"$1-&gt;CheckRewriteString($2, $3)"</span>;
+<span class="lineno" id=line207></span>  
+<span class="lineno" id=line208></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Set[RE2, <span class="library" title="binding of C++ string type">string</span>] {
+<span class="lineno" id=line209></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\in">\(\in\)</span> : <span class="library" title="binding of C++ string type">string</span> * RE2 -&gt; bool =
+<span class="lineno" id=line210></span>        <span class="fstring">"$2-&gt;Match(::re2::StringPiece($1),0, ::re2::StringPiece($1).length(),::re2::RE2::ANCHOR_BOTH, (::re2::StringPiece*)0, 0)"</span>
+<span class="lineno" id=line211></span>      ;
+<span class="lineno" id=line212></span>    }
+<span class="lineno" id=line213></span>  
+<span class="lineno" id=line214></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator (re2:<span class="library" title="binding of C++ string type">string</span>, <span class="big_keyword" title="Define a mutable variable">var</span> target:<span class="library" title="binding of C++ string type">string</span>) =&gt; iterator (RE2 re2, target);
+<span class="lineno" id=line215></span>  
+<span class="lineno" id=line216></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterable[RE2 * <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]] {
+<span class="lineno" id=line217></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator (r:RE2, <span class="big_keyword" title="Define a mutable variable">var</span> target:<span class="library" title="binding of C++ string type">string</span>) () : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]] = {
+<span class="lineno" id=line218></span>        <span class="big_keyword" title="Define a mutable variable">var</span> emptystring = <span class="fstring">""</span>;
+<span class="lineno" id=line219></span>        <span class="big_keyword" title="Define a mutable variable">var</span> l = <span class="library" title="number of elements in data structure">len</span> target;
+<span class="lineno" id=line220></span>        <span class="big_keyword" title="Define a mutable variable">var</span> s = StringPiece target;
+<span class="lineno" id=line221></span>        <span class="big_keyword" title="Define a mutable variable">var</span> p1 = s.data;  
+<span class="lineno" id=line222></span>        <span class="big_keyword" title="Define a mutable variable">var</span> p = 0;
+<span class="lineno" id=line223></span>        <span class="big_keyword" title="Define a mutable variable">var</span> n = NumberOfCapturingGroups(r)+1;
+<span class="lineno" id=line224></span>        <span class="big_keyword" title="Define a mutable variable">var</span> v1 = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (n.<span class="library" title="binding of C size_t type">size</span>,StringPiece emptystring);
+<span class="lineno" id=line225></span>        <span class="big_keyword" title="Define a mutable variable">var</span> v2 = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>] (n.<span class="library" title="binding of C size_t type">size</span>,<span class="fstring">""</span>);
+<span class="lineno" id=line226></span>      again:&gt;
+<span class="lineno" id=line227></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Match(r, s, p, UNANCHORED,v1.stl_begin, n);
+<span class="lineno" id=line228></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="value of function return used in post condition">result</span> <span class="small_keyword" title="jump to label">goto</span> endoff;
+<span class="lineno" id=line229></span>        <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0 <span class="small_keyword" title="upwards counting for loop">upto</span> n - 1 <span class="small_keyword" title="imperative code begins">do</span> set(v2, i.<span class="library" title="binding of C size_t type">size</span>, <span class="library" title="binding of C++ string type">string</span>(v1.i)); <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line230></span>        <span class="big_keyword" title="Define a mutable variable">var</span> p2 = v1.0.data;
+<span class="lineno" id=line231></span>        <span class="big_keyword" title="Run time assertion">assert</span>(v1.0.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span> &gt; 0); <span class="comment">// prevent infinite loop</span>
+<span class="lineno" id=line232></span>        p = (p2 - p1).<span class="library" title="binding of C int type">int</span>+v1.0.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line233></span>        <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some v2;
+<span class="lineno" id=line234></span>        <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line235></span>      endoff:&gt;
+<span class="lineno" id=line236></span>        <span class="small_keyword" title="return">return</span> None[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]];
+<span class="lineno" id=line237></span>      }
+<span class="lineno" id=line238></span>    }
+<span class="lineno" id=line239></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Streamable[RE2 * <span class="library" title="binding of C++ string type">string</span>, Varray::<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]];
+<span class="lineno" id=line240></span>  
+<span class="lineno" id=line241></span>    <span class="comment">// Extract Some match array or None if not matching.</span>
+<span class="lineno" id=line242></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> extract (re2:<span class="library" title="binding of C++ string type">string</span>, target:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]] =&gt; iterator (RE2 re2, target) ();
+<span class="lineno" id=line243></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> extract (re2:RE2, target:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]] =&gt; iterator (re2, target) ();
+<span class="lineno" id=line244></span>  
+<span class="lineno" id=line245></span>  }
+<span class="lineno" id=line246></span>  
+<span class="lineno" id=line247></span>  <span class="big_keyword" title="Open a module or class">open</span> Set[RE2, <span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line248></span>  
+</pre></p></div><h1 id='Regular_definitions_h'><img src='/share/src/web/images/minus.gif' id='Regular definitions' onclick='toggle(this,"Regular_definitions_d")' alt='+'/> 4 Regular definitions</h1><div id='Regular_definitions_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/regex/regdef.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Regdef {
+<span class="lineno" id=line3></span>    variant regex =
+<span class="lineno" id=line4></span>    | Alts of <span class="library" title="functional, singly linked list">list</span>[regex]
+<span class="lineno" id=line5></span>    | Seqs of <span class="library" title="functional, singly linked list">list</span>[regex]
+<span class="lineno" id=line6></span>    | Rpt of regex * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line7></span>    | Charset of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line8></span>    | String of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line9></span>    | Group of regex
+<span class="lineno" id=line10></span>    | Perl of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line11></span>    ;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> prec: regex -&gt; <span class="library" title="binding of C int type">int</span> =
+<span class="lineno" id=line14></span>    | Perl _ =&gt; 3
+<span class="lineno" id=line15></span>    | Alts _ =&gt; 3
+<span class="lineno" id=line16></span>    | Seqs _ =&gt; 2
+<span class="lineno" id=line17></span>    | String _ =&gt; 2
+<span class="lineno" id=line18></span>    | Rpt _ =&gt; 1
+<span class="lineno" id=line19></span>    | Charset _ =&gt; 0
+<span class="lineno" id=line20></span>    | Group _ =&gt; 0
+<span class="lineno" id=line21></span>    ;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex_digit (i:<span class="library" title="binding of C int type">int</span>)=&gt;
+<span class="lineno" id=line24></span>      <span class="small_keyword" title="conditional">if</span> i&lt;10 <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C++ string type">string</span> (<span class="library" title="binding of C char type">char</span> (ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">"0"</span>) + i)) 
+<span class="lineno" id=line25></span>      <span class="small_keyword" title="conditional">else</span> <span class="library" title="binding of C++ string type">string</span> (<span class="library" title="binding of C char type">char</span> (ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">"A"</span>) + i - 10))
+<span class="lineno" id=line26></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line27></span>    ;
+<span class="lineno" id=line28></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex2(c:<span class="library" title="binding of C char type">char</span>)=&gt;
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="let binder">let</span> i = ord c <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line30></span>      <span class="fstring">"\\x"</span> + hex_digit ( i / 16 ) + hex_digit ( i % 16 )
+<span class="lineno" id=line31></span>    ;
+<span class="lineno" id=line32></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> charset_quote(c:<span class="library" title="binding of C char type">char</span>)=&gt;
+<span class="lineno" id=line33></span>      <span class="small_keyword" title="conditional">if</span> c <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstvuwxyz"</span> <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C++ string type">string</span> c
+<span class="lineno" id=line34></span>      <span class="small_keyword" title="conditional">else</span> hex2 c
+<span class="lineno" id=line35></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line36></span>    ;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex(s:<span class="library" title="binding of C++ string type">string</span> <span class="small_keyword" title="predicative type constraint or precondition">when</span> <span class="library" title="number of elements in data structure">len</span> s &gt; 0uz)= {
+<span class="lineno" id=line39></span>      <span class="big_keyword" title="Define a mutable variable">var</span> r = <span class="fstring">""</span>; 
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> <span class="library" title="number of elements in data structure">len</span> s - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line41></span>        r += charset_quote s.[i];
+<span class="lineno" id=line42></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line43></span>      <span class="small_keyword" title="return">return</span> r; 
+<span class="lineno" id=line44></span>    }
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ngrp (s:<span class="library" title="binding of C++ string type">string</span>)=&gt; <span class="fstring">"(?:"</span>+s+<span class="fstring">")"</span>;
+<span class="lineno" id=line47></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cngrp (s:<span class="library" title="binding of C++ string type">string</span>, op: <span class="library" title="binding of C int type">int</span>, ip: <span class="library" title="binding of C int type">int</span>) =&gt; <span class="small_keyword" title="conditional">if</span> ip &gt; op <span class="small_keyword" title="conditional">then</span> ngrp (s) <span class="small_keyword" title="conditional">else</span> s <span class="small_keyword" title="conditional">endif</span>; 
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> render: regex -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line50></span>    | Alts rs =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> 
+<span class="lineno" id=line51></span>     (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="binding of C++ string type">string</span>) (elt:regex)=&gt; 
+<span class="lineno" id=line52></span>       (<span class="small_keyword" title="conditional">if</span> acc == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> acc + <span class="fstring">"|"</span> <span class="small_keyword" title="conditional">endif</span>) + (render elt)) 
+<span class="lineno" id=line53></span>      <span class="fstring">""</span> rs
+<span class="lineno" id=line54></span>    | Seqs rs =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> 
+<span class="lineno" id=line55></span>      (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="binding of C++ string type">string</span>) (elt:regex)=&gt; acc + cngrp(render elt,2,prec elt))
+<span class="lineno" id=line56></span>      <span class="fstring">""</span> rs
+<span class="lineno" id=line57></span>    | Rpt (r,i,x) =&gt;
+<span class="lineno" id=line58></span>      <span class="small_keyword" title="conditional">if</span> i == 0 <span class="small_keyword" title="logical conjunction">and</span> x == -1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"*"</span>
+<span class="lineno" id=line59></span>      <span class="small_keyword" title="conditional">elif</span> i == 1 <span class="small_keyword" title="logical conjunction">and</span> x == -1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"+"</span>
+<span class="lineno" id=line60></span>      <span class="small_keyword" title="conditional">elif</span> i == 0 <span class="small_keyword" title="logical conjunction">and</span> x == 1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"?"</span>
+<span class="lineno" id=line61></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line62></span>        cngrp(render r,1,prec r) + <span class="fstring">"{"</span> + <span class="library" title="Convert a value to a string">str</span> i + <span class="fstring">","</span> + <span class="small_keyword" title="conditional">if</span> x &lt; 0 <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> <span class="library" title="Convert a value to a string">str</span> x <span class="small_keyword" title="conditional">endif</span> + <span class="fstring">"}"</span>
+<span class="lineno" id=line63></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>    | String s =&gt; hex(s)
+<span class="lineno" id=line66></span>    | Charset s =&gt; <span class="fstring">"["</span> + hex s + <span class="fstring">"]"</span>
+<span class="lineno" id=line67></span>    | Group r =&gt; <span class="fstring">"("</span> + render r + <span class="fstring">")"</span>
+<span class="lineno" id=line68></span>    | Perl s =&gt; s
+<span class="lineno" id=line69></span>    ;
+<span class="lineno" id=line70></span>  }
+</pre></p></div><h1 id='Lexer_h'><img src='/share/src/web/images/minus.gif' id='Lexer' onclick='toggle(this,"Lexer_d")' alt='+'/> 5 Lexer</h1><div id='Lexer_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/regex/lexer.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Lexer
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> lex_iterator = <span class="fstring">"char const*"</span>;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> start_iterator : <span class="library" title="binding of C++ string type">string</span> -&gt; lex_iterator = <span class="fstring">"$1.c_str()"</span>;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> end_iterator: <span class="library" title="binding of C++ string type">string</span> -&gt; lex_iterator = <span class="fstring">"$1.c_str()+$1.size()"</span>;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> bounds (x:<span class="library" title="binding of C++ string type">string</span>): lex_iterator * lex_iterator = {
+<span class="lineno" id=line7></span>      <span class="small_keyword" title="return">return</span>
+<span class="lineno" id=line8></span>        start_iterator x,
+<span class="lineno" id=line9></span>        end_iterator x
+<span class="lineno" id=line10></span>      ;
+<span class="lineno" id=line11></span>    }
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> string_between: lex_iterator * lex_iterator -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line13></span>     <span class="fstring">"::std::string($1,$2)"</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> + : lex_iterator * <span class="library" title="binding of C int type">int</span> -&gt; lex_iterator = <span class="fstring">"$1 + $2"</span>;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> - : lex_iterator * <span class="library" title="binding of C int type">int</span> -&gt; lex_iterator = <span class="fstring">"$1 - $2"</span>;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> - : lex_iterator * lex_iterator -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1 - $2"</span>;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref: lex_iterator -&gt; <span class="library" title="binding of C char type">char</span> = <span class="fstring">"*$1"</span>;
+<span class="lineno" id=line19></span>  }
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[Lexer::lex_iterator] {
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == :Lexer::lex_iterator * Lexer::lex_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line23></span>  }
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[Lexer::lex_iterator] {
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; :Lexer::lex_iterator * Lexer::lex_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line27></span>  }
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Open a module or class">open</span> Eq[Lexer::lex_iterator];
+<span class="lineno" id=line30></span>  
+</pre></p></div><h1 id='Config_h'><img src='/share/src/web/images/minus.gif' id='Config' onclick='toggle(this,"Config_d")' alt='+'/> 6 Config</h1><div id='Config_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/src/config/unix/re2.fpc</pre>
+<p><pre class="prefmtbg">Name: Re2
+Description: Google Re2 regexp library
+provides_dlib: -lflx_re2_dynamic
+provides_slib: -lflx_re2_static
+includes: '"re2/re2.h"'
+library: flx_re2
+macros: BUILD_RE2
+srcdir: src/re2/re2
+headers: re2/(re2|set|stringpiece|variadic_function)\.h  
+src: re2/[^/]*\.cc|util/arena\.cc|util/hash\.cc|util/rune\.cc|util/stringpiece\.cc|util/strutil.cc|util/stringprintf\.cc|util/valgrind\.cc
+build_includes: src/re2/re2
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/re2.fpc</pre>
+<p><pre class="prefmtbg">Name: Re2
+Description: Google Re2 regexp library
+provides_dlib: /DEFAULTLIB:flx_re2_dynamic
+provides_slib: /DEFAULTLIB:flx_re2_static
+includes: '"re2/re2.h"'
+library: flx_re2
+macros: BUILD_RE2 WIN32 NOMINMAX
+srcdir: src\re2\re2
+headers: re2\\(re2|set|stringpiece|variadic_function)\.h  
+src: re2\\[^\\]*\.cc|util\\arena\.cc|util\\hash\.cc|util\\rune\.cc|util\\stringpiece\.cc|util\\strutil.cc|util\\stringprintf\.cc|util\\valgrind\.cc
+build_includes: src/re2/re2
+</pre></p><pre class='inclusion'>
+share/lib/rtl/flx_re2_config.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_RE2_CONFIG_H__
+#<span class="preproc">define</span> __FLX_RE2_CONFIG_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">ifdef</span> BUILD_RE2
+#<span class="preproc">define</span> RE2_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> RE2_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

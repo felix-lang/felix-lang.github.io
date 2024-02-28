@@ -1,0 +1,951 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Synchronous Scheduler</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Synchronous Support System"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Synchronous Support System_h')"> <a href="#Synchronous_Support_System_h">Synchronous Support System</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Synchronous_Support_System_h'><img src='/share/src/web/images/minus.gif' id='Synchronous Support System' onclick='toggle(this,"Synchronous_Support_System_d")' alt='+'/> 1 Synchronous Support System</h1><div id='Synchronous_Support_System_d' style='display:block'>
+<p>This class encapsulate the core Felix synchronous scheduling
+mechanism and services synchronous service calls.
+</p><p>The scheduler method <code>frun</code> executes <code>fthread_t</code> fibres 
+from the scheduler queue <code>active</code>, performing
+synchronous service calls made by the fibres until it
+is unable to proceed.
+</p><p>It then suspends and returns a code indication one of two conditions.
+Either the scheduler is <code>blocked</code> because there are no more
+active fibres on the queue to resume, or, it has received a
+non-synchronous service request it is unable to satisfy,
+in which case it returns <code>delegated</code> indicating it is delegating
+the responsibility to satisfy the service request to its caller.
+</p><p>The variable <code>request</code> contains the service call which the
+scheduler is delegating.
+</p><p>The scheduler itself is a finite state machine with three states:
+it is ready to resume the current fibre, it is ready to get
+the next fibre from the queue, or it is blocked because the
+current fibre has gone and the queue is empty.
+</p><p>Synchronous reads and writes can suspend or activate fibres.
+The special external multiwrite provides a way to populate
+the scheduler queue externally by pushing waiting fibres
+off a synchronous channel into the active queue.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_sync.hpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">ifndef</span> __FLX_SYNC_H__
+#<span class="preproc">define</span> __FLX_SYNC_H__
+
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;list&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;atomic&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_spinlock.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_async.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"pthread_thread.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> run {
+
+<span class="comment">// *************************************
+</span><span class="comment">// fthread_list has grown to include the async control object
+</span><span class="comment">// and its ready list
+</span><span class="comment">//
+</span><span class="comment">// this object contains the data shared by multiple pthreads
+</span><span class="comment">// pooled to run coroutines concurrently
+</span><span class="comment">// *************************************
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN fthread_list {
+  ::flx::gc::generic::gc_profile_t *gcp;
+  fthread_list(fthread_list <span class="qualifier">const</span>&amp;) = delete;
+  fthread_list&amp; operator=(fthread_list <span class="qualifier">const</span>&amp;) = delete;
+<span class="qualifier">public</span>:
+  <span class="comment">// INVARIANT fthread_first==nullptr equiv fthread_last=nullptr
+</span>  ::flx::rtl::fthread_t *fthread_first; <span class="comment">// has to be public for shape spec
+</span>  ::flx::rtl::fthread_t *fthread_last; <span class="comment">// WEAK
+</span>
+  ::<span class="small_keyword">std</span>::atomic_flag qisblocked;
+
+  <span class="comment">// FIXME: THESE SHOULDNT BE ATOMIC BECAUSE IDIOT C++ MIGHT MUTEX WRAP THEM
+</span>  <span class="comment">// Instead they should only be used inside our spinlock
+</span>  ::<span class="small_keyword">std</span>::atomic&lt;<span class="qualifier">int</span>&gt; fibre_count; <span class="comment">// n threads sharing list
+</span>  ::<span class="small_keyword">std</span>::atomic&lt;<span class="qualifier">int</span>&gt; busy_count; <span class="comment">// n threads actually working
+</span>
+  ::flx::rtl::flx_spinlock active_lock;
+
+  size_t async_count; <span class="comment">// pending async jobs
+</span>  async_hooker* async; <span class="comment">// async dispatch and ready list object
+</span>
+  fthread_list (::flx::gc::generic::gc_profile_t *gcp);
+  ~fthread_list ();
+
+  <span class="qualifier">void</span> push_back(::flx::rtl::fthread_t *);
+  <span class="qualifier">void</span> push_front(::flx::rtl::fthread_t *);
+  ::flx::rtl::fthread_t *pop_front();
+
+  <span class="comment">// DIAGNOSTICS ONLY
+</span>  size_t size() <span class="qualifier">const</span>;
+  ::flx::rtl::fthread_t *front()<span class="qualifier">const</span>;
+};
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t fthread_list_ptr_map;
+
+
+<span class="comment">// This class handles synchronous channel I/O and fthreads
+</span><span class="big_keyword">struct</span> RTL_EXTERN sync_sched {
+  sync_sched () = delete;
+  sync_sched (sync_sched <span class="qualifier">const</span>&amp;) = delete;
+  sync_sched &amp;operator=(sync_sched <span class="qualifier">const</span>&amp;) = delete;
+
+  bool debug_driver;
+
+  <span class="comment">// the garbage collector and general control object
+</span>  ::flx::gc::generic::collector_t *collector;
+
+  <span class="comment">// scheduler queue
+</span>  fthread_list *active;
+
+  <span class="comment">// temporary for currently running fibre
+</span>  ::flx::rtl::fthread_t *ft;
+
+  <span class="comment">// variable to hold service request
+</span>  ::flx::rtl::svc_req_t *request;
+
+  <span class="comment">// type for the state of the scheduler
+</span>  <span class="comment">// when it suspends by returning.
+</span>  <span class="big_keyword">enum</span> fstate_t { blocked, delegated };
+
+  <span class="comment">// debugging helper to get a description of
+</span>  <span class="comment">// the suspended scheduler state
+</span>  <span class="qualifier">static</span> <span class="qualifier">char</span> <span class="qualifier">const</span> * get_fstate_desc(fstate_t);
+
+  <span class="comment">// debugging helper to get a description of
+</span>  <span class="comment">// the running scheduler state
+</span>  <span class="qualifier">char</span> <span class="qualifier">const</span> * get_fpc_desc();
+
+  sync_sched (
+    bool debug_driver_,
+    ::flx::gc::generic::gc_profile_t *gcp_,
+    fthread_list *active_
+  );
+
+<span class="qualifier">public</span>:
+  <span class="qualifier">void</span> push_front(::flx::rtl::fthread_t*);
+  fstate_t frun();
+
+  <span class="comment">// a special routine to allow a multiwrite to be performed
+</span>  <span class="comment">// from outside the scheduler whilst it is suspended.
+</span>  <span class="qualifier">void</span> external_multi_swrite(::flx::rtl::schannel_t*, <span class="qualifier">void</span>*);
+<span class="qualifier">protected</span>:
+  <span class="comment">// handlers for synchronous service calls.
+</span>  <span class="qualifier">void</span> <span class="small_keyword">do</span>_yield();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_spawn_fthread();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_schedule_fthread();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_sread();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_swrite();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_multi_swrite();
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_kill();
+  <span class="qualifier">void</span> show_state();
+};
+
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t sync_sched_ptr_map;
+
+
+}}
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/rtl/flx_sync.cpp</pre>
+<p><pre class='cppbg'>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"flx_sync.hpp"</span>
+
+using <span class="big_keyword">namespace</span> flx::rtl;
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> run {
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// SHAPE for sync_sched 
+</span><span class="comment">// ********************************************************
+</span>
+<span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t sync_sched_offsets[2]={
+    {offsetof(sync_sched,active),nullptr},
+    {offsetof(sync_sched,ft),nullptr}
+};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> sync_sched_offset_data = { 2, sync_sched_offsets };
+
+::flx::gc::generic::gc_shape_t sync_sched_ptr_map = {
+  <span class="fstring">"rtl::sync_sched"</span>,
+  1,sizeof(sync_sched),
+  0, <span class="comment">// no finaliser,
+</span>  0, <span class="comment">// fcops
+</span>  &amp;sync_sched_offset_data, 
+  ::flx::gc::generic::scan_by_offsets,
+  0,0, <span class="comment">// no serialisation as yet
+</span>  ::flx::gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// fthread_list
+</span><span class="comment">// ***************************************************
+</span>fthread_list::fthread_list(::flx::gc::generic::gc_profile_t *gcp_) : 
+  fibre_count(1),
+  busy_count(0),
+  async_count(0),
+  async(nullptr),
+  active_lock(),
+  gcp(gcp_),
+  fthread_first(nullptr),
+  fthread_last(nullptr)
+{
+  qisblocked.clear();
+}
+fthread_list::~fthread_list () { 
+  fprintf(stderr,<span class="fstring">"[fthread_list: destructor] Pthread %p delete async queue\n"</span>,(<span class="qualifier">void</span>*)::flx::pthread::mythrid());
+  delete async; 
+}
+
+
+fthread_t *fthread_list::front() <span class="qualifier">const</span> { 
+  <span class="small_keyword">return</span> fthread_first;
+}
+
+fthread_t *fthread_list::pop_front() { 
+  auto tmp = fthread_first;
+  <span class="small_keyword">if</span> (!tmp) <span class="small_keyword">return</span> nullptr; <span class="comment">// queue empty
+</span>
+  <span class="comment">// point at next
+</span>  fthread_first = tmp-&gt;next;
+  <span class="comment">// if next is null, null out last pointer
+</span>  <span class="small_keyword">if</span>(!fthread_first) fthread_last = nullptr;
+
+  tmp-&gt;next = nullptr; <span class="comment">// for GC, null out link
+</span>  <span class="small_keyword">return</span> tmp;
+}
+
+<span class="comment">// INVARIANT fthread_first==nullptr equiv fthread_last=nullptr
+</span><span class="comment">// PRECONDITION: p != nullptr
+</span><span class="qualifier">void</span> fthread_list::push_front(fthread_t *p) { 
+  p-&gt;next = fthread_first;
+  fthread_first = p;
+  <span class="small_keyword">if</span> (!fthread_last) fthread_last = p;
+}
+
+<span class="comment">// INVARIANT fthread_first==nullptr equiv fthread_last=nullptr
+</span><span class="comment">// PRECONDITION: p != nullptr
+</span><span class="qualifier">void</span> fthread_list::push_back(fthread_t *p) { 
+  <span class="small_keyword">if</span>(!fthread_last) fthread_first=fthread_last=p;
+  else {
+    fthread_last-&gt;next = p;
+    fthread_last = p;
+  }
+}
+
+size_t fthread_list::size()<span class="qualifier">const</span> { 
+  auto count = 0; 
+  <span class="small_keyword">for</span>(auto it=fthread_first; it; it=it-&gt;next)++count; <span class="small_keyword">return</span> count; 
+}
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// SHAPE for fthread_list
+</span><span class="comment">// ********************************************************
+</span>
+<span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t fthread_list_offsets[1]={
+    {offsetof(fthread_list,fthread_first),nullptr} <span class="comment">// fthread_last is weak
+</span>};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> fthread_list_offset_data = { 1, fthread_list_offsets };
+
+::flx::gc::generic::gc_shape_t fthread_list_ptr_map = {
+  <span class="fstring">"rtl::fthread_list"</span>,
+  1,sizeof(fthread_list),
+  0, <span class="comment">// no finaliser,
+</span>  0, <span class="comment">// fcops
+</span>  &amp;fthread_list_offset_data, 
+  ::flx::gc::generic::scan_by_offsets,
+  0,0, <span class="comment">// no serialisation as yet
+</span>  ::flx::gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+
+<span class="comment">// ***************************************************
+</span><span class="comment">// sync_sched
+</span><span class="comment">// ***************************************************
+</span><span class="qualifier">char</span> <span class="qualifier">const</span> *sync_sched::get_fstate_desc(fstate_t fs)
+{
+  switch(fs)
+  {
+    case blocked: <span class="small_keyword">return</span> <span class="fstring">"blocked"</span>;
+    case delegated: <span class="small_keyword">return</span> <span class="fstring">"delegated"</span>;
+    default: <span class="small_keyword">return</span> <span class="fstring">"Illegal fstate_t"</span>;
+  }
+}
+
+<span class="qualifier">char</span> <span class="qualifier">const</span> *sync_sched::get_fpc_desc()
+{
+  <span class="small_keyword">if</span> (ft)
+    <span class="small_keyword">return</span> <span class="fstring">"Next request pos"</span>;
+  else
+  {
+    <span class="small_keyword">if</span> (active-&gt;size() &gt; 0) <span class="small_keyword">return</span> <span class="fstring">"Next fthread pos"</span>;
+    else <span class="small_keyword">return</span> <span class="fstring">"Out of active threads"</span>;
+  }
+}
+
+
+sync_sched::sync_sched (
+  bool debug_driver_,
+  ::flx::gc::generic::gc_profile_t *gcp_,
+  fthread_list *active_
+) :
+  debug_driver(debug_driver_),
+  collector(gcp_-&gt;collector),
+  active(active_),
+  ft(nullptr)
+{}
+
+
+<span class="qualifier">void</span> sync_sched::show_state () {
+    <span class="small_keyword">if</span> (debug_driver)
+      fprintf(stderr, <span class="fstring">"CUR[%p] ACT[%p]\n"</span>,ft,
+        active-&gt;size()?active-&gt;front():NULL);
+  }
+
+<span class="comment">// used by async to activate fthread in ready (async complete) queue
+</span><span class="qualifier">void</span> sync_sched::push_front(fthread_t *f) {
+  spinguard dummy(&amp;(active-&gt;active_lock));
+  <span class="small_keyword">if</span>(ft) active-&gt;push_front(ft);
+  ft = f;
+}
+
+<span class="qualifier">void</span> sync_sched::<span class="small_keyword">do</span>_yield()
+    {
+      <span class="small_keyword">if</span>(debug_driver)
+         fprintf(stderr,<span class="fstring">"[sync: svc_yield] yield"</span>);
+      
+      spinguard dummy(&amp;(active-&gt;active_lock));
+      active-&gt;push_back(ft);
+      ft = active-&gt;pop_front();
+    }
+
+<span class="qualifier">void</span> sync_sched::<span class="small_keyword">do</span>_spawn_fthread()
+    {
+      spinguard dummy(&amp;(active-&gt;active_lock));
+      fthread_t *ftx = request-&gt;svc_fthread_req.fthread;
+      ftx-&gt;owner = active;
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_spawn_fthread] Spawn fthread %p\n"</span>,ftx);
+      <span class="comment">// invoke new fibre immediately like a subroutine
+</span>      active-&gt;push_front(ft);
+      ft = ftx;
+    }
+
+<span class="qualifier">void</span> sync_sched::<span class="small_keyword">do</span>_schedule_fthread()
+    {
+      spinguard dummy(&amp;(active-&gt;active_lock));
+      fthread_t *ftx = request-&gt;svc_fthread_req.fthread;
+      ftx-&gt;owner = active;
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_schedule_fthread] Schedule fthread %p\n"</span>,ftx);
+      <span class="comment">// keep running current fibre, delay invoking new one
+</span>      active-&gt;push_back(ftx);
+    }
+
+<span class="comment">// FIXME: HANDLE NULL. Read & Write variable addresses can be NULL
+</span><span class="comment">// if the data type is unit
+</span><span class="qualifier">void</span> sync_sched::<span class="small_keyword">do</span>_sread()
+    {
+      fthread_list *writer_owner;
+      svc_sio_req_t pw;
+      fthread_t *writer;
+
+      svc_sio_req_t pr = request-&gt;svc_sio_req;
+      schannel_t *chan = pr.chan;
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_read] Fibre %p Request to read on channel %p\n"</span>,ft,chan);
+
+      active-&gt;active_lock.lock();
+      <span class="small_keyword">if</span>(chan==NULL) <span class="small_keyword">goto</span> svc_read_none;
+
+svc_read_next:
+     writer = chan-&gt;pop_writer();
+     <span class="small_keyword">if</span>(writer == 0) <span class="small_keyword">goto</span> svc_read_none;       <span class="comment">// no writers
+</span>     <span class="small_keyword">if</span>(writer-&gt;cc == 0) <span class="small_keyword">goto</span> svc_read_next;   <span class="comment">// killed
+</span>
+     pw = writer-&gt;get_svc()-&gt;svc_sio_req;
+     <span class="small_keyword">if</span> (pr.data &amp;&amp; pw.data) {
+       <span class="small_keyword">if</span>(debug_driver)
+          fprintf(stderr,<span class="fstring">"[sync: svc_read] Writer @%p=%p, read into %p\n"</span>, 
+            pw.data,*pw.data, pr.data);
+        *pr.data= *pw.data;
+      }
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_read] current fibre %p FED, fibre %p UNBLOCKED\n"</span>,ft, writer);
+
+      <span class="comment">// WE are the reader, stay current, push writer
+</span>      <span class="comment">// onto active list
+</span>      writer_owner = writer-&gt;owner;
+      <span class="small_keyword">if</span> (active == writer_owner) {
+        active-&gt;push_front(writer); 
+        <span class="small_keyword">goto</span> exit1;
+      } 
+      else <span class="small_keyword">goto</span> exit2;
+
+svc_read_none:
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_read] No writers on channel %p: fibre %p HUNGRY\n"</span>,chan,ft);
+      chan-&gt;push_reader(ft);
+      ft = active-&gt;pop_front();
+exit1:      
+      show_state();
+      active-&gt;active_lock.unlock();
+      <span class="small_keyword">return</span>;
+
+exit2:
+      active-&gt;active_lock.unlock();
+      writer_owner-&gt;active_lock.lock();
+      writer_owner-&gt;push_front(writer);
+      show_state();
+      writer_owner-&gt;active_lock.unlock();
+      <span class="small_keyword">return</span>;
+    }
+
+<span class="qualifier">void</span> sync_sched::<span class="small_keyword">do</span>_swrite()
+    {
+      fthread_list *reader_owner;
+      svc_sio_req_t pr;
+      fthread_t *reader;
+
+      svc_sio_req_t pw = request-&gt;svc_sio_req;
+      schannel_t *chan = pw.chan;
+      <span class="small_keyword">if</span>(debug_driver)
+         fprintf(stderr,<span class="fstring">"[sync: svc_write] Fibre %p Request to write on channel %p\n"</span>,ft,chan);
+
+      active-&gt;active_lock.lock();
+      <span class="small_keyword">if</span>(chan==NULL)<span class="small_keyword">goto</span> svc_write_none;
+svc_write_next:
+      reader= chan-&gt;pop_reader();
+      <span class="small_keyword">if</span>(reader == 0) <span class="small_keyword">goto</span> svc_write_none;     <span class="comment">// no readers
+</span>      <span class="small_keyword">if</span>(reader-&gt;cc == 0) <span class="small_keyword">goto</span> svc_write_next; <span class="comment">// killed
+</span>      pr = reader-&gt;get_svc()-&gt;svc_sio_req;
+      <span class="small_keyword">if</span> (pr.data &amp;&amp; pw.data) {
+        <span class="small_keyword">if</span>(debug_driver)
+          fprintf(stderr,<span class="fstring">"[sync: svc_write] Writer @%p=%p, read into %p\n"</span>, 
+            pw.data,*pw.data, pr.data);
+        *pr.data= *pw.data;
+      }
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_write] hungry fibre %p FED\n"</span>,reader);
+
+      reader_owner = reader-&gt;owner;
+      <span class="small_keyword">if</span> (active == reader_owner) {
+        <span class="comment">// WE are the writer, push us onto the active list
+</span>        <span class="comment">// and make the reader on the channel current
+</span>        active-&gt;push_front(ft); 
+        ft = reader;
+        <span class="small_keyword">goto</span> exit1;
+      }
+      else <span class="small_keyword">goto</span> exit2;
+
+svc_write_none:
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_write] No readers on channel %p: fibre %p BLOCKING\n"</span>,chan,ft);
+      chan-&gt;push_writer(ft);
+      ft = active-&gt;pop_front();
+exit1:
+      active-&gt;active_lock.unlock();
+      show_state();
+      <span class="small_keyword">return</span>;
+
+exit2:
+      active-&gt;active_lock.unlock();
+      reader_owner-&gt;active_lock.lock();
+      reader_owner-&gt;push_front(reader);
+      reader_owner-&gt;active_lock.unlock();
+      show_state();
+      <span class="small_keyword">return</span>;
+    }
+
+<span class="comment">// NOTE: not protected by mutex
+</span><span class="qualifier">void</span> sync_sched::external_multi_swrite (schannel_t *chan, <span class="qualifier">void</span> *data)
+    {
+      <span class="small_keyword">if</span>(chan==NULL) <span class="small_keyword">return</span>;
+    svc_multi_write_next:
+      fthread_t *reader= chan-&gt;pop_reader();
+      <span class="small_keyword">if</span>(reader == 0)  <span class="small_keyword">return</span>;    <span class="comment">// no readers left
+</span>      <span class="small_keyword">if</span>(reader-&gt;cc == 0) <span class="small_keyword">goto</span> svc_multi_write_next; <span class="comment">// killed
+</span>      {
+        svc_sio_req_t pr = reader-&gt;get_svc()-&gt;svc_sio_req;
+        <span class="small_keyword">if</span>(debug_driver)
+           fprintf(stderr,<span class="fstring">"[sync: svc_multi_write] Write data %p, read into %p\n"</span>, 
+             data, pr.data);
+        *pr.data = data;
+        active-&gt;push_front(reader); <span class="comment">// NOTE: NOT LOCKED! Possibly WRONG
+</span>      }
+      <span class="small_keyword">goto</span> svc_multi_write_next;
+    }
+
+<span class="qualifier">void</span> sync_sched::<span class="small_keyword">do</span>_multi_swrite()
+    {
+      spinguard dummy(&amp;(active-&gt;active_lock));
+      svc_sio_req_t pw = request-&gt;svc_sio_req;
+      <span class="qualifier">void</span> *data = pw.data;
+      schannel_t *chan = pw.chan;
+      <span class="small_keyword">if</span>(debug_driver)
+        fprintf(stderr,<span class="fstring">"[sync: svc_multi_write] Request to write on channel %p\n"</span>,chan);
+      external_multi_swrite (chan, data);
+    }
+
+<span class="qualifier">void</span> sync_sched::<span class="small_keyword">do</span>_kill()
+    {
+      spinguard dummy(&amp;(active-&gt;active_lock));
+      fthread_t *ftx = request-&gt;svc_fthread_req.fthread;
+      <span class="small_keyword">if</span>(debug_driver)fprintf(stderr,<span class="fstring">"[sync: svc_kill] Request to kill fthread %p\n"</span>,ftx);
+      ftx -&gt; kill();
+      <span class="small_keyword">return</span>;
+    }
+
+
+<span class="comment">// NOTE: the currently running fibre variable is owned
+</span><span class="comment">// by this sync scheduler and is not shared, so access to
+</span><span class="comment">// it does not required serialisation
+</span>
+sync_sched::fstate_t sync_sched::frun()
+{
+  <span class="small_keyword">if</span> (debug_driver)
+     fprintf(stderr,<span class="fstring">"[sync] frun: pthread %p, entry ft=%p, active size=%d\n"</span>,
+        (<span class="qualifier">void</span>*)::flx::pthread::mythrid(), ft,(<span class="qualifier">int</span>)active-&gt;size());
+dispatch:
+  <span class="small_keyword">if</span> (ft == 0) {
+     spinguard dummy(&amp;(active-&gt;active_lock));
+     ft = active-&gt;pop_front(); 
+     <span class="small_keyword">if</span> (debug_driver)
+       fprintf(stderr,<span class="fstring">"[sync] pthread %p fetching fthread %p\n"</span>,(<span class="qualifier">void</span>*)::flx::pthread::mythrid(),ft);
+  }
+  <span class="small_keyword">if</span> (ft == 0) { 
+    <span class="small_keyword">return</span> blocked; 
+  }
+  request = ft-&gt;run();        <span class="comment">// run fthread to get request
+</span>  <span class="small_keyword">if</span>(request == 0)            <span class="comment">// euthenasia request
+</span>  {
+    spinguard dummy(&amp;(active-&gt;active_lock));
+    ft = 0;
+    <span class="small_keyword">goto</span> dispatch;
+  }
+
+  <span class="small_keyword">if</span> (debug_driver)
+    fprintf(stderr,<span class="fstring">"[flx_sync:sync_sched] dispatching service request %d\n"</span>, request-&gt;svc_req);
+  switch(request-&gt;svc_req)
+  {
+    case svc_yield: <span class="small_keyword">do</span>_yield(); <span class="small_keyword">goto</span> dispatch;
+
+    case svc_spawn_fthread : <span class="small_keyword">do</span>_spawn_fthread(); <span class="small_keyword">goto</span> dispatch;
+    case svc_schedule_fthread: <span class="small_keyword">do</span>_schedule_fthread(); <span class="small_keyword">goto</span> dispatch;
+
+    case svc_sread: <span class="small_keyword">do</span>_sread(); <span class="small_keyword">goto</span> dispatch;
+
+    case svc_swrite: <span class="small_keyword">do</span>_swrite(); <span class="small_keyword">goto</span> dispatch;
+
+    case svc_multi_swrite: <span class="small_keyword">do</span>_multi_swrite(); <span class="small_keyword">goto</span> dispatch;
+
+    case svc_kill: <span class="small_keyword">do</span>_kill(); <span class="small_keyword">goto</span> dispatch;
+
+    default:  
+      <span class="small_keyword">if</span> (debug_driver)
+        fprintf(stderr,<span class="fstring">"[flx_sync:sync_sched] delegating service request %d\n"</span>, request-&gt;svc_req);
+      <span class="small_keyword">return</span> delegated;
+  }
+}
+
+}}
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

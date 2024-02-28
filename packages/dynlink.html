@@ -1,0 +1,1795 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Dynamic Linker</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Dynamic Linkage",
+"Synopsis",
+"Dynamic link portability layer",
+"The flx_dl.h header: portability macros.",
+"The <code>flx_dlopen</code> unit: C++ header file.",
+"The <code>flx_dlopen</code> unit: C++ implementation.",
+"Felix level dynamic loader system",
+"The <code>flx_dynlink</code> unit: <code>flx_dynlink_t</code> class implementation.",
+"The <code>flx_dynlink</code> unit: <code>flx_libinst_t</code> class implementation.",
+"The dynamic link library binding <code>Dynlink</code>",
+"C++ support package.",
+"Error handling.",
+"Library handle <code>flx_library</code>",
+"Constructor for <code>flx_library</code>: <code>create_library_handle</code>",
+"Load a library <code>dlopen</code>",
+"Load a library from registry <code>regopen</code>",
+"Get the filename associated with a library handle: <code>filename</code>",
+"Unlink a dll : <code>dlclose</code>.",
+"Get the address of an exported symbol: <code>dlsym</code>",
+"Library instance type <code>flx_instance</code>",
+"Library instance constructor <code>create_instance_handle</code>",
+"Create a library instance from a library: <code>create</code>",
+"Get the filename from an instance <code>filename</code>.",
+"Get the startup procedure from an instance <code>filename</code>.",
+"Get the library associated with an instance.",
+"Get the thread frame associated with an instance.",
+"Convenience constructor for an instance <code>init_lib</code>",
+"Convenience to run a program <code>run_lib</code>",
+"Checked version of <code>dlsym</code>",
+"Higher level wrappers for finding Felix functions.",
+"Plugins.",
+"Utilities and misc.",
+"Dynamic Linkage support"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Dynamic Linkage_h')"> <a href="#Dynamic_Linkage_h">Dynamic Linkage</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Synopsis_h">Synopsis</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Dynamic link portability layer_h')"> <a href="#Dynamic_link_portability_layer_h">Dynamic link portability layer</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#The_flx_dl.h_header:_portability_macros._h">The flx_dl.h header: portability macros.</a></div>
+      <div class=m2><a href="#The_<code>flx_dlopen</code>_unit:_C++_header_file._h">The <code>flx_dlopen</code> unit: C++ header file.</a></div>
+      <div class=m2><a href="#The_<code>flx_dlopen</code>_unit:_C++_implementation._h">The <code>flx_dlopen</code> unit: C++ implementation.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Felix level dynamic loader system_h')"> <a href="#Felix_level_dynamic_loader_system_h">Felix level dynamic loader system</a></div>
+      <div class=sm id=menu3>
+      <div class=m2><a href="#The_<code>flx_dynlink</code>_unit:_<code>flx_dynlink_t</code>_class_implementation._h">The <code>flx_dynlink</code> unit: <code>flx_dynlink_t</code> class implementation.</a></div>
+      <div class=m2><a href="#The_<code>flx_dynlink</code>_unit:_<code>flx_libinst_t</code>_class_implementation._h">The <code>flx_dynlink</code> unit: <code>flx_libinst_t</code> class implementation.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#The dynamic link library binding <code>Dynlink</code>_h')"> <a href="#The_dynamic_link_library_binding_<code>Dynlink</code>_h">The dynamic link library binding <code>Dynlink</code></a></div>
+      <div class=sm id=menu4>
+      <div class=m2><a href="#C++_support_package._h">C++ support package.</a></div>
+      <div class=m2><a href="#Error_handling._h">Error handling.</a></div>
+      <div class=m2><a href="#Library_handle_<code>flx_library</code>_h">Library handle <code>flx_library</code></a></div>
+      <div class=m2><a href="#Constructor_for_<code>flx_library</code>:_<code>create_library_handle</code>_h">Constructor for <code>flx_library</code>: <code>create_library_handle</code></a></div>
+      <div class=m2><a href="#Load_a_library_<code>dlopen</code>_h">Load a library <code>dlopen</code></a></div>
+      <div class=m2><a href="#Load_a_library_from_registry_<code>regopen</code>_h">Load a library from registry <code>regopen</code></a></div>
+      <div class=m2><a href="#Get_the_filename_associated_with_a_library_handle:_<code>filename</code>_h">Get the filename associated with a library handle: <code>filename</code></a></div>
+      <div class=m2><a href="#Unlink_a_dll_:_<code>dlclose</code>._h">Unlink a dll : <code>dlclose</code>.</a></div>
+      <div class=m2><a href="#Get_the_address_of_an_exported_symbol:_<code>dlsym</code>_h">Get the address of an exported symbol: <code>dlsym</code></a></div>
+      <div class=m2><a href="#Library_instance_type_<code>flx_instance</code>_h">Library instance type <code>flx_instance</code></a></div>
+      <div class=m2><a href="#Library_instance_constructor_<code>create_instance_handle</code>_h">Library instance constructor <code>create_instance_handle</code></a></div>
+      <div class=m2><a href="#Create_a_library_instance_from_a_library:_<code>create</code>_h">Create a library instance from a library: <code>create</code></a></div>
+      <div class=m2><a href="#Get_the_filename_from_an_instance_<code>filename</code>._h">Get the filename from an instance <code>filename</code>.</a></div>
+      <div class=m2><a href="#Get_the_startup_procedure_from_an_instance_<code>filename</code>._h">Get the startup procedure from an instance <code>filename</code>.</a></div>
+      <div class=m2><a href="#Get_the_library_associated_with_an_instance._h">Get the library associated with an instance.</a></div>
+      <div class=m2><a href="#Get_the_thread_frame_associated_with_an_instance._h">Get the thread frame associated with an instance.</a></div>
+      <div class=m2><a href="#Convenience_constructor_for_an_instance_<code>init_lib</code>_h">Convenience constructor for an instance <code>init_lib</code></a></div>
+      <div class=m2><a href="#Convenience_to_run_a_program_<code>run_lib</code>_h">Convenience to run a program <code>run_lib</code></a></div>
+      <div class=m2><a href="#Checked_version_of_<code>dlsym</code>_h">Checked version of <code>dlsym</code></a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Higher level wrappers for finding Felix functions._h')"> <a href="#Higher_level_wrappers_for_finding_Felix_functions._h">Higher level wrappers for finding Felix functions.</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Plugins._h')"> <a href="#Plugins._h">Plugins.</a></div>
+      <div class=sm id=menu6>
+      <div class=m2><a href="#Utilities_and_misc._h">Utilities and misc.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Dynamic Linkage support_h')"> <a href="#Dynamic_Linkage_support_h">Dynamic Linkage support</a></div>
+      <div class=sm id=menu7>
+      </div>
+    <script>counter_max=7;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Dynamic_Linkage_h'><img src='/share/src/web/images/minus.gif' id='Dynamic Linkage' onclick='toggle(this,"Dynamic_Linkage_d")' alt='+'/> 1 Dynamic Linkage</h1><div id='Dynamic_Linkage_d' style='display:block'>
+<h2 id='Synopsis_h'><img src='/share/src/web/images/minus.gif' id='Synopsis' onclick='toggle(this,"Synopsis_d")' alt='+'/> 1.1 Synopsis</h2><div id='Synopsis_d' style='display:block'>
+<p>This subsystem provides the ability to load,link or otherwise
+access program code at run time. We use the name <code>DLL</code> to refer
+to a dynamically loaded file containing executable instructions,
+on Windows this is a dynamic link library which usually ends
+in extension <code>.dll</code> whilst on Linux we have shared libraries
+with extension <code>.so</code> and on OSX we use files with extension <code>.dylib</code>.
+</p><p>There is a confusing array of operations provided here which will
+require refactoring in the future. 
+</p><p>The core platform dependent operations are implemented in C++
+and configuration and compile time choices determine the
+platform supported.
+</p><p>These core operations are wrapped, in C++, to remove the
+file loading dependencies, and provide resource control
+integrated with the garbage collector. 
+</p><p>We use <code>LoadLibrary</code> on Windows and <code>dlopen</code> on Unix platforms
+wrapped inside a C++ class <code>flx_dynlink_t</code> that represents
+a library, in Felix the type <code>flx_library</code> is used.
+</p><p>Felix generated code does not permit variables to be
+stored in static storage. Instead, a structure is used
+to contain Felix top level variables. For historical
+reasons objects are called <em>thread frames.</em>
+</p><p>Members of a thread frame are accessed in Felix bindings
+to C++ using the macro <code>ptf-></code> which stands for <em>pointer
+to thread frame.</em>
+</p><p>A Felix generated shared library requires an instance to be 
+created which is a closure: a pair consisting of the library code
+and a <code>thread_frame_t</code> object which is allocated on the heap.
+The closure object has the type <code>flx_libinst_t</code> in C++
+and <code>flx_instance</code> in Felix.
+</p><p>Instances require a fixed protocol which involves
+the library containing exported symbols which can
+be linked using <code>LoadProcAddress</code> on Windows
+or <code>dlsym</code> on unix, which can be used to construct
+the required thread frame. High level Felix functions
+require he thread frame because it contains a pointer
+to the garbage collector which in turn provides the
+system allocator.
+</p><p>Higher level abstractions require more fixed
+symbols. In particular, there is a protocol
+for loading a special kind of library 
+called a <em>plugin</em> which make separate
+compilation of and use of dynamic libraries
+particularly convenient.
+</p></div></div><h1 id='Dynamic_link_portability_layer_h'><img src='/share/src/web/images/minus.gif' id='Dynamic link portability layer' onclick='toggle(this,"Dynamic_link_portability_layer_d")' alt='+'/> 2 Dynamic link portability layer</h1><div id='Dynamic_link_portability_layer_d' style='display:block'>
+<p>A low level layer proving OS and some link technology
+portability.
+</p><h2 id='The_flx_dl.h_header:_portability_macros._h'><img src='/share/src/web/images/minus.gif' id='The flx_dl.h header: portability macros.' onclick='toggle(this,"The_flx_dl.h_header:_portability_macros._d")' alt='+'/> 2.1 The flx_dl.h header: portability macros.</h2><div id='The_flx_dl.h_header:_portability_macros._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_dl.h</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_DL_H__
+#<span class="preproc">define</span> __FLX_DL_H__
+
+<span class="comment">// define dynamic library loader stuff, even for static linkage
+</span><span class="comment">// SPECS:
+</span><span class="comment">//
+</span><span class="comment">// FLX_LIBHANDLE is the type of a native DLL handle
+</span><span class="comment">//   it's a typedef NOT a macro.
+</span><span class="comment">//
+</span><span class="comment">// FLX_NOLIBRARY is a macro specifying the value if there is no library.
+</span><span class="comment">//   used for initialisation, or, error value if dynamic load fails
+</span><span class="comment">//
+</span><span class="comment">// FLX_LIB_EXTENSION is a macro specifying the string name of
+</span><span class="comment">//  the platform library extension including the dot (.)
+</span><span class="comment">//
+</span><span class="comment">// FLX_ENV_LIBRARY_PATH_NAME is a macro that specifies the name
+</span><span class="comment">//   of the environment variable specifying extra directories
+</span><span class="comment">//   to search for DLLs.
+</span><span class="comment">//
+</span><span class="comment">// FLX_NATIVE_DLSYM(lib,sym) accepts a library handle and an identifier.
+</span><span class="comment">//   It works for both static and dynamic linkage.
+</span><span class="comment">//
+</span><span class="comment">//   For dynamic linkage it converts the symbol to a string
+</span><span class="comment">//     and calls dlsym
+</span><span class="comment">//   For static linkage it just returns the provided symbol,
+</span><span class="comment">//     which should have been linked by the linker.
+</span><span class="comment">//     This will work for both static linkage AND for
+</span><span class="comment">//     load time dynamic linkage (but not run time linkage).
+</span><span class="comment">//
+</span><span class="comment">// FLX_NATIVE_SDLSYM(lib,string) accepts a library handle
+</span><span class="comment">//   and a string.  If lib is a valid run time loaded library,
+</span><span class="comment">//   this routine works independently of how it was linked
+</span><span class="comment">//   (since even statically linked programs can dlopen libraries).
+</span><span class="comment">//
+</span><span class="comment">//   It may even work for lib=NULL if the linker is set to export
+</span><span class="comment">//   symbols to the program, and NULL is the linkers code for the
+</span><span class="comment">//   module's namespace.
+</span><span class="comment">//
+</span><span class="comment">// FLX_DLSYM(lib,sym) is just FLX_NATIVE_DLSYM, it requires a symbol.
+</span><span class="comment">//
+</span><span class="comment">// FLX_SDLSYM(lib,string) uses FLX_NATIVE_SDLSYM if dynamic linkage is selected 
+</span><span class="comment">//   and throws an exception if static linkage is chosen.
+</span><span class="comment">//
+</span><span class="comment">// Therefore: 
+</span><span class="comment">//   * the "S" version of these macros uses a string name,
+</span><span class="comment">//     the non-"S" version uses an identifier.
+</span><span class="comment">//
+</span><span class="comment">//   * FLX_NATIVE_SDLSYM uses a string name and always does
+</span><span class="comment">//     run time lookup.
+</span><span class="comment">//
+</span><span class="comment">//   * FLX_DLSYM uses a symbol and uses a linker bound
+</span><span class="comment">//     address if FLX_STATIC_LINK is selected
+</span><span class="comment">//     Otherwise it uses run time lookup.
+</span><span class="comment">//
+</span>#<span class="small_keyword">if</span> FLX_WIN32
+  #<span class="preproc">include</span> <span class="fstring">&lt;windows.h&gt;</span>
+  <span class="big_keyword">typedef</span> HMODULE FLX_LIBHANDLE;
+  #<span class="preproc">define</span> FLX_LIB_EXTENSION <span class="fstring">".DLL"</span>
+  #<span class="preproc">define</span> FLX_NATIVE_DLSYM(x,y) (<span class="qualifier">void</span>*)GetProcAddress(x,#y)
+  #<span class="preproc">define</span> FLX_NATIVE_SDLSYM(x,y) (<span class="qualifier">void</span>*)GetProcAddress(x,y)
+  #<span class="preproc">define</span> FLX_ENV_LIBRARY_PATH_NAME <span class="fstring">"PATH"</span>
+#<span class="preproc">else</span>
+  <span class="comment">// UNIX, recent OSX
+</span>  <span class="big_keyword">typedef</span> <span class="qualifier">void</span> *FLX_LIBHANDLE;
+  #<span class="small_keyword">if</span> FLX_CYGWIN
+    #<span class="preproc">define</span> FLX_LIB_EXTENSION <span class="fstring">".dll"</span>
+    #<span class="preproc">define</span> FLX_ENV_LIBRARY_PATH_NAME <span class="fstring">"LD_LIBRARY_PATH"</span>
+  #elif FLX_MACOSX
+    #<span class="preproc">define</span> FLX_LIB_EXTENSION <span class="fstring">".dylib"</span>
+    #<span class="preproc">define</span> FLX_ENV_LIBRARY_PATH_NAME <span class="fstring">"DYLD_LIBRARY_PATH"</span>
+  #<span class="preproc">else</span>
+    #<span class="preproc">define</span> FLX_LIB_EXTENSION <span class="fstring">".so"</span>
+    #<span class="preproc">define</span> FLX_ENV_LIBRARY_PATH_NAME <span class="fstring">"LD_LIBRARY_PATH"</span>
+  #<span class="preproc">endif</span>
+  #<span class="preproc">include</span> <span class="fstring">&lt;dlfcn.h&gt;</span>
+  #<span class="preproc">define</span> FLX_NATIVE_DLSYM(x,y) dlsym(x,#y)
+  #<span class="preproc">define</span> FLX_NATIVE_SDLSYM(x,y) dlsym(x,y)
+#<span class="preproc">endif</span>
+
+#<span class="preproc">define</span> FLX_NOLIBRARY NULL
+
+#<span class="preproc">define</span> FLX_DLSYM(x,y) FLX_NATIVE_DLSYM(x,y)
+
+#<span class="preproc">ifndef</span> FLX_STATIC_LINK
+  #<span class="preproc">define</span> FLX_SDLSYM(x,y) FLX_NATIVE_SDLSYM(x,(y))
+#<span class="preproc">else</span>
+  #<span class="preproc">define</span> FLX_SDLSYM(x,y) (throw ::flx::rtl::flx_link_failure_t(\
+    <span class="fstring">"&lt;static link&gt;"</span>,y,<span class="fstring">"dlsym with static link requires name not string"</span>),\
+    (<span class="qualifier">void</span>*)0\
+  )
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+
+</pre></p></div><h2 id='The_<code>flx_dlopen</code>_unit:_C++_header_file._h'><img src='/share/src/web/images/minus.gif' id='The <code>flx_dlopen</code> unit: C++ header file.' onclick='toggle(this,"The_<code>flx_dlopen</code>_unit:_C++_header_file._d")' alt='+'/> 2.2 The <code>flx_dlopen</code> unit: C++ header file.</h2><div id='The_<code>flx_dlopen</code>_unit:_C++_header_file._d' style='display:block'>
+<p>This file contains portable versions of the low
+level dlopen/LoadLibrary functions.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_dlopen.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_DLOPEN_H__
+#<span class="preproc">define</span> __FLX_DLOPEN_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_dynlink_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_dl.h"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+using <span class="big_keyword">namespace</span> <span class="small_keyword">std</span>;
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> dynlink {
+<span class="comment">/// Load library
+</span>DYNLINK_EXTERN FLX_LIBHANDLE flx_load_library_nothrow(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename);
+DYNLINK_EXTERN FLX_LIBHANDLE flx_load_library_throw(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename);
+
+DYNLINK_EXTERN FLX_LIBHANDLE flx_load_module_nothrow(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename); 
+DYNLINK_EXTERN FLX_LIBHANDLE flx_load_module_throw(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename); 
+
+DYNLINK_EXTERN ::<span class="small_keyword">std</span>::string flx_lib_extension ();
+DYNLINK_EXTERN ::<span class="small_keyword">std</span>::string flx_env_library_path_name ();
+
+DYNLINK_EXTERN FLX_LIBHANDLE flx_nolibrary();
+
+DYNLINK_EXTERN <span class="qualifier">void</span> *flx_native_dlsym
+  (FLX_LIBHANDLE,::<span class="small_keyword">std</span>::string);
+
+}}
+
+#<span class="preproc">endif</span>
+</pre></p></div><h2 id='The_<code>flx_dlopen</code>_unit:_C++_implementation._h'><img src='/share/src/web/images/minus.gif' id='The <code>flx_dlopen</code> unit: C++ implementation.' onclick='toggle(this,"The_<code>flx_dlopen</code>_unit:_C++_implementation._d")' alt='+'/> 2.3 The <code>flx_dlopen</code> unit: C++ implementation.</h2><div id='The_<code>flx_dlopen</code>_unit:_C++_implementation._d' style='display:block'>
+<p>Implement the RTL portable low level dlopen/LoadLibrary functions.
+</p><pre class='inclusion'>
+share/src/dynlink/flx_dlopen.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_dlopen.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> dynlink {
+
+FLX_LIBHANDLE
+flx_load_library_nothrow(<span class="qualifier">const</span> <span class="small_keyword">std</span>::string&amp; filename)
+{
+  FLX_LIBHANDLE library = FLX_NOLIBRARY;
+  <span class="small_keyword">if</span> (::<span class="small_keyword">std</span>::getenv(<span class="fstring">"FLX_SHELL_ECHO"</span>)!=(<span class="qualifier">char</span>*)0)
+    fprintf(stderr,<span class="fstring">"[load_library] %s\n"</span>, filename.c_str());
+#<span class="small_keyword">if</span> FLX_WIN32
+  <span class="comment">// stop windows showing err dialogues, ignoring error code.
+</span>  (<span class="qualifier">void</span>)SetErrorMode(SEM_NOOPENFILEERRORBOX);
+  library = LoadLibrary(filename.c_str());
+#<span class="preproc">else</span>
+    library = dlopen(filename.c_str(),RTLD_NOW | RTLD_LOCAL);
+#<span class="preproc">endif</span>
+  <span class="small_keyword">return</span> library;
+}
+
+FLX_LIBHANDLE
+flx_load_library_throw(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename)
+{
+  FLX_LIBHANDLE library = flx_load_library_nothrow(filename);
+  <span class="small_keyword">if</span>(library == FLX_NOLIBRARY)
+    throw ::flx::rtl::flx_link_failure_t(filename,<span class="fstring">"LoadLibrary/dlopen"</span>,<span class="fstring">"Cannot find dll/shared library"</span>);
+  <span class="small_keyword">return</span> library;
+}
+
+FLX_LIBHANDLE
+flx_load_module_nothrow(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename)
+{
+  <span class="small_keyword">return</span> flx_load_library_nothrow(filename + FLX_LIB_EXTENSION);
+}
+
+FLX_LIBHANDLE
+flx_load_module_throw(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename)
+{
+  <span class="small_keyword">return</span> flx_load_library_throw(filename + FLX_LIB_EXTENSION);
+}
+
+::<span class="small_keyword">std</span>::string flx_lib_extension () { <span class="small_keyword">return</span> FLX_LIB_EXTENSION; }
+::<span class="small_keyword">std</span>::string flx_env_library_path_name () { <span class="small_keyword">return</span> FLX_ENV_LIBRARY_PATH_NAME; }
+
+FLX_LIBHANDLE flx_nolibrary() { <span class="small_keyword">return</span> FLX_NOLIBRARY; }
+
+<span class="qualifier">void</span> *flx_native_dlsym(FLX_LIBHANDLE lib, ::<span class="small_keyword">std</span>::string symname)
+{
+  <span class="small_keyword">return</span> FLX_NATIVE_DLSYM(lib,symname.c_str());
+}
+
+}} <span class="comment">// namespaces
+</span></pre></p></div></div><h1 id='Felix_level_dynamic_loader_system_h'><img src='/share/src/web/images/minus.gif' id='Felix level dynamic loader system' onclick='toggle(this,"Felix_level_dynamic_loader_system_d")' alt='+'/> 3 Felix level dynamic loader system</h1><div id='Felix_level_dynamic_loader_system_d' style='display:block'>
+<p>This is a higher level loader which is primarily designed
+for loading Felix programs machined as libraries, but it can
+also be used for high level libraries such as plugins.
+</p><p>The core concept is based on Windows 3.1, in which the library
+is read only program code, and requires an data frame to
+execute. Unlike C style libraries, mutable data is not permitted
+in libraries. Instead, the library must provide a function to
+create a heap allocated data frame to store global data.
+</p><p>Hence, after loading, one or more instances of the library
+can be created by combining the code API with a data frame.
+Felix calls this data frame the <em>thread frame</em>.
+</p><p>Since each client of a library create their own instance
+of the library, the global variables of the client do
+not interfere.
+</p><p>The type <code>flx_dynlink_t</code> represents a library, whereas
+the type <code>flx_libinst_t</code> represents a pair consisting
+of the library together with a data frame. This provides
+a single entity from which to dispatch function calls
+which may interact by per instance data without clobbering
+an independent client's use of the library.
+</p><p>Except in special circumstances Felix demands all code
+be reentrant and in particular mutable global variables
+are not allowed at the C level.
+</p><p>The special circumstances are dictated by poor quality
+API's including Posix signals and of course the 
+notorious <code>errno</code>.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_dynlink.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_DYNLINK_H__
+#<span class="preproc">define</span> __FLX_DYNLINK_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_dl.h"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_dlopen.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_continuation.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> dynlink {
+
+<span class="big_keyword">struct</span> DYNLINK_EXTERN flx_dynlink_t;
+<span class="big_keyword">struct</span> DYNLINK_EXTERN flx_libinst_t;
+
+
+<span class="comment">/// frame creators.
+</span><span class="big_keyword">typedef</span> <span class="qualifier">void</span> *(*thread_frame_creator_t)
+(
+  ::flx::gc::generic::gc_profile_t*,
+  <span class="qualifier">void</span>*
+);
+
+<span class="comment">/// library initialisation routine.
+</span><span class="big_keyword">typedef</span> ::flx::rtl::con_t *(*start_t)
+(
+  <span class="qualifier">void</span>*,
+  <span class="qualifier">int</span>,
+  <span class="qualifier">char</span> **,
+  FILE*,
+  FILE*,
+  FILE*
+
+);
+
+<span class="big_keyword">typedef</span> ::flx::rtl::con_t *(*main_t)(<span class="qualifier">void</span>*);
+
+<span class="comment">/// dynamic object loader.
+</span><span class="big_keyword">struct</span> DYNLINK_EXTERN flx_dynlink_t
+{
+  <span class="comment">// filename of library used for dynamic linkage
+</span>  ::<span class="small_keyword">std</span>::string filename;
+
+  <span class="comment">// modulename of library
+</span>  <span class="comment">// usually filename without path prefix or extension
+</span>  ::<span class="small_keyword">std</span>::string modulename;
+
+  <span class="comment">// OS specific handle refering to the library if one is loaded
+</span>  <span class="comment">// undefine otherwise
+</span>  FLX_LIBHANDLE library;
+
+  <span class="comment">// Felix specific entry point used to create thread frame.
+</span>  <span class="comment">// Typically this function allocates the thread frame as a C++
+</span>  <span class="comment">// object, calling its contructor.
+</span>  <span class="comment">// A library together with a thread frame is known as an instance
+</span>  <span class="comment">// of the library.
+</span>  thread_frame_creator_t thread_frame_creator;
+
+  <span class="comment">// Felix specific entry point used to initialise thread frame
+</span>  <span class="comment">// Morally equivalent to the body of a C++ constructor,
+</span>  <span class="comment">// this calls the libraries initialisation routine.
+</span>  <span class="comment">// If the library is meant to be a program, this routine
+</span>  <span class="comment">// often contains the program code.
+</span>  start_t start_sym;
+
+  <span class="comment">// A separate mainline, morally equivalent to C main() function.
+</span>  <span class="comment">// Intended to be called after the start routine has completed.
+</span>  main_t main_sym;
+
+  <span class="comment">// Allow a default initialised default object refering to no library.
+</span>  flx_dynlink_t(bool debug);
+
+  <span class="comment">// set static link data into an empty dynlink object.
+</span>  <span class="qualifier">void</span> <span class="qualifier">static</span>_link(
+    ::<span class="small_keyword">std</span>::string modulename,
+    thread_frame_creator_t thread_frame_creator,
+    start_t start_sym,
+    main_t main_sym);
+
+
+  <span class="comment">// initialise for static link
+</span>  <span class="comment">// equivalent to default object followed by call to static_link method
+</span>  flx_dynlink_t(
+    ::<span class="small_keyword">std</span>::string modulename,
+    thread_frame_creator_t thread_frame_creator,
+    start_t start_sym,
+    main_t main_sym,
+    bool debug
+  ) throw(::flx::rtl::flx_link_failure_t);
+
+  <span class="comment">// dynamic link library from filename and module name
+</span>  <span class="qualifier">void</span> dynamic_link_with_modulename(
+     <span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename, 
+     <span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; modulename) throw(::flx::rtl::flx_link_failure_t);
+
+  <span class="comment">// With this variant the module name is calculated from the filename.
+</span>  <span class="qualifier">void</span> dynamic_link(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename) throw(::flx::rtl::flx_link_failure_t);
+
+  <span class="qualifier">virtual</span> ~flx_dynlink_t();
+
+  bool debug;
+
+
+<span class="qualifier">private</span>:
+  <span class="qualifier">void</span> unlink(); <span class="comment">// implementation of destructor only
+</span>  flx_dynlink_t(flx_dynlink_t <span class="qualifier">const</span>&amp;); <span class="comment">// uncopyable
+</span>  <span class="qualifier">void</span> operator=(flx_dynlink_t <span class="qualifier">const</span>&amp;); <span class="comment">// uncopyable
+</span>};
+
+<span class="comment">/// Thread Frame Initialisation.
+</span>
+<span class="big_keyword">struct</span> DYNLINK_EXTERN flx_libinst_t
+{
+  <span class="qualifier">void</span> *thread_frame;
+  ::flx::rtl::con_t *start_proc;
+  ::flx::rtl::con_t *main_proc;
+  flx_dynlink_t *lib;
+  ::flx::gc::generic::gc_profile_t *gcp;
+  <span class="qualifier">void</span> *world;  <span class="comment">// FIXME: flx_world*, can't specify atm due to circularity
+</span>  bool debug;
+
+  <span class="qualifier">void</span> create
+  (
+    flx_dynlink_t *lib_a,
+    ::flx::gc::generic::gc_profile_t *gcp_a,
+    <span class="qualifier">void</span> *world_a, <span class="comment">// FIXME as above
+</span>    <span class="qualifier">int</span> argc,
+    <span class="qualifier">char</span> **argv,
+    FILE *stdin_,
+    FILE *stdout_,
+    FILE *stderr_,
+    bool debug_
+  );
+
+  <span class="qualifier">void</span> destroy ();
+
+  ::flx::rtl::con_t *bind_proc(<span class="qualifier">void</span> *fn, <span class="qualifier">void</span> *data);
+  <span class="qualifier">virtual</span> ~flx_libinst_t();
+  flx_libinst_t(bool debug);
+
+<span class="qualifier">private</span>:
+  flx_libinst_t(flx_libinst_t <span class="qualifier">const</span>&amp;);
+  <span class="qualifier">void</span> operator=(flx_libinst_t <span class="qualifier">const</span>&amp;);
+};
+
+DYNLINK_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t flx_dynlink_ptr_map;
+DYNLINK_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t flx_libinst_ptr_map;
+
+}} <span class="comment">// namespaces
+</span>#<span class="preproc">endif</span>
+
+</pre></p><h2 id='The_<code>flx_dynlink</code>_unit:_<code>flx_dynlink_t</code>_class_implementation._h'><img src='/share/src/web/images/minus.gif' id='The <code>flx_dynlink</code> unit: <code>flx_dynlink_t</code> class implementation.' onclick='toggle(this,"The_<code>flx_dynlink</code>_unit:_<code>flx_dynlink_t</code>_class_implementation._d")' alt='+'/> 3.1 The <code>flx_dynlink</code> unit: <code>flx_dynlink_t</code> class implementation.</h2><div id='The_<code>flx_dynlink</code>_unit:_<code>flx_dynlink_t</code>_class_implementation._d' style='display:block'>
+<pre class='inclusion'>
+share/src/dynlink/flx_dynlink.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_dynlink.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_strutil.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstring&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdlib&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stddef.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> dynlink {
+
+flx_dynlink_t::flx_dynlink_t(flx_dynlink_t <span class="qualifier">const</span>&amp;) {} <span class="comment">// no copy hack
+</span><span class="qualifier">void</span> flx_dynlink_t::operator=(flx_dynlink_t <span class="qualifier">const</span>&amp;) {} <span class="comment">// no copy hack
+</span>
+flx_dynlink_t::flx_dynlink_t(bool debug_):
+  filename(<span class="fstring">""</span>),
+  modulename(<span class="fstring">""</span>),
+  library(0),
+  thread_frame_creator(NULL),
+  start_sym(NULL),
+  main_sym(NULL),
+  debug(debug_)
+{}
+
+flx_dynlink_t::flx_dynlink_t(
+  ::<span class="small_keyword">std</span>::string modulename_a,
+  thread_frame_creator_t thread_frame_creator,
+  start_t start_sym,
+  main_t main_sym, 
+  bool debug_
+  ) throw(::flx::rtl::flx_link_failure_t)
+:
+  modulename (modulename_a),
+  library(0),
+  thread_frame_creator(thread_frame_creator),
+  start_sym(start_sym),
+  main_sym(main_sym),
+  debug(debug_)
+{
+  <span class="small_keyword">if</span>(!thread_frame_creator)
+    throw ::flx::rtl::flx_link_failure_t(<span class="fstring">"&lt;static link&gt;"</span>,<span class="fstring">"dlsym"</span>,<span class="fstring">"create_thread_frame"</span>);
+
+  <span class="small_keyword">if</span>(!start_sym)
+    throw ::flx::rtl::flx_link_failure_t(<span class="fstring">"&lt;static link&gt;"</span>,<span class="fstring">"dlsym"</span>,<span class="fstring">"flx_start"</span>);
+}
+
+<span class="qualifier">void</span> flx_dynlink_t::<span class="qualifier">static</span>_link (
+  ::<span class="small_keyword">std</span>::string modulename,
+  thread_frame_creator_t thread_frame_creator,
+  start_t start_sym,
+  main_t main_sym
+)
+{
+  this-&gt;modulename = modulename;
+  this-&gt;thread_frame_creator = thread_frame_creator;
+  this-&gt;start_sym = start_sym;
+  this-&gt;main_sym = main_sym;
+}
+
+
+<span class="qualifier">void</span> flx_dynlink_t::dynamic_link_with_modulename(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename_a, <span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; modulename_a) throw(::flx::rtl::flx_link_failure_t)
+{
+  filename = filename_a;
+  modulename = modulename_a;
+  library = flx_load_library_throw(filename);
+  <span class="comment">//fprintf(stderr,"File %s dlopened at %p ok\n",fname.c_str(),library);
+</span>
+  thread_frame_creator = (thread_frame_creator_t)
+    FLX_NATIVE_SDLSYM(library,(modulename+<span class="fstring">"_create_thread_frame"</span>).c_str());
+  <span class="small_keyword">if</span>(!thread_frame_creator)
+    throw ::flx::rtl::flx_link_failure_t(filename,<span class="fstring">"dlsym"</span>,modulename+<span class="fstring">"_create_thread_frame"</span>);
+
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr,<span class="fstring">"[dynlink:dynamic_link] Thread frame creator found at %p\n"</span>,thread_frame_creator);
+
+  start_sym = (start_t)FLX_NATIVE_SDLSYM(library,(modulename+<span class="fstring">"_flx_start"</span>).c_str());
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr,<span class="fstring">"[dynlink:dynamic_link] Start symbol = %p\n"</span>,start_sym);
+  <span class="small_keyword">if</span>(!start_sym)
+    throw ::flx::rtl::flx_link_failure_t(filename,<span class="fstring">"dlsym"</span>,modulename+<span class="fstring">"_flx_start"</span>);
+
+  main_sym = (main_t)FLX_NATIVE_SDLSYM(library,<span class="fstring">"flx_main"</span>);
+
+  <span class="small_keyword">if</span>(debug) 
+    fprintf(stderr,<span class="fstring">"[dynlink:dynamic_link] main symbol = %p\n"</span>,main_sym);
+
+}
+
+<span class="qualifier">void</span> flx_dynlink_t::dynamic_link(<span class="qualifier">const</span> ::<span class="small_keyword">std</span>::string&amp; filename_a) throw(::flx::rtl::flx_link_failure_t)
+{
+  string mname = ::flx::rtl::strutil::filename_to_modulename (filename_a);
+  dynamic_link_with_modulename(filename_a,mname);
+}
+
+<span class="comment">// dont actually unload libraries
+</span><span class="comment">// it doesn't work right in C/C++
+</span><span class="comment">// can leave dangling references
+</span><span class="comment">// impossible to manage properly
+</span><span class="qualifier">void</span> flx_dynlink_t::unlink()
+{
+    <span class="comment">//fprintf(stderr,"closing library\n");
+</span><span class="comment">//#if FLX_WIN32 || FLX_CYGWIN
+</span>#<span class="small_keyword">if</span> FLX_WIN32
+    <span class="comment">//FreeLibrary(library);
+</span>#<span class="preproc">else</span>
+    <span class="comment">//dlclose(library);
+</span>#<span class="preproc">endif</span>
+}
+
+flx_dynlink_t::~flx_dynlink_t() { 
+  <span class="comment">// fprintf(stderr, "Library %p of module '%s' file '%s' destroyed\n", this, 
+</span>  <span class="comment">// modulename.c_str(), filename.c_str()
+</span>  <span class="comment">// ); 
+</span>}
+</pre></p></div><h2 id='The_<code>flx_dynlink</code>_unit:_<code>flx_libinst_t</code>_class_implementation._h'><img src='/share/src/web/images/minus.gif' id='The <code>flx_dynlink</code> unit: <code>flx_libinst_t</code> class implementation.' onclick='toggle(this,"The_<code>flx_dynlink</code>_unit:_<code>flx_libinst_t</code>_class_implementation._d")' alt='+'/> 3.2 The <code>flx_dynlink</code> unit: <code>flx_libinst_t</code> class implementation.</h2><div id='The_<code>flx_dynlink</code>_unit:_<code>flx_libinst_t</code>_class_implementation._d' style='display:block'>
+<pre class='inclusion'>
+share/src/dynlink/flx_dynlink.cpp</pre>
+<p><pre class='cppbg'>
+<span class="comment">// ************************************************
+</span><span class="comment">// libinst
+</span><span class="comment">// ************************************************
+</span>
+flx_libinst_t::~flx_libinst_t() {
+  <span class="comment">// fprintf(stderr, "Library instance %p of library %p destroyed\n",this,lib);
+</span>}
+flx_libinst_t::flx_libinst_t(bool debug_) :
+  thread_frame (NULL),
+  start_proc (NULL),
+  main_proc (NULL),
+  lib (NULL),
+  gcp(NULL),
+  debug(debug_)
+{}
+
+flx_libinst_t::flx_libinst_t(flx_libinst_t <span class="qualifier">const</span>&amp;){}
+<span class="qualifier">void</span> flx_libinst_t::operator=(flx_libinst_t <span class="qualifier">const</span>&amp;){}
+
+<span class="qualifier">void</span> flx_libinst_t::create
+(
+  flx_dynlink_t *lib_a,
+  flx::gc::generic::gc_profile_t *gcp_a,
+  <span class="qualifier">void</span> *world_a,
+  <span class="qualifier">int</span> argc,
+  <span class="qualifier">char</span> **argv,
+  FILE *stdin_,
+  FILE *stdout_,
+  FILE *stderr_,
+  bool debug_
+)
+{
+  lib = lib_a;
+  gcp = gcp_a;
+  world = world_a;
+  debug = debug_;
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr,<span class="fstring">"[libinst:create] Creating instance for library %p-&gt;'%s'\n"</span>,lib, lib-&gt;filename.c_str());
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr, <span class="fstring">"[libinst:create] Creating thread frame\n"</span>);
+  thread_frame = lib-&gt;thread_frame_creator( gcp, world);
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr, <span class="fstring">"[libinst:create] thread frame CREATED %p\n"</span>, thread_frame);
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr, <span class="fstring">"[libinst:create] CREATING start_proc by running start_sym %p\n"</span>, lib-&gt;start_sym);
+  try {
+    start_proc = lib-&gt;start_sym(thread_frame, argc, argv, stdin_,stdout_,stderr_);
+  }
+  catch (::flx::rtl::con_t *p) {
+    <span class="small_keyword">if</span> (debug)
+    fprintf(stderr, 
+       <span class="fstring">"[lininst::create] setting start_proc to continuation %p thrown by start_sym %p\n"</span>,
+       p,lib-&gt;start_sym);
+    start_proc = p;
+  }
+
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr, <span class="fstring">"[libinst:create] start_proc CREATED %p\n"</span>, start_proc);
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr, <span class="fstring">"[libinst:create] CREATING main_proc by running main_sym %p\n"</span>, lib-&gt;main_sym);
+  main_proc = lib-&gt;main_sym?lib-&gt;main_sym(thread_frame):0;
+  <span class="small_keyword">if</span> (debug)
+    fprintf(stderr, <span class="fstring">"[libinst:create] main_proc CREATED %p\n"</span>, main_proc);
+}
+
+::flx::rtl::con_t *flx_libinst_t::bind_proc(<span class="qualifier">void</span> *fn, <span class="qualifier">void</span> *data) {
+  <span class="big_keyword">typedef</span> ::flx::rtl::con_t *(*binder_t)(<span class="qualifier">void</span> *,<span class="qualifier">void</span>*);
+  <span class="small_keyword">return</span> ((binder_t)fn)(thread_frame,data);
+}
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// OFFSETS for flx_dynlink_t
+</span><span class="comment">// ********************************************************
+</span>FLX_FINALISER(flx_dynlink_t)
+::flx::gc::generic::gc_shape_t flx_dynlink_ptr_map = {
+  <span class="fstring">"dynlink::flx_dynlink_t"</span>,
+  1,sizeof(flx_dynlink_t),
+  flx_dynlink_t_finaliser, 
+  0, <span class="comment">// fcops 
+</span>  0, <span class="comment">// private data
+</span>  0, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;flx_dynlink_t&gt;, <span class="comment">// encoder
+</span>  ::flx::gc::generic::tunblit&lt;flx_dynlink_t&gt;,  <span class="comment">// decoder
+</span>  ::flx::gc::generic::gc_flags_default, <span class="comment">// flags
+</span>  0UL, 0UL
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// OFFSETS for flx_libinst 
+</span><span class="comment">// ********************************************************
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t flx_libinst_offsets[4]={
+    {offsetof(flx_libinst_t,thread_frame),nullptr},
+    {offsetof(flx_libinst_t,start_proc),nullptr},
+    {offsetof(flx_libinst_t,main_proc),nullptr},
+    {offsetof(flx_libinst_t,lib),nullptr}
+};
+FLX_FINALISER(flx_libinst_t)
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> flx_libinst_offset_data = { 4, flx_libinst_offsets };
+::flx::gc::generic::gc_shape_t flx_libinst_ptr_map = {
+  <span class="fstring">"dynlink::flx_libinst"</span>,
+  1,sizeof(flx_libinst_t),
+  flx_libinst_t_finaliser, 
+  0, <span class="comment">// fcops
+</span>  &amp;flx_libinst_offset_data,
+  ::flx::gc::generic::scan_by_offsets,
+  ::flx::gc::generic::tblit&lt;flx_libinst_t&gt;,::flx::gc::generic::tunblit&lt;flx_libinst_t&gt;, 
+  ::flx::gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+}} <span class="comment">// namespaces
+</span></pre></p></div></div><h1 id='The_dynamic_link_library_binding_<code>Dynlink</code>_h'><img src='/share/src/web/images/minus.gif' id='The dynamic link library binding <code>Dynlink</code>' onclick='toggle(this,"The_dynamic_link_library_binding_<code>Dynlink</code>_d")' alt='+'/> 4 The dynamic link library binding <code>Dynlink</code></h1><div id='The_dynamic_link_library_binding_<code>Dynlink</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Dynlink
+<span class="lineno" id=line2></span>  {
+</pre></p><h2 id='C++_support_package._h'><img src='/share/src/web/images/minus.gif' id='C++ support package.' onclick='toggle(this,"C++_support_package._d")' alt='+'/> 4.1 C++ support package.</h2><div id='C++_support_package._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_dynlink"</span>;
+<span class="lineno" id=line2></span>  
+</pre></p></div><h2 id='Error_handling._h'><img src='/share/src/web/images/minus.gif' id='Error handling.' onclick='toggle(this,"Error_handling._d")' alt='+'/> 4.2 Error handling.</h2><div id='Error_handling._d' style='display:block'>
+<p>The current version of the library requires dynamic link attempts
+to succeed. If they fail an exception is thrown which aborts
+the program unless specifically caught. In future, we may
+provide an interface based on option types which enforces
+user level error checking as well.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Exception thrown if dynamic linkage fails.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> flx_link_failure_t = <span class="fstring">"::flx::rtl::flx_link_failure_t"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    <span class="doccomment">Constructor for dynamic linkage exception.</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> flx_link_failure_t : <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::flx_link_failure_t($1,$2,$3)"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Extractors.</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filename : flx_link_failure_t -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1.filename"</span>;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> operation : flx_link_failure_t -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1.operation"</span>;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> what : flx_link_failure_t -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1.what"</span>;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="doccomment">Delete returned exception.</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> delete : cptr[flx_link_failure_t] = <span class="fstring">"delete $1;"</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="doccomment">This doesn't belong here but it will do for now</span>
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_debug_driver_flag : 1 -&gt; bool = <span class="fstring">"ptf-&gt; gcp-&gt;debug_driver"</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>; 
+<span class="lineno" id=line17></span>  
+</pre></p></div><h2 id='Library_handle_<code>flx_library</code>_h'><img src='/share/src/web/images/minus.gif' id='Library handle <code>flx_library</code>' onclick='toggle(this,"Library_handle_<code>flx_library</code>_d")' alt='+'/> 4.3 Library handle <code>flx_library</code></h2><div id='Library_handle_<code>flx_library</code>_d' style='display:block'>
+<p>A platform independent handle which can refer to a dynamic
+link library object. Operations in this category are universal
+and apply to all dynamic link libraries, whether or not they
+were generated by Felix.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Type of a DLL (dynamic link library) object.</span>
+<span class="lineno" id=line2></span>    _gc_pointer <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> flx_library = <span class="fstring">"::flx::dynlink::flx_dynlink_t*"</span>;
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Constructor_for_<code>flx_library</code>:_<code>create_library_handle</code>_h'><img src='/share/src/web/images/minus.gif' id='Constructor for <code>flx_library</code>: <code>create_library_handle</code>' onclick='toggle(this,"Constructor_for_<code>flx_library</code>:_<code>create_library_handle</code>_d")' alt='+'/> 4.4 Constructor for <code>flx_library</code>: <code>create_library_handle</code></h2><div id='Constructor_for_<code>flx_library</code>:_<code>create_library_handle</code>_d' style='display:block'>
+<p>The constructor makes an unpopulated library handle
+not associated with any particular DLL.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Create a fresh DLL object.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> create_library_handle: bool -&gt;flx_library=
+<span class="lineno" id=line3></span>      <span class="fstring">"new(*ptf-&gt; gcp, ::flx::dynlink::flx_dynlink_ptr_map, false) ::flx::dynlink::flx_dynlink_t($1)"</span>;
+<span class="lineno" id=line4></span>  
+</pre></p></div><h2 id='Load_a_library_<code>dlopen</code>_h'><img src='/share/src/web/images/minus.gif' id='Load a library <code>dlopen</code>' onclick='toggle(this,"Load_a_library_<code>dlopen</code>_d")' alt='+'/> 4.5 Load a library <code>dlopen</code></h2><div id='Load_a_library_<code>dlopen</code>_d' style='display:block'>
+<p>This procedure associates a library handle with a particular
+file name and also attempts to load the library.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Link a DLL using given filename.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">May throw flx_link_failure_t.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dlopen:flx_library * <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1-&gt;dynamic_link($2);"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="doccomment">Link a DLL using given filename and modulename.</span>
+<span class="lineno" id=line6></span>    <span class="doccomment">May throw flx_link_failure_t.</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> modopen:flx_library * <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> = 
+<span class="lineno" id=line8></span>      <span class="fstring">"$1-&gt;dynamic_link_with_modulename($2, $3);"</span>
+<span class="lineno" id=line9></span>    ;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>     <span class="doccomment">Link static </span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_entry_points : flx_library * <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span> =
+<span class="lineno" id=line13></span>      <span class="fstring">"$1-&gt;static_link($2,(::flx::dynlink::thread_frame_creator_t)$3, (::flx::dynlink::start_t)$4, NULL);"</span>
+<span class="lineno" id=line14></span>    ;
+<span class="lineno" id=line15></span>  
+</pre></p></div><h2 id='Load_a_library_from_registry_<code>regopen</code>_h'><img src='/share/src/web/images/minus.gif' id='Load a library from registry <code>regopen</code>' onclick='toggle(this,"Load_a_library_from_registry_<code>regopen</code>_d")' alt='+'/> 4.6 Load a library from registry <code>regopen</code></h2><div id='Load_a_library_from_registry_<code>regopen</code>_d' style='display:block'>
+<p>Given a registry, simulate dynamic linkage.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> module_dictionary_t = StrDict::strdict[<span class="library" title="special binding of C void* type">address</span>];
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> registry_t = StrDict::strdict[module_dictionary_t];
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_module_registry_address_address: 1 -&gt; &amp;&amp;registry_t = 
+<span class="lineno" id=line4></span>      <span class="fstring">"(void****)(void*)&amp;(ptf-&gt; gcp-&gt;collector-&gt;module_registry)"</span>
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="comment">// severe hackery: if the registry isn't initialised,</span>
+<span class="lineno" id=line8></span>    <span class="comment">// create one, store its address in the GC object, and make</span>
+<span class="lineno" id=line9></span>    <span class="comment">// it a root so the GC scans it: the GC isn't owned by itself,</span>
+<span class="lineno" id=line10></span>    <span class="comment">// but the registry is owned by the GC.</span>
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> get_module_registry  () :registry_t = {
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ppregistry : &amp;&amp;registry_t = #get_module_registry_address_address;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pregistry : &amp;registry_t = *ppregistry;
+<span class="lineno" id=line14></span>      <span class="small_keyword" title="conditional">if</span> <span class="hack">C_hack</span>::isNULL (pregistry) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line15></span>        pregistry = unbox (new (StrDict::strdict[module_dictionary_t] ()));
+<span class="lineno" id=line16></span>        ppregistry &lt;- pregistry;
+<span class="lineno" id=line17></span>        Gc::add_root (<span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] (pregistry));
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="return">return</span> *pregistry;
+<span class="lineno" id=line20></span>    }
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> regopen (registry:registry_t) (lib:flx_library, modulename:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line23></span>    {
+<span class="lineno" id=line24></span>       <span class="comment">//println$ "regopen " + modulename;</span>
+<span class="lineno" id=line25></span>       <span class="big_keyword" title="Define a mutable variable">var</span> mod = StrDict::get registry modulename;
+<span class="lineno" id=line26></span>       <span class="small_keyword" title="match statement or expression">match</span> mod <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line27></span>       | #None =&gt; 
+<span class="lineno" id=line28></span>         <span class="comment">//println$ "Not in registry, using dlopen for " + modulename;</span>
+<span class="lineno" id=line29></span>         modopen$ lib, modulename+#Filename::dynamic_library_extension, modulename;
+<span class="lineno" id=line30></span>       | Some dict =&gt;
+<span class="lineno" id=line31></span>         <span class="comment">//println$ "Found module "+modulename+" in registry"; </span>
+<span class="lineno" id=line32></span>         <span class="big_keyword" title="Define a mutable variable">var</span> tfc = dict.get_dflt (modulename+<span class="fstring">"_create_thread_frame"</span>, NULL);
+<span class="lineno" id=line33></span>         <span class="comment">//println$ "Thread frame creator = " + str tfc;</span>
+<span class="lineno" id=line34></span>         <span class="small_keyword" title="conditional">if</span> tfc == NULL <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line35></span>           raise$ flx_link_failure_t(modulename,<span class="fstring">"regopen"</span>,<span class="fstring">"Cannot find symbol "</span> + modulename+<span class="fstring">"_create_thread_frame in module registry for "</span> + modulename);
+<span class="lineno" id=line36></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line37></span>         <span class="big_keyword" title="Define a mutable variable">var</span> start_sym = dict.get_dflt (modulename+<span class="fstring">"_flx_start"</span>,NULL);
+<span class="lineno" id=line38></span>         <span class="small_keyword" title="conditional">if</span> start_sym == NULL <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line39></span>           raise$ flx_link_failure_t(modulename,<span class="fstring">"regopen"</span>,<span class="fstring">"Cannot find symbol "</span> + modulename+<span class="fstring">"_flx_start in module registry for "</span>+modulename);
+<span class="lineno" id=line40></span>         <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line41></span>         <span class="comment">//println$ "Start symbol = " + str start_sym;</span>
+<span class="lineno" id=line42></span>         set_entry_points$ lib,modulename,tfc, start_sym;
+<span class="lineno" id=line43></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line44></span>    }
+<span class="lineno" id=line45></span>  
+</pre></p></div><h2 id='Get_the_filename_associated_with_a_library_handle:_<code>filename</code>_h'><img src='/share/src/web/images/minus.gif' id='Get the filename associated with a library handle: <code>filename</code>' onclick='toggle(this,"Get_the_filename_associated_with_a_library_handle:_<code>filename</code>_d")' alt='+'/> 4.7 Get the filename associated with a library handle: <code>filename</code></h2><div id='Get_the_filename_associated_with_a_library_handle:_<code>filename</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Get the filename of a DLL.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filename : flx_library -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1-&gt;filename"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    <span class="doccomment">Get the modulename of a DLL.</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> modulename : flx_library -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"$1-&gt;modulename"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Get the threadframe creator function</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_thread_frame_creator_as_address: flx_library -&gt; <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"(void*)$1-&gt;thread_frame_creator"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Get start function</span>
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_start_as_address: flx_library -&gt; <span class="library" title="special binding of C void* type">address</span>  = <span class="fstring">"(void*)$1-&gt;start_sym"</span>;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> add_symbol  (modulename:<span class="library" title="binding of C++ string type">string</span>, symbolname:<span class="library" title="binding of C++ string type">string</span>, adr:<span class="library" title="special binding of C void* type">address</span>)
+<span class="lineno" id=line14></span>    {
+<span class="lineno" id=line15></span>       <span class="comment">//println$ "add symbol " + symbolname + " to module " + modulename+ " value " + str adr;</span>
+<span class="lineno" id=line16></span>       <span class="big_keyword" title="Define a mutable variable">var</span> registry = #Dynlink::get_module_registry;
+<span class="lineno" id=line17></span>       <span class="big_keyword" title="Define a mutable variable">var</span> mod = #{
+<span class="lineno" id=line18></span>         <span class="small_keyword" title="match statement or expression">match</span> get registry modulename <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line19></span>         | #None =&gt;
+<span class="lineno" id=line20></span>            <span class="big_keyword" title="Define a mutable variable">var</span> mod = #strdict[<span class="library" title="special binding of C void* type">address</span>];
+<span class="lineno" id=line21></span>            add registry modulename mod;
+<span class="lineno" id=line22></span>            <span class="small_keyword" title="return">return</span> mod;
+<span class="lineno" id=line23></span>         | Some dict =&gt; <span class="small_keyword" title="return">return</span> dict;
+<span class="lineno" id=line24></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line25></span>       };
+<span class="lineno" id=line26></span>       mod.add symbolname adr;
+<span class="lineno" id=line27></span>    }
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  
+</pre></p></div><h2 id='Unlink_a_dll_:_<code>dlclose</code>._h'><img src='/share/src/web/images/minus.gif' id='Unlink a dll : <code>dlclose</code>.' onclick='toggle(this,"Unlink_a_dll_:_<code>dlclose</code>._d")' alt='+'/> 4.8 Unlink a dll : <code>dlclose</code>.</h2><div id='Unlink_a_dll_:_<code>dlclose</code>._d' style='display:block'>
+<p>This routine reduces the reference count of a library handle
+by one, and if it drops to zero unloads the library at the
+OS level.
+</p><p>References counts are increase by one when instances are created.
+The initial <code>dlopen</code> sets the reference count to 1.
+</p><p>Unlinking clears the association of the handle with the filename
+and tells the platform linker to unlink the library.
+However this does not necessarily unload the library because
+the platform linker may also reference count the library,
+and the user may link the same DLL twice using distinct
+library handles.
+</p><p>Because of the badly designed structure of C programs,
+unloading a library physically is not safe and cannot
+be made safe. Even with tight control of library code
+generation, it is very hard to ensure there are no references
+left to a library. References include pointers to functions,
+vtables, rtti objects, strings, other constants, and sometimes
+even variables.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Unlink a DLL.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Unsafe! Use with extreme caution.</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">May cause pointers into the DLL code segment to dangle.</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dlclose:flx_library = <span class="fstring">"$1-&gt;unlink();"</span>;
+<span class="lineno" id=line5></span>  
+</pre></p></div><h2 id='Get_the_address_of_an_exported_symbol:_<code>dlsym</code>_h'><img src='/share/src/web/images/minus.gif' id='Get the address of an exported symbol: <code>dlsym</code>' onclick='toggle(this,"Get_the_address_of_an_exported_symbol:_<code>dlsym</code>_d")' alt='+'/> 4.9 Get the address of an exported symbol: <code>dlsym</code></h2><div id='Get_the_address_of_an_exported_symbol:_<code>dlsym</code>_d' style='display:block'>
+<p>This routine takes a library and a string argument
+and tries to find the value associated with the string
+in the library symbol table, using <code>GetProcAddress</code>
+on Windows or <code>dlsym</code> on Unix. This action is independent
+of whether the calling program was linked dynamically
+or statically.
+</p><p>For functions, this operator returns a function
+pointer. For variables, it returns the address of the variable.
+DO not forget the extra dereference requires if the variable
+is itself a pointer.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Find raw address of a symbol in a DLL.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">This function now ALWAYS does a dlsym</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">(or Windows equivalent)</span>
+<span class="lineno" id=line4></span>    <span class="doccomment">even for static linkage: after all </span>
+<span class="lineno" id=line5></span>    <span class="doccomment">statically linked executables can still</span>
+<span class="lineno" id=line6></span>    <span class="doccomment">load DLLs at run time.</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> raw_dlsym:flx_library * string-&gt;<span class="library" title="special binding of C void* type">address</span> =
+<span class="lineno" id=line8></span>        <span class="fstring">"FLX_NATIVE_SDLSYM($1-&gt;library,$2.c_str())"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> find_sym(lib:flx_library, sym:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="special binding of C void* type">address</span> =
+<span class="lineno" id=line11></span>    {
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="conditional">if</span> lib.filename == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line13></span>        <span class="big_keyword" title="Define a mutable variable">var</span> reg = #get_module_registry;
+<span class="lineno" id=line14></span>        <span class="small_keyword" title="match statement or expression">match</span> reg.get lib.modulename <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line15></span>        | #None =&gt; <span class="small_keyword" title="return">return</span> NULL;
+<span class="lineno" id=line16></span>        | Some dict =&gt;
+<span class="lineno" id=line17></span>          <span class="small_keyword" title="match statement or expression">match</span> dict.get sym <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line18></span>          | #None =&gt; <span class="small_keyword" title="return">return</span> NULL;
+<span class="lineno" id=line19></span>          | Some sym =&gt; <span class="small_keyword" title="return">return</span> sym;
+<span class="lineno" id=line20></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line21></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>; 
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line23></span>        <span class="small_keyword" title="return">return</span> raw_dlsym (lib,sym);
+<span class="lineno" id=line24></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line25></span>    }
+<span class="lineno" id=line26></span>  
+</pre></p></div><h2 id='Library_instance_type_<code>flx_instance</code>_h'><img src='/share/src/web/images/minus.gif' id='Library instance type <code>flx_instance</code>' onclick='toggle(this,"Library_instance_type_<code>flx_instance</code>_d")' alt='+'/> 4.10 Library instance type <code>flx_instance</code></h2><div id='Library_instance_type_<code>flx_instance</code>_d' style='display:block'>
+<p>A library instance is a closure consisting of the
+library code, represent by a library handle, 
+together with a pointer to an instance of the
+libraries thread frame. Operations in this category
+only work with Felix generated library objects.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Type of a DLL (dynamic link library) instance.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Conceptually this is a pair consisting of</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">a library object and a global data frame object.</span>
+<span class="lineno" id=line4></span>    _gc_pointer <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> flx_instance = <span class="fstring">"::flx::dynlink::flx_libinst_t*"</span>;
+<span class="lineno" id=line5></span>  
+</pre></p></div><h2 id='Library_instance_constructor_<code>create_instance_handle</code>_h'><img src='/share/src/web/images/minus.gif' id='Library instance constructor <code>create_instance_handle</code>' onclick='toggle(this,"Library_instance_constructor_<code>create_instance_handle</code>_d")' alt='+'/> 4.11 Library instance constructor <code>create_instance_handle</code></h2><div id='Library_instance_constructor_<code>create_instance_handle</code>_d' style='display:block'>
+<p>Create a new library instance handle unassociated with any
+library or thread frame.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Create a fresh DLL instance object.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> create_instance_handle: bool-&gt;flx_instance=
+<span class="lineno" id=line3></span>      <span class="fstring">"new(*ptf-&gt; gcp, ::flx::dynlink::flx_libinst_ptr_map, false) ::flx::dynlink::flx_libinst_t($1)"</span>;
+<span class="lineno" id=line4></span>  
+</pre></p></div><h2 id='Create_a_library_instance_from_a_library:_<code>create</code>_h'><img src='/share/src/web/images/minus.gif' id='Create a library instance from a library: <code>create</code>' onclick='toggle(this,"Create_a_library_instance_from_a_library:_<code>create</code>_d")' alt='+'/> 4.12 Create a library instance from a library: <code>create</code></h2><div id='Create_a_library_instance_from_a_library:_<code>create</code>_d' style='display:block'>
+<p>This procedure creates a thread frame from a library,
+initialises it, and sets the given library instance
+with the library handle and thread frame.
+The instance handle should not already be associated with a library
+or thread frame.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Create a DLL instance from a DLL.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">This is a procedure, so maybe the caller is too</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">which means the thread frame must be available.</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> create: flx_library * flx_instance =
+<span class="lineno" id=line5></span>      <span class="fstring">"$2-&gt;create($1,ptf-&gt; gcp,ptf-&gt; world,ptf-&gt; argc,ptf-&gt; argv,ptf-&gt; flx_stdin, ptf-&gt; flx_stdout, ptf-&gt; flx_stderr, false);"</span> 
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>
+<span class="lineno" id=line7></span>    ;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> create_with_args: flx_library * flx_instance * <span class="library" title="binding of C int type">int</span> * + (+<span class="library" title="binding of C char type">char</span>) =
+<span class="lineno" id=line10></span>      <span class="fstring">"$2-&gt;create($1,ptf-&gt; gcp,ptf-&gt; world,$3,$4,ptf-&gt; flx_stdin, ptf-&gt; flx_stdout, ptf-&gt; flx_stderr, false);"</span> 
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_gc"</span>
+<span class="lineno" id=line12></span>    ;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> create_with_args (lib:flx_library, inst:flx_instance, args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line15></span>    {
+<span class="lineno" id=line16></span>      <span class="comment">// convert list to a varray of strings</span>
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a mutable variable">var</span> a = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span> args; 
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>      <span class="comment">// now convert to varray of char pointers</span>
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> myget(i:<span class="library" title="binding of C size_t type">size</span>)=&gt;a.i.cstr; 
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[+<span class="library" title="binding of C char type">char</span>] (a.<span class="library" title="number of elements in data structure">len</span>,a.<span class="library" title="number of elements in data structure">len</span>,myget); 
+<span class="lineno" id=line22></span>      create_with_args (lib,inst,x.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>,x.stl_begin);
+<span class="lineno" id=line23></span>    }
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>  
+</pre></p></div><h2 id='Get_the_filename_from_an_instance_<code>filename</code>._h'><img src='/share/src/web/images/minus.gif' id='Get the filename from an instance <code>filename</code>.' onclick='toggle(this,"Get_the_filename_from_an_instance_<code>filename</code>._d")' alt='+'/> 4.13 Get the filename from an instance <code>filename</code>.</h2><div id='Get_the_filename_from_an_instance_<code>filename</code>._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Get the filename of a DLL from an instance of it.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filename : flx_instance -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::std::string($1-&gt;lib-&gt;filename)"</span>;
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Get_the_startup_procedure_from_an_instance_<code>filename</code>._h'><img src='/share/src/web/images/minus.gif' id='Get the startup procedure from an instance <code>filename</code>.' onclick='toggle(this,"Get_the_startup_procedure_from_an_instance_<code>filename</code>._d")' alt='+'/> 4.14 Get the startup procedure from an instance <code>filename</code>.</h2><div id='Get_the_startup_procedure_from_an_instance_<code>filename</code>._d' style='display:block'>
+<p>Felix generated libraries contain a symbol which is used
+to initialise the thread frame. This initialisation is
+in addition to that performed when the instance is created.
+Typically the instance creation initialisation simply invokes
+the C++ default constructor and sets a couple of critical
+variables including a pointer to the garbage collector
+and standard input/output streams.
+</p><p>The startup procedure we get here, on the other hand,
+usually refers to the client program when using the
+scripting model; the behaviour of the program is 
+the observable side effects of this initialisation
+procedure.
+</p><p>For plugin libraries, the initialisation procedure is used
+to construct default values or initialise starting state.
+</p><p>The initialisation procedure is represent by a pointer
+to a continuation object, type <code>cont</code>, which has to be run
+by a scheduler after associating it with a fibre:
+the procedure is <em>not</em> a C function.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Get the initialisation continuation of an instance.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_init: flx_instance -&gt; cont = <span class="fstring">"$1-&gt;start_proc"</span>;
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Get_the_library_associated_with_an_instance._h'><img src='/share/src/web/images/minus.gif' id='Get the library associated with an instance.' onclick='toggle(this,"Get_the_library_associated_with_an_instance._d")' alt='+'/> 4.15 Get the library associated with an instance.</h2><div id='Get_the_library_associated_with_an_instance._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Get the DLL associated with an instance.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_library: flx_instance -&gt; flx_library = <span class="fstring">"$1-&gt;lib"</span>;
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Get_the_thread_frame_associated_with_an_instance._h'><img src='/share/src/web/images/minus.gif' id='Get the thread frame associated with an instance.' onclick='toggle(this,"Get_the_thread_frame_associated_with_an_instance._d")' alt='+'/> 4.16 Get the thread frame associated with an instance.</h2><div id='Get_the_thread_frame_associated_with_an_instance._d' style='display:block'>
+<p>Since we don't know the type of the thread frame here,
+it is returned as a pure address.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Get the thread frame (global data object) of an instance.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_thread_frame: flx_instance -&gt; <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"(void*)$1-&gt;thread_frame"</span>;
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Convenience_constructor_for_an_instance_<code>init_lib</code>_h'><img src='/share/src/web/images/minus.gif' id='Convenience constructor for an instance <code>init_lib</code>' onclick='toggle(this,"Convenience_constructor_for_an_instance_<code>init_lib</code>_d")' alt='+'/> 4.17 Convenience constructor for an instance <code>init_lib</code></h2><div id='Convenience_constructor_for_an_instance_<code>init_lib</code>_d' style='display:block'>
+<p>This function creates a library handle and instance handle
+and loads the library given a filename, all in one operation.
+Then it runs the startup initialisation procedure.
+Finally the instance is returned.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>    <span class="doccomment">Create, link, and prepare a DLL instance from a modulename.</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">NOTE: libraries created here do not need to be roots</span>
+<span class="lineno" id=line4></span>    <span class="comment">// The code is never deleted (due to design issues with C).</span>
+<span class="lineno" id=line5></span>    <span class="comment">// If the library isn't reachable, you can't create an instance.</span>
+<span class="lineno" id=line6></span>    <span class="comment">// If an instance is created, it reaches the library.</span>
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> prepare_lib(modulename:<span class="library" title="binding of C++ string type">string</span>):flx_instance = {
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a mutable variable">var</span> dlibrary = create_library_handle(get_debug_driver_flag());
+<span class="lineno" id=line9></span>      <span class="comment">//Gc::add_root (C_hack::cast[address] library);</span>
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linstance =  create_instance_handle(get_debug_driver_flag());
+<span class="lineno" id=line11></span>      regopen #get_module_registry (dlibrary,modulename);
+<span class="lineno" id=line12></span>      create (dlibrary,linstance);
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="return">return</span> linstance;
+<span class="lineno" id=line14></span>    }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="doccomment">Create, link, and prepare a DLL instance from a modulename.</span>
+<span class="lineno" id=line17></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> prepare_lib_with_args(modulename:<span class="library" title="binding of C++ string type">string</span>, args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]):flx_instance = {
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a mutable variable">var</span> dlibrary = create_library_handle(get_debug_driver_flag());
+<span class="lineno" id=line19></span>      <span class="comment">//Gc::add_root (C_hack::cast[address] library);</span>
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linstance =  create_instance_handle(get_debug_driver_flag());
+<span class="lineno" id=line21></span>      regopen #get_module_registry (dlibrary,modulename);
+<span class="lineno" id=line22></span>      create_with_args (dlibrary,linstance,args);
+<span class="lineno" id=line23></span>      <span class="small_keyword" title="return">return</span> linstance;
+<span class="lineno" id=line24></span>    }
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="doccomment">Create, link, and initialise a  DLL instance from a modulename.</span>
+<span class="lineno" id=line28></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> init_lib(modulename:<span class="library" title="binding of C++ string type">string</span>):flx_instance = {
+<span class="lineno" id=line29></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linstance = prepare_lib(modulename);
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a mutable variable">var</span> init = get_init linstance;
+<span class="lineno" id=line31></span>      Fibres::run init;
+<span class="lineno" id=line32></span>      <span class="small_keyword" title="return">return</span> linstance;
+<span class="lineno" id=line33></span>    }
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>    <span class="doccomment">Create, link, and initialise a  DLL instance from a modulename.</span>
+<span class="lineno" id=line36></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> init_lib_with_args(modulename:<span class="library" title="binding of C++ string type">string</span>, args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]):flx_instance = {
+<span class="lineno" id=line37></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linstance = prepare_lib_with_args(modulename,args);
+<span class="lineno" id=line38></span>      <span class="big_keyword" title="Define a mutable variable">var</span> init = get_init linstance;
+<span class="lineno" id=line39></span>      Fibres::run init;
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="return">return</span> linstance;
+<span class="lineno" id=line41></span>    }
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>  
+</pre></p></div><h2 id='Convenience_to_run_a_program_<code>run_lib</code>_h'><img src='/share/src/web/images/minus.gif' id='Convenience to run a program <code>run_lib</code>' onclick='toggle(this,"Convenience_to_run_a_program_<code>run_lib</code>_d")' alt='+'/> 4.18 Convenience to run a program <code>run_lib</code></h2><div id='Convenience_to_run_a_program_<code>run_lib</code>_d' style='display:block'>
+<p>This function does the same as <code>init_lib</code>.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Run a Felix program from a filename.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_lib(modulename:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line3></span>    {
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linstance = init_lib(modulename);
+<span class="lineno" id=line5></span>      <span class="hack">C_hack</span>::ignore(linstance);
+<span class="lineno" id=line6></span>    }
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="comment">// BUG: no return code!</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_program(args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>])
+<span class="lineno" id=line10></span>    {
+<span class="lineno" id=line11></span>      <span class="small_keyword" title="match statement or expression">match</span> args <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line12></span>      | Cons (h, t) =&gt;
+<span class="lineno" id=line13></span>        <span class="big_keyword" title="Define a mutable variable">var</span> linstance = prepare_lib_with_args(h,t);
+<span class="lineno" id=line14></span>        <span class="big_keyword" title="Define a mutable variable">var</span> init = get_init linstance;
+<span class="lineno" id=line15></span>        Fibres::run init;
+<span class="lineno" id=line16></span>      | _ =&gt; ;
+<span class="lineno" id=line17></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line18></span>    }
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>  
+</pre></p></div><h2 id='Checked_version_of_<code>dlsym</code>_h'><img src='/share/src/web/images/minus.gif' id='Checked version of <code>dlsym</code>' onclick='toggle(this,"Checked_version_of_<code>dlsym</code>_d")' alt='+'/> 4.19 Checked version of <code>dlsym</code></h2><div id='Checked_version_of_<code>dlsym</code>_d' style='display:block'>
+<p>This routine tries to find a symbol with the specified
+name in an instance, if it is found, the resulting address
+is cast to the specified type. It also prints a diagnostic
+if the symbol cannot be found.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Find typed address of a symbol in a DLL.</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> flx_dlsym[T] (linst: flx_instance, sym:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> dlibrary = Dynlink::get_library linst;
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a mutable variable">var</span> tf = Dynlink::get_thread_frame linst;
+<span class="lineno" id=line5></span>  <span class="comment">//println$ "Trying to load symbol " + sym + " from library " + linst.filename;</span>
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a mutable variable">var</span> raw_sym = Dynlink::find_sym$ dlibrary, sym;
+<span class="lineno" id=line7></span>      <span class="small_keyword" title="conditional">if</span> isNULL raw_sym <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line8></span>        eprintln$ <span class="fstring">"Unable to load symbol "</span> + sym + <span class="fstring">" from library "</span> + linst.filename;
+<span class="lineno" id=line9></span>        raise$ flx_link_failure_t(linst.filename,<span class="fstring">"dlsym"</span>,<span class="fstring">"Cannot find symbol "</span> + sym); 
+<span class="lineno" id=line10></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line11></span>  <span class="comment">//    eprintln$ "loaded symbol " + sym + " from library " + linst.filename + " address= " + str raw_sym;</span>
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a mutable variable">var</span> typed_sym = <span class="hack">C_hack</span>::cast[T] raw_sym;
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="return">return</span> typed_sym, tf;
+<span class="lineno" id=line14></span>    }
+<span class="lineno" id=line15></span>  
+</pre></p></div></div><h1 id='Higher_level_wrappers_for_finding_Felix_functions._h'><img src='/share/src/web/images/minus.gif' id='Higher level wrappers for finding Felix functions.' onclick='toggle(this,"Higher_level_wrappers_for_finding_Felix_functions._d")' alt='+'/> 5 Higher level wrappers for finding Felix functions.</h1><div id='Higher_level_wrappers_for_finding_Felix_functions._d' style='display:block'>
+<p>Here make a set of higher level wrappers for finding 
+standard protocol Felix function in DLLs. These wrappers
+create a closure by binding the C address of the constructor
+for the Felix function class in C++ to the library instance,
+and return that. 
+</p><p>Closures returned by these function can be invoked as normal
+Felix functions and procedures. Whereas a function defined
+in the current files binds to  the thread frame implicitly,
+with a library the instance is required to supply the
+thread frame. The closures returned by these wrappers
+are bound to the libraries thread frame so they can
+be invoked with the ordinary syntax.
+</p><p>Note that these operations are not type safe. If you get
+the type wrong all hell will break loose. This is because
+dlsym finds functions by their C names and C++ entities
+use mangled names we cannot compute in a portable way.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Return a closure representing a symbol in a DLL instance</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">of a function of no arguments.</span>
+<span class="lineno" id=line3></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> func0[R] (linst: flx_instance, sym:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s,tf= flx_dlsym[<span class="library" title="special binding of C void* type">address</span> --&gt; R] (linst, sym);
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="return">return</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> () =&gt; s tf;
+<span class="lineno" id=line6></span>    }
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="doccomment">Return a closure representing a symbol in a DLL instance</span>
+<span class="lineno" id=line9></span>    <span class="doccomment">of a function of one argument.</span>
+<span class="lineno" id=line10></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> func1[R,A0] (linst: flx_instance, sym:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s,tf= flx_dlsym[<span class="library" title="special binding of C void* type">address</span> * A0 --&gt; R] (linst, sym);
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="return">return</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> (a0:A0) =&gt; s (tf, a0);
+<span class="lineno" id=line13></span>    }
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="doccomment">Return a closure representing a symbol in a DLL instance</span>
+<span class="lineno" id=line16></span>    <span class="doccomment">of a function of two arguments.</span>
+<span class="lineno" id=line17></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> func2[R,A0,A1] (linst: flx_instance, sym:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s,tf= flx_dlsym[<span class="library" title="special binding of C void* type">address</span> * A0 * A1 --&gt; R] (linst, sym);
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="return">return</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> (<span class="big_keyword" title="Define a mutable variable">var</span> a0:A0, <span class="big_keyword" title="Define a mutable variable">var</span> a1:A1) =&gt; s (tf, a0, a1);
+<span class="lineno" id=line20></span>    }
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="doccomment">Return a closure representing a symbol in a DLL instance</span>
+<span class="lineno" id=line23></span>    <span class="doccomment">of a procedure of no arguments.</span>
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> proc0 (linst: flx_instance, sym:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s,tf= flx_dlsym[<span class="library" title="special binding of C void* type">address</span> --&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>] (linst, sym);
+<span class="lineno" id=line26></span>      <span class="small_keyword" title="return">return</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> () { s tf; };
+<span class="lineno" id=line27></span>    }
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>    <span class="doccomment">Return a closure representing a symbol in a DLL instance</span>
+<span class="lineno" id=line30></span>    <span class="doccomment">of a procedure of one argument.</span>
+<span class="lineno" id=line31></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> proc1[A0] (linst: flx_instance, sym:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line32></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s,tf= flx_dlsym[<span class="library" title="special binding of C void* type">address</span> * A0 --&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>] (linst, sym);
+<span class="lineno" id=line33></span>      <span class="small_keyword" title="return">return</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (a0:A0) { s (tf, a0); };
+<span class="lineno" id=line34></span>    }
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    <span class="doccomment">Return a closure representing a symbol in a DLL instance</span>
+<span class="lineno" id=line37></span>    <span class="doccomment">of a procedure of two arguments.</span>
+<span class="lineno" id=line38></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> proc2[A0,A1] (linst: flx_instance, sym:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line39></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s,tf= flx_dlsym[<span class="library" title="special binding of C void* type">address</span> * A0 * A1 --&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>] (linst, sym);
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="return">return</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (a0:A0,a1:A1) { s (tf, a0, a1); };
+<span class="lineno" id=line41></span>    }
+<span class="lineno" id=line42></span>  
+</pre></p></div><h1 id='Plugins._h'><img src='/share/src/web/images/minus.gif' id='Plugins.' onclick='toggle(this,"Plugins._d")' alt='+'/> 6 Plugins.</h1><div id='Plugins._d' style='display:block'>
+<p>A plugin is a special kind of DLL which supplies two
+fixed entry points: a setup routine, which is called
+to initialise the thread frame given a string argument,
+and a single entry point which is subsequently called
+and which typically returns an object type consisting
+of a set of methods acting on the object state and
+initialised thread frame context.
+</p><p>The setup routine typically take a string of configuration
+parameters, extracts them with a parser, and stores them
+in variables.
+</p><p>The current protocol is that the setup function must
+be called "dllname_setup", the entry point name is passed
+as a string. 
+</p><p>In order to accomodate static linking of plugins in the
+future, the setup and entry point symbols would need to have
+univerally unique names, since static linkage cannot work
+with duplicate definitions, so the protocol will change
+to require the library name as a prefix. Stay tuned.
+</p><pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Specialised routine(s) to load stylised plugin.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Two entry points:</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">  //$ setup: string -&gt; int</span>
+<span class="lineno" id=line4></span>    <span class="doccomment">  //$ is called to initialise the instance globals.</span>
+<span class="lineno" id=line5></span>    <span class="doccomment">  //$ entry-point: arg -&gt; iftype</span>
+<span class="lineno" id=line6></span>    <span class="doccomment">  //$ is the primary entry point, typically an object factory, </span>
+<span class="lineno" id=line7></span>    <span class="doccomment">when called with an argument</span>
+<span class="lineno" id=line8></span>    <span class="doccomment">of type arg_t it returns //$ an object of type iftype.</span>
+<span class="lineno" id=line9></span>    <span class="doccomment">  //$ This function returns the object factory.</span>
+<span class="lineno" id=line10></span>    <span class="doccomment">setup is called automatically with the supplied string.</span>
+<span class="lineno" id=line11></span>    <span class="doccomment">  //$ There are 3 variants where the factory function accepts</span>
+<span class="lineno" id=line12></span>    <span class="doccomment">0, 1 and 2 arguments.</span>
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span>  load-plugin-func0[iftype] (
+<span class="lineno" id=line14></span>      dll-name: <span class="library" title="binding of C++ string type">string</span>,   <span class="comment">// name of the DLL minus the extension</span>
+<span class="lineno" id=line15></span>      setup-str: <span class="library" title="binding of C++ string type">string</span>=<span class="fstring">""</span>,  <span class="comment">// string to pass to setup</span>
+<span class="lineno" id=line16></span>      entry-point: <span class="library" title="binding of C++ string type">string</span>=<span class="fstring">""</span>   <span class="comment">// export name of factory function</span>
+<span class="lineno" id=line17></span>    ) : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; iftype =
+<span class="lineno" id=line18></span>    {
+<span class="lineno" id=line19></span>      <span class="big_keyword" title="Define a mutable variable">var</span> entrypoint = <span class="small_keyword" title="conditional">if</span> entry-point == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> dll-name <span class="small_keyword" title="conditional">else</span> entry-point;
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linst = Dynlink::init_lib(dll-name);
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a mutable variable">var</span> sresult = Dynlink::func1[<span class="library" title="binding of C int type">int</span>,<span class="library" title="binding of C++ string type">string</span>] (linst, dll-name+<span class="fstring">"_setup"</span>) (setup-str);
+<span class="lineno" id=line22></span>      <span class="hack">C_hack</span>::ignore(sresult);
+<span class="lineno" id=line23></span>      <span class="small_keyword" title="conditional">if</span> sresult != 0 <span class="small_keyword" title="call a procedure">call</span> eprintln$ <span class="fstring">"[dynlink] Warning: Plugin Library "</span> + dll-name + <span class="fstring">" set up returned "</span> + <span class="library" title="Convert a value to a string">str</span> sresult;
+<span class="lineno" id=line24></span>      <span class="small_keyword" title="return">return</span> Dynlink::func0[iftype] (linst, entrypoint);
+<span class="lineno" id=line25></span>    }
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span>  load-plugin-func1[iftype, arg_t] (
+<span class="lineno" id=line28></span>      dll-name: <span class="library" title="binding of C++ string type">string</span>,   <span class="comment">// name of the DLL minus the extension</span>
+<span class="lineno" id=line29></span>      setup-str: <span class="library" title="binding of C++ string type">string</span>=<span class="fstring">""</span>,  <span class="comment">// string to pass to setup</span>
+<span class="lineno" id=line30></span>      entry-point: <span class="library" title="binding of C++ string type">string</span>=<span class="fstring">""</span>   <span class="comment">// export name of factory function</span>
+<span class="lineno" id=line31></span>    ) : arg_t -&gt; iftype =
+<span class="lineno" id=line32></span>    {
+<span class="lineno" id=line33></span>      <span class="big_keyword" title="Define a mutable variable">var</span> entrypoint = <span class="small_keyword" title="conditional">if</span> entry-point == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> dll-name <span class="small_keyword" title="conditional">else</span> entry-point;
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linst = Dynlink::init_lib(dll-name);
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="Define a mutable variable">var</span> sresult = Dynlink::func1[<span class="library" title="binding of C int type">int</span>,<span class="library" title="binding of C++ string type">string</span>] (linst, dll-name+<span class="fstring">"_setup"</span>) (setup-str);
+<span class="lineno" id=line36></span>      <span class="hack">C_hack</span>::ignore(sresult);
+<span class="lineno" id=line37></span>      <span class="small_keyword" title="conditional">if</span> sresult != 0 <span class="small_keyword" title="call a procedure">call</span> eprintln$ <span class="fstring">"[dynlink] Warning: Plugin Library "</span> + dll-name + <span class="fstring">" set up returned "</span> + <span class="library" title="Convert a value to a string">str</span> sresult;
+<span class="lineno" id=line38></span>      <span class="small_keyword" title="return">return</span> Dynlink::func1[iftype,arg_t] (linst, entrypoint);
+<span class="lineno" id=line39></span>    }
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span>  load-plugin-func2[iftype, arg1_t, arg2_t] (
+<span class="lineno" id=line42></span>      dll-name: <span class="library" title="binding of C++ string type">string</span>,   <span class="comment">// name of the DLL minus the extension</span>
+<span class="lineno" id=line43></span>      setup-str: <span class="library" title="binding of C++ string type">string</span>=<span class="fstring">""</span>,  <span class="comment">// string to pass to setup</span>
+<span class="lineno" id=line44></span>      entry-point: <span class="library" title="binding of C++ string type">string</span>=<span class="fstring">""</span>   <span class="comment">// export name of factory function</span>
+<span class="lineno" id=line45></span>    ) : arg1_t * arg2_t -&gt; iftype =
+<span class="lineno" id=line46></span>    {
+<span class="lineno" id=line47></span>      <span class="big_keyword" title="Define a mutable variable">var</span> entrypoint = <span class="small_keyword" title="conditional">if</span> entry-point == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> dll-name <span class="small_keyword" title="conditional">else</span> entry-point;
+<span class="lineno" id=line48></span>      <span class="big_keyword" title="Define a mutable variable">var</span> linst = Dynlink::init_lib(dll-name);
+<span class="lineno" id=line49></span>      <span class="big_keyword" title="Define a mutable variable">var</span> sresult = Dynlink::func1[<span class="library" title="binding of C int type">int</span>,<span class="library" title="binding of C++ string type">string</span>] (linst, dll-name+<span class="fstring">"_setup"</span>) (setup-str);
+<span class="lineno" id=line50></span>      <span class="hack">C_hack</span>::ignore(sresult);
+<span class="lineno" id=line51></span>      <span class="small_keyword" title="conditional">if</span> sresult != 0 <span class="small_keyword" title="call a procedure">call</span> eprintln$ <span class="fstring">"[dynlink] Warning: Plugin Library "</span> + dll-name + <span class="fstring">" set up returned "</span> + <span class="library" title="Convert a value to a string">str</span> sresult;
+<span class="lineno" id=line52></span>      <span class="small_keyword" title="return">return</span> Dynlink::func2[iftype,arg1_t, arg2_t] (linst, entrypoint);
+<span class="lineno" id=line53></span>    }
+<span class="lineno" id=line54></span>  
+</pre></p><h2 id='Utilities_and_misc._h'><img src='/share/src/web/images/minus.gif' id='Utilities and misc.' onclick='toggle(this,"Utilities_and_misc._d")' alt='+'/> 6.1 Utilities and misc.</h2><div id='Utilities_and_misc._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/dynlink.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>    <span class="doccomment">Execute an address representing a top</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">level exported felix procedure's C wrapper,</span>
+<span class="lineno" id=line4></span>    <span class="doccomment">this creates a 'read to run' continuation object</span>
+<span class="lineno" id=line5></span>    <span class="doccomment">by both constructing the object using the thread</span>
+<span class="lineno" id=line6></span>    <span class="doccomment">frame of the instance as an argument, and calling</span>
+<span class="lineno" id=line7></span>    <span class="doccomment">it to fix a null return address and an arbitrary</span>
+<span class="lineno" id=line8></span>    <span class="doccomment">client data pointer as arguments to the call method.</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> bind_proc: flx_instance * <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span> -&gt; cont =
+<span class="lineno" id=line10></span>      <span class="fstring">"$1-&gt;bind_proc($2,$3)"</span>;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="doccomment">Get the OS dependent handle representing a loaded DLL.</span>
+<span class="lineno" id=line13></span>    <span class="doccomment">Return as an address. </span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> dlib_of : flx_library -&gt; <span class="library" title="special binding of C void* type">address</span> = <span class="fstring">"(void*)$1-&gt;library"</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="doccomment">Throw an exception indicating the failure to </span>
+<span class="lineno" id=line17></span>    <span class="doccomment">find a symbol in a DLL.</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dlsym_err:flx_library*<span class="library" title="binding of C++ string type">string</span>=<span class="fstring">"""
+<span class="lineno" id=line19></span>      throw ::flx::rtl::flx_link_failure_t($1-&gt;filename,$2,"symbol not found");
+<span class="lineno" id=line20></span>    """</span>;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="doccomment">Run a procedure represented by a string name with</span>
+<span class="lineno" id=line23></span>    <span class="doccomment">given thread frame.</span>
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_proc (linstance:flx_instance, p: <span class="library" title="binding of C++ string type">string</span>, data: <span class="library" title="special binding of C void* type">address</span>)
+<span class="lineno" id=line25></span>    {
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a mutable variable">var</span> lib = get_library linstance;
+<span class="lineno" id=line27></span>      <span class="big_keyword" title="Define a mutable variable">var</span> sym = find_sym(lib, p);
+<span class="lineno" id=line28></span>      <span class="small_keyword" title="conditional">if</span> isNULL(sym) <span class="small_keyword" title="call a procedure">call</span> dlsym_err(lib,p);
+<span class="lineno" id=line29></span>      <span class="big_keyword" title="Define a mutable variable">var</span> f = bind_proc(linstance, sym, data);
+<span class="lineno" id=line30></span>      run f;
+<span class="lineno" id=line31></span>    }
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>  }
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>  
+</pre></p></div></div><h1 id='Dynamic_Linkage_support_h'><img src='/share/src/web/images/minus.gif' id='Dynamic Linkage support' onclick='toggle(this,"Dynamic_Linkage_support_d")' alt='+'/> 7 Dynamic Linkage support</h1><div id='Dynamic_Linkage_support_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_dynlink_config.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_DYNLINK_CONFIG_H__
+#<span class="preproc">define</span> __FLX_DYNLINK_CONFIG_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">ifdef</span> BUILD_DYNLINK
+#<span class="preproc">define</span> DYNLINK_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> DYNLINK_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+$PWD/src/config/unix/dl.fpc</pre>
+<p><pre class="prefmtbg">Name: dl
+Description: dynamic loading support
+includes: '&lt;dlfcn.h&gt;'
+requires_dlibs: -ldl
+requires_slibs: -ldl
+</pre></p><pre class='inclusion'>
+$PWD/src/config/macosx/dl.fpc</pre>
+<p><pre class="prefmtbg">Name: dl
+Description: dynamic loading support
+includes: '&lt;dlfcn.h&gt;'
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/dl.fpc</pre>
+<p><pre class="prefmtbg">Name: dl
+Description: dynamic loading support
+</pre></p><pre class='inclusion'>
+$PWD/src/config/unix/flx_dynlink.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_dynlink
+Description: Felix Dynamic loading support
+provides_dlib: -lflx_dynlink_dynamic
+provides_slib: -lflx_dynlink_static
+Requires: dl flx_exceptions flx_gc flx_strutil 
+library: flx_dynlink
+includes: '"flx_dynlink.hpp"'
+macros: BUILD_DYNLINK
+srcdir: src/dynlink
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/flx_dynlink.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_dynlink
+Description: Felix Dynamic loading support
+provides_dlib: /DEFAULTLIB:flx_dynlink_dynamic
+provides_slib: /DEFAULTLIB:flx_dynlink_static
+Requires: dl flx_exceptions flx_gc flx_strutil
+library: flx_dynlink
+includes: '"flx_dynlink.hpp"'
+macros: BUILD_DYNLINK
+srcdir: src/dynlink
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+$PWD/buildsystem/flx_dynlink.py</pre>
+<p><pre class="prefmtbg">import fbuild
+from fbuild.path import Path
+from fbuild.record import Record
+from fbuild.builders.file import copy
+from fbuild.functools import call
+
+import buildsystem
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    print('[fbuild] [rtl] build dynlink')
+    path = Path(phase.ctx.buildroot/'share'/'src/dynlink')
+
+    srcs = [f for f in Path.glob(path / '*.cpp')]
+    includes = [phase.ctx.buildroot / 'host/lib/rtl', phase.ctx.buildroot / 'share/lib/rtl']
+    macros = ['BUILD_DYNLINK']
+    libs = [
+        call('buildsystem.flx_strutil.build_runtime', phase),
+        call('buildsystem.flx_gc.build_runtime', phase),
+    ]
+
+    dst = 'host/lib/rtl/flx_dynlink'
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            libs=[lib.static for lib in libs],
+            macros=macros),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            libs=[lib.shared for lib in libs],
+            macros=macros))
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

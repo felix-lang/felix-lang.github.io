@@ -1,0 +1,599 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Streamable data types and iterators</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Iterators",
+"Streams"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Iterators_h')"> <a href="#Iterators_h">Iterators</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Streams_h')"> <a href="#Streams_h">Streams</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Iterators_h'><img src='/share/src/web/images/minus.gif' id='Iterators' onclick='toggle(this,"Iterators_d")' alt='+'/> 1 Iterators</h1><div id='Iterators_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/control/iterator.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Class of data structures supporting streaming.</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">The container type just needs an iterator method.</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">The iterator method returns a generator which</span>
+<span class="lineno" id=line4></span>  <span class="doccomment">yields the values stored in the container.</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a type class">class</span> Iterable [C1, V] {
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> iterator : C1 -&gt; 1 -&gt; <span class="library" title="option type: Some x or None">opt</span>[V];
+<span class="lineno" id=line7></span>  }
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a type class">class</span> Streamable[C1, V] {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Iterable[C1,V];
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="comment">// check if a streamable x is a subset of a set y.</span>
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span>[C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V]] (x:C1, y:C2) = 
+<span class="lineno" id=line14></span>    {
+<span class="lineno" id=line15></span>      <span class="small_keyword" title="for loop">for</span> v <span class="small_keyword" title="membership operator, function mem">in</span> x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line16></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> (v <span class="tex_symbol" title="\in">\(\in\)</span> y) <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line17></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line19></span>  bad:&gt;
+<span class="lineno" id=line20></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line21></span>    }
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="comment">// subset or equal: variant equality bar</span>
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subseteqq">\(\subseteqq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V]] 
+<span class="lineno" id=line25></span>      (x:C1, y:C2) =&gt; x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y
+<span class="lineno" id=line26></span>    ;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    <span class="comment">// congruence (equality as sets)</span>
+<span class="lineno" id=line29></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cong">\(\cong\)</span>[C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line30></span>      (x:C1, y:C2) =&gt; x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y <span class="small_keyword" title="logical conjunction">and</span> y <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> x
+<span class="lineno" id=line31></span>    ;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="comment">// negated congruence</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\ncong">\(\ncong\)</span>[C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line35></span>      (x:C1, y:C2) =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\cong">\(\cong\)</span> y)
+<span class="lineno" id=line36></span>    ;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="comment">// proper subset</span>
+<span class="lineno" id=line39></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subset">\(\subset\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line40></span>      (x:C1, y:C2) =&gt; x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y <span class="small_keyword" title="logical conjunction">and</span> x <span class="tex_symbol" title="\ncong">\(\ncong\)</span> y
+<span class="lineno" id=line41></span>    ;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="comment">// variant proper relations with strke-through on equality bar</span>
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subsetneq">\(\subsetneq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line45></span>      (x:C1, y:C2) =&gt; x <span class="tex_symbol" title="\subset">\(\subset\)</span> y
+<span class="lineno" id=line46></span>    ;
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\subsetneqq">\(\subsetneqq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line48></span>      (x:C1, y:C2) =&gt; x <span class="tex_symbol" title="\subset">\(\subset\)</span> y
+<span class="lineno" id=line49></span>    ;
+<span class="lineno" id=line50></span>  
+<span class="lineno" id=line51></span>    <span class="comment">// reversed relations, super set</span>
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supset">\(\supset\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line53></span>      (x:C1, y:C2) =&gt; y <span class="tex_symbol" title="\subset">\(\subset\)</span> x
+<span class="lineno" id=line54></span>    ;
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supseteq">\(\supseteq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V]] 
+<span class="lineno" id=line57></span>      (x:C1, y:C2) =&gt; y <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> x
+<span class="lineno" id=line58></span>    ;
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supseteqq">\(\supseteqq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V]] 
+<span class="lineno" id=line61></span>      (x:C1, y:C2) =&gt; y <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> x
+<span class="lineno" id=line62></span>    ;
+<span class="lineno" id=line63></span>    <span class="comment">// variant proper relations with strke-through on equality bar</span>
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supsetneq">\(\supsetneq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line65></span>      (x:C1, y:C2) =&gt; x <span class="tex_symbol" title="\supset">\(\supset\)</span> y
+<span class="lineno" id=line66></span>    ;
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\supsetneqq">\(\supsetneqq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line68></span>      (x:C1, y:C2) =&gt; x <span class="tex_symbol" title="\supset">\(\supset\)</span> y
+<span class="lineno" id=line69></span>    ;
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>    <span class="comment">// negated operators, strike-through</span>
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsubseteq">\(\nsubseteq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V]] 
+<span class="lineno" id=line74></span>      (x:C1, y:C2) =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y)
+<span class="lineno" id=line75></span>    ;
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsubseteqq">\(\nsubseteqq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V]] 
+<span class="lineno" id=line78></span>      (x:C1, y:C2) =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\subseteq">\(\subseteq\)</span> y)
+<span class="lineno" id=line79></span>    ;
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>    <span class="comment">// negated reversed operators, strike-through</span>
+<span class="lineno" id=line82></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsupseteq">\(\nsupseteq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line83></span>      (x:C1, y:C2) =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\supseteq">\(\supseteq\)</span> y)
+<span class="lineno" id=line84></span>    ;
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\nsupseteqq">\(\nsupseteqq\)</span> [C2 <span class="small_keyword" title="type-class constraint">with</span> Set[C2,V], Streamable[C2,V], Set[C1,V]] 
+<span class="lineno" id=line87></span>      (x:C1, y:C2) =&gt; <span class="small_keyword" title="logical negation">not</span> (x <span class="tex_symbol" title="\supseteq">\(\supseteq\)</span> y)
+<span class="lineno" id=line88></span>    ;
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>  }
+<span class="lineno" id=line91></span>  
+<span class="lineno" id=line92></span>  
+</pre></p></div><h1 id='Streams_h'><img src='/share/src/web/images/minus.gif' id='Streams' onclick='toggle(this,"Streams_d")' alt='+'/> 2 Streams</h1><div id='Streams_d' style='display:block'>
+<p>A functional stream is a coinductive data type
+dual to a list: it is a function 
+</p><p><pre class="prefmtbg">   uncons: S -&gt; T * S.
+</pre></p><p>First here is the class based definition of a stream.
+It has some problems as do all such definitions:
+</p><pre class='inclusion'>
+share/lib/std/datatype/stream.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Fstream[T,S] {
+<span class="lineno" id=line2></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> uncons: S -&gt; T * S;
+<span class="lineno" id=line3></span>  };
+</pre></p><p>And now, we have a stream example.
+It is suprising? An integer is a stream.
+</p><pre class='inclusion'>
+share/lib/std/datatype/stream.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Fstream [<span class="library" title="binding of C int type">int</span>,<span class="library" title="binding of C int type">int</span>] {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> uncons(x:<span class="library" title="binding of C int type">int</span>) =&gt; x, x + 1;
+<span class="lineno" id=line3></span>  }
+</pre></p><p>An obvious problem: the stream is ascending.
+A descending stream is obvious:
+</p><p><pre class="prefmtbg">fun uncons(x:int) =&gt; x, x - 1
+</pre></p><p>and clearly there are rather a LOT of streams that
+can be defined on an integer.
+</p><p>A stream is the dual of a list, some say it is an
+infinite list. Here is a stream of optional ints
+built from a list of ints.
+</p><pre class='inclusion'>
+share/lib/std/datatype/stream.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Fstream [<span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C int type">int</span>], <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C int type">int</span>]] {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> uncons: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C int type">int</span>] -&gt; <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C int type">int</span>] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C int type">int</span>] =
+<span class="lineno" id=line3></span>    | Cons (h,t) =&gt; Some h, t
+<span class="lineno" id=line4></span>    | #Empty =&gt; None[<span class="library" title="binding of C int type">int</span>], Empty[<span class="library" title="binding of C int type">int</span>]
+<span class="lineno" id=line5></span>    ;
+<span class="lineno" id=line6></span>  }
+</pre></p><p>The option type is a good way to provide a trailing
+infinite sequence of values mandated by the definition
+of a stream.
+</p><p>This function converts an arbitrary stream
+into a generator. This hides the state type
+and state value from clients, however the forward
+iterator we previously had is now degraded to an
+input iterator (where I use iterator in the C++ sense)
+</p><pre class='inclusion'>
+share/lib/std/datatype/stream.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Stream 
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> make_generator [T,S <span class="small_keyword" title="type-class constraint">with</span> Fstream[T,S]] 
+<span class="lineno" id=line4></span>    (<span class="big_keyword" title="Define a mutable variable">var</span> state:S) 
+<span class="lineno" id=line5></span>  =&gt;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> () : T = {
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a mutable variable">var</span> v,s = uncons state;
+<span class="lineno" id=line8></span>      state = s;
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="return">return</span> v;
+<span class="lineno" id=line10></span>    }
+<span class="lineno" id=line11></span>  ;
+</pre></p><p>Felix already has an interesting construction
+called an iterator, it is a generator function
+of type
+</p><p><pre class="prefmtbg">   1 -&gt; opt[T]
+</pre></p><p>We build such iterator out of a stream of optional values
+</p><pre class='inclusion'>
+share/lib/std/datatype/stream.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> make_iterator [T,S <span class="small_keyword" title="type-class constraint">with</span> Fstream[<span class="library" title="option type: Some x or None">opt</span>[T],S]] 
+<span class="lineno" id=line2></span>    (<span class="big_keyword" title="Define a mutable variable">var</span> state:S) 
+<span class="lineno" id=line3></span>  =&gt;
+<span class="lineno" id=line4></span>    make_generator[<span class="library" title="option type: Some x or None">opt</span>[T],S] state
+<span class="lineno" id=line5></span>  ;
+</pre></p><p>Our definition is bad, because so far there is only
+ONE kind of fstream for every type.
+</p><p>What we really want is that, given some uncons function,
+we can make a fstream object out of it.
+</p><p>here's our stream object: it has an uncons function
+and an initial state value. The uncons function
+is called uncons_f to avoid ambiguities
+</p><pre class='inclusion'>
+share/lib/std/datatype/stream.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> stream[T,S] = ( state:S, uncons_f: S -&gt; T * S );
+</pre></p><p>Now, instantiate it.
+The critical thing we're doing is translating
+the internal uncons_f function, to one that
+returns a stream object
+</p><pre class='inclusion'>
+share/lib/std/datatype/stream.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T,S] Fstream[T, stream[T,S]] {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> uncons (x:stream[T,S]) : T * stream[T,S] =&gt;
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="let binder">let</span> head,tail = x.uncons_f x.state <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line4></span>      head, (state=tail, uncons_f = x.uncons_f)
+<span class="lineno" id=line5></span>    ;
+<span class="lineno" id=line6></span>  }
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> [T,S] Fstream[T,stream[T,S]];
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Open a module or class">open</span> Stream;
+<span class="lineno" id=line10></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

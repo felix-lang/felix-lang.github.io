@@ -1,0 +1,2075 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Run Time Library</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Bootstrap builder.",
+"Compiler Support",
+"RTL",
+"Exec Util",
+"Main",
+"Shapes",
+"Plat Linux",
+"Macro config stuff"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Bootstrap builder._h')"> <a href="#Bootstrap_builder._h">Bootstrap builder.</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Compiler Support_h')"> <a href="#Compiler_Support_h">Compiler Support</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#RTL_h')"> <a href="#RTL_h">RTL</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Exec Util_h')"> <a href="#Exec_Util_h">Exec Util</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Main_h')"> <a href="#Main_h">Main</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Shapes_h')"> <a href="#Shapes_h">Shapes</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Plat Linux_h')"> <a href="#Plat_Linux_h">Plat Linux</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Macro config stuff_h')"> <a href="#Macro_config_stuff_h">Macro config stuff</a></div>
+      <div class=sm id=menu8>
+      </div>
+    <script>counter_max=8;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Bootstrap_builder._h'><img src='/share/src/web/images/minus.gif' id='Bootstrap builder.' onclick='toggle(this,"Bootstrap_builder._d")' alt='+'/> 1 Bootstrap builder.</h1><div id='Bootstrap_builder._d' style='display:block'>
+<pre class='inclusion'>
+$PWD/buildsystem/flx_rtl.py</pre>
+<p><pre class="prefmtbg">import fbuild
+from fbuild.functools import call
+from fbuild.path import Path
+from fbuild.record import Record
+from fbuild.builders.file import copy
+
+import buildsystem
+from buildsystem.config import config_call
+
+# ------------------------------------------------------------------------------
+
+def build_runtime(phase):
+    path = Path(phase.ctx.buildroot/'share'/'src', 'rtl')
+
+    print("[fbuild] [rtl] MAKING RTL ******* ")
+
+    srcs = [f for f in Path.glob(path / '*.cpp')]
+    includes = [
+        phase.ctx.buildroot / 'host/lib/rtl',
+        phase.ctx.buildroot / 'share/lib/rtl'
+    ]
+    macros = ['BUILD_RTL']
+    libs = [
+        call('buildsystem.flx_uint256_t.build_runtime', phase),
+        #call('buildsystem.flx_integer.build_runtime', phase),
+        call('buildsystem.flx_strutil.build_runtime', phase),
+        call('buildsystem.flx_dynlink.build_runtime', phase),
+        call('buildsystem.flx_async.build_runtime', phase),
+        call('buildsystem.flx_exceptions.build_runtime', phase),
+        call('buildsystem.flx_gc.build_runtime', phase),
+    ]
+
+    dlfcn_h = config_call('fbuild.config.c.posix.dlfcn_h',
+        phase.platform,
+        phase.cxx.static,
+        phase.cxx.shared)
+
+    if dlfcn_h.dlopen:
+        external_libs = dlfcn_h.external_libs
+    else:
+        external_libs = []
+
+    dst = 'host/lib/rtl/flx'
+    return Record(
+        static=buildsystem.build_cxx_static_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.static for lib in libs],
+            external_libs=external_libs),
+        shared=buildsystem.build_cxx_shared_lib(phase, dst, srcs,
+            includes=includes,
+            macros=macros,
+            libs=[lib.shared for lib in libs],
+            external_libs=external_libs))
+</pre></p></div><h1 id='Compiler_Support_h'><img src='/share/src/web/images/minus.gif' id='Compiler Support' onclick='toggle(this,"Compiler_Support_d")' alt='+'/> 2 Compiler Support</h1><div id='Compiler_Support_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_compiler_support_headers.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_COMPILER_SUPPORT_HEADERS_H__
+#<span class="preproc">define</span> __FLX_COMPILER_SUPPORT_HEADERS_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="small_keyword">if</span> defined(FLX_PTF_STATIC_STRUCT) || defined(FLX_PTF_STATIC_PTR)
+#error <span class="fstring">"FLX_PTF_STATIC_STRUCT and FLX_PTF_STATIC_PTR no longer supported"</span>
+#<span class="preproc">endif</span>
+
+<span class="comment">//#define PTF ptf->
+</span>#<span class="preproc">define</span> FLX_POINTER_TO_THREAD_FRAME ptf
+
+#<span class="preproc">define</span> FLX_DCL_THREAD_FRAME
+
+#<span class="small_keyword">if</span> FLX_CGOTO
+  #<span class="preproc">define</span> FLX_LOCAL_LABEL_VARIABLE_TYPE <span class="qualifier">void</span>*
+  #<span class="preproc">define</span> FLX_PC_DECL <span class="qualifier">void</span> *pc;
+  #<span class="preproc">define</span> FLX_KILLPC pc = &amp;&amp;_flx_dead_frame;
+  #<span class="preproc">define</span> FLX_RESETPC pc = nullptr;
+#<span class="preproc">else</span>
+  #<span class="preproc">define</span> FLX_PC_DECL <span class="qualifier">int</span> pc;
+  #<span class="preproc">define</span> FLX_LOCAL_LABEL_VARIABLE_TYPE <span class="qualifier">int</span>
+  #<span class="preproc">define</span> FLX_KILLPC pc = -1;
+  #<span class="preproc">define</span> FLX_RESETPC pc = 0;
+#<span class="preproc">endif</span>
+
+<span class="comment">// THESE ARE NOT CURRENTLY USED
+</span><span class="comment">// The intent is that we can use a consistent name for some structural types
+</span><span class="comment">// across compilation boundaries by using C++ template names.
+</span><span class="comment">// The templates are never defined, just declared.
+</span><span class="comment">// The types are defined with the old way, but as a specialisation
+</span><span class="comment">// of the template. The existing structure names become typedefs
+</span><span class="comment">// to that template. So the body of code is otherwise unchanged,
+</span><span class="comment">// but the C++ mangled name will be the same in all compilations.
+</span><span class="comment">// THE PROBLEM is it only works if the component types do not recursively
+</span><span class="comment">// refer to the whole type, because C++ cannot handle recursive type
+</span><span class="comment">// combinators.
+</span>
+#<span class="preproc">define</span> t <span class="qualifier">typename</span>
+#<span class="preproc">define</span> t2 t,t
+#<span class="preproc">define</span> t3 t,t,t
+#<span class="preproc">define</span> t4 t,t,t,t
+#<span class="preproc">define</span> p <span class="big_keyword">template</span> &lt;
+#<span class="preproc">define</span> s &gt; <span class="big_keyword">struct</span>
+<span class="big_keyword">template</span> &lt;<span class="qualifier">typename</span>, <span class="qualifier">int</span>&gt; <span class="big_keyword">struct</span> _fix; <span class="comment">// fixpoint
+</span><span class="big_keyword">template</span> &lt;t,t&gt; <span class="big_keyword">struct</span> _ft;            <span class="comment">// function
+</span><span class="big_keyword">template</span> &lt;t,t&gt; <span class="big_keyword">struct</span> _cft;           <span class="comment">// cfunction
+</span><span class="big_keyword">template</span> &lt;t,<span class="qualifier">int</span>&gt; <span class="big_keyword">struct</span> _at;          <span class="comment">// array
+</span><span class="big_keyword">template</span> &lt;t&gt; <span class="big_keyword">struct</span> _pt;              <span class="comment">// procedure
+</span>  p t2 s _tt2;                        <span class="comment">// tuples
+</span>  p t3 s _tt3;
+  p t4 s _tt4;
+  p t,t4 s _tt5;
+  p t2,t4 s _tt6;
+  p t3,t4 s _tt7;
+#undef t
+#undef t2
+#undef t3
+#undef t4
+#undef p
+#undef s
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/lib/rtl/flx_compiler_support_bodies.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_COMPILER_SUPPORT_BODIES_H__
+#<span class="preproc">define</span> __FLX_COMPILER_SUPPORT_BODIES_H__
+#<span class="preproc">include</span> <span class="fstring">"flx_compiler_support_headers.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;algorithm&gt;</span>
+
+<span class="comment">//
+</span><span class="comment">// convert an rvalue to an lvalue
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt;
+T <span class="qualifier">const</span> &amp;lvalue(T <span class="qualifier">const</span> &amp;x)
+{
+  <span class="small_keyword">return</span> x;
+}
+
+<span class="comment">// this reinterpret cast works with rvalues too
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T, <span class="qualifier">typename</span> U&gt;
+T &amp;reinterpret(U <span class="qualifier">const</span> &amp;x) {
+  <span class="small_keyword">return</span> reinterpret_cast&lt;T&amp;&gt;(<span class="qualifier">const</span>_cast&lt;U&amp;&gt;(x));
+}
+
+<span class="comment">// convert any pointer to any other: the T should be a pointer.
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T, <span class="qualifier">typename</span> U&gt;
+T reinterpret(U <span class="qualifier">const</span> *x) {
+  <span class="small_keyword">return</span> reinterpret_cast&lt;T&gt;(<span class="qualifier">const</span>_cast&lt;U*&gt;(x));
+}
+
+<span class="comment">// convert any pointer to non-const to any other: the T should be a pointer.
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T, <span class="qualifier">typename</span> U&gt;
+T reinterpret(U *x) {
+  <span class="small_keyword">return</span> reinterpret_cast&lt;T&gt;(x);
+}
+
+
+
+<span class="comment">// dflt init
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> dflt_init(T *p){ new(p) T(); }
+
+<span class="comment">// destroy object
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> destroy(T *p){ p-&gt;T::~T(); }
+
+<span class="comment">// copy initialise
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> copy_init (T *dst, T *src)
+{
+  new(dst) T(*src);
+}
+
+<span class="comment">// move initialise
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> move_init (T *dst, T *src)
+{
+  new(dst) T(::<span class="small_keyword">std</span>::move(*src));
+}
+
+<span class="comment">// move initialise, destroy src
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> dmove_init (T *dst, T *src)
+{
+  new(dst) T(::<span class="small_keyword">std</span>::move(*src));
+  destroy (src);
+}
+
+<span class="comment">// copy assign
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> copy_assign (T *dst, T *src)
+{
+  *dst = *src;
+}
+
+<span class="comment">// move assign
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> move_assign (T *dst, T *src)
+{
+  *dst = ::<span class="small_keyword">std</span>::move(*src);
+}
+
+<span class="comment">// move assign, destroy src
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="qualifier">void</span> dmove_assign (T *dst, T *src)
+{
+  *dst = ::<span class="small_keyword">std</span>::move(*src);
+  destroy (src);
+}
+
+<span class="big_keyword">class</span> ValueType
+{
+  <span class="qualifier">virtual</span> size_t object_size_impl()=0;
+  <span class="qualifier">virtual</span> size_t object_alignment_impl()=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> dflt_init_impl (<span class="qualifier">void</span> *)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> destroy_impl (<span class="qualifier">void</span> *)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> copy_init_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> move_init_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> copy_assign_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> move_assign_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *)=0;
+<span class="qualifier">public</span>:
+  size_t object_size() { <span class="small_keyword">return</span> object_size_impl(); }
+  size_t object_alignment() { <span class="small_keyword">return</span> object_size_impl(); }
+  <span class="qualifier">void</span> dflt_init(<span class="qualifier">void</span> *dst) { dflt_init_impl(dst); }
+  <span class="qualifier">void</span> destroy(<span class="qualifier">void</span> *dst) { destroy_impl (dst); }
+
+  <span class="qualifier">void</span> copy_init (<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { copy_init_impl(dst,src); }
+  <span class="qualifier">void</span> move_init (<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { move_init_impl(dst,src); }
+  <span class="qualifier">void</span> copy_assign(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { copy_assign_impl(dst,src); }
+  <span class="qualifier">void</span> move_assign(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { move_assign_impl(dst,src); }
+};
+
+<span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T&gt; 
+<span class="big_keyword">class</span> CxxValueType : <span class="qualifier">public</span> <span class="qualifier">virtual</span> ValueType
+{
+  size_t object_size_impl() { <span class="small_keyword">return</span> sizeof(T); }
+  size_t object_alignment_impl() { <span class="small_keyword">return</span> alignof(T); }
+  <span class="qualifier">void</span> dflt_init_impl(<span class="qualifier">void</span> *dst) { ::dflt_init&lt;T&gt;((T*)dst); }
+  <span class="qualifier">void</span> destroy_impl(<span class="qualifier">void</span> *dst) { ::dflt_init&lt;T&gt;((T*)dst); }
+  <span class="qualifier">void</span> copy_init_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { ::copy_init&lt;T&gt;((T*)dst,(T*)src); }
+  <span class="qualifier">void</span> move_init_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { ::move_init&lt;T&gt;((T*)dst,(T*)src); }
+  <span class="qualifier">void</span> copy_assign_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { ::copy_assign&lt;T&gt;((T*)dst,(T*)src); }
+  <span class="qualifier">void</span> move_assign_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) { ::move_assign&lt;T&gt;((T*)dst,(T*)src); }
+};
+
+<span class="comment">// object does NOT own the product description array
+</span><span class="comment">// should use a shared pointer thing I guess
+</span><span class="big_keyword">class</span> ProductType : <span class="qualifier">public</span> <span class="qualifier">virtual</span> ValueType
+{
+  size_t n;
+  ValueType **cp;
+<span class="qualifier">public</span>:
+  ProductType (ValueType **p, size_t m) : cp(p), n(m) {}
+  ~ProductType();
+  size_t object_size_impl() override;
+  size_t object_alignment_impl() override;
+  <span class="qualifier">void</span> dflt_init_impl (<span class="qualifier">void</span> *) override;
+  <span class="qualifier">void</span> destroy_impl (<span class="qualifier">void</span> *) override;
+  <span class="qualifier">void</span> copy_init_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *) override;
+  <span class="qualifier">void</span> move_init_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *) override;
+  <span class="qualifier">void</span> copy_assign_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *) override;
+  <span class="qualifier">void</span> move_assign_impl(<span class="qualifier">void</span> *, <span class="qualifier">void</span> *) override;
+};
+
+
+<span class="comment">// special names for tuples with only a few components
+</span><span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T0, <span class="qualifier">typename</span> T1&gt; 
+<span class="big_keyword">struct</span> _tt2 {
+  T0 mem_0;
+  T1 mem_1;
+  _tt2() {}
+  _tt2 (T0 _a0, T1 _a1) : mem_0(_a0), mem_1(_a1) {}
+};
+
+<span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T0, <span class="qualifier">typename</span> T1, <span class="qualifier">typename</span> T2&gt; 
+<span class="big_keyword">struct</span> _tt3 {
+  T0 mem_0;
+  T1 mem_1;
+  T2 mem_2;
+  _tt3() {}
+  _tt3 (T0 _a0, T1 _a1, T2 _a2) : 
+    mem_0(_a0), mem_1(_a1),mem_2(_a2) 
+    {}
+};
+
+<span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T0, <span class="qualifier">typename</span> T1, <span class="qualifier">typename</span> T2, <span class="qualifier">typename</span> T3&gt; 
+<span class="big_keyword">struct</span> _tt4 {
+  T0 mem_0;
+  T1 mem_1;
+  T2 mem_2;
+  T3 mem_3;
+  _tt4() {}
+  _tt4 (T0 _a0, T1 _a1, T2 _a2, T3 _a3) : 
+    mem_0(_a0), mem_1(_a1),mem_2(_a2), mem_3(_a3) 
+    {}
+};
+
+<span class="big_keyword">template</span>&lt;<span class="qualifier">typename</span> T0, <span class="qualifier">typename</span> T1, <span class="qualifier">typename</span> T2, <span class="qualifier">typename</span> T3, <span class="qualifier">typename</span> T4&gt; 
+<span class="big_keyword">struct</span> _tt5 {
+  T0 mem_0;
+  T1 mem_1;
+  T2 mem_2;
+  T3 mem_3;
+  T4 mem_4;
+  _tt5() {}
+  _tt5 (T0 _a0, T1 _a1, T2 _a2, T3 _a3, T4 _a4) : 
+    mem_0(_a0), mem_1(_a1),mem_2(_a2), mem_3(_a3), mem_4(_a4)
+    {}
+};
+
+<span class="comment">//-----------------------------------------
+</span><span class="comment">// C function types
+</span><span class="comment">// Felix cannot handle these in type specifications so we have to give aliases.
+</span><span class="comment">// 
+</span><span class="comment">// Usage is like this:
+</span><span class="comment">// type myfun1[R] = "type1<?1>::cfun"
+</span><span class="comment">//-----------------------------------------
+</span>
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> R&gt;
+<span class="big_keyword">struct</span> _type1 {
+ <span class="big_keyword">typedef</span> R (*cfun)(<span class="qualifier">void</span>);
+ <span class="big_keyword">typedef</span> <span class="qualifier">void</span> (*cproc)(R);
+};
+
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> R,<span class="big_keyword">class</span> P1&gt;
+<span class="big_keyword">struct</span> _type2 {
+ <span class="big_keyword">typedef</span> R (*cfun)(P1);
+ <span class="big_keyword">typedef</span> <span class="qualifier">void</span> (*cproc)(R,P1);
+};
+
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> R,<span class="big_keyword">class</span> P1, <span class="big_keyword">class</span> P2&gt;
+<span class="big_keyword">struct</span> _type3 {
+ <span class="big_keyword">typedef</span> R (*cfun)(P1,P2);
+ <span class="big_keyword">typedef</span> <span class="qualifier">void</span> (*cproc)(R,P1,P2);
+};
+
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> R,<span class="big_keyword">class</span> P1, <span class="big_keyword">class</span> P2, <span class="big_keyword">class</span> P3&gt;
+<span class="big_keyword">struct</span> _type4 {
+ <span class="big_keyword">typedef</span> R (*cfun)(P1,P2,P3);
+ <span class="big_keyword">typedef</span> <span class="qualifier">void</span> (*cproc)(R,P1,P2,P3);
+};
+
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> R,<span class="big_keyword">class</span> P1, <span class="big_keyword">class</span> P2, <span class="big_keyword">class</span> P3, <span class="big_keyword">class</span> P4&gt;
+<span class="big_keyword">struct</span> _type5 {
+ <span class="big_keyword">typedef</span> R (*cfun)(P1,P2,P3,P4);
+ <span class="big_keyword">typedef</span> <span class="qualifier">void</span> (*cproc)(R,P1,P2,P3,P4);
+};
+
+
+
+
+#<span class="preproc">define</span> FLX_EXEC_FAILURE(f,op,what) \
+  throw ::flx::rtl::flx_exec_failure_t (f,op,what)
+
+#<span class="preproc">define</span> FLX_HALT(f,sl,sc,el,ec,s) \
+  throw ::flx::rtl::flx_halt_t (::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),__FILE__,__LINE__,s)
+
+<span class="comment">// note call should be trace(&v,...) however that requires
+</span><span class="comment">// compiler support to make a trace record for each tracepoint
+</span><span class="comment">// so we use NULL for now
+</span>
+#<span class="preproc">ifdef</span> FLX_ENABLE_TRACE
+#<span class="preproc">define</span> FLX_TRACE(v,f,sl,sc,el,ec,s) \
+  ::flx::rtl::flx_trace (NULL,::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),__FILE__,__LINE__,s)
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> FLX_TRACE(v,f,sl,sc,el,ec,s)
+#<span class="preproc">endif</span>
+
+#<span class="preproc">define</span> FLX_MATCH_FAILURE(f,sl,sc,el,ec) \
+  throw ::flx::rtl::flx_match_failure_t (::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),__FILE__,__LINE__)
+
+#<span class="preproc">define</span> FLX_DROPTHRU_FAILURE(f,sl,sc,el,ec) \
+  throw ::flx::rtl::flx_dropthru_failure_t (::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),__FILE__,__LINE__)
+
+#<span class="preproc">define</span> FLX_ASSERT_FAILURE(f,sl,sc,el,ec) \
+  throw ::flx::rtl::flx_assert_failure_t (::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),__FILE__,__LINE__)
+
+#<span class="preproc">define</span> FLX_ASSERT2_FAILURE(f,sl,sc,el,ec,f2,sl2,sc2,el2,ec2) \
+  throw ::flx::rtl::flx_assert2_failure_t (\
+    ::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),\
+    ::flx::rtl::flx_range_srcref_t(f2,sl2,sc2,el2,sc2),\
+    __FILE__,__LINE__)
+
+#<span class="preproc">define</span> FLX_AXIOM_CHECK_FAILURE(f,sl,sc,el,ec,f2,sl2,sc2,el2,ec2) \
+  throw ::flx::rtl::flx_axiom_check_failure_t (\
+    ::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),\
+    ::flx::rtl::flx_range_srcref_t(f2,sl2,sc2,el2,sc2),\
+    __FILE__,__LINE__)
+
+#<span class="preproc">define</span> FLX_RANGE_FAILURE(mi,v,ma,f,sl,sc,el,ec) \
+  throw ::flx::rtl::flx_range_failure_t (mi,v,ma,::flx::rtl::flx_range_srcref_t(f,sl,sc,el,ec),__FILE__,__LINE__)
+
+<span class="comment">// for generated code in body file
+</span>#<span class="preproc">define</span> INIT_PC pc=0;
+    <span class="comment">///< interior program counter
+</span>
+#<span class="small_keyword">if</span> FLX_CGOTO
+  #<span class="preproc">ifdef</span> __clang__
+  #<span class="preproc">define</span> FLX_START_SWITCH (&amp;&amp;_start_switch); _start_switch: <span class="small_keyword">if</span>(pc)<span class="small_keyword">goto</span> *pc;
+  #<span class="preproc">else</span>
+  #<span class="preproc">define</span> FLX_START_SWITCH _start_switch: <span class="small_keyword">if</span>(pc)<span class="small_keyword">goto</span> *pc;
+  #<span class="preproc">endif</span>
+  #<span class="preproc">define</span> FLX_LOCAL_LABEL_ADDRESS(x) &amp;&amp;case_##x
+  #<span class="preproc">define</span> FLX_SET_PC(x) pc=&amp;&amp;case_##x;
+  #<span class="preproc">define</span> FLX_CASE_LABEL(x) case_##x:;
+  #<span class="preproc">define</span> FLX_DECLARE_LABEL(n,i,x) \
+    <span class="qualifier">extern</span> <span class="qualifier">void</span> f##i##_##n##_##x(<span class="qualifier">void</span>) __asm__(<span class="fstring">"l"</span>#i<span class="fstring">"_"</span>#n<span class="fstring">"_"</span>#x);
+  #<span class="preproc">define</span> FLX_LABEL(n,i,x) x:\
+    __asm__(<span class="fstring">".global l"</span>#i<span class="fstring">"_"</span>#n<span class="fstring">"_"</span>#x);\
+    __asm__(<span class="fstring">"l"</span>#i<span class="fstring">"_"</span>#n<span class="fstring">"_"</span>#x<span class="fstring">":"</span>);\
+    __asm__(<span class="fstring">""</span>::<span class="fstring">"g"</span>(&amp;&amp;x));
+  #<span class="preproc">define</span> FLX_FARTARGET(n,i,x) (<span class="qualifier">void</span>*)&amp;f##i##_##n##_##x
+  #<span class="preproc">define</span> FLX_END_SWITCH \
+    _flx_dead_frame: throw ::flx::rtl::flx_dead_frame_failure_t(__FILE__,__LINE__);
+#<span class="preproc">else</span>
+  #<span class="preproc">define</span> FLX_START_SWITCH _start_switch: switch(pc){case 0:;
+  #<span class="preproc">define</span> FLX_LOCAL_LABEL_ADDRESS(x) x
+  #<span class="preproc">define</span> FLX_SET_PC(x) pc=x;
+  #<span class="preproc">define</span> FLX_CASE_LABEL(x) case x:;
+  #<span class="preproc">define</span> FLX_DECLARE_LABEL(n,i,x)
+  #<span class="preproc">define</span> FLX_LABEL(n,i,x) case n: x:;
+  #<span class="preproc">define</span> FLX_FARTARGET(n,i,x) n
+  #<span class="preproc">define</span> FLX_END_SWITCH \
+    case -1: throw ::flx::rtl::flx_dead_frame_failure_t(__FILE__,__LINE__);\
+    default: throw ::flx::rtl::flx_switch_failure_t(__FILE__,__LINE__); }
+#<span class="preproc">endif</span>
+
+<span class="comment">//
+</span><span class="comment">// We do a direct long jump to a target as follows:
+</span><span class="comment">// 
+</span><span class="comment">// If the target frame is just ourself (this) 
+</span><span class="comment">// we set the pc and just goto the start of the procedure,
+</span><span class="comment">// allowing the switch/computed goto there to do the local jump.
+</span><span class="comment">//
+</span><span class="comment">// If the target is foreign, we force the foreign frame pc
+</span><span class="comment">// to the target pc, and then return that frame to the driver
+</span><span class="comment">// so it will resume that procedure, executing the starting switch,
+</span><span class="comment">// which now jumps to the required location.
+</span><span class="comment">//
+</span>#<span class="preproc">define</span> FLX_DIRECT_LONG_JUMP(ja) \
+  { \
+    ::flx::rtl::jump_address_t j = ja; \
+    <span class="small_keyword">if</span>(j.target_frame == this) { \
+      pc = j.local_pc; \
+      <span class="small_keyword">goto</span> _start_switch; \
+    } else { \
+      j.target_frame-&gt;pc = j.local_pc; \
+      <span class="small_keyword">return</span> j.target_frame; \
+    } \
+  }
+
+#<span class="preproc">define</span> FLX_RETURN \
+{ \
+  con_t *tmp = _caller; \
+  _caller = 0; \
+  <span class="small_keyword">return</span> tmp; \
+}
+
+#<span class="preproc">define</span> FLX_NEWP(x) new(*ptf-&gt;gcp,x##_ptr_map,true)x
+
+#<span class="preproc">define</span> FLX_FINALISER(x) \
+<span class="qualifier">static</span> <span class="qualifier">void</span> x##_finaliser(::flx::gc::generic::collector_t *, <span class="qualifier">void</span> *__p){\
+  ((x*)__p)-&gt;~x();\
+}
+
+
+<span class="comment">//#define FLX_FMEM_INIT_ONLY : ptf(_ptf)
+</span><span class="comment">//#define FLX_FMEM_INIT : ptf(_ptf),
+</span><span class="comment">//#define FLX_FPAR_PASS_ONLY ptf
+</span><span class="comment">//#define FLX_FPAR_PASS ptf,
+</span><span class="comment">//#define FLX_APAR_PASS_ONLY _ptf
+</span><span class="comment">//#define FLX_APAR_PASS _ptf,
+</span><span class="comment">//#define _PTF _ptf->
+</span><span class="comment">//#define _PTFV _ptf
+</span>#<span class="preproc">define</span> FLX_DEF_THREAD_FRAME
+
+#<span class="preproc">define</span> FLX_FRAME_WRAPPERS(mname,name) \
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> FLX_EXPORT mname::thread_frame_t *name##_create_thread_frame(\
+  ::flx::gc::generic::gc_profile_t *gcp,\
+  ::flx::run::flx_world *world\
+) {\
+  mname::thread_frame_t *p = new(*gcp,mname::thread_frame_t_ptr_map,false) mname::thread_frame_t();\
+  p-&gt;world = world;\
+  p-&gt;gcp = gcp;\
+  <span class="small_keyword">return</span> p;\
+}
+
+<span class="comment">// init is a heap procedure
+</span>#<span class="preproc">define</span> FLX_START_WRAPPER(mname,name,x)\
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> FLX_EXPORT ::flx::rtl::con_t *name##_flx_start(\
+  mname::thread_frame_t *__ptf,\
+  <span class="qualifier">int</span> argc,\
+  <span class="qualifier">char</span> **argv,\
+  FILE *stdin_,\
+  FILE *stdout_,\
+  FILE *stderr_\
+) {\
+  __ptf-&gt;argc = argc;\
+  __ptf-&gt;argv = argv;\
+  __ptf-&gt;flx_stdin = stdin_;\
+  __ptf-&gt;flx_stdout = stdout_;\
+  __ptf-&gt;flx_stderr = stderr_;\
+  <span class="small_keyword">return</span> (new(*__ptf-&gt;gcp,mname::x##_ptr_map,false) \
+    mname::x(__ptf)) -&gt;call(0);\
+}
+
+<span class="comment">// init is a stack procedure
+</span>#<span class="preproc">define</span> FLX_STACK_START_WRAPPER_PTF(mname,name,x)\
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> FLX_EXPORT ::flx::rtl::con_t *name##_flx_start(\
+  mname::thread_frame_t *__ptf,\
+  <span class="qualifier">int</span> argc,\
+  <span class="qualifier">char</span> **argv,\
+  FILE *stdin_,\
+  FILE *stdout_,\
+  FILE *stderr_\
+) {\
+  __ptf-&gt;argc = argc;\
+  __ptf-&gt;argv = argv;\
+  __ptf-&gt;flx_stdin = stdin_;\
+  __ptf-&gt;flx_stdout = stdout_;\
+  __ptf-&gt;flx_stderr = stderr_;\
+  mname::x(__ptf).stack_call();\
+  <span class="small_keyword">return</span> 0;\
+}
+
+
+<span class="comment">// init is a stack procedure, no PTF
+</span>#<span class="preproc">define</span> FLX_STACK_START_WRAPPER_NOPTF(mname,name,x)\
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> FLX_EXPORT ::flx::rtl::con_t *name##_flx_start(\
+  mname::thread_frame_t *__ptf,\
+  <span class="qualifier">int</span> argc,\
+  <span class="qualifier">char</span> **argv,\
+  FILE *stdin_,\
+  FILE *stdout_,\
+  FILE *stderr_\
+) {\
+  __ptf-&gt;argc = argc;\
+  __ptf-&gt;argv = argv;\
+  __ptf-&gt;flx_stdin = stdin_;\
+  __ptf-&gt;flx_stdout = stdout_;\
+  __ptf-&gt;flx_stderr = stderr_;\
+  mname::x().stack_call();\
+  <span class="small_keyword">return</span> 0;\
+}
+
+
+<span class="comment">// init is a C procedure, passed PTF
+</span>#<span class="preproc">define</span> FLX_C_START_WRAPPER_PTF(mname,name,x)\
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> FLX_EXPORT ::flx::rtl::con_t *name##_flx_start(\
+  mname::thread_frame_t *__ptf,\
+  <span class="qualifier">int</span> argc,\
+  <span class="qualifier">char</span> **argv,\
+  FILE *stdin_,\
+  FILE *stdout_,\
+  FILE *stderr_\
+) {\
+  __ptf-&gt;argc = argc;\
+  __ptf-&gt;argv = argv;\
+  __ptf-&gt;flx_stdin = stdin_;\
+  __ptf-&gt;flx_stdout = stdout_;\
+  __ptf-&gt;flx_stderr = stderr_;\
+  mname::x(__ptf);\
+  <span class="small_keyword">return</span> 0;\
+}
+
+<span class="comment">// init is a C procedure, NOT passed PTF
+</span>#<span class="preproc">define</span> FLX_C_START_WRAPPER_NOPTF(mname,name,x)\
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> FLX_EXPORT ::flx::rtl::con_t *name##_flx_start(\
+  mname::thread_frame_t *__ptf,\
+  <span class="qualifier">int</span> argc,\
+  <span class="qualifier">char</span> **argv,\
+  FILE *stdin_,\
+  FILE *stdout_,\
+  FILE *stderr_\
+) {\
+  mname::x();\
+  <span class="small_keyword">return</span> 0;\
+}
+
+
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='RTL_h'><img src='/share/src/web/images/minus.gif' id='RTL' onclick='toggle(this,"RTL_d")' alt='+'/> 3 RTL</h1><div id='RTL_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_rtl.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_RTL_H__
+#<span class="preproc">define</span> __FLX_RTL_H__
+
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_serialisers.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_shapes.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_compiler_support_headers.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_compiler_support_bodies.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_continuation.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_svc.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;string&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;functional&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdint&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;mutex&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;list&gt;</span> 
+#<span class="preproc">include</span> <span class="fstring">&lt;atomic&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_spinlock.hpp"</span>
+
+<span class="comment">// forward decl
+</span><span class="big_keyword">namespace</span> flx {<span class="big_keyword">namespace</span> run { <span class="big_keyword">struct</span> RTL_EXTERN fthread_list; }}
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+
+
+<span class="big_keyword">typedef</span> <span class="qualifier">void</span> *<span class="qualifier">void</span>_pointer;
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// Compact Linear Type and projection  
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">typedef</span> ::<span class="small_keyword">std</span>::uint64_t cl_t; 
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// Felix system classes
+</span><span class="comment">// ********************************************************
+</span>
+
+<span class="big_keyword">struct</span> RTL_EXTERN muxguard;
+
+<span class="comment">// MOVED TO flx_exceptions
+</span><span class="comment">//struct RTL_EXTERN con_t;     // continuation
+</span><span class="big_keyword">struct</span> RTL_EXTERN jump_address_t;     <span class="comment">// label variable type
+</span><span class="big_keyword">struct</span> RTL_EXTERN fthread_t; <span class="comment">// f-thread
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN _uctor_;   <span class="comment">// union constructor
+</span><span class="comment">//struct RTL_EXTERN _variant_;   // variant constructor
+</span><span class="big_keyword">struct</span> RTL_EXTERN schannel_t;   <span class="comment">// synchronous channel type
+</span><span class="big_keyword">struct</span> RTL_EXTERN clptr_t;  <span class="comment">// pointer to compact linear product component
+</span><span class="big_keyword">struct</span> RTL_EXTERN clprj_t;  <span class="comment">// compact linear projection
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN muxguard {
+<span class="qualifier">private</span>:
+   muxguard() = delete;
+   muxguard(muxguard <span class="qualifier">const</span>&amp;) = delete;
+   muxguard *operator=(muxguard <span class="qualifier">const</span>&amp;)=delete;
+  ::<span class="small_keyword">std</span>::mutex *m;
+<span class="qualifier">public</span>:
+  muxguard (::<span class="small_keyword">std</span>::mutex *p);
+  ~muxguard ();
+};
+ 
+ 
+<span class="comment">// MOVE THIS TO RTL AND PROVIDE SUITABLE RTTI SO GC KNOWS ABOUT THE FRAME POINTER
+</span><span class="big_keyword">struct</span> RTL_EXTERN jump_address_t
+{
+  con_t *target_frame;
+  FLX_LOCAL_LABEL_VARIABLE_TYPE local_pc;
+
+  jump_address_t (con_t *tf, FLX_LOCAL_LABEL_VARIABLE_TYPE lpc) : 
+    target_frame (tf), local_pc (lpc) 
+  {}
+  jump_address_t () : target_frame (0), local_pc(0) {}
+  jump_address_t (con_t *tf) : target_frame(tf), local_pc(0) {}
+  <span class="comment">// default copy constructor and assignment
+</span>};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// FTHREAD. Felix threads
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN fthread_t <span class="comment">// fthread abstraction
+</span>{
+  con_t *cc;                    <span class="comment">///< current continuation
+</span>  fthread_t *next;              <span class="comment">///< link to next fthread, to be used in scheduler queue and schannels
+</span>  ::flx::run::fthread_list *owner; <span class="comment">///< weak pointer to owning scheduler model object
+</span>  <span class="comment">//fthread_t();                  ///< dead thread, suitable for assignment
+</span>  <span class="comment">//fthread_t(con_t*);            ///< make thread from a continuation
+</span>  fthread_t(con_t*, ::flx::run::fthread_list *);            <span class="comment">///< make thread from a continuation
+</span>  svc_req_t *run();               <span class="comment">///< run until dead or driver service request
+</span>  <span class="qualifier">void</span> kill();                  <span class="comment">///< kill by detaching the continuation
+</span>  svc_req_t *get_svc()<span class="qualifier">const</span>;      <span class="comment">///< get current service request of waiting thread
+</span><span class="qualifier">private</span>: <span class="comment">// uncopyable
+</span>  fthread_t(fthread_t <span class="qualifier">const</span>&amp;) = delete;
+  <span class="qualifier">void</span> operator=(fthread_t <span class="qualifier">const</span>&amp;) = delete;
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// SCHANNEL. Synchronous channels
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN schannel_t
+{
+  fthread_t *top; <span class="comment">// has to be public for offsetof macro
+</span>
+  <span class="qualifier">void</span> push_reader(fthread_t *);        <span class="comment">///< add a reader
+</span>  fthread_t *pop_reader();              <span class="comment">///< pop a reader, NULL if none
+</span>  <span class="qualifier">void</span> push_writer(fthread_t *);        <span class="comment">///< add a writer
+</span>  fthread_t *pop_writer();              <span class="comment">///< pop a writer, NULL if none
+</span>  schannel_t();
+
+<span class="qualifier">private</span>: <span class="comment">// uncopyable
+</span>  schannel_t(schannel_t <span class="qualifier">const</span>&amp;) = delete;
+  <span class="qualifier">void</span> operator= (schannel_t <span class="qualifier">const</span>&amp;) = delete;
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// VARIANTS. Felix union type
+</span><span class="comment">/// note: non-polymorphic, so ctor can be inline
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN _uctor_
+{
+  <span class="qualifier">int</span> variant;  <span class="comment">///< Variant code
+</span>  <span class="qualifier">void</span> *data;   <span class="comment">///< Heap variant constructor data
+</span>  _uctor_() : variant(-1), data(0) {}
+  _uctor_(<span class="qualifier">int</span> i, <span class="qualifier">void</span> *d) : variant(i), data(d) {}
+  _uctor_(<span class="qualifier">int</span> *a, _uctor_ x) : variant(a[x.variant]), data(x.data) {}
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// VARIANTS. Felix variant type
+</span><span class="comment">/// note: non-polymorphic, so ctor can be inline
+</span><span class="comment">// ********************************************************
+</span>
+<span class="comment">/* NOT USED ANY MORE
+struct RTL_EXTERN _variant_
+{
+  char const *vname;  ///< Variant code
+  void *vdata;   ///< Heap variant constructor data
+  _variant_() : vname(""), vdata(0) {}
+  _variant_(char const *n, void *d) : vname(n), vdata(d) {}
+};
+**</span>/
+
+
+<span class="comment">// ===============================================================
+</span><span class="comment">// COMPACT LINEAR STUFF
+</span><span class="comment">// ===============================================================
+</span>
+<span class="comment">// ********************************************************
+</span><span class="comment">/// COMPACT LINEAR PROJECTIONS 
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN clprj_t 
+{
+  cl_t divisor;
+  cl_t modulus;
+  clprj_t () : divisor(1), modulus(-1) {}
+  clprj_t (cl_t d, cl_t m) : divisor (d), modulus (m) {}
+
+};
+
+<span class="comment">// reverse compose projections left \odot right
+</span><span class="qualifier">inline</span> clprj_t rcompose (clprj_t left, clprj_t right) {
+  <span class="small_keyword">return</span> clprj_t (left.divisor * right.divisor, right.modulus);
+}
+
+<span class="comment">// apply projection to value
+</span><span class="qualifier">inline</span> cl_t apply (clprj_t prj, cl_t v) {
+  <span class="small_keyword">return</span> v / prj.divisor % prj.modulus;
+}
+
+<span class="comment">// ********************************************************
+</span><span class="comment">/// COMPACT LINEAR POINTERS
+</span><span class="comment">// ********************************************************
+</span>
+<span class="big_keyword">struct</span> RTL_EXTERN clptr_t 
+{
+  cl_t *p;
+  cl_t divisor;
+  cl_t modulus;
+  clptr_t () : p(0), divisor(1),modulus(-1) {}
+  clptr_t (cl_t *_p, cl_t d, cl_t m) : p(_p), divisor(d),modulus(m) {}
+
+  <span class="comment">// upgrade from ordinary pointer
+</span>  clptr_t (cl_t *_p, cl_t siz) : p (_p), divisor(1), modulus(siz) {}
+
+  <span class="comment">// add projection to existing compact linear pointer
+</span>  clptr_t (clptr_t _p, cl_t div, cl_t siz) : p(_p.p), divisor (_p.divisor * div), modulus(siz) {}
+};
+
+<span class="big_keyword">struct</span> RTL_EXTERN <span class="qualifier">const</span>_clptr_t 
+{
+  cl_t <span class="qualifier">const</span> *p;
+  cl_t divisor;
+  cl_t modulus;
+  <span class="qualifier">const</span>_clptr_t () : p(0), divisor(1),modulus(-1) {}
+  <span class="qualifier">const</span>_clptr_t (cl_t <span class="qualifier">const</span> *_p, cl_t d, cl_t m) : p(_p), divisor(d),modulus(m) {}
+
+  <span class="comment">// copy constructors
+</span>  <span class="qualifier">const</span>_clptr_t (<span class="qualifier">const</span>_clptr_t <span class="qualifier">const</span> &amp;x) : p(x.p), divisor(x.divisor), modulus(x.modulus) {}
+  <span class="qualifier">const</span>_clptr_t (clptr_t <span class="qualifier">const</span> &amp;x) : p(x.p), divisor(x.divisor), modulus(x.modulus) {}
+
+  <span class="comment">// upgrade from ordinary pointer
+</span>  <span class="qualifier">const</span>_clptr_t (cl_t <span class="qualifier">const</span> *_p, cl_t siz) : p (_p), divisor(1), modulus(siz) {}
+
+  <span class="comment">// add projection to existing compact linear pointer
+</span>  <span class="qualifier">const</span>_clptr_t (<span class="qualifier">const</span>_clptr_t _p, cl_t div, cl_t siz) : p(_p.p), divisor (_p.divisor * div), modulus(siz) {}
+};
+
+
+<span class="comment">// apply projection to pointer
+</span><span class="qualifier">inline</span> clptr_t applyprj (clptr_t cp, clprj_t d)  {
+  <span class="small_keyword">return</span>  clptr_t (cp.p, d.divisor * cp.divisor, d.modulus);
+}
+
+<span class="qualifier">inline</span> <span class="qualifier">const</span>_clptr_t applyprj (<span class="qualifier">const</span>_clptr_t cp, clprj_t d)  {
+  <span class="small_keyword">return</span>  <span class="qualifier">const</span>_clptr_t (cp.p, d.divisor * cp.divisor, d.modulus);
+}
+
+<span class="comment">// dereference
+</span><span class="qualifier">inline</span> cl_t clt_deref(clptr_t q) { <span class="small_keyword">return</span> *q.p / q.divisor % q.modulus; }
+<span class="qualifier">inline</span> cl_t clt_deref(<span class="qualifier">const</span>_clptr_t q) { <span class="small_keyword">return</span> *q.p / q.divisor % q.modulus; }
+<span class="qualifier">inline</span> cl_t operator*(clptr_t q) { <span class="small_keyword">return</span> *q.p / q.divisor % q.modulus; }
+<span class="qualifier">inline</span> cl_t operator*(<span class="qualifier">const</span>_clptr_t q) { <span class="small_keyword">return</span> *q.p / q.divisor % q.modulus; }
+
+
+<span class="comment">// storeat
+</span><span class="comment">// NOTE: not available for const version
+</span><span class="qualifier">inline</span> <span class="qualifier">void</span> storeat (clptr_t q, cl_t v) {
+    *q.p = *q.p - (*q.p / q.divisor % q.modulus) * q.divisor + v * q.divisor;
+    <span class="comment">//*q.p -= ((*q.p / q.divisor % q.modulus) - v) * q.divisor; //???
+</span>}
+
+<span class="comment">// ===============================================================
+</span><span class="comment">// TRACE
+</span><span class="comment">// ===============================================================
+</span><span class="big_keyword">struct</span> flx_trace_t
+{
+  size_t count;
+  <span class="qualifier">int</span> enable_trace;
+};
+
+<span class="qualifier">extern</span> RTL_EXTERN <span class="qualifier">int</span> flx_enable_trace;
+
+RTL_EXTERN <span class="qualifier">void</span> flx_trace(flx_trace_t* tr,flx_range_srcref_t sr, <span class="qualifier">char</span> <span class="qualifier">const</span> *file, <span class="qualifier">int</span> line, <span class="qualifier">char</span> <span class="qualifier">const</span> *msg);
+
+}} <span class="comment">// namespaces
+</span>
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/rtl/flx_rtl.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_shapes.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdio&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cassert&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstddef&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdint.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_exceptions.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_collector.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_serialisers.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_continuation.hpp"</span>
+
+<span class="comment">// main run time library code
+</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+
+
+muxguard::muxguard (::<span class="small_keyword">std</span>::mutex *p): m(p) { <span class="small_keyword">if</span> (m)m-&gt;lock(); }
+muxguard::~muxguard () { <span class="small_keyword">if</span> (m)m-&gt;unlock(); }
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// fthread_t implementation
+</span><span class="comment">// ********************************************************
+</span>
+<span class="comment">//fthread_t::fthread_t() : cc(nullptr), next(nullptr) {}
+</span><span class="comment">//fthread_t::fthread_t(con_t *a) : cc(a), next(nullptr) {}
+</span>fthread_t::fthread_t(con_t *a, ::flx::run::fthread_list *b) : cc(a), owner(b), next(nullptr) {}
+
+<span class="qualifier">void</span> fthread_t::kill() { cc = nullptr; }
+
+svc_req_t *fthread_t::get_svc()<span class="qualifier">const</span> { <span class="small_keyword">return</span> cc?cc-&gt;p_svc:nullptr; }
+
+svc_req_t *fthread_t::run() {
+  <span class="small_keyword">if</span>(!cc) <span class="small_keyword">return</span> nullptr; <span class="comment">// dead
+</span>restep:
+  cc-&gt;p_svc = nullptr;
+step:
+  <span class="comment">//fprintf(stderr,"[fthread_t::run::step] cc=%p->",cc);
+</span>  try { cc = cc-&gt;resume(); }
+  catch (con_t *x) { cc = x; }
+
+  <span class="comment">//fprintf(stderr,"[fthread_t::run::step] ->%p\n",cc);
+</span>  <span class="small_keyword">if</span>(!cc) <span class="small_keyword">return</span> nullptr; <span class="comment">// died
+</span>
+  <span class="small_keyword">if</span>(cc-&gt;p_svc)
+  {
+    <span class="comment">//fprintf(stderr,"[fthread_t::run::service call] ->%d\n",cc->p_svc);
+</span>    switch(cc-&gt;p_svc-&gt;svc_req)
+    {
+<span class="comment">/*
+      case svc_get_fthread:
+        // NEW VARIANT LAYOUT RULES
+        // One less level of indirection here
+        //**(fthread_t***)(cc->p_svc->data) = this;
+        *(fthread_t**)(cc->p_svc->data) = this;
+        goto restep;      // handled
+**</span>/
+      <span class="comment">//case svc_yield:
+</span>      <span class="comment">//  goto restep;
+</span>
+      <span class="comment">// we don't know what to do with the request,
+</span>      <span class="comment">// so pass the buck to the driver
+</span>      default:
+        <span class="small_keyword">return</span> cc-&gt;p_svc;
+    }
+  }
+  <span class="small_keyword">goto</span> step;
+}
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// schannel_t implementation
+</span><span class="comment">// ********************************************************
+</span>
+schannel_t::schannel_t () : top(nullptr) {}
+
+<span class="comment">// PRECONDITION: channel is empty or has readers
+</span><span class="qualifier">void</span> schannel_t::push_reader(fthread_t *r)
+{
+  r-&gt;next = top;
+  top = r;
+}
+
+<span class="comment">// PRECONDITION: channel is empty or has writers
+</span><span class="qualifier">void</span> schannel_t::push_writer(fthread_t *w)
+{
+  w-&gt;next = top;
+  top = (fthread_t*)((uintptr_t)w | 1u);
+}
+
+fthread_t *schannel_t::pop_reader()
+{
+  <span class="small_keyword">if</span> (top == nullptr || (uintptr_t)top &amp; 1u) <span class="small_keyword">return</span> nullptr; <span class="comment">// NULL or low bit set
+</span>  fthread_t *tmp = top;
+  top = tmp-&gt;next;
+  tmp-&gt;next = nullptr; <span class="comment">// for GC
+</span>  <span class="small_keyword">return</span> tmp;
+}
+
+fthread_t *schannel_t::pop_writer()
+{
+  <span class="small_keyword">if</span> (!((uintptr_t)top &amp; 1u)) <span class="small_keyword">return</span> nullptr; <span class="comment">// low bit clear (includes NULL case)
+</span>  fthread_t *tmp = (fthread_t*)((uintptr_t)top &amp; ~(uintptr_t)1u); <span class="comment">// mask out low bit
+</span>  top = tmp-&gt;next;
+  tmp-&gt;next = nullptr; <span class="comment">// for GC
+</span>  <span class="small_keyword">return</span> tmp;
+}
+<span class="comment">// ********************************************************
+</span><span class="comment">// trace feature
+</span><span class="comment">// ********************************************************
+</span>
+<span class="qualifier">int</span> flx_enable_trace=1;
+size_t flx_global_trace_count=0uL;
+
+<span class="qualifier">void</span> flx_trace(flx_trace_t* tr,flx_range_srcref_t sr, <span class="qualifier">char</span> <span class="qualifier">const</span> *file, <span class="qualifier">int</span> line, <span class="qualifier">char</span> <span class="qualifier">const</span> *msg)
+{
+  <span class="small_keyword">if</span>(!flx_enable_trace)<span class="small_keyword">return</span>;
+  flx_global_trace_count++;
+  <span class="small_keyword">if</span>(tr)
+  {
+    tr-&gt;count++;
+    <span class="small_keyword">if</span>(tr-&gt;enable_trace)
+    {
+      fprintf(stderr,<span class="fstring">"%zu : %s\n"</span>,tr-&gt;count,msg);
+      print_loc(stderr,sr,file,line);
+    }
+  }
+  else
+  {
+    fprintf(stderr,<span class="fstring">"%zu : %s\n"</span>,flx_global_trace_count,msg);
+    print_loc(stderr,sr,file,line);
+  }
+}
+}}
+
+ProductType::~ProductType(){}
+
+size_t ProductType::object_size_impl() {
+  size_t s = 0;
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i=0; i&lt;n; ++i) s+=cp[i]-&gt;object_size();
+  <span class="small_keyword">return</span> s;
+}
+
+size_t ProductType::object_alignment_impl() {
+  size_t s = 0;
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i=0; i&lt;n; ++i) s = ::<span class="small_keyword">std</span>::max(s,cp[i]-&gt;object_alignment());
+  <span class="small_keyword">return</span> s;
+}
+
+<span class="comment">// if a is aligned then a%amt == 0
+</span><span class="comment">// otherwise a%amt is the amount over the previously aligned
+</span><span class="comment">// address, so we subtract it to get the previously aligned address
+</span><span class="comment">// and then add the amt back to get the next one.
+</span>uintptr_t round_up (uintptr_t a, size_t amt) {
+  size_t adj = a % amt;
+  <span class="small_keyword">return</span> adj? a + amt - a%amt:a;
+}
+#<span class="preproc">define</span> INCR(p,a) *(<span class="qualifier">unsigned</span> <span class="qualifier">char</span> **)p += a;
+
+<span class="qualifier">void</span> *round_up (<span class="qualifier">void</span> *a, size_t amt) { 
+  <span class="small_keyword">return</span> (<span class="qualifier">void</span>*)round_up((uintptr_t)a, amt); 
+}
+
+<span class="qualifier">void</span> ProductType::dflt_init_impl (<span class="qualifier">void</span> *p) {
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i = 0; i&lt;n; ++i) {
+    auto vt = cp[i];
+    p = round_up(p,vt-&gt;object_alignment());
+    vt-&gt;dflt_init(p);
+    INCR(p,vt-&gt;object_size());
+  }
+};
+
+<span class="qualifier">void</span> ProductType::destroy_impl (<span class="qualifier">void</span> *p) {
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i = 0; i&lt;n; ++i) {
+    auto vt = cp[i];
+    p = round_up(p,vt-&gt;object_alignment());
+    vt-&gt;destroy(p);
+    INCR(p,vt-&gt;object_size());
+  }
+}
+
+<span class="qualifier">void</span> ProductType::copy_init_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) {
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i = 0; i&lt;n; ++i) {
+    auto vt = cp[i];
+    auto align = vt-&gt;object_alignment();
+    src = round_up(src,align);
+    dst = round_up(dst,align);
+    vt-&gt;copy_init(dst,src);
+    auto z = vt-&gt;object_size();
+    INCR(src,z);
+    INCR(dst,z);
+  }
+}
+
+<span class="qualifier">void</span> ProductType::move_init_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) {
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i = 0; i&lt;n; ++i) {
+    auto vt = cp[i];
+    auto align = vt-&gt;object_alignment();
+    src = round_up(src,align);
+    dst = round_up(dst,align);
+    vt-&gt;move_init(dst,src);
+    auto z = vt-&gt;object_size();
+    INCR(src, z);
+    INCR(dst, z);
+  }
+}
+
+<span class="qualifier">void</span> ProductType::copy_assign_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) {
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i = 0; i&lt;n; ++i) {
+    auto vt = cp[i];
+    auto align = vt-&gt;object_alignment();
+    src = round_up(src,align);
+    dst = round_up(dst,align);
+    vt-&gt;copy_assign(dst,src);
+    auto z = vt-&gt;object_size();
+    INCR(src, z);
+    INCR(dst, z);
+  }
+}
+
+<span class="qualifier">void</span> ProductType::move_assign_impl(<span class="qualifier">void</span> *dst, <span class="qualifier">void</span> *src) {
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> i = 0; i&lt;n; ++i) {
+    auto vt = cp[i];
+    auto align = vt-&gt;object_alignment();
+    src = round_up(src,align);
+    dst = round_up(dst,align);
+    vt-&gt;move_assign(dst,src);
+    auto z = vt-&gt;object_size();
+    INCR(src, z);
+    INCR(dst, z);
+  }
+}
+
+
+</pre></p></div><h1 id='Exec_Util_h'><img src='/share/src/web/images/minus.gif' id='Exec Util' onclick='toggle(this,"Exec_Util_d")' alt='+'/> 4 Exec Util</h1><div id='Exec_Util_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_executil.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> FLX_EXECUTIL
+#<span class="preproc">define</span> FLX_EXECUTIL
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_sync.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl { <span class="big_keyword">namespace</span> executil {
+  RTL_EXTERN <span class="qualifier">void</span> run(flx::rtl::con_t *c);
+  RTL_EXTERN <span class="qualifier">void</span> frun (::flx::gc::generic::gc_profile_t* gcp, ::flx::rtl::con_t *p);
+}}}
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/rtl/flx_executil.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_executil.hpp"</span>
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl { <span class="big_keyword">namespace</span> executil {
+
+<span class="comment">// badly named, this procedure just runs a Felix procedure, with minimal support
+</span><span class="comment">// no handling of coroutine stuff or svc is supported
+</span><span class="qualifier">void</span> run(::flx::rtl::con_t *p)
+{
+<span class="comment">//fprintf(stderr,"Starting executil::run\n");
+</span>  <span class="small_keyword">while</span>(p)
+  {
+    try { p=p-&gt;resume(); }
+    catch (::flx::rtl::con_t *x) { p = x; }
+  }
+}
+
+<span class="comment">// This utility provides more support for synchronous scheduling
+</span><span class="comment">// operations, supporting channel I/O etc but not async stuff like svc general
+</span><span class="qualifier">void</span> frun (::flx::gc::generic::gc_profile_t* gcp, ::flx::rtl::con_t *p)
+{
+<span class="comment">//fprintf(stderr,  "Starting executil::frun\n");
+</span>  ::flx::run::fthread_list *q = new(*gcp,::flx::run::fthread_list_ptr_map,false) ::flx::run::fthread_list(gcp);
+
+  ::flx::run::sync_sched *ss = 
+     new(*gcp,::flx::run::sync_sched_ptr_map,false) ::flx::run::sync_sched(false, gcp, q)
+  ;
+
+  ::flx::rtl::fthread_t *ft = 
+    new(*gcp,::flx::rtl::_fthread_ptr_map,false) ::flx::rtl::fthread_t(p,q)
+  ;
+
+  gcp-&gt;collector-&gt;add_root(ss);
+
+  <span class="comment">// this code should check the termination condition and BUG OUT
+</span>  <span class="comment">// is the client code caused a delegation eg svc general
+</span>  ss-&gt;frun(); 
+  gcp-&gt;collector-&gt;remove_root(ss);
+}
+
+}}}
+</pre></p><pre class='inclusion'>
+$PWD/src/config/flx_executil.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_executil
+Description: Felix mini scheduler
+Requires: flx
+includes: '"flx_executil.hpp"'
+</pre></p></div><h1 id='Main_h'><img src='/share/src/web/images/minus.gif' id='Main' onclick='toggle(this,"Main_d")' alt='+'/> 5 Main</h1><div id='Main_d' style='display:block'>
+<pre class='inclusion'>
+share/src/rtl/flx_main.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+<span class="comment">// THIS IS A DO NOTHING MAINLINE FOR USE WHEN STATICALLY LINKING
+</span>#<span class="preproc">include</span> <span class="fstring">"stdio.h"</span>
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> RTL_EXTERN ::flx::rtl::con_t *flx_main( <span class="qualifier">void</span> *p){ 
+  <span class="comment">//fprintf(stderr, "DUMMY flx_main()\n"); 
+</span>  <span class="small_keyword">return</span> 0; 
+}
+</pre></p></div><h1 id='Shapes_h'><img src='/share/src/web/images/minus.gif' id='Shapes' onclick='toggle(this,"Shapes_d")' alt='+'/> 6 Shapes</h1><div id='Shapes_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_rtl_shapes.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_RTL_SHAPES_HPP__
+#<span class="preproc">define</span> __FLX_RTL_SHAPES_HPP__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_gc.hpp"</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+<span class="comment">// ********************************************************
+</span><span class="comment">// Shape (RTTI) objects for system classes
+</span><span class="comment">// con_t is only an abstract base, so has no fixed shape
+</span><span class="comment">// shapes for instance types generated by Felix compiler
+</span><span class="comment">// we provide a shape for C 'int' type as well
+</span><span class="comment">// ********************************************************
+</span>
+<span class="comment">// special: just the offset data for a pointer
+</span>RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> _address_offset_data;
+
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t _fthread_ptr_map;
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t schannel_ptr_map;
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t _uctor_ptr_map;
+<span class="comment">//RTL_EXTERN extern ::flx::gc::generic::gc_shape_t _variant_ptr_map;
+</span>RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t _<span class="qualifier">int</span>_ptr_map;
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t _address_ptr_map;
+<span class="comment">//RTL_EXTERN extern ::flx::gc::generic::gc_shape_t _caddress_ptr_map;
+</span>RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t clptr_t_ptr_map;
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t clprj_t_ptr_map;
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t jump_address_ptr_map;
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t cl_t_ptr_map;
+
+}}
+#<span class="preproc">endif</span>
+
+</pre></p><pre class='inclusion'>
+share/src/rtl/flx_rtl_shapes.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_rtl_shapes.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_dynlink.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stddef.h&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+<span class="comment">// ********************************************************
+</span><span class="comment">//OFFSETS for fthread_t
+</span><span class="comment">// ********************************************************
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t _fthread_offsets[2]={
+    {offsetof(fthread_t,cc),nullptr},
+    {offsetof(fthread_t,next),nullptr}
+};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> _fthread_offset_data = { 2, _fthread_offsets };
+
+::flx::gc::generic::gc_shape_t _fthread_ptr_map = {
+  <span class="fstring">"rtl::fthread_t"</span>,
+  1,sizeof(fthread_t),
+  0,
+  0, <span class="comment">// fcops
+</span>  &amp;_fthread_offset_data,
+  ::flx::gc::generic::scan_by_offsets,
+  ::flx::gc::generic::tblit&lt;fthread_t&gt;,::flx::gc::generic::tunblit&lt;fthread_t&gt;, 
+  gc::generic::gc_flags_immobile,
+  0UL, 0UL
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">//OFFSETS for schannel_t
+</span><span class="comment">// ********************************************************
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t schannel_offsets[1]={
+    {offsetof(schannel_t,top),nullptr}
+};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> schannel_offset_data = { 1, schannel_offsets };
+
+::flx::gc::generic::gc_shape_t schannel_ptr_map = {
+  <span class="fstring">"rtl::schannel_t"</span>,
+  1,sizeof(schannel_t),
+  0, <span class="comment">// no finaliser
+</span>  0, <span class="comment">// fcops
+</span>  &amp;schannel_offset_data, <span class="comment">// scanner data
+</span>  ::flx::gc::generic::scan_by_offsets, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;schannel_t&gt;,  <span class="comment">// encoder
+</span>  ::flx::gc::generic::tunblit&lt;schannel_t&gt;,  <span class="comment">// decoder
+</span>  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// _uctor_ implementation
+</span><span class="comment">// ********************************************************
+</span><span class="comment">//OFFSETS for _uctor_
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t  _uctor_offsets[1]= {
+  {offsetof(_uctor_,data),nullptr}
+};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> _uctor_offset_data = { 1, _uctor_offsets };
+
+<span class="qualifier">static</span> CxxValueType&lt;_uctor_&gt; _uctor_fcops {};
+
+::flx::gc::generic::gc_shape_t _uctor_ptr_map = {
+  <span class="fstring">"rtl::_uctor_"</span>,
+  1,
+  sizeof(_uctor_),
+  0, <span class="comment">// finaliser
+</span>  &amp;_uctor_fcops, <span class="comment">// fcops
+</span>  &amp;_uctor_offset_data, <span class="comment">// scanner data
+</span>  ::flx::gc::generic::scan_by_offsets, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;_uctor_&gt;, <span class="comment">// encoder
+</span>  ::flx::gc::generic::tunblit&lt;_uctor_&gt;,  <span class="comment">// decoder
+</span>  gc::generic::gc_flags_default
+};
+
+<span class="comment">/*
+// ********************************************************
+// _variant_ implementation
+// ********************************************************
+//OFFSETS for _variant_
+static const std::size_t _variant_offsets[1]= {
+  offsetof(_variant_,vdata)
+};
+
+static CxxValueType<_variant_> _variant_fcops {};
+
+static ::flx::gc::generic::offset_data_t const _variant_offset_data = { 1, _variant_offsets };
+
+::flx::gc::generic::gc_shape_t _variant_ptr_map = {
+  "rtl::_variant_",
+  1,
+  sizeof(_variant_),
+  0, // finaliser
+  &_variant_fcops, // fcops
+  &_variant_offset_data, // scanner data
+  ::flx::gc::generic::scan_by_offsets, // scanner
+  ::flx::gc::generic::tblit<_variant_>, // encoder
+  ::flx::gc::generic::tunblit<_variant_>,  // decoder
+  gc::generic::gc_flags_default
+};
+**</span>/
+
+<span class="qualifier">static</span> CxxValueType&lt;<span class="qualifier">int</span>&gt; <span class="qualifier">int</span>_fcops {};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// jump_address implementation
+</span><span class="comment">// ********************************************************
+</span><span class="comment">//OFFSETS for jump_address 
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t jump_address_offsets[1]= {
+  {offsetof(jump_address_t,target_frame),nullptr}
+};
+
+<span class="qualifier">static</span> ::flx::gc::generic::offset_data_t <span class="qualifier">const</span> 
+  jump_address_offset_data = { 1, jump_address_offsets }
+;
+
+<span class="qualifier">static</span> CxxValueType&lt;jump_address_t&gt; jump_address_t_fcops {};
+
+::flx::gc::generic::gc_shape_t jump_address_ptr_map = {
+  <span class="fstring">"rtl::jump_address_t"</span>,
+  1,
+  sizeof(_uctor_),
+  0, <span class="comment">// finaliser
+</span>  &amp;jump_address_t_fcops, <span class="comment">// fcops
+</span>  &amp;jump_address_offset_data, <span class="comment">// scanner data
+</span>  ::flx::gc::generic::scan_by_offsets, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;jump_address_t&gt;, <span class="comment">// encoder
+</span>  ::flx::gc::generic::tunblit&lt;jump_address_t&gt;,  <span class="comment">// decoder
+</span>  gc::generic::gc_flags_default
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// int implementation
+</span><span class="comment">// ********************************************************
+</span>
+
+::flx::gc::generic::gc_shape_t _<span class="qualifier">int</span>_ptr_map = {
+  <span class="fstring">"rtl::int"</span>,
+  1,
+  sizeof(<span class="qualifier">int</span>),
+  0, <span class="comment">// finaliser
+</span>  &amp;<span class="qualifier">int</span>_fcops,
+  <span class="comment">//0, // fcops
+</span>  0, <span class="comment">// scanner data
+</span>  0, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;<span class="qualifier">int</span>&gt;, <span class="comment">// encoder
+</span>  ::flx::gc::generic::tunblit&lt;<span class="qualifier">int</span>&gt;,  <span class="comment">// decoder
+</span>  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// cl_t implementation
+</span><span class="comment">// ********************************************************
+</span>
+<span class="qualifier">static</span> CxxValueType&lt;cl_t&gt; cl_t_fcops {};
+
+::flx::gc::generic::gc_shape_t cl_t_ptr_map = {
+  <span class="fstring">"rtl::cl_t"</span>,
+  1,
+  sizeof(cl_t),
+  0, <span class="comment">// finaliser
+</span>  &amp;cl_t_fcops, <span class="comment">// fcops
+</span>  0, <span class="comment">// scanner data
+</span>  0, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;cl_t&gt;,
+  ::flx::gc::generic::tunblit&lt;cl_t&gt;, 
+  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// clptr_t implementation
+</span><span class="comment">// ********************************************************
+</span>
+<span class="qualifier">static</span> CxxValueType&lt;clptr_t&gt; clptr_t_fcops {};
+
+<span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t _clptr_t_offsets[1]={ {0,nullptr} };
+::flx::gc::generic::offset_data_t <span class="qualifier">const</span> _clptr_t_offset_data = { 1, _clptr_t_offsets };
+
+
+::flx::gc::generic::gc_shape_t clptr_t_ptr_map = {
+  <span class="fstring">"rtl::clptr_t"</span>,
+  1,
+  sizeof(clptr_t),
+  0, <span class="comment">// finaliser
+</span>  &amp;clptr_t_fcops, <span class="comment">// fcops
+</span>  &amp;_clptr_t_offset_data, <span class="comment">// scanner data
+</span>  ::flx::gc::generic::scan_by_offsets, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;clptr_t&gt;,
+  ::flx::gc::generic::tunblit&lt;clptr_t&gt;, 
+  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// clprj_t implementation
+</span><span class="comment">// ********************************************************
+</span>
+<span class="qualifier">static</span> CxxValueType&lt;clprj_t&gt; clprj_t_fcops {};
+
+::flx::gc::generic::offset_data_t <span class="qualifier">const</span> _clprj_t_offset_data = { 0, NULL };
+
+
+::flx::gc::generic::gc_shape_t clprj_t_ptr_map = {
+  <span class="fstring">"rtl::clprj_t"</span>,
+  1,
+  sizeof(clprj_t),
+  0, <span class="comment">// finaliser
+</span>  &amp;clprj_t_fcops, <span class="comment">// fcops
+</span>  0, <span class="comment">// scanner data
+</span>  ::flx::gc::generic::scan_by_offsets, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;clprj_t&gt;,
+  ::flx::gc::generic::tunblit&lt;clprj_t&gt;, 
+  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// pointer implementation
+</span><span class="comment">// ********************************************************
+</span>
+<span class="comment">//OFFSETS for address
+</span><span class="qualifier">static</span> <span class="qualifier">const</span> ::flx::gc::generic::offset_entry_t _address_offsets[1]={ {0,nullptr} };
+::flx::gc::generic::offset_data_t <span class="qualifier">const</span> _address_offset_data = { 1, _address_offsets };
+
+<span class="qualifier">static</span> ::<span class="small_keyword">std</span>::string address_encoder (<span class="qualifier">void</span> *p) { 
+  <span class="small_keyword">return</span> ::flx::gc::generic::blit (p,sizeof (<span class="qualifier">void</span>*));
+}
+
+<span class="qualifier">static</span> size_t address_decoder (<span class="qualifier">void</span> *p, <span class="qualifier">char</span> *s, size_t i) { 
+  <span class="small_keyword">return</span> ::flx::gc::generic::unblit (p,sizeof (<span class="qualifier">void</span>*),s,i);
+}
+
+
+<span class="comment">// ********************************************************
+</span><span class="comment">// address implementation : MUST BE LAST because the compiler
+</span><span class="comment">// uses "address_ptr_map" as the back link for generated shape tables
+</span><span class="comment">// ********************************************************
+</span>
+::flx::gc::generic::gc_shape_t _address_ptr_map = {
+  <span class="fstring">"rtl::address"</span>,
+  1,
+  sizeof(<span class="qualifier">void</span>*),
+  0, <span class="comment">// finaliser
+</span>  0, <span class="comment">// fcops
+</span>  &amp;_address_offset_data, <span class="comment">/// scanner data
+</span>  ::flx::gc::generic::scan_by_offsets, <span class="comment">// scanner
+</span>  ::flx::gc::generic::tblit&lt;<span class="qualifier">void</span>*&gt;, <span class="comment">// encoder
+</span>  ::flx::gc::generic::tunblit&lt;<span class="qualifier">void</span>*&gt;, <span class="comment">// decoder
+</span>  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+
+
+}}
+
+</pre></p></div><h1 id='Plat_Linux_h'><img src='/share/src/web/images/minus.gif' id='Plat Linux' onclick='toggle(this,"Plat_Linux_d")' alt='+'/> 7 Plat Linux</h1><div id='Plat_Linux_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/plat_linux.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __PLAT_LINUX_H__
+#<span class="preproc">define</span> __PLAT_LINUX_H__
+<span class="qualifier">int</span> get_cpu_nr();
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/rtl/plat_linux.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">define</span> STAT <span class="fstring">"/proc/stat"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdio.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;errno.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdlib.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"plat_linux.hpp"</span>
+
+<span class="comment">// return number of cpus
+</span><span class="qualifier">int</span> get_cpu_nr()
+{
+   FILE *fp;
+   <span class="qualifier">char</span> line[16];
+   <span class="qualifier">int</span> proc_nb, cpu_nr = -1;
+
+   <span class="small_keyword">if</span> ((fp = fopen(STAT, <span class="fstring">"r"</span>)) == NULL) {
+      fprintf(stderr, (<span class="fstring">"Cannot open %s: %s\n"</span>), STAT, strerror(errno));
+      exit(1);
+   }
+
+   <span class="small_keyword">while</span> (fgets(line, 16, fp) != NULL) {
+
+      <span class="small_keyword">if</span> (strncmp(line, <span class="fstring">"cpu "</span>, 4) &amp;&amp; !strncmp(line, <span class="fstring">"cpu"</span>, 3)) {
+         <span class="qualifier">char</span>* endptr = NULL;
+         proc_nb = strtol(line + 3, &amp;endptr, 0);
+
+         <span class="small_keyword">if</span> (!(endptr &amp;&amp; *endptr == <span class="fstring">'\0'</span>)) {
+           fprintf(stderr, <span class="fstring">"unable to parse '%s' as an integer in %s\n"</span>, line + 3, STAT);
+           exit(1);
+         }
+
+         <span class="small_keyword">if</span> (proc_nb &gt; cpu_nr)
+            cpu_nr = proc_nb;
+      }
+   }
+
+   fclose(fp);
+
+   <span class="small_keyword">return</span> (cpu_nr + 1);
+}
+</pre></p></div><h1 id='Macro_config_stuff_h'><img src='/share/src/web/images/minus.gif' id='Macro config stuff' onclick='toggle(this,"Macro_config_stuff_d")' alt='+'/> 8 Macro config stuff</h1><div id='Macro_config_stuff_d' style='display:block'>
+<p>Here flx_rtl_config.hpp depends on flx_rtl_config.h
+which depends on flx_rtl_config_params.hpp which is
+generated by the configuration system.
+</p><pre class='inclusion'>
+share/lib/rtl/flx_rtl_config.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_RTL_CONFIG_HPP__
+#<span class="preproc">define</span> __FLX_RTL_CONFIG_HPP__
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.h"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;stdint.h&gt;</span>
+<span class="comment">// get variant index code and pointer from packed variant rep
+</span>#<span class="preproc">define</span> FLX_VP(x) ((<span class="qualifier">void</span>*)((uintptr_t)(x) &amp; ~(uintptr_t)0x03))
+#<span class="preproc">define</span> FLX_VI(x) ((<span class="qualifier">int</span>)((uintptr_t)(x) &amp; (uintptr_t)0x03))
+
+<span class="comment">// make a packed variant rep from index code and pointer
+</span>#<span class="preproc">define</span> FLX_VR(i,p) ((<span class="qualifier">void</span>*)((uintptr_t)(p)|(uintptr_t)(i)))
+
+
+<span class="comment">// get variant index code and pointer from nullptr variant rep
+</span>#<span class="preproc">define</span> FLX_VNP(x) (x)
+#<span class="preproc">define</span> FLX_VNI(x) ((<span class="qualifier">int</span>)(x!=0))
+
+<span class="comment">// make a nullptr variant rep from index code and pointer
+</span>#<span class="preproc">define</span> FLX_VNR(i,p) (p)
+
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/lib/rtl/flx_rtl_config.h</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> __FLX_RTL_CONFIG_H__
+#<span class="preproc">define</span> __FLX_RTL_CONFIG_H__
+
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config_params.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;setjmp.h&gt;</span>
+
+#<span class="small_keyword">if</span> FLX_HAVE_GNU_BUILTIN_EXPECT
+#<span class="preproc">define</span> FLX_UNLIKELY(x) __builtin_expect(<span class="qualifier">long</span>(x),0)
+#<span class="preproc">define</span> FLX_LIKELY(x) __builtin_expect(<span class="qualifier">long</span>(x),1)
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> FLX_UNLIKELY(x) x
+#<span class="preproc">define</span> FLX_LIKELY(x) x
+#<span class="preproc">endif</span>
+
+
+#<span class="preproc">define</span> FLX_SAVE_REGS \
+  jmp_buf reg_save_on_stack; \
+  setjmp (reg_save_on_stack)
+
+<span class="comment">//
+</span>#<span class="small_keyword">if</span> FLX_HAVE_CGOTO &amp;&amp; FLX_HAVE_ASM_LABELS
+#<span class="preproc">define</span> FLX_CGOTO 1
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> FLX_CGOTO 0
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> FLX_WIN32 &amp;&amp; !defined(_WIN32_WINNT)
+#<span class="preproc">define</span> _WIN32_WINNT 0x0600 <span class="comment">// Require Windows NT5 (2K, XP, 2K3)
+</span>#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> FLX_WIN32 &amp;&amp; !defined(WINVER)
+#<span class="preproc">define</span> WINVER 0x0600 <span class="comment">// Require Windows NT5 (2K, XP, 2K3)
+</span>#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> FLX_WIN32
+<span class="comment">// vs windows.h just LOVES to include winsock version 1 headers by default.
+</span><span class="comment">// that's bad for everyone, so quit it.
+</span>#<span class="preproc">define</span> _WINSOCKAPI_
+
+<span class="comment">// windows.h defines min/max macros, which can cause all sorts of confusion.
+</span>#<span class="preproc">ifndef</span> NOMINMAX
+#<span class="preproc">define</span> NOMINMAX
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+
+
+#<span class="small_keyword">if</span> FLX_WIN32
+  #<span class="small_keyword">if</span> defined(FLX_STATIC_LINK)
+    #<span class="preproc">define</span> FLX_EXPORT
+    #<span class="preproc">define</span> FLX_IMPORT
+  #<span class="preproc">else</span>
+    #<span class="preproc">define</span> FLX_EXPORT __declspec(dllexport)
+    #<span class="preproc">define</span> FLX_IMPORT __declspec(dllimport)
+  #<span class="preproc">endif</span>
+#<span class="preproc">else</span>
+  <span class="comment">// All modules on Unix are compiled with -fvisibility=hidden
+</span>  <span class="comment">// All API symbols get visibility default
+</span>  <span class="comment">// whether or not we're static linking or dynamic linking (with -fPIC)
+</span>  #<span class="preproc">define</span> FLX_EXPORT __attribute__((visibility(<span class="fstring">"default"</span>))) 
+  #<span class="preproc">define</span> FLX_IMPORT __attribute__((visibility(<span class="fstring">"default"</span>))) 
+#<span class="preproc">endif</span>
+
+#<span class="preproc">ifdef</span> BUILD_RTL
+#<span class="preproc">define</span> RTL_EXTERN FLX_EXPORT
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> RTL_EXTERN FLX_IMPORT
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> FLX_MACOSX &amp;&amp; !FLX_HAVE_DLOPEN
+#<span class="preproc">define</span> FLX_MACOSX_NODLCOMPAT 1
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> FLX_MACOSX_NODLCOMPAT 0
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> FLX_HAVE_GNU
+#<span class="preproc">define</span> FLX_ALWAYS_INLINE __attribute__ ((always_<span class="qualifier">inline</span>))
+#<span class="preproc">define</span> FLX_NOINLINE __attribute__ ((noinline))
+#<span class="preproc">define</span> FLX_CONST __attribute__ ((<span class="qualifier">const</span>))
+#<span class="preproc">define</span> FLX_PURE __attribute__ ((pure))
+#<span class="preproc">define</span> FLX_GXX_PARSER_HACK (<span class="qualifier">void</span>)0,
+#<span class="preproc">define</span> FLX_UNUSED __attribute__((unused))
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> FLX_ALWAYS_INLINE
+#<span class="preproc">define</span> FLX_NOINLINE
+#<span class="preproc">define</span> FLX_CONST
+#<span class="preproc">define</span> FLX_PURE
+#<span class="preproc">define</span> FLX_GXX_PARSER_HACK
+#<span class="preproc">define</span> FLX_UNUSED
+#<span class="preproc">endif</span>
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+$PWD/src/config/flx_rtl_core.fpc</pre>
+<p><pre class="prefmtbg">Description: Felix Core Run Time Libraries
+Requires: flx flx_gc flx_spinlock
+Requires: flx_exceptions flx_pthread flx_async 
+Requires: re2 flx_dynlink demux faio
+Requires: flx_uint256_t 
+Requires: sqlite3
+Requires: blake3 
+</pre></p><pre class='inclusion'>
+$PWD/src/config/flx_thread_free_rtl_core.fpc</pre>
+<p><pre class="prefmtbg">Description: Felix Core Run Time Libraries (no threads, no async I/O)
+Requires: flx flx_gc flx_thread_free_run 
+Requires: flx_exceptions
+Requires: re2 flx_dynlink
+Requires: flx_uint256_t 
+Requires: sqlite3
+</pre></p><pre class='inclusion'>
+$PWD/src/config/unix/flx.fpc</pre>
+<p><pre class="prefmtbg">Name: flx
+Description: Felix core runtime support
+provides_dlib: -lflx_dynamic
+provides_slib: -lflx_static
+Requires: flx_gc flx_exceptions flx_pthread flx_dynlink
+library: rtl
+includes:  '"flx_rtl.hpp"'  &lt;iostream&gt; &lt;cstdio&gt; &lt;cstddef&gt; &lt;cassert&gt; &lt;climits&gt; &lt;string&gt;
+macros: BUILD_RTL
+srcdir: src/rtl
+src: .*\.cpp
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/flx.fpc</pre>
+<p><pre class="prefmtbg">Name: flx
+Description: Felix core runtime support
+provides_dlib: /DEFAULTLIB:flx_dynamic
+provides_slib: /DEFAULTLIB:flx_static
+Requires: flx_gc flx_exceptions flx_pthread flx_dynlink
+library: rtl
+includes:  '"flx_rtl.hpp"' &lt;iostream&gt; &lt;cstdio&gt; &lt;cstddef&gt; &lt;cassert&gt; &lt;climits&gt; &lt;string&gt;
+macros: BUILD_RTL
+srcdir: src/rtl
+src: .*\.cpp
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

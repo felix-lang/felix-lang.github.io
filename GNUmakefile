@@ -11,6 +11,12 @@ tut:
 	for file in web/*.html; do sed -i -e s/fdoc/html/g ${file}; done
 	rm web/*.html-e
 
+
+packages:
+	for file in /Users/skaller/felix/src/packages/*.fdoc; do \
+	  env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=packages "$${file}"; \
+	  done
+
 extract:
 	flx_iscr embedc.fdoc
 	flx_iscr corout.fdoc
@@ -26,3 +32,4 @@ deploy:
 
 all: pretty extract test deploy
 
+.PHONY: packages

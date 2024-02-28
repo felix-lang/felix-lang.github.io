@@ -1,0 +1,976 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>C Parsing Utils</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"C Tokeniser"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#C Tokeniser_h')"> <a href="#C_Tokeniser_h">C Tokeniser</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='C_Tokeniser_h'><img src='/share/src/web/images/minus.gif' id='C Tokeniser' onclick='toggle(this,"C_Tokeniser_d")' alt='+'/> 1 C Tokeniser</h1><div id='C_Tokeniser_d' style='display:block'>
+<p>This is a crude C tokeniser that is intended for parsing
+header files only, i.e. interfaces.
+</p><pre class='inclusion'>
+share/lib/std/c/ctok.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// TODO: strings, chars</span>
+<span class="lineno" id=line3></span>  <span class="comment">// NOTE: preprocesor directives start with # and end with newline</span>
+<span class="lineno" id=line4></span>  <span class="comment">// NOTE: trailing slosh is elided, but also ends a token, not really correct</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a type class">class</span> Ctok
+<span class="lineno" id=line7></span>  {
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> c_tok(x:<span class="library" title="binding of C++ string type">string</span>): <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line10></span>  { 
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a mutable variable">var</span> token = <span class="fstring">""</span>;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a mutable variable">var</span> n = x.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a mutable variable">var</span> inmacro = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i = 0;
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="while loop">while</span> i &lt; n <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line17></span>      <span class="comment">// 3 char tokens</span>
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="conditional">if</span> x.[i.+3] <span class="small_keyword" title="membership operator, function mem">in</span> (<span class="fstring">"&lt;&lt;="</span>, <span class="fstring">"&gt;&gt;="</span>,<span class="fstring">"..."</span>)  <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line19></span>       <span class="small_keyword" title="value of function return used in post condition">result</span> -= x.[i.+3];
+<span class="lineno" id=line20></span>       i += 3;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="conditional">elif</span> x.[i.+2] == <span class="fstring">"\\\n"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line23></span>       i += 2;
+<span class="lineno" id=line24></span>      
+<span class="lineno" id=line25></span>      <span class="comment">// C++ comment</span>
+<span class="lineno" id=line26></span>      <span class="small_keyword" title="conditional">elif</span> x.[i.+2] == <span class="fstring">"//"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line27></span>        i += 2;
+<span class="lineno" id=line28></span>        <span class="small_keyword" title="while loop">while</span> i &lt;= n <span class="small_keyword" title="logical conjunction">and</span> x.[i] != <span class="fstring">"\n"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line29></span>          ++i;
+<span class="lineno" id=line30></span>        <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line31></span>        <span class="small_keyword" title="conditional">if</span> inmacro <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line32></span>          <span class="small_keyword" title="value of function return used in post condition">result</span> -= <span class="fstring">"\\n"</span>;
+<span class="lineno" id=line33></span>          inmacro = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line34></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line35></span>        ++i;
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>      <span class="comment">// C comment</span>
+<span class="lineno" id=line38></span>      <span class="small_keyword" title="conditional">elif</span> x.[i.+2] == <span class="fstring">"/*"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line39></span>        i += 2;
+<span class="lineno" id=line40></span>        <span class="small_keyword" title="while loop">while</span> i &lt;= n <span class="small_keyword" title="logical conjunction">and</span> x.[i.+2] != <span class="fstring">"*/"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line41></span>          ++i;
+<span class="lineno" id=line42></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line43></span>        i += 2;
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>      <span class="small_keyword" title="conditional">elif</span> x.[i] == <span class="fstring">"\n"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line46></span>        <span class="small_keyword" title="conditional">if</span> inmacro <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line47></span>          <span class="small_keyword" title="value of function return used in post condition">result</span> -= <span class="fstring">"\n"</span>;
+<span class="lineno" id=line48></span>          inmacro = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line49></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line50></span>        ++i;
+<span class="lineno" id=line51></span>  
+<span class="lineno" id=line52></span>      <span class="comment">// whitespace</span>
+<span class="lineno" id=line53></span>      <span class="small_keyword" title="conditional">elif</span> ord x.[i]  &lt;= 32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line54></span>        ++i; 
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>      <span class="comment">// 2 char tokens</span>
+<span class="lineno" id=line57></span>      <span class="small_keyword" title="conditional">elif</span> x.[i.+2] <span class="small_keyword" title="membership operator, function mem">in</span> (<span class="fstring">"::"</span>, 
+<span class="lineno" id=line58></span>         <span class="fstring">"&lt;&lt;"</span>, <span class="fstring">"&gt;&gt;"</span>, <span class="fstring">"&lt;="</span>, <span class="fstring">"&gt;="</span>, <span class="fstring">"=="</span>,<span class="fstring">"!="</span>. <span class="fstring">"&amp;&amp;"</span>,<span class="fstring">"||"</span>,
+<span class="lineno" id=line59></span>        <span class="fstring">"++"</span>,<span class="fstring">"--"</span>, <span class="fstring">"+="</span>,<span class="fstring">"=="</span>,<span class="fstring">"!="</span>,<span class="fstring">"&amp;="</span>,<span class="fstring">"^="</span>,<span class="fstring">"|="</span>) 
+<span class="lineno" id=line60></span>      <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line61></span>        <span class="small_keyword" title="value of function return used in post condition">result</span> -= x.[i.+2];; 
+<span class="lineno" id=line62></span>        i += 2;
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="conditional">elif</span> x.[i] == <span class="fstring">"#"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line65></span>        inmacro = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line66></span>        <span class="small_keyword" title="value of function return used in post condition">result</span> -= <span class="fstring">"#"</span>;
+<span class="lineno" id=line67></span>        ++i;
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>      <span class="comment">// 1 char tokens</span>
+<span class="lineno" id=line70></span>      <span class="small_keyword" title="conditional">elif</span> x.[i] <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"&lt;&gt;^!+-*/%(){}[],:;&amp;|?="</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line71></span>        <span class="small_keyword" title="value of function return used in post condition">result</span> -= x.[i].<span class="library" title="binding of C++ string type">string</span>; 
+<span class="lineno" id=line72></span>        ++i;
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>      <span class="comment">// char </span>
+<span class="lineno" id=line76></span>      <span class="small_keyword" title="conditional">elif</span> x.[i] == <span class="fstring">"'"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line77></span>        ++i;
+<span class="lineno" id=line78></span>        token = x.[i].<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line79></span>        <span class="small_keyword" title="while loop">while</span> i &lt; n <span class="small_keyword" title="logical conjunction">and</span> x.[i] != <span class="fstring">"'"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line80></span>          <span class="small_keyword" title="conditional">if</span> x.[i] == <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line81></span>            token += <span class="fstring">"\\"</span>;
+<span class="lineno" id=line82></span>            ++i;
+<span class="lineno" id=line83></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line84></span>          token += x.[i]; 
+<span class="lineno" id=line85></span>          ++i;
+<span class="lineno" id=line86></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line87></span>        <span class="small_keyword" title="value of function return used in post condition">result</span> -= token + <span class="fstring">"'"</span>;
+<span class="lineno" id=line88></span>        ++i;
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>      <span class="comment">// string</span>
+<span class="lineno" id=line91></span>      <span class="small_keyword" title="conditional">elif</span> x.[i] == <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line92></span>        token = x.[i].<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line93></span>        ++i;
+<span class="lineno" id=line94></span>        <span class="small_keyword" title="while loop">while</span> i &lt; n <span class="small_keyword" title="logical conjunction">and</span> x.[i] != <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line95></span>          <span class="small_keyword" title="conditional">if</span> x.[i] == <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line96></span>            token += <span class="fstring">"\\"</span>;
+<span class="lineno" id=line97></span>            ++i;
+<span class="lineno" id=line98></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line99></span>          token += x.[i]; 
+<span class="lineno" id=line100></span>          ++i;
+<span class="lineno" id=line101></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line102></span>        <span class="small_keyword" title="value of function return used in post condition">result</span> -= token + <span class="fstring">'"'</span>;
+<span class="lineno" id=line103></span>        ++i;
+<span class="lineno" id=line104></span>  
+<span class="lineno" id=line105></span>      <span class="comment">// identifier</span>
+<span class="lineno" id=line106></span>      <span class="small_keyword" title="conditional">elif</span> iscidstart x.[i] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line107></span>        token = x.[i].<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line108></span>        ++i;
+<span class="lineno" id=line109></span>        <span class="small_keyword" title="while loop">while</span> i &lt;= n <span class="small_keyword" title="logical conjunction">and</span> iscidcont x.[i] <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line110></span>          token += <span class="library" title="binding of C++ string type">string</span> x.[i]; 
+<span class="lineno" id=line111></span>          ++i;
+<span class="lineno" id=line112></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line113></span>        <span class="small_keyword" title="value of function return used in post condition">result</span> -= token;
+<span class="lineno" id=line114></span>  
+<span class="lineno" id=line115></span>      <span class="comment">// number</span>
+<span class="lineno" id=line116></span>      <span class="small_keyword" title="conditional">elif</span> x.[i] <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line117></span>       token = x.[i].<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line118></span>       ++i;
+<span class="lineno" id=line119></span>       <span class="small_keyword" title="while loop">while</span> x.[i] <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789xabcdefXABCDEF.pP+-uUlL"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line120></span>         token += x.[i].<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line121></span>         ++i;
+<span class="lineno" id=line122></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line123></span>       <span class="small_keyword" title="value of function return used in post condition">result</span> -= token;
+<span class="lineno" id=line124></span>  
+<span class="lineno" id=line125></span>      <span class="comment">// other</span>
+<span class="lineno" id=line126></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line127></span>       <span class="small_keyword" title="value of function return used in post condition">result</span> -= x.[i].<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line128></span>       ++i;
+<span class="lineno" id=line129></span>      <span class="small_keyword" title="end of body">done</span> <span class="comment">// conditional</span>
+<span class="lineno" id=line130></span>    <span class="small_keyword" title="end of body">done</span> <span class="comment">//loop</span>
+<span class="lineno" id=line131></span>    <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line132></span>  }
+<span class="lineno" id=line133></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> dump_tokens_formatted (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) {
+<span class="lineno" id=line134></span>    <span class="big_keyword" title="Define a mutable variable">var</span> nest = 0;
+<span class="lineno" id=line135></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> newline() { <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">""</span>; <span class="library" title="Print a string to standard output">print</span>$ <span class="fstring">" "</span> * ( 2 * nest); }
+<span class="lineno" id=line136></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Tokens = "</span>;
+<span class="lineno" id=line137></span>    <span class="small_keyword" title="for loop">for</span> token <span class="small_keyword" title="membership operator, function mem">in</span> tokens <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line138></span>      <span class="small_keyword" title="conditional">if</span> token == <span class="fstring">";"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line139></span>        <span class="library" title="Print a string to standard output">print</span>$ <span class="fstring">";"</span>; newline;
+<span class="lineno" id=line140></span>  
+<span class="lineno" id=line141></span>      <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"{"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line142></span>        newline;
+<span class="lineno" id=line143></span>        <span class="library" title="Print a string to standard output">print</span>$ <span class="fstring">"{"</span>;
+<span class="lineno" id=line144></span>        ++nest;
+<span class="lineno" id=line145></span>        newline;
+<span class="lineno" id=line146></span>  
+<span class="lineno" id=line147></span>      <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"}"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line148></span>        --nest;
+<span class="lineno" id=line149></span>        newline;
+<span class="lineno" id=line150></span>        <span class="library" title="Print a string to standard output">print</span>$ <span class="fstring">"}"</span>;
+<span class="lineno" id=line151></span>        newline;
+<span class="lineno" id=line152></span>      <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"#"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line153></span>        newline;
+<span class="lineno" id=line154></span>        <span class="library" title="Print a string to standard output">print</span>$ <span class="fstring">"#"</span>; 
+<span class="lineno" id=line155></span>      <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"\n"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line156></span>        <span class="library" title="Print a string to standard output">print</span> <span class="fstring">"#endmacro"</span>;
+<span class="lineno" id=line157></span>        newline;
+<span class="lineno" id=line158></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line159></span>        <span class="library" title="Print a string to standard output">print</span>$ token.<span class="library" title="Convert a value to a string">str</span>+  <span class="fstring">" "</span>;
+<span class="lineno" id=line160></span>      <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line161></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line162></span>  } <span class="comment">// dump</span>
+<span class="lineno" id=line163></span>  
+<span class="lineno" id=line164></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> iscident(x:<span class="library" title="binding of C++ string type">string</span>) : bool = {
+<span class="lineno" id=line165></span>    <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = iscidstart x.[0];
+<span class="lineno" id=line166></span>    <span class="small_keyword" title="for loop">for</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> x.[1..] perform
+<span class="lineno" id=line167></span>      <span class="small_keyword" title="value of function return used in post condition">result</span> &amp;= iscidcont ch;
+<span class="lineno" id=line168></span>    <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line169></span>  }
+<span class="lineno" id=line170></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> parameter_t = ctyp_t * <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line171></span>  
+<span class="lineno" id=line172></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> field_t = ctyp_t * <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line173></span>  
+<span class="lineno" id=line174></span>  <span class="comment">// either or both the tag string is present of the field list is present</span>
+<span class="lineno" id=line175></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> struct_t = <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[field_t]];
+<span class="lineno" id=line176></span>  
+<span class="lineno" id=line177></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> enumconst_t = <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line178></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> enum_t = <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="functional, singly linked list">list</span>[enumconst_t];
+<span class="lineno" id=line179></span>  
+<span class="lineno" id=line180></span>  
+<span class="lineno" id=line181></span>  variant ctyp_t =
+<span class="lineno" id=line182></span>  | Base of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line183></span>  | Ptr of ctyp_t
+<span class="lineno" id=line184></span>  | ConstPtr of ctyp_t
+<span class="lineno" id=line185></span>  | Array of ctyp_t * <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line186></span>  | Bitfield of <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line187></span>  | Function of ctyp_t * <span class="library" title="functional, singly linked list">list</span>[parameter_t]
+<span class="lineno" id=line188></span>  | Struct of struct_t
+<span class="lineno" id=line189></span>  | Union of struct_t
+<span class="lineno" id=line190></span>  | Enum of enum_t
+<span class="lineno" id=line191></span>  ;
+<span class="lineno" id=line192></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[ctyp_t] {
+<span class="lineno" id=line193></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == (a:ctyp_t, b:ctyp_t) =&gt; 
+<span class="lineno" id=line194></span>      <span class="small_keyword" title="match statement or expression">match</span> a,b <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line195></span>      | Base x, Base y =&gt; x == y
+<span class="lineno" id=line196></span>      | Ptr x, Ptr y =&gt; x == y
+<span class="lineno" id=line197></span>      | ConstPtr x, ConstPtr y =&gt; x == y
+<span class="lineno" id=line198></span>      | Array (x,l1), Array (y,l2) =&gt; x == y <span class="small_keyword" title="logical conjunction">and</span> l1 == l2
+<span class="lineno" id=line199></span>      | Bitfield (x,l1), Bitfield (y,l2) =&gt; x == y <span class="small_keyword" title="logical conjunction">and</span> l1 == l2
+<span class="lineno" id=line200></span>      | Struct x, Struct y =&gt; x == y
+<span class="lineno" id=line201></span>      | Union x, Union y =&gt; x == y
+<span class="lineno" id=line202></span>      | Enum x, Enum y =&gt; x == y
+<span class="lineno" id=line203></span>      | _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line204></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line205></span>    ;
+<span class="lineno" id=line206></span>  }
+<span class="lineno" id=line207></span>  <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[ctyp_t];
+<span class="lineno" id=line208></span>  
+<span class="lineno" id=line209></span>  
+<span class="lineno" id=line210></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> strbody (tag:<span class="library" title="binding of C++ string type">string</span>, fields:<span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[field_t]]) : <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line211></span>    <span class="small_keyword" title="conditional">if</span> tag != <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> tag + <span class="fstring">" "</span> <span class="small_keyword" title="conditional">else</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">endif</span> + 
+<span class="lineno" id=line212></span>    <span class="small_keyword" title="match statement or expression">match</span> fields <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line213></span>    | Some flds =&gt; 
+<span class="lineno" id=line214></span>      <span class="fstring">"{ "</span> + <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="binding of C++ string type">string</span>) (fld:field_t) =&gt; acc + <span class="fstring">" "</span> +  fld.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">";"</span>) <span class="fstring">""</span> flds + <span class="fstring">" }"</span>
+<span class="lineno" id=line215></span>    | None =&gt; <span class="fstring">""</span>
+<span class="lineno" id=line216></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line217></span>  ;
+<span class="lineno" id=line218></span>   
+<span class="lineno" id=line219></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[ctyp_t] {
+<span class="lineno" id=line220></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> : ctyp_t -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line221></span>      | Base b =&gt; b
+<span class="lineno" id=line222></span>      | Ptr x =&gt; x.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">"*"</span>
+<span class="lineno" id=line223></span>      | ConstPtr x =&gt; x.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" const*"</span>
+<span class="lineno" id=line224></span>      | Array (x,l) =&gt; <span class="fstring">"array("</span> + x.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">","</span> + l.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">")"</span>
+<span class="lineno" id=line225></span>      | Bitfield (b,l) =&gt; b + <span class="fstring">":"</span> + l.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line226></span>      | Function (r,ps) =&gt; 
+<span class="lineno" id=line227></span>        r.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">"("</span> + catmap <span class="fstring">","</span> <span class="library" title="Convert a value to a string">str</span> of parameter_t ps + <span class="fstring">")"</span>
+<span class="lineno" id=line228></span>      | Struct s =&gt; <span class="fstring">"struct "</span> + strbody s
+<span class="lineno" id=line229></span>      | Union s =&gt; <span class="fstring">"union "</span> + strbody s
+<span class="lineno" id=line230></span>      | Enum b =&gt; <span class="fstring">"enum "</span> + b.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line231></span>    ;
+<span class="lineno" id=line232></span>  }
+<span class="lineno" id=line233></span>  
+<span class="lineno" id=line234></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[parameter_t] {
+<span class="lineno" id=line235></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (t:ctyp_t,n:<span class="library" title="binding of C++ string type">string</span>) =&gt; t.<span class="library" title="Convert a value to a string">str</span> + <span class="small_keyword" title="conditional">if</span> n!=<span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">" "</span> <span class="small_keyword" title="conditional">else</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">endif</span> + n;
+<span class="lineno" id=line236></span>  }
+<span class="lineno" id=line237></span>  
+<span class="lineno" id=line238></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> discard_to_rbrace (level:<span class="library" title="binding of C int type">int</span>) (tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line239></span>    <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line240></span>    | <span class="fstring">"{"</span> ! tokens =&gt; discard_to_rbrace (level + 1) tokens
+<span class="lineno" id=line241></span>    | <span class="fstring">"}"</span> ! tokens =&gt; <span class="small_keyword" title="conditional">if</span> level &gt; 1 <span class="small_keyword" title="conditional">then</span> discard_to_rbrace (level - 1) tokens <span class="small_keyword" title="conditional">else</span> tokens
+<span class="lineno" id=line242></span>    | _ ! tokens  =&gt; discard_to_rbrace level tokens
+<span class="lineno" id=line243></span>    | Empty =&gt; tokens
+<span class="lineno" id=line244></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line245></span>  ;
+<span class="lineno" id=line246></span>  
+<span class="lineno" id=line247></span>  <span class="comment">// discard everything up to the next top level }</span>
+<span class="lineno" id=line248></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> discard_to_rbrace (tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line249></span>    discard_to_rbrace 0 tokens
+<span class="lineno" id=line250></span>  ;
+<span class="lineno" id=line251></span>  
+<span class="lineno" id=line252></span>  <span class="comment">// discard everything up to the next top level ;</span>
+<span class="lineno" id=line253></span>  <span class="comment">// won't work for nested code because of ; in for statements</span>
+<span class="lineno" id=line254></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> discard_to_semi (tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line255></span>    <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line256></span>    | <span class="fstring">"{"</span> ! tokens =&gt; discard_to_semi (discard_to_rbrace 1 tokens)
+<span class="lineno" id=line257></span>    | <span class="fstring">";"</span> ! tokens =&gt; tokens
+<span class="lineno" id=line258></span>    | _ ! tokens =&gt; discard_to_semi tokens
+<span class="lineno" id=line259></span>    | Empty =&gt; tokens
+<span class="lineno" id=line260></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line261></span>  ;
+<span class="lineno" id=line262></span>  
+<span class="lineno" id=line263></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> rev_grab_to_rbrace (out:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (level:<span class="library" title="binding of C int type">int</span>) (tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line264></span>    <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line265></span>    | <span class="fstring">"{"</span> ! tokens =&gt; rev_grab_to_rbrace (<span class="fstring">"{"</span> ! out) (level + 1) tokens
+<span class="lineno" id=line266></span>    | <span class="fstring">"}"</span> ! tokens =&gt; <span class="small_keyword" title="conditional">if</span> level &gt; 1 <span class="small_keyword" title="conditional">then</span> rev_grab_to_rbrace (<span class="fstring">"}"</span> ! out) (level - 1) tokens <span class="small_keyword" title="conditional">else</span> out, tokens
+<span class="lineno" id=line267></span>    | token  ! tokens  =&gt; rev_grab_to_rbrace (token ! out) level tokens
+<span class="lineno" id=line268></span>    | Empty =&gt; out, tokens
+<span class="lineno" id=line269></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line270></span>  ;
+<span class="lineno" id=line271></span>  
+<span class="lineno" id=line272></span>  <span class="comment">// grab everything up to the next top level }</span>
+<span class="lineno" id=line273></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> grab_to_rbrace (tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line274></span>    <span class="library" title="return data structure with elements reversed">rev</span> (rev_grab_to_rbrace Empty[<span class="library" title="binding of C++ string type">string</span>] 0 tokens)
+<span class="lineno" id=line275></span>  ;
+<span class="lineno" id=line276></span>  
+<span class="lineno" id=line277></span>  <span class="comment">// grab everything up to the next top level ;</span>
+<span class="lineno" id=line278></span>  <span class="comment">// won't work for nested code because of ; in for statements</span>
+<span class="lineno" id=line279></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> rev_grab_to_semi (out:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line280></span>    <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line281></span>    | <span class="fstring">"{"</span> ! tokens =&gt; 
+<span class="lineno" id=line282></span>      <span class="small_keyword" title="let binder">let</span> grabbed, trailing = (rev_grab_to_rbrace out 1 tokens) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line283></span>      rev_grab_to_semi grabbed trailing
+<span class="lineno" id=line284></span>  
+<span class="lineno" id=line285></span>    | <span class="fstring">";"</span> ! tokens =&gt; out,tokens
+<span class="lineno" id=line286></span>    | _ ! tokens =&gt; rev_grab_to_semi out tokens
+<span class="lineno" id=line287></span>    | Empty =&gt; out,tokens
+<span class="lineno" id=line288></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line289></span>  ;
+<span class="lineno" id=line290></span>  
+<span class="lineno" id=line291></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> grab_to_semi (tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =&gt;
+<span class="lineno" id=line292></span>    <span class="library" title="return data structure with elements reversed">rev</span> (rev_grab_to_semi Empty[<span class="library" title="binding of C++ string type">string</span>] tokens)
+<span class="lineno" id=line293></span>  ;
+<span class="lineno" id=line294></span>  
+<span class="lineno" id=line295></span>  
+<span class="lineno" id=line296></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line297></span>  <span class="comment">// input a token list</span>
+<span class="lineno" id=line298></span>  <span class="comment">// parse the LHS of a C type, the base type, eg int</span>
+<span class="lineno" id=line299></span>  <span class="comment">// return that and the rest of the tokens</span>
+<span class="lineno" id=line300></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line301></span>  
+<span class="lineno" id=line302></span>  
+<span class="lineno" id=line303></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_type_base (tokens:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="option type: Some x or None">opt</span>[ctyp_t * bool] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line304></span>  {
+<span class="lineno" id=line305></span>    <span class="big_keyword" title="Define a mutable variable">var</span> isconst = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line306></span>  next:&gt;
+<span class="lineno" id=line307></span>    <span class="small_keyword" title="conditional">if</span> is_empty tokens <span class="small_keyword" title="return">return</span> None[ctyp_t * bool], tokens;
+<span class="lineno" id=line308></span>    <span class="big_keyword" title="Define a mutable variable">var</span> token = head tokens;
+<span class="lineno" id=line309></span>    tokens = tail tokens;
+<span class="lineno" id=line310></span>    <span class="small_keyword" title="conditional">if</span> token == <span class="fstring">"const"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line311></span>      isconst = <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line312></span>      <span class="small_keyword" title="jump to label">goto</span> next;
+<span class="lineno" id=line313></span>    <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"struct"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line314></span>      <span class="comment">// set tag if present</span>
+<span class="lineno" id=line315></span>      <span class="big_keyword" title="Define a mutable variable">var</span> tag = <span class="fstring">""</span>;
+<span class="lineno" id=line316></span>      <span class="small_keyword" title="conditional">if</span> tokens.head.iscident <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line317></span>        tag = head tokens;
+<span class="lineno" id=line318></span>        tokens = tail tokens;
+<span class="lineno" id=line319></span>      <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line320></span>      <span class="comment">// set field list if present</span>
+<span class="lineno" id=line321></span>      <span class="big_keyword" title="Define a mutable variable">var</span> fields, toks = parse_struct_body tokens;
+<span class="lineno" id=line322></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ctyp = Struct (tag, fields);
+<span class="lineno" id=line323></span>      tokens = toks;
+<span class="lineno" id=line324></span>    <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"union"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line325></span>      tag = <span class="fstring">""</span>;
+<span class="lineno" id=line326></span>      <span class="small_keyword" title="conditional">if</span> tokens.head.iscident <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line327></span>        tag = head tokens;
+<span class="lineno" id=line328></span>        tokens = tail tokens;
+<span class="lineno" id=line329></span>      <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line330></span>      fields, toks = parse_struct_body tokens;
+<span class="lineno" id=line331></span>      ctyp = Union (tag, fields);
+<span class="lineno" id=line332></span>      tokens = toks;
+<span class="lineno" id=line333></span>    <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"enum"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line334></span>      token = head tokens;
+<span class="lineno" id=line335></span>      tokens = tail tokens;
+<span class="lineno" id=line336></span>      ctyp = Enum (token, Empty[enumconst_t]);
+<span class="lineno" id=line337></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line338></span>      ctyp = Base token; <span class="comment">// base type</span>
+<span class="lineno" id=line339></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line340></span>    <span class="small_keyword" title="return">return</span> Some (ctyp, isconst), tokens;
+<span class="lineno" id=line341></span>  }
+<span class="lineno" id=line342></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line343></span>  <span class="comment">// input a token list and a base type and const flag</span>
+<span class="lineno" id=line344></span>  <span class="comment">// parse the RHS of a C type, combine with base type</span>
+<span class="lineno" id=line345></span>  <span class="comment">// return that and the rest of the tokens</span>
+<span class="lineno" id=line346></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line347></span>  
+<span class="lineno" id=line348></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_tail_type 
+<span class="lineno" id=line349></span>  (
+<span class="lineno" id=line350></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ctyp:ctyp_t, 
+<span class="lineno" id=line351></span>    isconst:bool, 
+<span class="lineno" id=line352></span>    <span class="big_keyword" title="Define a mutable variable">var</span> tokens:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line353></span>  ) 
+<span class="lineno" id=line354></span>  : ctyp_t * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line355></span>  {
+<span class="lineno" id=line356></span>  next:&gt;
+<span class="lineno" id=line357></span>    <span class="small_keyword" title="conditional">if</span> is_empty tokens <span class="small_keyword" title="return">return</span> ctyp, tokens; 
+<span class="lineno" id=line358></span>    <span class="big_keyword" title="Define a mutable variable">var</span> token = head tokens;
+<span class="lineno" id=line359></span>    <span class="small_keyword" title="conditional">if</span> token == <span class="fstring">"*"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line360></span>      <span class="small_keyword" title="conditional">if</span> isconst <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line361></span>        ctyp = ConstPtr (ctyp);
+<span class="lineno" id=line362></span>        isconst = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line363></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line364></span>        ctyp = Ptr ctyp;
+<span class="lineno" id=line365></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line366></span>    <span class="small_keyword" title="conditional">elif</span> token == <span class="fstring">"long"</span> <span class="small_keyword" title="logical conjunction">and</span>  ctyp == Base <span class="fstring">"long"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line367></span>      ctyp = Base <span class="fstring">"long long"</span>;
+<span class="lineno" id=line368></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line369></span>      <span class="small_keyword" title="return">return</span> ctyp, tokens;
+<span class="lineno" id=line370></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line371></span>    tokens = tail tokens;
+<span class="lineno" id=line372></span>    <span class="small_keyword" title="jump to label">goto</span> next;
+<span class="lineno" id=line373></span>  }
+<span class="lineno" id=line374></span>  
+<span class="lineno" id=line375></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line376></span>  <span class="comment">// input a token list</span>
+<span class="lineno" id=line377></span>  <span class="comment">// parse a C type</span>
+<span class="lineno" id=line378></span>  <span class="comment">// return type and trailing tokens</span>
+<span class="lineno" id=line379></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line380></span>  
+<span class="lineno" id=line381></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_ctype (<span class="big_keyword" title="Define a mutable variable">var</span> tokens:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="option type: Some x or None">opt</span>[ctyp_t] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line382></span>    <span class="small_keyword" title="match statement or expression">match</span> parse_type_base tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line383></span>    | Some (cty, isconst),toks =&gt; 
+<span class="lineno" id=line384></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ctyp, trailing = parse_tail_type (cty, isconst, toks);
+<span class="lineno" id=line385></span>      <span class="small_keyword" title="return">return</span> Some ctyp, trailing;
+<span class="lineno" id=line386></span>  
+<span class="lineno" id=line387></span>    | None,toks =&gt; <span class="small_keyword" title="return">return</span> None[ctyp_t],toks;
+<span class="lineno" id=line388></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line389></span>  }
+<span class="lineno" id=line390></span>  
+<span class="lineno" id=line391></span>  
+<span class="lineno" id=line392></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line393></span>  <span class="comment">// parse array suffix if present</span>
+<span class="lineno" id=line394></span>  <span class="comment">// recursive, assumes length is a single token or missing</span>
+<span class="lineno" id=line395></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line396></span>  
+<span class="lineno" id=line397></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_array (ctyp:ctyp_t, tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : ctyp_t * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line398></span>     <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line399></span>     | <span class="fstring">"["</span> ! v ! <span class="fstring">"]"</span> ! rest =&gt; <span class="small_keyword" title="return">return</span> Array (ctyp, v.<span class="library" title="binding of C int type">int</span>), rest; 
+<span class="lineno" id=line400></span>     | <span class="fstring">"["</span> ! <span class="fstring">"]"</span> ! rest =&gt; <span class="small_keyword" title="return">return</span> Array (ctyp, 0), rest; 
+<span class="lineno" id=line401></span>     | _ =&gt; <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Failed array"</span>; <span class="small_keyword" title="return">return</span> ctyp, tokens;
+<span class="lineno" id=line402></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line403></span>  }
+<span class="lineno" id=line404></span>   
+<span class="lineno" id=line405></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line406></span>  <span class="comment">// Input a token list</span>
+<span class="lineno" id=line407></span>  <span class="comment">// Parse a function parameter</span>
+<span class="lineno" id=line408></span>  <span class="comment">// retun C type and parameter name (could be empty string)</span>
+<span class="lineno" id=line409></span>  <span class="comment">// bugs out if trailing more than one token</span>
+<span class="lineno" id=line410></span>  <span class="comment">// ***********************************************</span>
+<span class="lineno" id=line411></span>  
+<span class="lineno" id=line412></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_parameter(<span class="big_keyword" title="Define a mutable variable">var</span> tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="option type: Some x or None">opt</span>[ctyp_t * <span class="library" title="binding of C++ string type">string</span>] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line413></span>  {
+<span class="lineno" id=line414></span>    <span class="small_keyword" title="match statement or expression">match</span> parse_ctype tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line415></span>    | None,toks =&gt; 
+<span class="lineno" id=line416></span>      <span class="small_keyword" title="return">return</span> None [ctyp_t * <span class="library" title="binding of C++ string type">string</span>], toks;
+<span class="lineno" id=line417></span>  
+<span class="lineno" id=line418></span>    | Some cty, toks =&gt;
+<span class="lineno" id=line419></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ctyp = cty;
+<span class="lineno" id=line420></span>      tokens = toks;
+<span class="lineno" id=line421></span>      <span class="small_keyword" title="return">return</span> parse_field_tail (ctyp, tokens);
+<span class="lineno" id=line422></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line423></span>  }
+<span class="lineno" id=line424></span>  
+<span class="lineno" id=line425></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_field_tail (<span class="big_keyword" title="Define a mutable variable">var</span> ctyp:ctyp_t, <span class="big_keyword" title="Define a mutable variable">var</span> tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) 
+<span class="lineno" id=line426></span>  : <span class="library" title="option type: Some x or None">opt</span>[ctyp_t * <span class="library" title="binding of C++ string type">string</span>] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] 
+<span class="lineno" id=line427></span>  =
+<span class="lineno" id=line428></span>  {
+<span class="lineno" id=line429></span>  again:&gt;
+<span class="lineno" id=line430></span>    <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line431></span>    <span class="comment">// no parameter name</span>
+<span class="lineno" id=line432></span>    | Empty =&gt; <span class="small_keyword" title="return">return</span> Some (ctyp,<span class="fstring">""</span>),tokens;
+<span class="lineno" id=line433></span>  
+<span class="lineno" id=line434></span>    <span class="comment">// array type, no parameter name</span>
+<span class="lineno" id=line435></span>    | <span class="fstring">"["</span> ! toks =&gt;    
+<span class="lineno" id=line436></span>      tokens = <span class="fstring">""</span> ! tokens;
+<span class="lineno" id=line437></span>      <span class="small_keyword" title="jump to label">goto</span> again; <span class="comment">// push dummy name onto input</span>
+<span class="lineno" id=line438></span>  
+<span class="lineno" id=line439></span>    <span class="comment">// array type, parameter name</span>
+<span class="lineno" id=line440></span>    | param ! <span class="fstring">"["</span> ! toks <span class="small_keyword" title="predicative type constraint or precondition">when</span> iscident param =&gt;    
+<span class="lineno" id=line441></span>      <span class="big_keyword" title="Define a mutable variable">var</span> l1 = tokens.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line442></span>      ctyp, tokens= parse_array (ctyp, tail tokens);
+<span class="lineno" id=line443></span>      <span class="big_keyword" title="Define a mutable variable">var</span> l2 = tokens.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line444></span>      <span class="small_keyword" title="conditional">if</span> l2 &lt; l1 <span class="small_keyword" title="imperative code begins">do</span>  <span class="comment">// stop infinite loop</span>
+<span class="lineno" id=line445></span>        tokens = param + tokens; <span class="comment">// put param name back in input</span>
+<span class="lineno" id=line446></span>        <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line447></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line448></span>        <span class="small_keyword" title="return">return</span> Some (ctyp, param), toks;
+<span class="lineno" id=line449></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line450></span>  
+<span class="lineno" id=line451></span>    <span class="comment">// function type, function name</span>
+<span class="lineno" id=line452></span>    <span class="comment">// named: i.e like int f(int,int)</span>
+<span class="lineno" id=line453></span>    | param ! <span class="fstring">"("</span> ! toks <span class="small_keyword" title="predicative type constraint or precondition">when</span> iscident param =&gt;    
+<span class="lineno" id=line454></span>      l1 = tokens.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line455></span>      ctyp, tokens= parse_function_decl (ctyp, tail tokens);
+<span class="lineno" id=line456></span>      l2 = tokens.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line457></span>      <span class="small_keyword" title="conditional">if</span> l2 &lt; l1 <span class="small_keyword" title="imperative code begins">do</span>  <span class="comment">// stop infinite loop</span>
+<span class="lineno" id=line458></span>        tokens = param + tokens; <span class="comment">// put param name back in input</span>
+<span class="lineno" id=line459></span>        <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line460></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line461></span>        <span class="small_keyword" title="return">return</span> Some (ctyp, param), toks;
+<span class="lineno" id=line462></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line463></span>  
+<span class="lineno" id=line464></span>    <span class="comment">// function pointer type, name</span>
+<span class="lineno" id=line465></span>    <span class="comment">// named: i.e like int (*f)(int,int)</span>
+<span class="lineno" id=line466></span>    | <span class="fstring">"("</span> ! <span class="fstring">"*"</span> ! param ! toks <span class="small_keyword" title="predicative type constraint or precondition">when</span> iscident param =&gt;    
+<span class="lineno" id=line467></span>      l1 = tokens.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line468></span>      ctyp, tokens= parse_function_decl (ctyp, <span class="fstring">"("</span> ! <span class="fstring">"*"</span> ! toks);
+<span class="lineno" id=line469></span>      l2 = tokens.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line470></span>      <span class="small_keyword" title="conditional">if</span> l2 &lt; l1 <span class="small_keyword" title="imperative code begins">do</span>  <span class="comment">// stop infinite loop</span>
+<span class="lineno" id=line471></span>        tokens = param + tokens; <span class="comment">// put param name back in input</span>
+<span class="lineno" id=line472></span>        <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line473></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line474></span>        <span class="small_keyword" title="return">return</span> Some (ctyp, param), toks;
+<span class="lineno" id=line475></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line476></span>  
+<span class="lineno" id=line477></span>  
+<span class="lineno" id=line478></span>    <span class="comment">// simple type, parameter name</span>
+<span class="lineno" id=line479></span>    | param ! toks <span class="small_keyword" title="predicative type constraint or precondition">when</span> iscident param =&gt; 
+<span class="lineno" id=line480></span>      <span class="small_keyword" title="return">return</span> Some (ctyp,param),toks;
+<span class="lineno" id=line481></span>  
+<span class="lineno" id=line482></span>  
+<span class="lineno" id=line483></span>    <span class="comment">// simple type, no parameter name</span>
+<span class="lineno" id=line484></span>    | _ =&gt;
+<span class="lineno" id=line485></span>      <span class="small_keyword" title="return">return</span> Some (ctyp,<span class="fstring">""</span>), tokens;
+<span class="lineno" id=line486></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line487></span>  }
+<span class="lineno" id=line488></span>  
+<span class="lineno" id=line489></span>  <span class="comment">// comma separated list</span>
+<span class="lineno" id=line490></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_parameter_list(<span class="big_keyword" title="Define a mutable variable">var</span> tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="functional, singly linked list">list</span>[ctyp_t * <span class="library" title="binding of C++ string type">string</span>] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line491></span>  {
+<span class="lineno" id=line492></span>     <span class="big_keyword" title="Define a mutable variable">var</span> parameters = Empty[ctyp_t * <span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line493></span>  again:&gt;
+<span class="lineno" id=line494></span>    <span class="small_keyword" title="match statement or expression">match</span> parse_parameter tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line495></span>    | None,toks =&gt; 
+<span class="lineno" id=line496></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> parameters, toks;
+<span class="lineno" id=line497></span>    | Some (ctyp,name), toks =&gt;
+<span class="lineno" id=line498></span>      tokens = toks;
+<span class="lineno" id=line499></span>      parameters -= (ctyp,name);
+<span class="lineno" id=line500></span>      <span class="small_keyword" title="conditional">if</span> is_empty tokens <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> parameters,tokens;
+<span class="lineno" id=line501></span>      <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line502></span>      | <span class="fstring">","</span>! rest =&gt;
+<span class="lineno" id=line503></span>        tokens = rest;
+<span class="lineno" id=line504></span>        <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line505></span>      | _ =&gt; 
+<span class="lineno" id=line506></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> parameters, tokens;
+<span class="lineno" id=line507></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line508></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line509></span>  }
+<span class="lineno" id=line510></span>  
+<span class="lineno" id=line511></span>  <span class="comment">// excludes trailing ; cause it isn't a ; in a typedef!</span>
+<span class="lineno" id=line512></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_field_list (<span class="big_keyword" title="Define a mutable variable">var</span> tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="functional, singly linked list">list</span>[ctyp_t * <span class="library" title="binding of C++ string type">string</span>] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line513></span>  {
+<span class="lineno" id=line514></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fields = Empty[ctyp_t * <span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line515></span>    <span class="small_keyword" title="match statement or expression">match</span> parse_type_base tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line516></span>    | None, toks =&gt; <span class="small_keyword" title="return">return</span> fields, tokens; <span class="comment">// no fields </span>
+<span class="lineno" id=line517></span>    | Some (base_ctyp,isconst), toks =&gt;
+<span class="lineno" id=line518></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ctyp,toks2 = parse_tail_type (base_ctyp,isconst,toks);
+<span class="lineno" id=line519></span>  again:&gt;
+<span class="lineno" id=line520></span>      <span class="small_keyword" title="match statement or expression">match</span> parse_field_tail (ctyp, toks2) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line521></span>      | None, toks =&gt; <span class="small_keyword" title="return">return</span> fields, toks;
+<span class="lineno" id=line522></span>      | Some fld, toks =&gt;
+<span class="lineno" id=line523></span>        fields -=  fld;
+<span class="lineno" id=line524></span>        <span class="small_keyword" title="conditional">if</span> head toks == <span class="fstring">","</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line525></span>          ctyp,toks2 = parse_tail_type (base_ctyp,isconst,tail toks);
+<span class="lineno" id=line526></span>          <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line527></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line528></span>          <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> fields, toks;
+<span class="lineno" id=line529></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line530></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line531></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line532></span>  }
+<span class="lineno" id=line533></span>  
+<span class="lineno" id=line534></span>  <span class="comment">// includes { and }</span>
+<span class="lineno" id=line535></span>  <span class="comment">// returns None if no { present </span>
+<span class="lineno" id=line536></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_struct_body (<span class="big_keyword" title="Define a mutable variable">var</span> tokens: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="functional, singly linked list">list</span>[field_t]] * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =
+<span class="lineno" id=line537></span>  {
+<span class="lineno" id=line538></span>     <span class="big_keyword" title="Define a mutable variable">var</span> fields = Empty[field_t];
+<span class="lineno" id=line539></span>     <span class="small_keyword" title="conditional">if</span> head tokens != <span class="fstring">"{"</span> <span class="small_keyword" title="return">return</span> None[<span class="library" title="functional, singly linked list">list</span>[field_t]], tokens;
+<span class="lineno" id=line540></span>     tokens = tail tokens;
+<span class="lineno" id=line541></span>  again:&gt;
+<span class="lineno" id=line542></span>     <span class="small_keyword" title="conditional">if</span> head tokens == <span class="fstring">"}"</span> <span class="small_keyword" title="return">return</span> Some fields, tail tokens;
+<span class="lineno" id=line543></span>     <span class="big_keyword" title="Define a mutable variable">var</span> flds, toks = parse_field_list tokens;
+<span class="lineno" id=line544></span>     fields += flds; 
+<span class="lineno" id=line545></span>     <span class="small_keyword" title="conditional">if</span> head toks != <span class="fstring">";"</span> <span class="small_keyword" title="return">return</span> Some fields,toks;
+<span class="lineno" id=line546></span>     tokens = tail toks;
+<span class="lineno" id=line547></span>     <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line548></span>  }
+<span class="lineno" id=line549></span>  
+<span class="lineno" id=line550></span>  <span class="comment">// called by parse_function_decl only</span>
+<span class="lineno" id=line551></span>  <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_function_ptr_decl (ret:ctyp_t, <span class="big_keyword" title="Define a mutable variable">var</span> tokens:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : ctyp_t * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line552></span>    <span class="small_keyword" title="match statement or expression">match</span> tokens <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line553></span>    | <span class="fstring">"*"</span> ! <span class="fstring">")"</span> ! <span class="fstring">"("</span> ! trailing =&gt;
+<span class="lineno" id=line554></span>      def <span class="big_keyword" title="Define a mutable variable">var</span> params, tokens = parse_parameter_list trailing;
+<span class="lineno" id=line555></span>      <span class="big_keyword" title="Run time assertion">assert</span> head tokens== <span class="fstring">")"</span>;
+<span class="lineno" id=line556></span>      <span class="small_keyword" title="return">return</span> Ptr (Function (ret, params)), tail tokens;
+<span class="lineno" id=line557></span>    | _ =&gt; 
+<span class="lineno" id=line558></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Error, parse_function_ptr_decl, tokens="</span> + tokens.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line559></span>      <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line560></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line561></span>  }
+<span class="lineno" id=line562></span>  
+<span class="lineno" id=line563></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse_function_decl (ret:ctyp_t, <span class="big_keyword" title="Define a mutable variable">var</span> tokens:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : ctyp_t * <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = {
+<span class="lineno" id=line564></span>    <span class="big_keyword" title="Run time assertion">assert</span> head tokens == <span class="fstring">"("</span>;
+<span class="lineno" id=line565></span>    tokens = tail tokens; <span class="comment">// head must be "(" to get here</span>
+<span class="lineno" id=line566></span>    <span class="small_keyword" title="conditional">if</span> head tokens == <span class="fstring">"*"</span> <span class="small_keyword" title="return">return</span> parse_function_ptr_decl (ret, tokens);
+<span class="lineno" id=line567></span>    <span class="big_keyword" title="Define a mutable variable">var</span> params, trailing= parse_parameter_list tokens;
+<span class="lineno" id=line568></span>    <span class="big_keyword" title="Run time assertion">assert</span> head trailing== <span class="fstring">")"</span>;
+<span class="lineno" id=line569></span>    <span class="small_keyword" title="return">return</span> Function (ret,params), tail trailing;
+<span class="lineno" id=line570></span>  }
+<span class="lineno" id=line571></span>  
+<span class="lineno" id=line572></span>  
+<span class="lineno" id=line573></span>  }
+<span class="lineno" id=line574></span>  
+<span class="lineno" id=line575></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

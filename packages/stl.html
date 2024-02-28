@@ -1,0 +1,1153 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>C++ Standard Template Library bindings.</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Stl Iterators",
+"Stl Vector",
+"Stl Set",
+"Stl Multiset",
+"Stl Map",
+"Stl Multimap",
+"Stl List",
+"Stl Deque"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Stl Iterators_h')"> <a href="#Stl_Iterators_h">Stl Iterators</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Stl Vector_h')"> <a href="#Stl_Vector_h">Stl Vector</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Stl Set_h')"> <a href="#Stl_Set_h">Stl Set</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Stl Multiset_h')"> <a href="#Stl_Multiset_h">Stl Multiset</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Stl Map_h')"> <a href="#Stl_Map_h">Stl Map</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Stl Multimap_h')"> <a href="#Stl_Multimap_h">Stl Multimap</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Stl List_h')"> <a href="#Stl_List_h">Stl List</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Stl Deque_h')"> <a href="#Stl_Deque_h">Stl Deque</a></div>
+      <div class=sm id=menu8>
+      </div>
+    <script>counter_max=8;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Stl_Iterators_h'><img src='/share/src/web/images/minus.gif' id='Stl Iterators' onclick='toggle(this,"Stl_Iterators_d")' alt='+'/> 1 Stl Iterators</h1><div id='Stl_Iterators_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Iterator[it,t] {
+<span class="lineno" id=line3></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref: it -&gt; t;
+<span class="lineno" id=line4></span>  }
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a type class">class</span> Forward_iterator[it,t] {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> ForwardSequence[it];
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Iterator[it,t];
+<span class="lineno" id=line9></span>  }
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Define a type class">class</span> Bidirectional_iterator[it,t] {
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Forward_iterator[it,t];
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> BidirectionalSequence[it];
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a type class">class</span> Sequence[c,it,v] {
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[c];
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Forward_iterator[it,v];
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Container[c,v];
+<span class="lineno" id=line20></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="small_keyword" title="end of extension">begin</span>: c -&gt; it;
+<span class="lineno" id=line21></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> <span class="small_keyword" title="end of extension">end</span>: c -&gt; it;
+<span class="lineno" id=line22></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase: c * it;
+<span class="lineno" id=line23></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between: c * it * it;
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear: c;
+<span class="lineno" id=line25></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fold[i] (f:i-&gt;v-&gt;i) (<span class="big_keyword" title="Define a mutable variable">var</span> acc:i) (x:c): i = {
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s = <span class="small_keyword" title="end of extension">begin</span> x; <span class="big_keyword" title="Define a mutable variable">var</span> e = <span class="small_keyword" title="end of extension">end</span> x;
+<span class="lineno" id=line27></span>      <span class="small_keyword" title="while loop">while</span> s != e <span class="small_keyword" title="imperative code begins">do</span> acc = f acc (*s); ++s; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line28></span>      <span class="small_keyword" title="return">return</span> acc;
+<span class="lineno" id=line29></span>    }
+<span class="lineno" id=line30></span>  }
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>  <span class="big_keyword" title="Define a type class">class</span> Reversible_Sequence[c,it,rit,v] {
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Sequence[c,it,v];
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Bidirectional_iterator[it,v];
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Bidirectional_iterator[rit,v];
+<span class="lineno" id=line36></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> rbegin: c -&gt; rit;
+<span class="lineno" id=line37></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> rend: c -&gt; rit;
+<span class="lineno" id=line38></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> rfold[i] (f:i-&gt;v-&gt;i) (<span class="big_keyword" title="Define a mutable variable">var</span> acc:i) (x:c): i = {
+<span class="lineno" id=line39></span>      <span class="big_keyword" title="Define a mutable variable">var</span> s = rbegin x; <span class="big_keyword" title="Define a mutable variable">var</span> e = rend x;
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="while loop">while</span> s != e <span class="small_keyword" title="imperative code begins">do</span> acc = f acc (*s); ++s; <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line41></span>      <span class="small_keyword" title="return">return</span> acc;
+<span class="lineno" id=line42></span>    }
+<span class="lineno" id=line43></span>  }
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  <span class="big_keyword" title="Define a type class">class</span> Stl
+<span class="lineno" id=line47></span>  {
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> pair[k,v] = <span class="fstring">"::std::pair&lt;?1 const,?2&gt;"</span>;
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> make_pair[k,v]: k * v -&gt;pair[k,v] = <span class="fstring">"::std::make_pair($1,$2)"</span>;
+<span class="lineno" id=line50></span>  }
+<span class="lineno" id=line51></span>  
+</pre></p></div><h1 id='Stl_Vector_h'><img src='/share/src/web/images/minus.gif' id='Stl Vector' onclick='toggle(this,"Stl_Vector_d")' alt='+'/> 2 Stl Vector</h1><div id='Stl_Vector_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl_vector.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"stl/stl"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a type class">class</span> Stl_Vector[t]
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::vector;
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_vector = <span class="fstring">"::std::vector&lt;?1&gt;"</span>;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; stl_vector = <span class="fstring">"(FLX_GXX_PARSER_HACK std::vector&lt;?1&gt;())"</span>;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="binding of C int type">int</span> * t -&gt; stl_vector= <span class="fstring">"(FLX_GXX_PARSER_HACK std::vector&lt;?1&gt;($1,$2))"</span>;
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create[i] : i * i -&gt; stl_vector = <span class="fstring">"(FLX_GXX_PARSER_HACK std::vector&lt;?1&gt;($1,$2))"</span>;
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_vector_iterator = <span class="fstring">"::std::vector&lt;?1&gt;::iterator"</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_vector_reverse_iterator = <span class="fstring">"::std::vector&lt;?1&gt;::reverse_iterator"</span>;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> insert: stl_vector * stl_vector_iterator *  t  = <span class="fstring">"$1.insert($2,$3);"</span>;
+<span class="lineno" id=line14></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_back : stl_vector *  t  = <span class="fstring">"$1.push_back($2);"</span>;
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> front : stl_vector -&gt; t = <span class="fstring">"$1.front()"</span>;
+<span class="lineno" id=line16></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> front : stl_vector -&gt; t = <span class="fstring">"$1.front()"</span>;
+<span class="lineno" id=line17></span>      <span class="comment">//lvalue fun subscript : stl_vector * size -&gt; t = "$1.at($2)";</span>
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> subscript : stl_vector * <span class="library" title="binding of C size_t type">size</span> -&gt; t = <span class="fstring">"$1.at($2)"</span>;
+<span class="lineno" id=line19></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> reserve: stl_vector * <span class="library" title="binding of C size_t type">size</span> -&gt; t = <span class="fstring">"$1.reserve($2);"</span>;
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> add: stl_vector_iterator * <span class="library" title="binding of C int type">int</span> -&gt; stl_vector_iterator = <span class="fstring">"$1+$2"</span>;
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> sub: stl_vector_iterator * <span class="library" title="binding of C int type">int</span> -&gt; stl_vector_iterator = <span class="fstring">"$1-$2"</span>;
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pluseq: &amp;stl_vector_iterator * <span class="library" title="binding of C int type">int</span> = <span class="fstring">"*$1+=$2;"</span>;
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> minuseq: &amp;stl_vector_iterator * <span class="library" title="binding of C int type">int</span> = <span class="fstring">"*$1-=$2;"</span>;
+<span class="lineno" id=line24></span>      <span class="comment">//lvalue fun subscript: stl_vector_iterator * size -&gt; t = "$1[$2]";</span>
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> subscript: stl_vector_iterator * <span class="library" title="binding of C size_t type">size</span> -&gt; t = <span class="fstring">"$1[$2]"</span>;
+<span class="lineno" id=line26></span>  <span class="comment">// Stl_Vector</span>
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_vector] {
+<span class="lineno" id=line28></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_vector * stl_vector -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line29></span>    }
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[stl_vector,t] {
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: stl_vector -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line32></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty: stl_vector -&gt; bool = <span class="fstring">"$1.empty()"</span>;
+<span class="lineno" id=line33></span>    }
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Sequence[stl_vector,stl_vector_iterator,t] {
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">begin</span> : stl_vector-&gt; stl_vector_iterator= <span class="fstring">"$1.begin()"</span>;
+<span class="lineno" id=line36></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">end</span> : stl_vector-&gt; stl_vector_iterator= <span class="fstring">"$1.end()"</span>;
+<span class="lineno" id=line37></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase : stl_vector * stl_vector_iterator = <span class="fstring">"$1.erase($1);"</span>;
+<span class="lineno" id=line38></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between : stl_vector * stl_vector_iterator * stl_vector_iterator = <span class="fstring">"$1.erase($1,$2);"</span>;
+<span class="lineno" id=line39></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear : stl_vector = <span class="fstring">"$1.clear();"</span>;
+<span class="lineno" id=line40></span>    }
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Reversible_Sequence[stl_vector,stl_vector_iterator,stl_vector_reverse_iterator,t] {
+<span class="lineno" id=line42></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rbegin : stl_vector-&gt; stl_vector_reverse_iterator= <span class="fstring">"$1.rbegin()"</span>;
+<span class="lineno" id=line43></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rend : stl_vector-&gt; stl_vector_reverse_iterator= <span class="fstring">"$1.rend()"</span>;
+<span class="lineno" id=line44></span>    }
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  <span class="comment">// Stl_Vector iterator</span>
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_vector_iterator] {
+<span class="lineno" id=line48></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_vector_iterator * stl_vector_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line49></span>    }
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_vector_iterator] {
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_vector_iterator * stl_vector_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line52></span>    }
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_vector_iterator,t] {
+<span class="lineno" id=line54></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_vector_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line55></span>    }
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_vector_iterator] {
+<span class="lineno" id=line57></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_vector_iterator -&gt; stl_vector_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_vector_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_vector_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line60></span>    }
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_vector_iterator,t] {}
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_vector_iterator] {
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_vector_iterator -&gt; stl_vector_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line64></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_vector_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line65></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_vector_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line66></span>    }
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_vector_iterator,t] {}
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>  <span class="comment">// Stl_Vector reverse iterator</span>
+<span class="lineno" id=line70></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_vector_reverse_iterator] {
+<span class="lineno" id=line71></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_vector_reverse_iterator * stl_vector_reverse_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line72></span>    }
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_vector_reverse_iterator] {
+<span class="lineno" id=line74></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_vector_reverse_iterator * stl_vector_reverse_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line75></span>    }
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_vector_reverse_iterator,t] {
+<span class="lineno" id=line77></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_vector_reverse_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line78></span>    }
+<span class="lineno" id=line79></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_vector_reverse_iterator] {
+<span class="lineno" id=line80></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_vector_reverse_iterator -&gt; stl_vector_reverse_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line81></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_vector_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line82></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_vector_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line83></span>    }
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_vector_reverse_iterator,t] {}
+<span class="lineno" id=line85></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_vector_reverse_iterator] {
+<span class="lineno" id=line86></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_vector_reverse_iterator -&gt; stl_vector_reverse_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line87></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_vector_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line88></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_vector_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line89></span>    }
+<span class="lineno" id=line90></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_vector_reverse_iterator,t] {}
+<span class="lineno" id=line91></span>  }
+<span class="lineno" id=line92></span>  
+<span class="lineno" id=line93></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Stl_Vector[t];
+<span class="lineno" id=line94></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Reversible_Sequence[
+<span class="lineno" id=line95></span>    Stl_Vector::stl_vector[t],
+<span class="lineno" id=line96></span>    Stl_Vector::stl_vector_iterator[t],
+<span class="lineno" id=line97></span>    Stl_Vector::stl_vector_reverse_iterator[t],t];
+<span class="lineno" id=line98></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_Vector::stl_vector_iterator[t],t];
+<span class="lineno" id=line99></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_Vector::stl_vector_reverse_iterator[t],t];
+<span class="lineno" id=line100></span>  
+<span class="lineno" id=line101></span>  
+</pre></p></div><h1 id='Stl_Set_h'><img src='/share/src/web/images/minus.gif' id='Stl Set' onclick='toggle(this,"Stl_Set_d")' alt='+'/> 3 Stl Set</h1><div id='Stl_Set_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl_set.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"stl/stl"</span>;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a type class">class</span> Stl_Set[t]
+<span class="lineno" id=line4></span>    {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::set;
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_set = <span class="fstring">"::std::set&lt;?1&gt;"</span>;
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_set_iterator = <span class="fstring">"::std::set&lt;?1&gt;::iterator"</span>;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_set_reverse_iterator = <span class="fstring">"::std::set&lt;?1&gt;::reverse_iterator"</span>;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; stl_set = <span class="fstring">"(FLX_GXX_PARSER_HACK std::set&lt;?1&gt;())"</span>;
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> insert : stl_set * t = <span class="fstring">"$1.insert($2);"</span>;
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> find : stl_set * t -&gt;  stl_set_iterator = <span class="fstring">"$1.find($2)"</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem : stl_set * t -&gt; bool = <span class="fstring">"$1.find($2) != $1.end()"</span>;
+<span class="lineno" id=line13></span>  <span class="comment">// Stl_Set</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[Stl_Set::stl_set] {
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : Stl_Set::stl_set * Stl_Set::stl_set -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line16></span>    }
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[Stl_Set::stl_set,t] {
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: Stl_Set::stl_set -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line19></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty: Stl_Set::stl_set -&gt; bool = <span class="fstring">"$1.empty()"</span>;
+<span class="lineno" id=line20></span>    }
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Sequence[Stl_Set::stl_set,Stl_Set::stl_set_iterator,t] {
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">begin</span> : Stl_Set::stl_set-&gt; Stl_Set::stl_set_iterator= <span class="fstring">"$1.begin()"</span>;
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">end</span> : Stl_Set::stl_set-&gt; Stl_Set::stl_set_iterator= <span class="fstring">"$1.end()"</span>;
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase : Stl_Set::stl_set * Stl_Set::stl_set_iterator = <span class="fstring">"$1.erase($1);"</span>;
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between : Stl_Set::stl_set * Stl_Set::stl_set_iterator * Stl_Set::stl_set_iterator = <span class="fstring">"$1.erase($1,$2);"</span>;
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear : Stl_Set::stl_set = <span class="fstring">"$1.clear();"</span>;
+<span class="lineno" id=line27></span>    }
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Reversible_Sequence[Stl_Set::stl_set,Stl_Set::stl_set_iterator,Stl_Set::stl_set_reverse_iterator,t] {
+<span class="lineno" id=line29></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rbegin : Stl_Set::stl_set-&gt; Stl_Set::stl_set_reverse_iterator= <span class="fstring">"$1.rbegin()"</span>;
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rend : Stl_Set::stl_set-&gt; Stl_Set::stl_set_reverse_iterator= <span class="fstring">"$1.rend()"</span>;
+<span class="lineno" id=line31></span>    }
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="comment">// Stl_Set iterator</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_set_iterator] {
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_set_iterator * stl_set_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line36></span>    }
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_set_iterator] {
+<span class="lineno" id=line38></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_set_iterator * stl_set_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line39></span>    }
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_set_iterator,t] {
+<span class="lineno" id=line41></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_set_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line42></span>    }
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_set_iterator] {
+<span class="lineno" id=line44></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_set_iterator -&gt; stl_set_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line45></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_set_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_set_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line47></span>    }
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_set_iterator,t] {}
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_set_iterator] {
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_set_iterator -&gt; stl_set_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_set_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_set_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line53></span>    }
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_set_iterator,t] {}
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>  <span class="comment">// Stl_Set reverse iterator</span>
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_set_reverse_iterator] {
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_set_reverse_iterator * stl_set_reverse_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line59></span>    }
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_set_reverse_iterator] {
+<span class="lineno" id=line61></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_set_reverse_iterator * stl_set_reverse_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line62></span>    }
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_set_reverse_iterator,t] {
+<span class="lineno" id=line64></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_set_reverse_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line65></span>    }
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_set_reverse_iterator] {
+<span class="lineno" id=line67></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_set_reverse_iterator -&gt; stl_set_reverse_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line68></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_set_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line69></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_set_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line70></span>    }
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_set_reverse_iterator,t] {}
+<span class="lineno" id=line72></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_set_reverse_iterator] {
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_set_reverse_iterator -&gt; stl_set_reverse_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line74></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_set_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_set_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line76></span>    }
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_set_reverse_iterator,t] {}
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>  }
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>  <span class="big_keyword" title="Open a module or class">open</span> Stl_Set;
+<span class="lineno" id=line82></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Reversible_Sequence[
+<span class="lineno" id=line83></span>    Stl_Set::stl_set[t],
+<span class="lineno" id=line84></span>    Stl_Set::stl_set_iterator[t],
+<span class="lineno" id=line85></span>    Stl_Set::stl_set_reverse_iterator[t],t];
+<span class="lineno" id=line86></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_Set::stl_set_iterator[t],t];
+<span class="lineno" id=line87></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_Set::stl_set_reverse_iterator[t],t];
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>  
+</pre></p></div><h1 id='Stl_Multiset_h'><img src='/share/src/web/images/minus.gif' id='Stl Multiset' onclick='toggle(this,"Stl_Multiset_d")' alt='+'/> 4 Stl Multiset</h1><div id='Stl_Multiset_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl_multiset.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"stl/stl"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Stl_MultiSet[t]
+<span class="lineno" id=line4></span>    {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::set;
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_multiset = <span class="fstring">"::std::multiset&lt;?1&gt;"</span>;
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_multiset_iterator = <span class="fstring">"::std::multiset&lt;?1&gt;::iterator"</span>;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_multiset_reverse_iterator = <span class="fstring">"::std::multiset&lt;?1&gt;::reverse_iterator"</span>;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; stl_multiset = <span class="fstring">"(FLX_GXX_PARSER_HACK std::multiset&lt;?1&gt;())"</span>;
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> insert : stl_multiset * t = <span class="fstring">"$1.insert($2);"</span>;
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> find : stl_multiset * t -&gt;  stl_multiset_iterator = <span class="fstring">"$1.find($2)"</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem : stl_multiset * t -&gt; bool = <span class="fstring">"$1.find($2) != $1.end()"</span>;
+<span class="lineno" id=line13></span>  <span class="comment">// Stl_MultiSet</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_multiset] {
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_multiset * stl_multiset -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line16></span>    }
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[stl_multiset,t] {
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: stl_multiset -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line19></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty: stl_multiset -&gt; bool = <span class="fstring">"$1.empty()"</span>;
+<span class="lineno" id=line20></span>    }
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Sequence[stl_multiset,stl_multiset_iterator,t] {
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">begin</span> : stl_multiset-&gt; stl_multiset_iterator= <span class="fstring">"$1.begin()"</span>;
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">end</span> : stl_multiset-&gt; stl_multiset_iterator= <span class="fstring">"$1.end()"</span>;
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase : stl_multiset * stl_multiset_iterator = <span class="fstring">"$1.erase($1);"</span>;
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between : stl_multiset * stl_multiset_iterator * stl_multiset_iterator = <span class="fstring">"$1.erase($1,$2);"</span>;
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear : stl_multiset = <span class="fstring">"$1.clear();"</span>;
+<span class="lineno" id=line27></span>    }
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Reversible_Sequence[stl_multiset,stl_multiset_iterator,stl_multiset_reverse_iterator,t] {
+<span class="lineno" id=line29></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rbegin : stl_multiset-&gt; stl_multiset_reverse_iterator= <span class="fstring">"$1.rbegin()"</span>;
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rend : stl_multiset-&gt; stl_multiset_reverse_iterator= <span class="fstring">"$1.rend()"</span>;
+<span class="lineno" id=line31></span>    }
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="comment">// Stl_MultiSet iterator</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_multiset_iterator] {
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_multiset_iterator * stl_multiset_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line36></span>    }
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_multiset_iterator] {
+<span class="lineno" id=line38></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_multiset_iterator * stl_multiset_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line39></span>    }
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_multiset_iterator,t] {
+<span class="lineno" id=line41></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_multiset_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line42></span>    }
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_multiset_iterator] {
+<span class="lineno" id=line44></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_multiset_iterator -&gt; stl_multiset_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line45></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_multiset_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_multiset_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line47></span>    }
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_multiset_iterator,t] {}
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_multiset_iterator] {
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_multiset_iterator -&gt; stl_multiset_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_multiset_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_multiset_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line53></span>    }
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_multiset_iterator,t] {}
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>  <span class="comment">// Stl_MultiSet reverse iterator</span>
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_multiset_reverse_iterator] {
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_multiset_reverse_iterator * stl_multiset_reverse_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line59></span>    }
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_multiset_reverse_iterator] {
+<span class="lineno" id=line61></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_multiset_reverse_iterator * stl_multiset_reverse_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line62></span>    }
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_multiset_reverse_iterator,t] {
+<span class="lineno" id=line64></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_multiset_reverse_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line65></span>    }
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_multiset_reverse_iterator] {
+<span class="lineno" id=line67></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_multiset_reverse_iterator -&gt; stl_multiset_reverse_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line68></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_multiset_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line69></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_multiset_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line70></span>    }
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_multiset_reverse_iterator,t] {}
+<span class="lineno" id=line72></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_multiset_reverse_iterator] {
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_multiset_reverse_iterator -&gt; stl_multiset_reverse_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line74></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_multiset_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_multiset_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line76></span>    }
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_multiset_reverse_iterator,t] {}
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>  }
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>  <span class="big_keyword" title="Open a module or class">open</span> Stl_MultiSet;
+<span class="lineno" id=line82></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Reversible_Sequence[
+<span class="lineno" id=line83></span>    Stl_MultiSet::stl_multiset[t],
+<span class="lineno" id=line84></span>    Stl_MultiSet::stl_multiset_iterator[t],
+<span class="lineno" id=line85></span>    Stl_MultiSet::stl_multiset_reverse_iterator[t],t];
+<span class="lineno" id=line86></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_MultiSet::stl_multiset_iterator[t],t];
+<span class="lineno" id=line87></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_MultiSet::stl_multiset_reverse_iterator[t],t];
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>  
+</pre></p></div><h1 id='Stl_Map_h'><img src='/share/src/web/images/minus.gif' id='Stl Map' onclick='toggle(this,"Stl_Map_d")' alt='+'/> 5 Stl Map</h1><div id='Stl_Map_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl_map.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"stl/stl"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Stl_Map[k,v]
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::<span class="library" title="return data structure with function applied to each value">map</span>;
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_map = <span class="fstring">"::std::map&lt;?1,?2&gt;"</span>;
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_map_iterator = <span class="fstring">"::std::map&lt;?1,?2&gt;::iterator"</span>;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_map_reverse_iterator = <span class="fstring">"::std::map&lt;?1,?2&gt;::reverse_iterator"</span>;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; stl_map = <span class="fstring">"(FLX_GXX_PARSER_HACK std::map&lt;?1,?2&gt;())"</span>;
+<span class="lineno" id=line10></span>      <span class="comment">//lvalue fun subscript: stl_map * k -&gt; v = "$1[$2]";</span>
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> subscript: stl_map * k -&gt; v = <span class="fstring">"$1[$2]"</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> find : stl_map * k -&gt;  stl_map_iterator = <span class="fstring">"$1.find($2)"</span>;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem : stl_map * k -&gt; bool = <span class="fstring">"$1.find($2) != $1.end()"</span>;
+<span class="lineno" id=line14></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> insert : stl_map * k * v = <span class="fstring">"$1.insert(std::make_pair($2,$3));"</span>;
+<span class="lineno" id=line15></span>  <span class="comment">// Stl_Map</span>
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_map] {
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> ==: stl_map * stl_map -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line18></span>    }
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[stl_map,k*v] {
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: stl_map -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty: stl_map -&gt; bool = <span class="fstring">"$1.empty()"</span>;
+<span class="lineno" id=line22></span>    }
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Sequence[stl_map,stl_map_iterator,k*v] {
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">begin</span> : stl_map-&gt; stl_map_iterator= <span class="fstring">"$1.begin()"</span>;
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">end</span> : stl_map-&gt; stl_map_iterator= <span class="fstring">"$1.end()"</span>;
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase : stl_map * stl_map_iterator = <span class="fstring">"$1.erase($1);"</span>;
+<span class="lineno" id=line27></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between : stl_map * stl_map_iterator * stl_map_iterator = <span class="fstring">"$1.erase($1,$2);"</span>;
+<span class="lineno" id=line28></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear : stl_map = <span class="fstring">"$1.clear();"</span>;
+<span class="lineno" id=line29></span>    }
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Reversible_Sequence[stl_map,stl_map_iterator,stl_map_reverse_iterator,k*v] {
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rbegin : stl_map-&gt; stl_map_reverse_iterator= <span class="fstring">"$1.rbegin()"</span>;
+<span class="lineno" id=line32></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rend : stl_map-&gt; stl_map_reverse_iterator= <span class="fstring">"$1.rend()"</span>;
+<span class="lineno" id=line33></span>    }
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>  <span class="comment">// Stl_Map iterator</span>
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_map_iterator] {
+<span class="lineno" id=line37></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> ==: stl_map_iterator * stl_map_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line38></span>    }
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_map_iterator] {
+<span class="lineno" id=line40></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_map_iterator * stl_map_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line41></span>    }
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_map_iterator,k*v] {
+<span class="lineno" id=line43></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_map_iterator -&gt;  k*v  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line44></span>    }
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_map_iterator] {
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_map_iterator -&gt; stl_map_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line47></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_map_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line48></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_map_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line49></span>    }
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_map_iterator,k*v] {}
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_map_iterator] {
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_map_iterator -&gt; stl_map_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line53></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_map_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line54></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_map_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line55></span>    }
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_map_iterator,k*v] {}
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>  <span class="comment">// Stl_Map reverse iterator</span>
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_map_reverse_iterator] {
+<span class="lineno" id=line60></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> ==: stl_map_reverse_iterator * stl_map_reverse_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line61></span>    }
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_map_reverse_iterator] {
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_map_reverse_iterator * stl_map_reverse_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line64></span>    }
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_map_reverse_iterator,k*v] {
+<span class="lineno" id=line66></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_map_reverse_iterator -&gt;  k*v  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line67></span>    }
+<span class="lineno" id=line68></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_map_reverse_iterator] {
+<span class="lineno" id=line69></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_map_reverse_iterator -&gt; stl_map_reverse_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_map_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line71></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_map_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line72></span>    }
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_map_reverse_iterator,k*v] {}
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_map_reverse_iterator] {
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_map_reverse_iterator -&gt; stl_map_reverse_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line76></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_map_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line77></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_map_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line78></span>    }
+<span class="lineno" id=line79></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_map_reverse_iterator,k*v] {}
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>  }
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>  <span class="big_keyword" title="Open a module or class">open</span>[k,v] Stl_Map[k,v];
+<span class="lineno" id=line84></span>  <span class="big_keyword" title="Open a module or class">open</span>[k,v] Reversible_Sequence[
+<span class="lineno" id=line85></span>    Stl_Map::stl_map[k,v],
+<span class="lineno" id=line86></span>    Stl_Map::stl_map_iterator[k,v],
+<span class="lineno" id=line87></span>    Stl_Map::stl_map_reverse_iterator[k,v],k*v];
+<span class="lineno" id=line88></span>  <span class="big_keyword" title="Open a module or class">open</span>[k,v] Bidirectional_iterator[Stl_Map::stl_map_iterator[k,v],k*v];
+<span class="lineno" id=line89></span>  <span class="big_keyword" title="Open a module or class">open</span>[k,v] Bidirectional_iterator[Stl_Map::stl_map_reverse_iterator[k,v],k*v];
+<span class="lineno" id=line90></span>  
+<span class="lineno" id=line91></span>  
+<span class="lineno" id=line92></span>  
+</pre></p></div><h1 id='Stl_Multimap_h'><img src='/share/src/web/images/minus.gif' id='Stl Multimap' onclick='toggle(this,"Stl_Multimap_d")' alt='+'/> 6 Stl Multimap</h1><div id='Stl_Multimap_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl_multimap.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"stl/stl"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Stl_MultiMap[k,v]
+<span class="lineno" id=line4></span>    {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::<span class="library" title="return data structure with function applied to each value">map</span>;
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_multimap = <span class="fstring">"::std::multimap&lt;?1,?2&gt;"</span>;
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_multimap_iterator = <span class="fstring">"::std::multimap&lt;?1,?2&gt;::iterator"</span>;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_multimap_reverse_iterator = <span class="fstring">"::std::multimap&lt;?1,?2&gt;::reverse_iterator"</span>;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; stl_multimap = <span class="fstring">"(FLX_GXX_PARSER_HACK std::multimap&lt;?1,?2&gt;())"</span>;
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> subscript: stl_multimap * k -&gt; v = <span class="fstring">"$1[$2]"</span>;
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> find : stl_multimap * k -&gt;  stl_multimap_iterator = <span class="fstring">"$1.find($2)"</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem : stl_multimap * k -&gt; bool = <span class="fstring">"$1.find($2) != $1.end()"</span>;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> insert : stl_multimap * k * v = <span class="fstring">"$1.insert(std::make_pair($2,$3));"</span>;
+<span class="lineno" id=line14></span>  <span class="comment">// Stl_MultiMap</span>
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_multimap] {
+<span class="lineno" id=line16></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_multimap * stl_multimap -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line17></span>    }
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[stl_multimap,k*v] {
+<span class="lineno" id=line19></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: stl_multimap -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty: stl_multimap -&gt; bool = <span class="fstring">"$1.empty()"</span>;
+<span class="lineno" id=line21></span>    }
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Sequence[stl_multimap,stl_multimap_iterator,k*v] {
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">begin</span> : stl_multimap-&gt; stl_multimap_iterator= <span class="fstring">"$1.begin()"</span>;
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">end</span> : stl_multimap-&gt; stl_multimap_iterator= <span class="fstring">"$1.end()"</span>;
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase : stl_multimap * stl_multimap_iterator = <span class="fstring">"$1.erase($1);"</span>;
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between : stl_multimap * stl_multimap_iterator * stl_multimap_iterator = <span class="fstring">"$1.erase($1,$2);"</span>;
+<span class="lineno" id=line27></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear : stl_multimap = <span class="fstring">"$1.clear();"</span>;
+<span class="lineno" id=line28></span>    }
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Reversible_Sequence[stl_multimap,stl_multimap_iterator,stl_multimap_reverse_iterator,k*v] {
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rbegin : stl_multimap-&gt; stl_multimap_reverse_iterator= <span class="fstring">"$1.rbegin()"</span>;
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rend : stl_multimap-&gt; stl_multimap_reverse_iterator= <span class="fstring">"$1.rend()"</span>;
+<span class="lineno" id=line32></span>    }
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>  <span class="comment">// Stl_MultiMap iterator</span>
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_multimap_iterator] {
+<span class="lineno" id=line36></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_multimap_iterator * stl_multimap_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line37></span>    }
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_multimap_iterator] {
+<span class="lineno" id=line39></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_multimap_iterator * stl_multimap_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line40></span>    }
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_multimap_iterator,k*v] {
+<span class="lineno" id=line42></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_multimap_iterator -&gt;  k*v  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line43></span>    }
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_multimap_iterator] {
+<span class="lineno" id=line45></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_multimap_iterator -&gt; stl_multimap_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_multimap_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line47></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_multimap_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line48></span>    }
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_multimap_iterator,k*v] {}
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_multimap_iterator] {
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_multimap_iterator -&gt; stl_multimap_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_multimap_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line53></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_multimap_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line54></span>    }
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_multimap_iterator,k*v] {}
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>  <span class="comment">//Stl_MultiMap reverse iterator</span>
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_multimap_reverse_iterator] {
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_multimap_reverse_iterator * stl_multimap_reverse_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line60></span>    }
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_multimap_reverse_iterator] {
+<span class="lineno" id=line62></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_multimap_reverse_iterator * stl_multimap_reverse_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line63></span>    }
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_multimap_reverse_iterator,k*v] {
+<span class="lineno" id=line65></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_multimap_reverse_iterator -&gt;  k*v  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line66></span>    }
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_multimap_reverse_iterator] {
+<span class="lineno" id=line68></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_multimap_reverse_iterator -&gt; stl_multimap_reverse_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line69></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_multimap_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_multimap_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line71></span>    }
+<span class="lineno" id=line72></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_multimap_reverse_iterator,k*v] {}
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_multimap_reverse_iterator] {
+<span class="lineno" id=line74></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_multimap_reverse_iterator -&gt; stl_multimap_reverse_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_multimap_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line76></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_multimap_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line77></span>    }
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_multimap_reverse_iterator,k*v] {}
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>  }
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>  <span class="big_keyword" title="Open a module or class">open</span> Stl_MultiMap;
+<span class="lineno" id=line83></span>  <span class="big_keyword" title="Open a module or class">open</span>[k,v] Reversible_Sequence[
+<span class="lineno" id=line84></span>    Stl_MultiMap::stl_multimap[k,v],
+<span class="lineno" id=line85></span>    Stl_MultiMap::stl_multimap_iterator[k,v],
+<span class="lineno" id=line86></span>    Stl_MultiMap::stl_multimap_reverse_iterator[k,v],k*v];
+<span class="lineno" id=line87></span>  <span class="big_keyword" title="Open a module or class">open</span>[k,v] Bidirectional_iterator[Stl_MultiMap::stl_multimap_iterator[k,v],k*v];
+<span class="lineno" id=line88></span>  <span class="big_keyword" title="Open a module or class">open</span>[k,v] Bidirectional_iterator[Stl_MultiMap::stl_multimap_reverse_iterator[k,v],k*v];
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>  
+</pre></p></div><h1 id='Stl_List_h'><img src='/share/src/web/images/minus.gif' id='Stl List' onclick='toggle(this,"Stl_List_d")' alt='+'/> 7 Stl List</h1><div id='Stl_List_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl_list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"stl/stl"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a type class">class</span> Stl_List[t]
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::<span class="library" title="functional, singly linked list">list</span>;
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_list = <span class="fstring">"::std::list&lt;?1&gt;"</span>;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; stl_list = <span class="fstring">"(FLX_GXX_PARSER_HACK std::list&lt;?1&gt;())"</span>;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="binding of C int type">int</span> * t -&gt; stl_list= <span class="fstring">"(FLX_GXX_PARSER_HACK std::list&lt;?1&gt;($1,$2))"</span>;
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create[i] : i * i -&gt; stl_list = <span class="fstring">"(FLX_GXX_PARSER_HACK std::list&lt;?1&gt;($1,$2))"</span>;
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_list_iterator = <span class="fstring">"::std::list&lt;?1&gt;::iterator"</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_list_reverse_iterator = <span class="fstring">"::std::list&lt;?1&gt;::reverse_iterator"</span>;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> insert: stl_list * stl_list_iterator *  t  = <span class="fstring">"$1.insert($2,$3);"</span>;
+<span class="lineno" id=line14></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_front : stl_list *  t  = <span class="fstring">"$1.push_front($2);"</span>;
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_back : stl_list *  t  = <span class="fstring">"$1.push_back($2);"</span>;
+<span class="lineno" id=line16></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> front : stl_list -&gt; t = <span class="fstring">"$1.front()"</span>;
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> front : stl_list -&gt; t = <span class="fstring">"$1.front()"</span>;
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pop_front : stl_list = <span class="fstring">"$1.pop_back();"</span>;
+<span class="lineno" id=line19></span>  <span class="comment">// List</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_list] {
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_list * stl_list -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line22></span>    }
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[stl_list,t] {
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: stl_list -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty: stl_list -&gt; bool = <span class="fstring">"$1.empty()"</span>;
+<span class="lineno" id=line26></span>    }
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Sequence[stl_list,stl_list_iterator,t] {
+<span class="lineno" id=line28></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">begin</span> : stl_list-&gt; stl_list_iterator= <span class="fstring">"$1.begin()"</span>;
+<span class="lineno" id=line29></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">end</span> : stl_list-&gt; stl_list_iterator= <span class="fstring">"$1.end()"</span>;
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase : stl_list * stl_list_iterator = <span class="fstring">"$1.erase($1);"</span>;
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between : stl_list * stl_list_iterator * stl_list_iterator = <span class="fstring">"$1.erase($1,$2);"</span>;
+<span class="lineno" id=line32></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear : stl_list = <span class="fstring">"$1.clear();"</span>;
+<span class="lineno" id=line33></span>    }
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Reversible_Sequence[stl_list,stl_list_iterator,stl_list_reverse_iterator,t] {
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rbegin : stl_list-&gt; stl_list_reverse_iterator= <span class="fstring">"$1.rbegin()"</span>;
+<span class="lineno" id=line36></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rend : stl_list-&gt; stl_list_reverse_iterator= <span class="fstring">"$1.rend()"</span>;
+<span class="lineno" id=line37></span>    }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  <span class="comment">// List iterator</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_list_iterator] {
+<span class="lineno" id=line41></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_list_iterator * stl_list_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line42></span>    }
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_list_iterator] {
+<span class="lineno" id=line44></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_list_iterator * stl_list_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line45></span>    }
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_list_iterator,t] {
+<span class="lineno" id=line47></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_list_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line48></span>    }
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_list_iterator] {
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_list_iterator -&gt; stl_list_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_list_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_list_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line53></span>    }
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_list_iterator,t] {}
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_list_iterator] {
+<span class="lineno" id=line56></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_list_iterator -&gt; stl_list_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line57></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_list_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_list_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line59></span>    }
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_list_iterator,t] {}
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>  <span class="comment">// List reverse iterator</span>
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_list_reverse_iterator] {
+<span class="lineno" id=line64></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_list_reverse_iterator * stl_list_reverse_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line65></span>    }
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_list_reverse_iterator] {
+<span class="lineno" id=line67></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_list_reverse_iterator * stl_list_reverse_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line68></span>    }
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_list_reverse_iterator,t] {
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_list_reverse_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line71></span>    }
+<span class="lineno" id=line72></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_list_reverse_iterator] {
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_list_reverse_iterator -&gt; stl_list_reverse_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line74></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_list_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_list_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line76></span>    }
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_list_reverse_iterator,t] {}
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_list_reverse_iterator] {
+<span class="lineno" id=line79></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_list_reverse_iterator -&gt; stl_list_reverse_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line80></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_list_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line81></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_list_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line82></span>    }
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_list_reverse_iterator,t] {}
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>  }
+<span class="lineno" id=line86></span>  
+<span class="lineno" id=line87></span>  <span class="big_keyword" title="Open a module or class">open</span> Stl_List;
+<span class="lineno" id=line88></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Reversible_Sequence[
+<span class="lineno" id=line89></span>    Stl_List::stl_list[t],
+<span class="lineno" id=line90></span>    Stl_List::stl_list_iterator[t],
+<span class="lineno" id=line91></span>    Stl_List::stl_list_reverse_iterator[t],t];
+<span class="lineno" id=line92></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_List::stl_list_iterator[t],t];
+<span class="lineno" id=line93></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_List::stl_list_reverse_iterator[t],t];
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>  
+</pre></p></div><h1 id='Stl_Deque_h'><img src='/share/src/web/images/minus.gif' id='Stl Deque' onclick='toggle(this,"Stl_Deque_d")' alt='+'/> 8 Stl Deque</h1><div id='Stl_Deque_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/stl/stl_deque.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a type class">class</span> Stl_Deque[t]
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::deque;
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_deque = <span class="fstring">"::std::deque&lt;?1&gt;"</span>;
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; stl_deque = <span class="fstring">"(FLX_GXX_PARSER_HACK std::deque&lt;?1&gt;())"</span>;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create : <span class="library" title="binding of C int type">int</span> * t -&gt; stl_deque= <span class="fstring">"(FLX_GXX_PARSER_HACK std::deque&lt;?1&gt;($1,$2))"</span>;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> create[i] : i * i -&gt; stl_deque = <span class="fstring">"(FLX_GXX_PARSER_HACK std::deque&lt;?1&gt;($1,$2))"</span>;
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_deque_iterator = <span class="fstring">"::std::deque&lt;?1&gt;::iterator"</span>;
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> stl_deque_reverse_iterator = <span class="fstring">"::std::deque&lt;?1&gt;::reverse_iterator"</span>;
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> insert: stl_deque * stl_deque_iterator *  t  = <span class="fstring">"$1.insert($2,$3);"</span>;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_front : stl_deque *  t  = <span class="fstring">"$1.push_front($2);"</span>;
+<span class="lineno" id=line14></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_back : stl_deque *  t  = <span class="fstring">"$1.push_back($2);"</span>;
+<span class="lineno" id=line15></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pop_front : stl_deque = <span class="fstring">"$1.pop_back();"</span>;
+<span class="lineno" id=line16></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> front : stl_deque -&gt; t = <span class="fstring">"$1.front()"</span>;
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> front : stl_deque -&gt; t = <span class="fstring">"$1.front()"</span>;
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> subscript : stl_deque * <span class="library" title="binding of C int type">int</span> -&gt; t = <span class="fstring">"$1.at($2)"</span>;
+<span class="lineno" id=line19></span>  <span class="comment">// Stl_Deque</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_deque] {
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_deque * stl_deque -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line22></span>    }
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Container[stl_deque,t] {
+<span class="lineno" id=line24></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span>: stl_deque -&gt; <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"$1.size()"</span>;
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> empty: stl_deque -&gt; bool = <span class="fstring">"$1.empty()"</span>;
+<span class="lineno" id=line26></span>    }
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Sequence[stl_deque,stl_deque_iterator,t] {
+<span class="lineno" id=line28></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">begin</span> : stl_deque-&gt; stl_deque_iterator= <span class="fstring">"$1.begin()"</span>;
+<span class="lineno" id=line29></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="end of extension">end</span> : stl_deque-&gt; stl_deque_iterator= <span class="fstring">"$1.end()"</span>;
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase : stl_deque * stl_deque_iterator = <span class="fstring">"$1.erase($1);"</span>;
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> erase_between : stl_deque * stl_deque_iterator * stl_deque_iterator = <span class="fstring">"$1.erase($1,$2);"</span>;
+<span class="lineno" id=line32></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> clear : stl_deque = <span class="fstring">"$1.clear();"</span>;
+<span class="lineno" id=line33></span>    }
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Reversible_Sequence[stl_deque,stl_deque_iterator,stl_deque_reverse_iterator,t] {
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rbegin : stl_deque-&gt; stl_deque_reverse_iterator= <span class="fstring">"$1.rbegin()"</span>;
+<span class="lineno" id=line36></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> rend : stl_deque-&gt; stl_deque_reverse_iterator= <span class="fstring">"$1.rend()"</span>;
+<span class="lineno" id=line37></span>    }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  <span class="comment">// Stl_Deque iterator</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_deque_iterator] {
+<span class="lineno" id=line41></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_deque_iterator * stl_deque_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line42></span>    }
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_deque_iterator] {
+<span class="lineno" id=line44></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_deque_iterator * stl_deque_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line45></span>    }
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_deque_iterator,t] {
+<span class="lineno" id=line47></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_deque_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line48></span>    }
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_deque_iterator] {
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_deque_iterator -&gt; stl_deque_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_deque_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_deque_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line53></span>    }
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_deque_iterator,t] {}
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_deque_iterator] {
+<span class="lineno" id=line56></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_deque_iterator -&gt; stl_deque_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line57></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_deque_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_deque_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line59></span>    }
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_deque_iterator,t] {}
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>  <span class="comment">// Stl_Deque reverse iterator</span>
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[stl_deque_reverse_iterator] {
+<span class="lineno" id=line64></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : stl_deque_reverse_iterator * stl_deque_reverse_iterator -&gt; bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line65></span>    }
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[stl_deque_reverse_iterator] {
+<span class="lineno" id=line67></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : stl_deque_reverse_iterator * stl_deque_reverse_iterator -&gt; bool = <span class="fstring">"$1&lt;$2"</span>;
+<span class="lineno" id=line68></span>    }
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Iterator[stl_deque_reverse_iterator,t] {
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> deref : stl_deque_reverse_iterator -&gt;  t  = <span class="fstring">"*(#0*)(void*)&amp;*$1"</span>;
+<span class="lineno" id=line71></span>    }
+<span class="lineno" id=line72></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> ForwardSequence[stl_deque_reverse_iterator] {
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ: stl_deque_reverse_iterator -&gt; stl_deque_reverse_iterator = <span class="fstring">"$1+1"</span>;
+<span class="lineno" id=line74></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_incr : &amp;stl_deque_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_incr : &amp;stl_deque_reverse_iterator = <span class="fstring">"++*$1;"</span>;
+<span class="lineno" id=line76></span>    }
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Forward_iterator[stl_deque_reverse_iterator,t] {}
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> BidirectionalSequence[stl_deque_reverse_iterator] {
+<span class="lineno" id=line79></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred: stl_deque_reverse_iterator -&gt; stl_deque_reverse_iterator = <span class="fstring">"$1-1;"</span>;
+<span class="lineno" id=line80></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pre_decr : &amp;stl_deque_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line81></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> post_decr : &amp;stl_deque_reverse_iterator = <span class="fstring">"--*$1;"</span>;
+<span class="lineno" id=line82></span>    }
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Bidirectional_iterator[stl_deque_reverse_iterator,t] {}
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>  }
+<span class="lineno" id=line86></span>  
+<span class="lineno" id=line87></span>  <span class="big_keyword" title="Open a module or class">open</span> Stl_Deque;
+<span class="lineno" id=line88></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Reversible_Sequence[
+<span class="lineno" id=line89></span>    Stl_Deque::stl_deque[t],
+<span class="lineno" id=line90></span>    Stl_Deque::stl_deque_iterator[t],
+<span class="lineno" id=line91></span>    Stl:Stl_Deque::stl_deque_reverse_iterator[t],t];
+<span class="lineno" id=line92></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_Deque::stl_deque_iterator[t],t];
+<span class="lineno" id=line93></span>  <span class="big_keyword" title="Open a module or class">open</span>[t] Bidirectional_iterator[Stl_Deque::stl_deque_reverse_iterator[t],t];
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

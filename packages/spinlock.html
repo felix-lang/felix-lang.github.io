@@ -1,0 +1,609 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Spinlocks</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Spinlock"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Spinlock_h')"> <a href="#Spinlock_h">Spinlock</a></div>
+      <div class=sm id=menu1>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Spinlock_h'><img src='/share/src/web/images/minus.gif' id='Spinlock' onclick='toggle(this,"Spinlock_d")' alt='+'/> 1 Spinlock</h1><div id='Spinlock_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/flx_spinlock.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> _FLX_SPINLOCK_HPP
+#<span class="preproc">define</span> _FLX_SPINLOCK_HPP
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"flx_rtl.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">&lt;atomic&gt;</span>
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+
+RTL_EXTERN <span class="qualifier">extern</span> ::flx::gc::generic::gc_shape_t flx_spinlock_ptr_map;
+
+<span class="comment">// C++ compliant Lockable
+</span><span class="big_keyword">struct</span> RTL_EXTERN flx_spinlock {
+<span class="qualifier">private</span>:
+  flx_spinlock(flx_spinlock <span class="qualifier">const</span>&amp;)=delete; <span class="comment">// no copying
+</span>  flx_spinlock(flx_spinlock &amp;&amp;)=delete; <span class="comment">// no moving
+</span>  flx_spinlock &amp;operator=(flx_spinlock <span class="qualifier">const</span> &amp;)=delete; <span class="comment">// no assignment
+</span>
+  ::<span class="small_keyword">std</span>::atomic_flag <span class="qualifier">volatile</span> flag;
+<span class="qualifier">public</span>:
+  flx_spinlock() noexcept; <span class="comment">// init to clear
+</span>  <span class="qualifier">void</span> lock() <span class="qualifier">volatile</span>;
+  <span class="qualifier">void</span> unlock() <span class="qualifier">volatile</span>;
+};
+ 
+<span class="big_keyword">struct</span> RTL_EXTERN spinguard {
+<span class="qualifier">private</span>:
+  spinguard() = delete;
+  spinguard(spinguard <span class="qualifier">const</span>&amp;) = delete;
+  spinguard *operator=(spinguard <span class="qualifier">const</span>&amp;)=delete;
+  bool cond;
+  flx_spinlock *spinlock;
+<span class="qualifier">public</span>:
+  spinguard (flx_spinlock *);
+  ~spinguard ();
+};
+}}
+
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/src/rtl/flx_spinlock.cpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"flx_spinlock.hpp"</span>
+
+using <span class="big_keyword">namespace</span> <span class="small_keyword">std</span>;
+
+<span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> rtl {
+flx_spinlock::flx_spinlock() noexcept { flag.clear(memory_order_release); }
+<span class="qualifier">void</span> flx_spinlock::lock() <span class="qualifier">volatile</span> { <span class="small_keyword">while</span>(flag.test_and_set(memory_order_acquire)); }
+<span class="qualifier">void</span> flx_spinlock::unlock() <span class="qualifier">volatile</span> { flag.clear(memory_order_release); }
+
+
+spinguard::spinguard (flx_spinlock *p) : spinlock(p) { spinlock-&gt;lock(); }
+spinguard::~spinguard () {  spinlock-&gt;unlock(); }
+
+::flx::gc::generic::gc_shape_t flx_spinlock_ptr_map = {
+  <span class="fstring">"rtl::spinlock"</span>,
+  1,sizeof(flx_spinlock),
+  0, <span class="comment">// no finaliser
+</span>  0, <span class="comment">// fcops
+</span>  NULL, <span class="comment">// no offsets
+</span>  0,0,0,
+  gc::generic::gc_flags_default,
+  0UL, 0UL
+};
+}} <span class="comment">// namespace flx, rtl
+</span>
+</pre></p><pre class='inclusion'>
+share/lib/std/control/spinlock.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Spinlock {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_spinlock"</span>;
+<span class="lineno" id=line3></span>    _gc_pointer <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> spinlock = <span class="fstring">"::flx::rtl::flx_spinlock*"</span>;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> spinlock : 1 = <span class="fstring">"""
+<span class="lineno" id=line5></span>      [=] ()-&gt;::flx::rtl::flx_spinlock* { 
+<span class="lineno" id=line6></span>        auto p = new(*(ptf-&gt;gcp), ::flx::rtl::flx_spinlock_ptr_map,false) ::flx::rtl::flx_spinlock ();
+<span class="lineno" id=line7></span>        p-&gt;unlock();
+<span class="lineno" id=line8></span>        return p;
+<span class="lineno" id=line9></span>      } ()
+<span class="lineno" id=line10></span>    """</span>;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> lock : spinlock = <span class="fstring">"$1-&gt;lock();"</span>;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> unlock : spinlock = <span class="fstring">"$1-&gt;unlock();"</span>;
+<span class="lineno" id=line13></span>  } <span class="comment">// Spinlock</span>
+</pre></p><pre class='inclusion'>
+share/lib/std/datatype/cwbuf.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/spinlock"</span>;
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="comment">// RT circular buffer of machine words</span>
+<span class="lineno" id=line4></span>  <span class="comment">// guarranteed nonblocking</span>
+<span class="lineno" id=line5></span>  <span class="comment">// Semantics: </span>
+<span class="lineno" id=line6></span>  <span class="comment">//   when writing if the buffer is full, the read pointer is adjusted too</span>
+<span class="lineno" id=line7></span>  <span class="comment">//   this means the read head will skip the oldest word</span>
+<span class="lineno" id=line8></span>  <span class="comment">//</span>
+<span class="lineno" id=line9></span>  <span class="comment">//   when reading if the buffer is empty, the write pointer is adjusted too</span>
+<span class="lineno" id=line10></span>  <span class="comment">//   this means the next write will be just ahead of the read pointer</span>
+<span class="lineno" id=line11></span>  <span class="comment">//   the read will return stale data </span>
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a type class">class</span> CWBuf 
+<span class="lineno" id=line13></span>  { 
+<span class="lineno" id=line14></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a structure">struct</span> _cwbuf_t {
+<span class="lineno" id=line15></span>       beg : +<span class="library" title="special binding of C void* type">address</span>; <span class="comment">// first</span>
+<span class="lineno" id=line16></span>       nd : +<span class="library" title="special binding of C void* type">address</span>;  <span class="comment">// last + 1</span>
+<span class="lineno" id=line17></span>       s : Spinlock::spinlock;   <span class="comment">// the lock</span>
+<span class="lineno" id=line18></span>       r : +<span class="library" title="special binding of C void* type">address</span>;   <span class="comment">// read pointer</span>
+<span class="lineno" id=line19></span>       w : +<span class="library" title="special binding of C void* type">address</span>;   <span class="comment">// write pointer</span>
+<span class="lineno" id=line20></span>       full : bool;    <span class="comment">// buffer full?</span>
+<span class="lineno" id=line21></span>       empty : bool;   <span class="comment">// buffer empty?</span>
+<span class="lineno" id=line22></span>    };
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> cwbuf_t = &amp;_cwbuf_t;
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> cwbuf_t (n: <span class="library" title="binding of C size_t type">size</span>) { 
+<span class="lineno" id=line26></span>      <span class="big_keyword" title="Define a mutable variable">var</span> v = 
+<span class="lineno" id=line27></span>        <span class="small_keyword" title="let binder">let</span> m = max (n,16uz) <span class="small_keyword" title="membership operator, function mem">in</span> 
+<span class="lineno" id=line28></span>        <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="special binding of C void* type">address</span>] (m, <span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] 0z)
+<span class="lineno" id=line29></span>      ;
+<span class="lineno" id=line30></span>      <span class="small_keyword" title="return">return</span> 
+<span class="lineno" id=line31></span>        <span class="small_keyword" title="let binder">let</span> p = v.stl_begin <span class="small_keyword" title="membership operator, function mem">in</span> 
+<span class="lineno" id=line32></span>        new (_cwbuf_t (p, v.stl_end,  Spinlock::spinlock (), p, p, <span class="library" title="false value">false</span>, <span class="library" title="truth value">true</span>))
+<span class="lineno" id=line33></span>      ;
+<span class="lineno" id=line34></span>    }
+<span class="lineno" id=line35></span>   
+<span class="lineno" id=line36></span>    <span class="comment">// the latest data will overwrite the most stale on full</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push ( b: cwbuf_t, d: <span class="library" title="special binding of C void* type">address</span> ) {
+<span class="lineno" id=line38></span>  <span class="comment">//println$ "Pool push " + d.str;</span>
+<span class="lineno" id=line39></span>      b-&gt;s.Spinlock::lock;
+<span class="lineno" id=line40></span>      b-&gt;w &lt;- d; <span class="comment">// write</span>
+<span class="lineno" id=line41></span>      pre_incr b.w; <span class="comment">// incr</span>
+<span class="lineno" id=line42></span>      <span class="small_keyword" title="conditional">if</span> b-&gt;w == b-&gt;nd perform b.w &lt;- b-&gt;beg; <span class="comment">// wrap</span>
+<span class="lineno" id=line43></span>      <span class="small_keyword" title="conditional">if</span> b-&gt;full  perform b.r &lt;- b-&gt;w;  <span class="comment">// bump read pointer if it was full</span>
+<span class="lineno" id=line44></span>      b.full &lt;- b-&gt;w == b-&gt;r; <span class="comment">// reset full flag</span>
+<span class="lineno" id=line45></span>      b.empty &lt;- <span class="library" title="false value">false</span>; <span class="comment">// just written so can't be empty</span>
+<span class="lineno" id=line46></span>      b-&gt;s.Spinlock::unlock;
+<span class="lineno" id=line47></span>    }
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pop (b : cwbuf_t, pp : &amp;<span class="library" title="special binding of C void* type">address</span>) { 
+<span class="lineno" id=line49></span>      (b-&gt;s).Spinlock::lock;
+<span class="lineno" id=line50></span>      pp &lt;- *(b-&gt;r);
+<span class="lineno" id=line51></span>      pre_incr b.r;
+<span class="lineno" id=line52></span>      <span class="small_keyword" title="conditional">if</span> b-&gt;r == b-&gt;nd perform b.r &lt;- b-&gt;beg;
+<span class="lineno" id=line53></span>      <span class="small_keyword" title="conditional">if</span> b-&gt;empty perform b.w &lt;- b-&gt;r;
+<span class="lineno" id=line54></span>      b.empty &lt;- b-&gt;w == b-&gt;r;
+<span class="lineno" id=line55></span>      b.full &lt;- <span class="library" title="false value">false</span>; <span class="comment">// just read so can't be full</span>
+<span class="lineno" id=line56></span>      (b-&gt;s).Spinlock::unlock;
+<span class="lineno" id=line57></span>  <span class="comment">//println$ "Pool pop " + pp-&gt;str;</span>
+<span class="lineno" id=line58></span>    }
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>    <span class="comment">// this version returns null on empty</span>
+<span class="lineno" id=line61></span>    <span class="comment">// to avoid reading a stale block</span>
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pop_with_null_on_empty (b : cwbuf_t, pp : &amp;<span class="library" title="special binding of C void* type">address</span>) { 
+<span class="lineno" id=line63></span>      (b-&gt;s).Spinlock::lock;
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="conditional">if</span> b-&gt;empty <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line65></span>        pp&lt;- <span class="hack">C_hack</span>::cast[<span class="library" title="special binding of C void* type">address</span>] 0uz; 
+<span class="lineno" id=line66></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line67></span>        pp &lt;- *(b-&gt;r);
+<span class="lineno" id=line68></span>        pre_incr b.r;
+<span class="lineno" id=line69></span>        <span class="small_keyword" title="conditional">if</span> b-&gt;r == b-&gt;nd perform b.r &lt;- b-&gt;beg;
+<span class="lineno" id=line70></span>        b.empty &lt;- b-&gt;w == b-&gt;r;
+<span class="lineno" id=line71></span>        b.full &lt;- <span class="library" title="false value">false</span>; <span class="comment">// just read so can't be full</span>
+<span class="lineno" id=line72></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line73></span>      (b-&gt;s).Spinlock::unlock;
+<span class="lineno" id=line74></span>    }
+<span class="lineno" id=line75></span>  }
+</pre></p><pre class='inclusion'>
+share/lib/std/memory/poolalloc.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/spinlock"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/cwbuf"</span>;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a type class">class</span> PoolAllocator {
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Open a module or class">open</span> CWBuf; 
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> Pool_Allocator[T] (poolsize: <span class="library" title="binding of C size_t type">size</span>, alloc: 1 -&gt; &amp;T) 
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="the parameter of a chip">connector</span> memory 
+<span class="lineno" id=line10></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> acquire: %&gt;&amp;T
+<span class="lineno" id=line11></span>        <span class="small_keyword" title="a field of the chip parameter">pin</span> release: %&lt;&amp;T
+<span class="lineno" id=line12></span>    {
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> provider () {
+<span class="lineno" id=line14></span>        <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line15></span>          <span class="big_keyword" title="Define a mutable variable">var</span> p : &amp;T;
+<span class="lineno" id=line16></span>          pop (pool, <span class="hack">C_hack</span>::cast[&amp;<span class="library" title="special binding of C void* type">address</span>] &amp;p);
+<span class="lineno" id=line17></span>          write_pointer$ memory.acquire, p;
+<span class="lineno" id=line18></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line19></span>      }
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> collector () {
+<span class="lineno" id=line21></span>        <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line22></span>          <span class="big_keyword" title="Define a mutable variable">var</span> p: &amp;T;
+<span class="lineno" id=line23></span>          read_pointer$ memory.release, &amp;p;
+<span class="lineno" id=line24></span>          push (pool,p.<span class="library" title="special binding of C void* type">address</span>);
+<span class="lineno" id=line25></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line26></span>      }
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> service () {
+<span class="lineno" id=line29></span>        <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> provider;
+<span class="lineno" id=line30></span>        <span class="comment">//spawn_process collector;  // collector not running - why?</span>
+<span class="lineno" id=line31></span>        <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> collector; 
+<span class="lineno" id=line32></span>      }
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pool = cwbuf_t poolsize; 
+<span class="lineno" id=line35></span>      <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0uz ..&lt; poolsize <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line36></span>        <span class="big_keyword" title="Define a mutable variable">var</span> p = #alloc;
+<span class="lineno" id=line37></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Adding "</span> + p.<span class="library" title="special binding of C void* type">address</span>.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" to Allocator pool"</span>;
+<span class="lineno" id=line38></span>        push (pool,p.<span class="library" title="special binding of C void* type">address</span>);
+<span class="lineno" id=line39></span>      <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="call a procedure">call</span> service;
+<span class="lineno" id=line41></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Pool_Allocator terminated, NOT IMPLEMENTED YET FREE MEMORY!"</span>;
+<span class="lineno" id=line42></span>    }
+<span class="lineno" id=line43></span>  } <span class="comment">// Allocator</span>
+<span class="lineno" id=line44></span>  
+</pre></p><pre class='inclusion'>
+$PWD/src/config/flx_spinlock.fpc</pre>
+<p><pre class="prefmtbg">Name: flx_spinlock
+Description: hard real time spinlock
+Requires: flx
+includes: '"flx_spinlock.hpp"'
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

@@ -1,0 +1,1846 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Functional List</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"The <code>list</code> type.",
+"Constructors",
+"Named constructor for empty list.",
+"Construct a singleton list.",
+"Construct a list from an array.",
+"List comprehension.",
+"List comprehension.",
+"Reversing a list",
+"In-place unsafe reversal.",
+"In-place reversal.",
+"Copy and return last <code>copy_last</code>",
+"List <code>copy</code>",
+"Splice",
+"Concatenate two lists <code>join</code>.",
+"Cons an element onto a list.",
+"Append an element onto a list.",
+"Construe a list as an array value.",
+"Core routine <code>len</code>",
+"Core routine <code>unsafe_get</code>",
+"Default performance override <code>iter</code>",
+"Default performance override <code>fold_left</code>",
+"Default performance override <code>fold_right</code>",
+"Destructors",
+"Test for empty list <code>is_empty</code>",
+"Tail of a list <code>tail</code>",
+"Head of a list <code>head</code>",
+"Maps",
+"Reverse map a list <code>rev_map</code>",
+"Map a list <code>map</code>",
+"Reverse a list <code>rev</code>.",
+"Zip a pair of lists to a list of pairs <code>zip2</code>",
+"Useful lists",
+"A list of integers <code>range</code>.",
+"Consecutive integers <code>range</code>",
+"Non-negative integers to limit <code>range</code>",
+"Outer product.",
+"Concatenate a list of lists <code>cat</code>",
+"Lists and Strings",
+"Pack list of strings into a string with separator <code>cat</code>",
+"Map a list to a list of strings and cat with separator <code>catmap</code>",
+"Searching",
+"Value membership",
+"Value Find by relation <code>find</code>",
+"Sort",
+"Streaming list",
+"Association List",
+"Purely Functional Random Access List.",
+"Dlist",
+"Length <code>len</code>",
+"Inspection",
+"Insertion",
+"Deletion",
+"Use as a queue",
+"Queue iterator",
+"S-expressions",
+"LS-expressions"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#The <code>list</code> type._h')"> <a href="#The_<code>list</code>_type._h">The <code>list</code> type.</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Constructors_h')"> <a href="#Constructors_h">Constructors</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#Named_constructor_for_empty_list._h">Named constructor for empty list.</a></div>
+      <div class=m2><a href="#Construct_a_singleton_list._h">Construct a singleton list.</a></div>
+      <div class=m2><a href="#Construct_a_list_from_an_array._h">Construct a list from an array.</a></div>
+      <div class=m2><a href="#List_comprehension._h">List comprehension.</a></div>
+      <div class=m2><a href="#List_comprehension._h">List comprehension.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Reversing a list_h')"> <a href="#Reversing_a_list_h">Reversing a list</a></div>
+      <div class=sm id=menu3>
+      <div class=m2><a href="#In-place_unsafe_reversal._h">In-place unsafe reversal.</a></div>
+      <div class=m2><a href="#In-place_reversal._h">In-place reversal.</a></div>
+      <div class=m2><a href="#Copy_and_return_last_<code>copy_last</code>_h">Copy and return last <code>copy_last</code></a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#List <code>copy</code>_h')"> <a href="#List_<code>copy</code>_h">List <code>copy</code></a></div>
+      <div class=sm id=menu4>
+      <div class=m2><a href="#Splice_h">Splice</a></div>
+      <div class=m2><a href="#Concatenate_two_lists_<code>join</code>._h">Concatenate two lists <code>join</code>.</a></div>
+      <div class=m2><a href="#Cons_an_element_onto_a_list._h">Cons an element onto a list.</a></div>
+      <div class=m2><a href="#Append_an_element_onto_a_list._h">Append an element onto a list.</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Construe a list as an array value._h')"> <a href="#Construe_a_list_as_an_array_value._h">Construe a list as an array value.</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Destructors_h')"> <a href="#Destructors_h">Destructors</a></div>
+      <div class=sm id=menu6>
+      <div class=m2><a href="#Test_for_empty_list_<code>is_empty</code>_h">Test for empty list <code>is_empty</code></a></div>
+      <div class=m2><a href="#Tail_of_a_list_<code>tail</code>_h">Tail of a list <code>tail</code></a></div>
+      <div class=m2><a href="#Head_of_a_list_<code>head</code>_h">Head of a list <code>head</code></a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Maps_h')"> <a href="#Maps_h">Maps</a></div>
+      <div class=sm id=menu7>
+      <div class=m2><a href="#Reverse_map_a_list_<code>rev_map</code>_h">Reverse map a list <code>rev_map</code></a></div>
+      <div class=m2><a href="#Map_a_list_<code>map</code>_h">Map a list <code>map</code></a></div>
+      <div class=m2><a href="#Reverse_a_list_<code>rev</code>._h">Reverse a list <code>rev</code>.</a></div>
+      <div class=m2><a href="#Zip_a_pair_of_lists_to_a_list_of_pairs_<code>zip2</code>_h">Zip a pair of lists to a list of pairs <code>zip2</code></a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Useful lists_h')"> <a href="#Useful_lists_h">Useful lists</a></div>
+      <div class=sm id=menu8>
+      <div class=m2><a href="#A_list_of_integers_<code>range</code>._h">A list of integers <code>range</code>.</a></div>
+      <div class=m2><a href="#Consecutive_integers_<code>range</code>_h">Consecutive integers <code>range</code></a></div>
+      <div class=m2><a href="#Non-negative_integers_to_limit_<code>range</code>_h">Non-negative integers to limit <code>range</code></a></div>
+      <div class=m2><a href="#Outer_product._h">Outer product.</a></div>
+      <div class=m2><a href="#Concatenate_a_list_of_lists_<code>cat</code>_h">Concatenate a list of lists <code>cat</code></a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#Lists and Strings_h')"> <a href="#Lists_and_Strings_h">Lists and Strings</a></div>
+      <div class=sm id=menu9>
+      <div class=m2><a href="#Pack_list_of_strings_into_a_string_with_separator_<code>cat</code>_h">Pack list of strings into a string with separator <code>cat</code></a></div>
+      <div class=m2><a href="#Map_a_list_to_a_list_of_strings_and_cat_with_separator_<code>catmap</code>_h">Map a list to a list of strings and cat with separator <code>catmap</code></a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#Searching_h')"> <a href="#Searching_h">Searching</a></div>
+      <div class=sm id=menu10>
+      <div class=m2><a href="#Value_membership_h">Value membership</a></div>
+      <div class=m2><a href="#Value_Find_by_relation_<code>find</code>_h">Value Find by relation <code>find</code></a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu11','#Sort_h')"> <a href="#Sort_h">Sort</a></div>
+      <div class=sm id=menu11>
+      </div>
+      <div class=m1 onclick="mshow('menu12','#Streaming list_h')"> <a href="#Streaming_list_h">Streaming list</a></div>
+      <div class=sm id=menu12>
+      </div>
+      <div class=m1 onclick="mshow('menu13','#Association List_h')"> <a href="#Association_List_h">Association List</a></div>
+      <div class=sm id=menu13>
+      </div>
+      <div class=m1 onclick="mshow('menu14','#Purely Functional Random Access List._h')"> <a href="#Purely_Functional_Random_Access_List._h">Purely Functional Random Access List.</a></div>
+      <div class=sm id=menu14>
+      </div>
+      <div class=m1 onclick="mshow('menu15','#Dlist_h')"> <a href="#Dlist_h">Dlist</a></div>
+      <div class=sm id=menu15>
+      <div class=m2><a href="#Length_<code>len</code>_h">Length <code>len</code></a></div>
+      <div class=m2><a href="#Inspection_h">Inspection</a></div>
+      <div class=m2><a href="#Insertion_h">Insertion</a></div>
+      <div class=m2><a href="#Deletion_h">Deletion</a></div>
+      <div class=m2><a href="#Use_as_a_queue_h">Use as a queue</a></div>
+      <div class=m2><a href="#Queue_iterator_h">Queue iterator</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu16','#S-expressions_h')"> <a href="#S-expressions_h">S-expressions</a></div>
+      <div class=sm id=menu16>
+      </div>
+      <div class=m1 onclick="mshow('menu17','#LS-expressions_h')"> <a href="#LS-expressions_h">LS-expressions</a></div>
+      <div class=sm id=menu17>
+      </div>
+    <script>counter_max=17;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='The_<code>list</code>_type._h'><img src='/share/src/web/images/minus.gif' id='The <code>list</code> type.' onclick='toggle(this,"The_<code>list</code>_type._d")' alt='+'/> 1 The <code>list</code> type.</h1><div id='The_<code>list</code>_type._d' style='display:block'>
+<p>The core data type for most functional programming languages.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> List
+<span class="lineno" id=line2></span>  {
+</pre></p><p>Felix uses Snoc lists:
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    variant <span class="library" title="functional, singly linked list">list</span>[T] = | Empty | Snoc of <span class="library" title="functional, singly linked list">list</span>[T] * T;
+</pre></p><p>Note Snoc is Cons spelled backwards. The representation of this
+variant is a NULL pointer for an empty list, or a pointer to
+a node object otherwise. In the node object, the pointer to the
+next node comes first, followed by the data. Had we used the
+usual Cons, the data would come first. The advantage of having the
+next pointer first is that some operations written in C, such
+as in place reversal and appending two lists can be independent
+of the value type T.
+</p><p>However, we utilise Felix user defined pattern matching feature
+to allow the client to use the more familiar Cons anyhow.
+This requires two functions
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="comment">// match checker</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> _match_ctor_Cons[T] : <span class="library" title="functional, singly linked list">list</span>[T] -&gt; bool = <span class="fstring">"!!$1"</span>; 
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    <span class="comment">// argument extractor</span>
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Function or procedure which should be inlined if possible">inline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> _ctor_arg_Cons[T]: <span class="library" title="functional, singly linked list">list</span>[T] -&gt; T * <span class="library" title="functional, singly linked list">list</span>[T] = 
+<span class="lineno" id=line6></span>      <span class="fstring">"reinterpret&lt;#0&gt;(flx::list::snoc2cons&lt;?1&gt;($1))"</span> 
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="specify requirements">requires</span> snoc2cons_h
+<span class="lineno" id=line8></span>    ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="comment">// Cons pseudo constructor</span>
+<span class="lineno" id=line11></span>    <span class="qualifier" title="Function or procedure which should be inlined if possible">inline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> Cons[T] (h:T, t:<span class="library" title="functional, singly linked list">list</span>[T]) =&gt; Snoc (t,h);
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="comment">// C++ code use to reverse Cons order to Snoc order and vice versa</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> snoc2cons_h = """<span class="embedded_c">
+<span class="lineno" id=line15></span>      <span class="big_keyword">namespace</span> flx { <span class="big_keyword">namespace</span> list {
+<span class="lineno" id=line16></span>        <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt; <span class="big_keyword">struct</span> snoc { <span class="qualifier">void</span> *mem_0; T mem_1; };
+<span class="lineno" id=line17></span>        <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt; <span class="big_keyword">struct</span> cons { T mem_0; <span class="qualifier">void</span> * mem_1; };
+<span class="lineno" id=line18></span>        <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt; cons&lt;T&gt; snoc2cons (<span class="qualifier">void</span> *x) { 
+<span class="lineno" id=line19></span>          <span class="small_keyword">return</span> cons&lt;T&gt; {((snoc&lt;T&gt;*)x)-&gt;mem_1, ((snoc&lt;T&gt;*)x)-&gt;mem_0}; 
+<span class="lineno" id=line20></span>        }
+<span class="lineno" id=line21></span>      }}
+<span class="lineno" id=line22></span>    </span>""";
+<span class="lineno" id=line23></span>  
+</pre></p></div><h1 id='Constructors_h'><img src='/share/src/web/images/minus.gif' id='Constructors' onclick='toggle(this,"Constructors_d")' alt='+'/> 2 Constructors</h1><div id='Constructors_d' style='display:block'>
+<h2 id='Named_constructor_for_empty_list._h'><img src='/share/src/web/images/minus.gif' id='Named constructor for empty list.' onclick='toggle(this,"Named_constructor_for_empty_list._d")' alt='+'/> 2.1 Named constructor for empty list.</h2><div id='Named_constructor_for_empty_list._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Make an empty list.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] <span class="library" title="functional, singly linked list">list</span>[T] () =&gt; Empty[T];
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Construct_a_singleton_list._h'><img src='/share/src/web/images/minus.gif' id='Construct a singleton list.' onclick='toggle(this,"Construct_a_singleton_list._d")' alt='+'/> 2.2 Construct a singleton list.</h2><div id='Construct_a_singleton_list._d' style='display:block'>
+<p>Does not work if the argument is an array
+or option iterator.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Make a list with one element.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">NOTE: list (1,2) is a list of 2 ints.</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">To get a list of one pair use list[int*int] (1,2) instead!</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] <span class="library" title="functional, singly linked list">list</span>[T] (x:T) =&gt; Snoc(Empty[T],x);
+<span class="lineno" id=line5></span>  
+</pre></p></div><h2 id='Construct_a_list_from_an_array._h'><img src='/share/src/web/images/minus.gif' id='Construct a list from an array.' onclick='toggle(this,"Construct_a_list_from_an_array._d")' alt='+'/> 2.3 Construct a list from an array.</h2><div id='Construct_a_list_from_an_array._d' style='display:block'>
+<p>You can also use the notation ([1,2,3]).
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Make a list from an array.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T,N:COMPACTLINEAR] <span class="library" title="functional, singly linked list">list</span>[T] (x:<span class="library" title="array type, a tuple of all components the same type">array</span>[T, N]) = {
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> o = Empty[T];
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="conditional">if</span> x.<span class="library" title="number of elements in data structure">len</span> &gt; 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> x.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span> - 1 <span class="small_keyword" title="downwards counting for loop">downto</span> 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line6></span>          o = Snoc(o,x.i);
+<span class="lineno" id=line7></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="return">return</span> o;
+<span class="lineno" id=line10></span>    }
+<span class="lineno" id=line11></span>  
+</pre></p></div><h2 id='List_comprehension._h'><img src='/share/src/web/images/minus.gif' id='List comprehension.' onclick='toggle(this,"List_comprehension._d")' alt='+'/> 2.4 List comprehension.</h2><div id='List_comprehension._d' style='display:block'>
+<p>Make a list from an option stream.
+Named variant.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">List comprehension:</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Make a list from a stream.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> list_comprehension[T] (f: (1-&gt;<span class="library" title="option type: Some x or None">opt</span>[T])) = {
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a mutable variable">var</span> ff = f;
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (l:<span class="library" title="functional, singly linked list">list</span>[T]) = {
+<span class="lineno" id=line6></span>        <span class="big_keyword" title="Define a mutable variable">var</span> x = ff();
+<span class="lineno" id=line7></span>        <span class="small_keyword" title="return">return</span> 
+<span class="lineno" id=line8></span>          <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line9></span>         | Some elt =&gt; aux (Snoc(l,elt)) 
+<span class="lineno" id=line10></span>         | #None =&gt; <span class="library" title="return data structure with elements reversed">rev</span> l
+<span class="lineno" id=line11></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line12></span>        ;
+<span class="lineno" id=line13></span>      }
+<span class="lineno" id=line14></span>      <span class="small_keyword" title="return">return</span> aux Empty[T];
+<span class="lineno" id=line15></span>    }
+<span class="lineno" id=line16></span>  
+</pre></p></div><h2 id='List_comprehension._h'><img src='/share/src/web/images/minus.gif' id='List comprehension.' onclick='toggle(this,"List_comprehension._d")' alt='+'/> 2.5 List comprehension.</h2><div id='List_comprehension._d' style='display:block'>
+<p>Make a list from an option stream.
+Constructor variant.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">List comprehension:</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Make a list from a stream.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] <span class="library" title="functional, singly linked list">list</span>[T](f: (1-&gt;<span class="library" title="option type: Some x or None">opt</span>[T])) =&gt; list_comprehension f;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  
+</pre></p></div></div><h1 id='Reversing_a_list_h'><img src='/share/src/web/images/minus.gif' id='Reversing a list' onclick='toggle(this,"Reversing_a_list_d")' alt='+'/> 3 Reversing a list</h1><div id='Reversing_a_list_d' style='display:block'>
+<h2 id='In-place_unsafe_reversal._h'><img src='/share/src/web/images/minus.gif' id='In-place unsafe reversal.' onclick='toggle(this,"In-place_unsafe_reversal._d")' alt='+'/> 3.1 In-place unsafe reversal.</h2><div id='In-place_unsafe_reversal._d' style='display:block'>
+<p>Another helper routine.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">In place list reversal: unsafe!</span>
+<span class="lineno" id=line2></span>    <span class="comment">// second arg is a dummy to make overload work</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="return data structure with elements reversed">rev</span>[T,PLT=&amp;<span class="library" title="functional, singly linked list">list</span>[T]] : &amp;<span class="library" title="functional, singly linked list">list</span>[T] = <span class="fstring">"_rev($1,(?1*)0);"</span> <span class="big_keyword" title="specify requirements">requires</span> _iprev_[T,PLT];
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="return data structure with elements reversed">rev</span>[T,PLT=&amp;<span class="library" title="functional, singly linked list">list</span>[T]] : &amp;(uniq <span class="library" title="functional, singly linked list">list</span>[T]) = <span class="fstring">"_rev($1,(?1*)0);"</span> <span class="big_keyword" title="specify requirements">requires</span> _iprev_[T,PLT];
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> _iprev_[T,PLT]=
+<span class="lineno" id=line7></span>      """<span class="embedded_c">
+<span class="lineno" id=line8></span>      <span class="qualifier">static</span> <span class="qualifier">void</span> _rev(?2 plt, ?1*) <span class="comment">// second arg is a dummy
+<span class="lineno" id=line9></span>  </span>    { <span class="comment">// in place reversal
+<span class="lineno" id=line10></span>  </span>      <span class="big_keyword">struct</span> node_t { <span class="qualifier">void</span> *tail; ?1 elt; };
+<span class="lineno" id=line11></span>        <span class="qualifier">void</span> *nutail = 0; 
+<span class="lineno" id=line12></span>        <span class="qualifier">void</span> *cur = *plt;
+<span class="lineno" id=line13></span>        <span class="small_keyword">while</span>(cur)
+<span class="lineno" id=line14></span>        {
+<span class="lineno" id=line15></span>          <span class="qualifier">void</span> *oldtail = ((node_t*)FLX_VNP(cur))-&gt;tail;   <span class="comment">// save old tail in temp
+<span class="lineno" id=line16></span>  </span>        ((node_t*)FLX_VNP(cur))-&gt;tail = nutail;          <span class="comment">// overwrite current node tail
+<span class="lineno" id=line17></span>  </span>        nutail = cur;                                   <span class="comment">// set new tail to current
+<span class="lineno" id=line18></span>  </span>        cur = oldtail;                                  <span class="comment">// set current to saved old tail
+<span class="lineno" id=line19></span>  </span>      }
+<span class="lineno" id=line20></span>        *plt = nutail;                                    <span class="comment">// overwrite 
+<span class="lineno" id=line21></span>  </span>    }
+<span class="lineno" id=line22></span>      </span>"""
+<span class="lineno" id=line23></span>    ;
+<span class="lineno" id=line24></span>  
+</pre></p></div><h2 id='In-place_reversal._h'><img src='/share/src/web/images/minus.gif' id='In-place reversal.' onclick='toggle(this,"In-place_reversal._d")' alt='+'/> 3.2 In-place reversal.</h2><div id='In-place_reversal._d' style='display:block'>
+<p>Another variant of the unsafe reversal.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="comment">// in place list reversal, also returns the last element</span>
+<span class="lineno" id=line2></span>    <span class="comment">// as a list, empty iff the original list is</span>
+<span class="lineno" id=line3></span>    <span class="comment">// unsafe!</span>
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> rev_last[T,PLT=&amp;<span class="library" title="functional, singly linked list">list</span>[T]] : &amp;<span class="library" title="functional, singly linked list">list</span>[T] * &amp;<span class="library" title="functional, singly linked list">list</span>[T] = <span class="fstring">"_rev_last($1,$2,(?1*)0);"</span> <span class="big_keyword" title="specify requirements">requires</span> _rev_last_[T,PLT];
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> _rev_last_[T,PLT]=
+<span class="lineno" id=line7></span>      """<span class="embedded_c">
+<span class="lineno" id=line8></span>      <span class="qualifier">static</span> <span class="qualifier">void</span> _rev_last(?2 p1, ?2 p2, ?1*)
+<span class="lineno" id=line9></span>      { <span class="comment">// in place reversal returns tail as well
+<span class="lineno" id=line10></span>  </span>      <span class="comment">//struct node_t { ?1 elt; void *tail; };
+<span class="lineno" id=line11></span>  </span>      <span class="big_keyword">struct</span> node_t { <span class="qualifier">void</span> *tail; ?1 elt; };
+<span class="lineno" id=line12></span>        <span class="qualifier">void</span> *nutail = (<span class="qualifier">void</span>*)0;                 <span class="comment">// new temp tail
+<span class="lineno" id=line13></span>  </span>      <span class="qualifier">void</span> *cur = *p1;                         <span class="comment">// list to reverse
+<span class="lineno" id=line14></span>  </span>      <span class="qualifier">void</span> *last = cur;                        <span class="comment">// save head
+<span class="lineno" id=line15></span>  </span>      <span class="small_keyword">while</span>(cur)
+<span class="lineno" id=line16></span>        {
+<span class="lineno" id=line17></span>          <span class="qualifier">void</span> *oldtail = ((node_t*)FLX_VNP(cur))-&gt;tail;            <span class="comment">// set old tail to current's tail
+<span class="lineno" id=line18></span>  </span>        ((node_t*)FLX_VNP(cur))-&gt;tail = nutail;                   <span class="comment">// set current's tail to nutail
+<span class="lineno" id=line19></span>  </span>        nutail = cur;                                            <span class="comment">// set nutail to current
+<span class="lineno" id=line20></span>  </span>        cur = oldtail;                                           <span class="comment">// set current to old tail
+<span class="lineno" id=line21></span>  </span>      }
+<span class="lineno" id=line22></span>        *p1 = nutail;                                              <span class="comment">// reversed list
+<span class="lineno" id=line23></span>  </span>      *p2 = last;                                                <span class="comment">// original lists tail
+<span class="lineno" id=line24></span>  </span>    }
+<span class="lineno" id=line25></span>      </span>"""
+<span class="lineno" id=line26></span>    ;
+<span class="lineno" id=line27></span>  
+</pre></p></div><h2 id='Copy_and_return_last_<code>copy_last</code>_h'><img src='/share/src/web/images/minus.gif' id='Copy and return last <code>copy_last</code>' onclick='toggle(this,"Copy_and_return_last_<code>copy_last</code>_d")' alt='+'/> 3.3 Copy and return last <code>copy_last</code></h2><div id='Copy_and_return_last_<code>copy_last</code>_d' style='display:block'>
+<p>Yet another helper.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Copy a list, and return last element as a list,</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">empty if original list was empty.</span>
+<span class="lineno" id=line3></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> copy_last[T] (inp:<span class="library" title="functional, singly linked list">list</span>[T], out:&amp;<span class="library" title="functional, singly linked list">list</span>[T], last:&amp;<span class="library" title="functional, singly linked list">list</span>[T]) {
+<span class="lineno" id=line4></span>      out &lt;- unbox (<span class="library" title="return data structure with elements reversed">rev</span> inp);
+<span class="lineno" id=line5></span>      rev_last (out, last);
+<span class="lineno" id=line6></span>    }
+<span class="lineno" id=line7></span>  
+</pre></p></div></div><h1 id='List_<code>copy</code>_h'><img src='/share/src/web/images/minus.gif' id='List <code>copy</code>' onclick='toggle(this,"List_<code>copy</code>_d")' alt='+'/> 4 List <code>copy</code></h1><div id='List_<code>copy</code>_d' style='display:block'>
+<p>Make an entirely new copy of a list.
+Primarily a helper.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Copy a list.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> copy[T] (x:<span class="library" title="functional, singly linked list">list</span>[T]):uniq <span class="library" title="functional, singly linked list">list</span>[T]=&gt; <span class="library" title="return data structure with elements reversed">rev</span> (<span class="library" title="return data structure with elements reversed">rev</span> x);
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> copy[T] (x:uniq <span class="library" title="functional, singly linked list">list</span>[T]):uniq <span class="library" title="functional, singly linked list">list</span>[T]=&gt; x;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> dup[T] (x:uniq <span class="library" title="functional, singly linked list">list</span>[T]):uniq <span class="library" title="functional, singly linked list">list</span>[T] * uniq <span class="library" title="functional, singly linked list">list</span>[T] {
+<span class="lineno" id=line5></span>       <span class="big_keyword" title="Define a mutable variable">var</span> y = unbox x;
+<span class="lineno" id=line6></span>       <span class="small_keyword" title="return">return</span> box y,copy y;
+<span class="lineno" id=line7></span>    }
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  
+</pre></p><h2 id='Splice_h'><img src='/share/src/web/images/minus.gif' id='Splice' onclick='toggle(this,"Splice_d")' alt='+'/> 4.1 Splice</h2><div id='Splice_d' style='display:block'>
+<p>This is primarily a non-functional helper routine.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">The second list is made the tail of the</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">list stored at the location pointed at by the first argument.</span>
+<span class="lineno" id=line3></span>    <span class="doccomment">If the first list is empty, the variable will point</span>
+<span class="lineno" id=line4></span>    <span class="doccomment">at the second list. This operation is DANGEROUS because</span>
+<span class="lineno" id=line5></span>    <span class="doccomment">it is a mutator: lists are traditionally purely functional.</span>
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="comment">// NOTE: this will fail if the second argument is named "p"!</span>
+<span class="lineno" id=line8></span>    <span class="comment">// fix as for rev, rev_last!</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> _unsafe_splice[T] : &amp;<span class="library" title="functional, singly linked list">list</span>[T] * <span class="library" title="functional, singly linked list">list</span>[T] =
+<span class="lineno" id=line10></span>      <span class="fstring">"""
+<span class="lineno" id=line11></span>      { // list splice
+<span class="lineno" id=line12></span>        struct node_t { void *tail; ?1 elt; };
+<span class="lineno" id=line13></span>        void **p = $1;
+<span class="lineno" id=line14></span>        while(*p) p = &amp;((node_t*)FLX_VNP(*p))-&gt;tail;
+<span class="lineno" id=line15></span>        *p = $2;
+<span class="lineno" id=line16></span>      }
+<span class="lineno" id=line17></span>      """</span>
+<span class="lineno" id=line18></span>    ;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="comment">// safe list splice </span>
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> splice[T] (<span class="big_keyword" title="Define a mutable variable">var</span> x: uniq (<span class="library" title="functional, singly linked list">list</span>[T]), <span class="big_keyword" title="Define a mutable variable">var</span> y: uniq (<span class="library" title="functional, singly linked list">list</span>[T])): uniq (<span class="library" title="functional, singly linked list">list</span>[T]) =
+<span class="lineno" id=line22></span>    {
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x1 = unbox x; <span class="comment">// hack</span>
+<span class="lineno" id=line24></span>      _unsafe_splice (&amp;x1,unbox y);
+<span class="lineno" id=line25></span>      <span class="small_keyword" title="return">return</span>  box x1;
+<span class="lineno" id=line26></span>    }
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    <span class="comment">// safe list splice </span>
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> splice[T] (<span class="big_keyword" title="Define a mutable variable">var</span> x: uniq (<span class="library" title="functional, singly linked list">list</span>[T]), <span class="big_keyword" title="Define a mutable variable">var</span> y: <span class="library" title="functional, singly linked list">list</span>[T]): <span class="library" title="functional, singly linked list">list</span>[T] =
+<span class="lineno" id=line30></span>    {
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x1 = unbox x; <span class="comment">// hack</span>
+<span class="lineno" id=line32></span>      _unsafe_splice (&amp;x1,y);
+<span class="lineno" id=line33></span>      <span class="small_keyword" title="return">return</span>  x1;
+<span class="lineno" id=line34></span>    }
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  
+</pre></p></div><h2 id='Concatenate_two_lists_<code>join</code>._h'><img src='/share/src/web/images/minus.gif' id='Concatenate two lists <code>join</code>.' onclick='toggle(this,"Concatenate_two_lists_<code>join</code>._d")' alt='+'/> 4.2 Concatenate two lists <code>join</code>.</h2><div id='Concatenate_two_lists_<code>join</code>._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Concatenate two lists.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Slow; required for fold</span>
+<span class="lineno" id=line3></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> join [T] (x:<span class="library" title="functional, singly linked list">list</span>[T]) (y: <span class="library" title="functional, singly linked list">list</span>[T]):<span class="library" title="functional, singly linked list">list</span>[T] =&gt; splice (copy x,y);
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="comment">// fast</span>
+<span class="lineno" id=line7></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + [T] (x:<span class="library" title="functional, singly linked list">list</span>[T], y: <span class="library" title="functional, singly linked list">list</span>[T]):<span class="library" title="functional, singly linked list">list</span>[T] =&gt; splice (copy x,y);
+<span class="lineno" id=line8></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + [T] (x:uniq <span class="library" title="functional, singly linked list">list</span>[T], y: <span class="library" title="functional, singly linked list">list</span>[T]):<span class="library" title="functional, singly linked list">list</span>[T] =&gt; splice (x, y);
+<span class="lineno" id=line9></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + [T] (x:uniq <span class="library" title="functional, singly linked list">list</span>[T], y: uniq <span class="library" title="functional, singly linked list">list</span>[T]):uniq <span class="library" title="functional, singly linked list">list</span>[T] =&gt; splice(x,y);
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> += [T] (x:&amp;<span class="library" title="functional, singly linked list">list</span>[T], y: <span class="library" title="functional, singly linked list">list</span>[T]) =&gt; x &lt;- join (*x) y;
+<span class="lineno" id=line12></span>  
+</pre></p></div><h2 id='Cons_an_element_onto_a_list._h'><img src='/share/src/web/images/minus.gif' id='Cons an element onto a list.' onclick='toggle(this,"Cons_an_element_onto_a_list._d")' alt='+'/> 4.3 Cons an element onto a list.</h2><div id='Cons_an_element_onto_a_list._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Prepend element to head of list.</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + [T] (x:T, y:<span class="library" title="functional, singly linked list">list</span>[T]):<span class="library" title="functional, singly linked list">list</span>[T] =&gt; Snoc(y,x);
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Append_an_element_onto_a_list._h'><img src='/share/src/web/images/minus.gif' id='Append an element onto a list.' onclick='toggle(this,"Append_an_element_onto_a_list._d")' alt='+'/> 4.4 Append an element onto a list.</h2><div id='Append_an_element_onto_a_list._d' style='display:block'>
+<p>O(N) slow.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Append element to tail of list (slow!).</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> + [T] (x:<span class="library" title="functional, singly linked list">list</span>[T], y:T):<span class="library" title="functional, singly linked list">list</span>[T] =&gt; <span class="library" title="return data structure with elements reversed">rev</span>$ Snoc (<span class="library" title="return data structure with elements reversed">rev</span> x,y);
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    <span class="doccomment">Append element to tail of list (slow!).</span>
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> += [T] (x:&amp;<span class="library" title="functional, singly linked list">list</span>[T], y:T) { x &lt;- *x + y; }
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Prepend element to head of list (fast!).</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> -= [T] (x:&amp;<span class="library" title="functional, singly linked list">list</span>[T], y:T) { x &lt;- y ! *x; }
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  
+</pre></p></div></div><h1 id='Construe_a_list_as_an_array_value._h'><img src='/share/src/web/images/minus.gif' id='Construe a list as an array value.' onclick='toggle(this,"Construe_a_list_as_an_array_value._d")' alt='+'/> 5 Construe a list as an array value.</h1><div id='Construe_a_list_as_an_array_value._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Contrue a list as an array value</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] ArrayValue[<span class="library" title="functional, singly linked list">list</span>[T],T] {
+</pre></p><h3 id='Core_routine_<code>len</code>_h'><img src='/share/src/web/images/minus.gif' id='Core routine <code>len</code>' onclick='toggle(this,"Core_routine_<code>len</code>_d")' alt='+'/> 5.1 Core routine <code>len</code></h3><div id='Core_routine_<code>len</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>      <span class="doccomment">Return umber of elements in a list.</span>
+<span class="lineno" id=line2></span>      <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span> (x:<span class="library" title="functional, singly linked list">list</span>[T]) = {
+<span class="lineno" id=line3></span>        <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (acc:<span class="library" title="binding of C size_t type">size</span>) (x:<span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line4></span>          <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>          | #Empty =&gt; acc
+<span class="lineno" id=line6></span>          | Snoc(t,_) =&gt; aux (acc + 1uz) t
+<span class="lineno" id=line7></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>        ;
+<span class="lineno" id=line9></span>        <span class="small_keyword" title="return">return</span> aux 0uz x;
+<span class="lineno" id=line10></span>      }
+</pre></p><h3 id='Core_routine_<code>unsafe_get</code>_h'><img src='/share/src/web/images/minus.gif' id='Core routine <code>unsafe_get</code>' onclick='toggle(this,"Core_routine_<code>unsafe_get</code>_d")' alt='+'/> 5.1.1 Core routine <code>unsafe_get</code></h3><div id='Core_routine_<code>unsafe_get</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>      <span class="doccomment">get n'th element</span>
+<span class="lineno" id=line2></span>      <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> unsafe_get: <span class="library" title="functional, singly linked list">list</span>[T] * <span class="library" title="binding of C size_t type">size</span> -&gt; T =
+<span class="lineno" id=line3></span>        | Snoc(_,h), 0uz =&gt; h
+<span class="lineno" id=line4></span>        | Snoc(t,_), i =&gt; unsafe_get (t, i - 1uz)
+<span class="lineno" id=line5></span>      ;
+<span class="lineno" id=line6></span>  
+</pre></p></div><h3 id='Default_performance_override_<code>iter</code>_h'><img src='/share/src/web/images/minus.gif' id='Default performance override <code>iter</code>' onclick='toggle(this,"Default_performance_override_<code>iter</code>_d")' alt='+'/> 5.1.2 Default performance override <code>iter</code></h3><div id='Default_performance_override_<code>iter</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>      <span class="doccomment">Apply a procedure to each element of a list.</span>
+<span class="lineno" id=line2></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="call procedure on each element of data structure">iter</span> (_f:T-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) (x:<span class="library" title="functional, singly linked list">list</span>[T]) {
+<span class="lineno" id=line3></span>        <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line4></span>        | #Empty =&gt; {}
+<span class="lineno" id=line5></span>        | Snoc(t,h) =&gt; { _f h; <span class="library" title="call procedure on each element of data structure">iter</span> _f t; }
+<span class="lineno" id=line6></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line7></span>        ;
+<span class="lineno" id=line8></span>      }
+<span class="lineno" id=line9></span>  
+</pre></p></div><h3 id='Default_performance_override_<code>fold_left</code>_h'><img src='/share/src/web/images/minus.gif' id='Default performance override <code>fold_left</code>' onclick='toggle(this,"Default_performance_override_<code>fold_left</code>_d")' alt='+'/> 5.1.3 Default performance override <code>fold_left</code></h3><div id='Default_performance_override_<code>fold_left</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>      <span class="doccomment">Traditional left fold over list (tail rec).</span>
+<span class="lineno" id=line2></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span>[U] (_f:U-&gt;T-&gt;U) (init:U) (x:<span class="library" title="functional, singly linked list">list</span>[T]):U =
+<span class="lineno" id=line3></span>      {
+<span class="lineno" id=line4></span>        <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (init:U) (x:<span class="library" title="functional, singly linked list">list</span>[T]):U =&gt;
+<span class="lineno" id=line5></span>          <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>          | #Empty =&gt; init
+<span class="lineno" id=line7></span>          | Snoc(t,h) =&gt; aux (_f init h) t
+<span class="lineno" id=line8></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line9></span>        ;
+<span class="lineno" id=line10></span>        <span class="small_keyword" title="return">return</span> aux init x;
+<span class="lineno" id=line11></span>      }
+<span class="lineno" id=line12></span>  
+</pre></p></div><h3 id='Default_performance_override_<code>fold_right</code>_h'><img src='/share/src/web/images/minus.gif' id='Default performance override <code>fold_right</code>' onclick='toggle(this,"Default_performance_override_<code>fold_right</code>_d")' alt='+'/> 5.1.4 Default performance override <code>fold_right</code></h3><div id='Default_performance_override_<code>fold_right</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>      <span class="doccomment">Right fold over list (not tail rec!).</span>
+<span class="lineno" id=line2></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="accumulated values of data structure from right into initial value using function">fold_right</span>[U] (_f:T-&gt;U-&gt;U) (x:<span class="library" title="functional, singly linked list">list</span>[T]) (init:U):U =
+<span class="lineno" id=line3></span>      {
+<span class="lineno" id=line4></span>        <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (x:<span class="library" title="functional, singly linked list">list</span>[T]) (init:U):U =&gt;
+<span class="lineno" id=line5></span>          <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>          | #Empty =&gt; init
+<span class="lineno" id=line7></span>          | Snoc(t,h) =&gt; _f h (aux t init)
+<span class="lineno" id=line8></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line9></span>        ;
+<span class="lineno" id=line10></span>        <span class="small_keyword" title="return">return</span> aux x init;
+<span class="lineno" id=line11></span>      }
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    }
+<span class="lineno" id=line14></span>  
+</pre></p></div></div></div><h1 id='Destructors_h'><img src='/share/src/web/images/minus.gif' id='Destructors' onclick='toggle(this,"Destructors_d")' alt='+'/> 6 Destructors</h1><div id='Destructors_d' style='display:block'>
+<h2 id='Test_for_empty_list_<code>is_empty</code>_h'><img src='/share/src/web/images/minus.gif' id='Test for empty list <code>is_empty</code>' onclick='toggle(this,"Test_for_empty_list_<code>is_empty</code>_d")' alt='+'/> 6.1 Test for empty list <code>is_empty</code></h2><div id='Test_for_empty_list_<code>is_empty</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Test if a list is empty.</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_empty[T] : <span class="library" title="functional, singly linked list">list</span>[T] -&gt; 2 =
+<span class="lineno" id=line3></span>      | #Empty =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line4></span>      | _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line5></span>    ;
+<span class="lineno" id=line6></span>  
+</pre></p></div><h2 id='Tail_of_a_list_<code>tail</code>_h'><img src='/share/src/web/images/minus.gif' id='Tail of a list <code>tail</code>' onclick='toggle(this,"Tail_of_a_list_<code>tail</code>_d")' alt='+'/> 6.2 Tail of a list <code>tail</code></h2><div id='Tail_of_a_list_<code>tail</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Tail of a list, abort with match failure if list is empty.</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> tail[T] (x:<span class="library" title="functional, singly linked list">list</span>[T]) : <span class="library" title="functional, singly linked list">list</span>[T] = {
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line4></span>      | Snoc(t,_) =&gt; <span class="small_keyword" title="return">return</span> t;
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line6></span>    }
+<span class="lineno" id=line7></span>  
+</pre></p></div><h2 id='Head_of_a_list_<code>head</code>_h'><img src='/share/src/web/images/minus.gif' id='Head of a list <code>head</code>' onclick='toggle(this,"Head_of_a_list_<code>head</code>_d")' alt='+'/> 6.3 Head of a list <code>head</code></h2><div id='Head_of_a_list_<code>head</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Head of a list, abort with match failure if list is empty.</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> head[T] (x:<span class="library" title="functional, singly linked list">list</span>[T]) : T = {
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line4></span>      | Snoc(_,h) =&gt; <span class="small_keyword" title="return">return</span> h;
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line6></span>    }
+<span class="lineno" id=line7></span>  
+</pre></p></div></div><h1 id='Maps_h'><img src='/share/src/web/images/minus.gif' id='Maps' onclick='toggle(this,"Maps_d")' alt='+'/> 7 Maps</h1><div id='Maps_d' style='display:block'>
+<h2 id='Reverse_map_a_list_<code>rev_map</code>_h'><img src='/share/src/web/images/minus.gif' id='Reverse map a list <code>rev_map</code>' onclick='toggle(this,"Reverse_map_a_list_<code>rev_map</code>_d")' alt='+'/> 7.1 Reverse map a list <code>rev_map</code></h2><div id='Reverse_map_a_list_<code>rev_map</code>_d' style='display:block'>
+<p>Tail recursive.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">map a list, return mapped list in reverse order (tail rec).</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> rev_map[T,U] (_f:T-&gt;U) (x:<span class="library" title="functional, singly linked list">list</span>[T]): uniq <span class="library" title="functional, singly linked list">list</span>[U] = {
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (inp:<span class="library" title="functional, singly linked list">list</span>[T]) (out:<span class="library" title="functional, singly linked list">list</span>[U]) : <span class="library" title="functional, singly linked list">list</span>[U] =&gt;
+<span class="lineno" id=line4></span>        <span class="small_keyword" title="match statement or expression">match</span> inp <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line5></span>        | #Empty =&gt; out
+<span class="lineno" id=line6></span>        | Snoc(t,h) =&gt; aux t (Snoc(out,_f(h)))
+<span class="lineno" id=line7></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>      ;
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="return">return</span> box (aux x Empty[U]);
+<span class="lineno" id=line10></span>    }
+<span class="lineno" id=line11></span>  
+</pre></p></div><h2 id='Map_a_list_<code>map</code>_h'><img src='/share/src/web/images/minus.gif' id='Map a list <code>map</code>' onclick='toggle(this,"Map_a_list_<code>map</code>_d")' alt='+'/> 7.2 Map a list <code>map</code></h2><div id='Map_a_list_<code>map</code>_d' style='display:block'>
+<p>Tail recursive. Uses rev_map and then inplace revseral.
+This is safe because we enforce linearity by abstraction.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">map a list (tail-rec).</span>
+<span class="lineno" id=line2></span>    <span class="comment">//  tail rec due to in-place reversal of result.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="return data structure with function applied to each value">map</span>[T,U] (_f:T-&gt;U) (x:<span class="library" title="functional, singly linked list">list</span>[T]): uniq <span class="library" title="functional, singly linked list">list</span>[U] =&gt;
+<span class="lineno" id=line4></span>      <span class="library" title="return data structure with elements reversed">rev</span> (rev_map _f x)
+<span class="lineno" id=line5></span>    ;
+<span class="lineno" id=line6></span>  
+</pre></p></div><h2 id='Reverse_a_list_<code>rev</code>._h'><img src='/share/src/web/images/minus.gif' id='Reverse a list <code>rev</code>.' onclick='toggle(this,"Reverse_a_list_<code>rev</code>._d")' alt='+'/> 7.3 Reverse a list <code>rev</code>.</h2><div id='Reverse_a_list_<code>rev</code>._d' style='display:block'>
+<p>Tail recursive.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">reverse a list (tail rec).</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="return data structure with elements reversed">rev</span>[T] (x:<span class="library" title="functional, singly linked list">list</span>[T]):uniq (<span class="library" title="functional, singly linked list">list</span>[T])= {
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (x:<span class="library" title="functional, singly linked list">list</span>[T]) (y:<span class="library" title="functional, singly linked list">list</span>[T]) : <span class="library" title="functional, singly linked list">list</span>[T] =
+<span class="lineno" id=line4></span>      {
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="return">return</span>
+<span class="lineno" id=line6></span>          <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>          | #Empty =&gt; y
+<span class="lineno" id=line8></span>          | Snoc(t,h) =&gt; aux t (Snoc(y,h))
+<span class="lineno" id=line9></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line10></span>        ;
+<span class="lineno" id=line11></span>      }
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="return">return</span> aux x Empty[T];
+<span class="lineno" id=line13></span>    }
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="comment">// safe inplace reversal</span>
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="return data structure with elements reversed">rev</span>[T](<span class="big_keyword" title="Define a mutable variable">var</span> x:uniq (<span class="library" title="functional, singly linked list">list</span>[T])) : uniq (<span class="library" title="functional, singly linked list">list</span>[T]) {
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a mutable variable">var</span> y = unbox x;
+<span class="lineno" id=line18></span>      <span class="library" title="return data structure with elements reversed">rev</span> &amp;y;
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="return">return</span> box y;
+<span class="lineno" id=line20></span>    }
+<span class="lineno" id=line21></span>  
+</pre></p></div><h2 id='Zip_a_pair_of_lists_to_a_list_of_pairs_<code>zip2</code>_h'><img src='/share/src/web/images/minus.gif' id='Zip a pair of lists to a list of pairs <code>zip2</code>' onclick='toggle(this,"Zip_a_pair_of_lists_to_a_list_of_pairs_<code>zip2</code>_d")' alt='+'/> 7.4 Zip a pair of lists to a list of pairs <code>zip2</code></h2><div id='Zip_a_pair_of_lists_to_a_list_of_pairs_<code>zip2</code>_d' style='display:block'>
+<p>Returns a list the length of the shortest argument.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Zip two lists into a list of pairs.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Zips to length of shortest list.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> zip2[T1,T2] (l1: <span class="library" title="functional, singly linked list">list</span>[T1]) (l2: <span class="library" title="functional, singly linked list">list</span>[T2]) : <span class="library" title="functional, singly linked list">list</span>[T1 * T2] = 
+<span class="lineno" id=line4></span>    {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (l1: <span class="library" title="functional, singly linked list">list</span>[T1]) (l2: <span class="library" title="functional, singly linked list">list</span>[T2]) (acc: <span class="library" title="functional, singly linked list">list</span>[T1 * T2]) =&gt;
+<span class="lineno" id=line6></span>        <span class="small_keyword" title="match statement or expression">match</span> l1, l2 <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>        | Snoc(t1,h1), Snoc(t2,h2) =&gt; aux t1 t2 (Snoc (acc, (h1, h2)))
+<span class="lineno" id=line8></span>        | _ =&gt; <span class="library" title="return data structure with elements reversed">rev</span> acc
+<span class="lineno" id=line9></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span> 
+<span class="lineno" id=line10></span>      ;
+<span class="lineno" id=line11></span>      <span class="small_keyword" title="return">return</span> aux l1 l2 Empty[T1 * T2];
+<span class="lineno" id=line12></span>    }
+<span class="lineno" id=line13></span>  
+</pre></p></div></div><h1 id='Useful_lists_h'><img src='/share/src/web/images/minus.gif' id='Useful lists' onclick='toggle(this,"Useful_lists_d")' alt='+'/> 8 Useful lists</h1><div id='Useful_lists_d' style='display:block'>
+<h2 id='A_list_of_integers_<code>range</code>._h'><img src='/share/src/web/images/minus.gif' id='A list of integers <code>range</code>.' onclick='toggle(this,"A_list_of_integers_<code>range</code>._d")' alt='+'/> 8.1 A list of integers <code>range</code>.</h2><div id='A_list_of_integers_<code>range</code>._d' style='display:block'>
+<p>From <code>low</code> to <code>high</code> exclusive with given <code>step</code>.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Generate an ordered list of ints between low and high with given step.</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">Low included, high not included.</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> range (low:<span class="library" title="binding of C int type">int</span>, high:<span class="library" title="binding of C int type">int</span>, step:<span class="library" title="binding of C int type">int</span>) =
+<span class="lineno" id=line4></span>    {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> inner(low:<span class="library" title="binding of C int type">int</span>, high:<span class="library" title="binding of C int type">int</span>, step:<span class="library" title="binding of C int type">int</span>, values:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C int type">int</span>]) =
+<span class="lineno" id=line6></span>      {
+<span class="lineno" id=line7></span>        <span class="small_keyword" title="return">return</span>
+<span class="lineno" id=line8></span>          <span class="small_keyword" title="conditional">if</span> high &lt; low
+<span class="lineno" id=line9></span>            <span class="small_keyword" title="conditional">then</span> values
+<span class="lineno" id=line10></span>            <span class="small_keyword" title="conditional">else</span> inner(low, high - step, step, Snoc(values,high))
+<span class="lineno" id=line11></span>            <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line12></span>        ;
+<span class="lineno" id=line13></span>      }
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>      <span class="comment">// reverse low and high so we can do negative steps</span>
+<span class="lineno" id=line16></span>      lo, hi, s := <span class="small_keyword" title="conditional">if</span> low &lt; high
+<span class="lineno" id=line17></span>        <span class="small_keyword" title="conditional">then</span> low, high, step
+<span class="lineno" id=line18></span>        <span class="small_keyword" title="conditional">else</span> high, low, -step
+<span class="lineno" id=line19></span>        <span class="small_keyword" title="conditional">endif</span>;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>      <span class="comment">// adjust the high to be the actual last value so we don't</span>
+<span class="lineno" id=line22></span>      <span class="comment">// have to reverse the list</span>
+<span class="lineno" id=line23></span>      n := hi - lo - 1;
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>      <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="conditional">if</span> s &lt;= 0
+<span class="lineno" id=line26></span>        <span class="small_keyword" title="conditional">then</span> Empty[<span class="library" title="binding of C int type">int</span>]
+<span class="lineno" id=line27></span>        <span class="small_keyword" title="conditional">else</span> inner(lo, lo + n - (n % s), s, Empty[<span class="library" title="binding of C int type">int</span>])
+<span class="lineno" id=line28></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line29></span>      ;
+<span class="lineno" id=line30></span>    }
+<span class="lineno" id=line31></span>  
+</pre></p></div><h2 id='Consecutive_integers_<code>range</code>_h'><img src='/share/src/web/images/minus.gif' id='Consecutive integers <code>range</code>' onclick='toggle(this,"Consecutive_integers_<code>range</code>_d")' alt='+'/> 8.2 Consecutive integers <code>range</code></h2><div id='Consecutive_integers_<code>range</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Range with step 1.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> range (low:<span class="library" title="binding of C int type">int</span>, high:<span class="library" title="binding of C int type">int</span>) =&gt; range(low, high, 1);
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Non-negative_integers_to_limit_<code>range</code>_h'><img src='/share/src/web/images/minus.gif' id='Non-negative integers to limit <code>range</code>' onclick='toggle(this,"Non-negative_integers_to_limit_<code>range</code>_d")' alt='+'/> 8.3 Non-negative integers to limit <code>range</code></h2><div id='Non-negative_integers_to_limit_<code>range</code>_d' style='display:block'>
+<p><code>num</code> integers 0 to <code>num-1</code>.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Range from 0 to num (excluded).</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> range (num:<span class="library" title="binding of C int type">int</span>) =&gt; range(0, num, 1);
+<span class="lineno" id=line3></span>  
+</pre></p></div><h2 id='Outer_product._h'><img src='/share/src/web/images/minus.gif' id='Outer product.' onclick='toggle(this,"Outer_product._d")' alt='+'/> 8.4 Outer product.</h2><div id='Outer_product._d' style='display:block'>
+<p>Given a list of lists of T named x and 
+a list of lists of T named y, 
+return a list of lists of T, consisting of every 
+combination xelt + yelt where e in x, f in y.
+</p><p>Note: this is a special case of a second order fold.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> outer_product[T] (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="functional, singly linked list">list</span>[T]]) (y:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="functional, singly linked list">list</span>[T]]): <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="functional, singly linked list">list</span>[T]] =
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a mutable variable">var</span> res = Empty[<span class="library" title="functional, singly linked list">list</span>[T]];
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="for loop">for</span> xelt <span class="small_keyword" title="membership operator, function mem">in</span> x
+<span class="lineno" id=line7></span>    <span class="small_keyword" title="for loop">for</span> yelt <span class="small_keyword" title="membership operator, function mem">in</span> y 
+<span class="lineno" id=line8></span>      perform res = (xelt + yelt) ! res;
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="return">return</span> res;
+<span class="lineno" id=line10></span>  }
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  
+</pre></p></div><h2 id='Concatenate_a_list_of_lists_<code>cat</code>_h'><img src='/share/src/web/images/minus.gif' id='Concatenate a list of lists <code>cat</code>' onclick='toggle(this,"Concatenate_a_list_of_lists_<code>cat</code>_d")' alt='+'/> 8.5 Concatenate a list of lists <code>cat</code></h2><div id='Concatenate_a_list_of_lists_<code>cat</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Concatenate all the lists in a list of lists.</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cat[T] (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="functional, singly linked list">list</span>[T]]):<span class="library" title="functional, singly linked list">list</span>[T] =
+<span class="lineno" id=line3></span>    {
+<span class="lineno" id=line4></span>       <span class="small_keyword" title="return">return</span>
+<span class="lineno" id=line5></span>         <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>         | #Empty =&gt; Empty[T]
+<span class="lineno" id=line7></span>         | Snoc(t,h) =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> join of (<span class="library" title="functional, singly linked list">list</span>[T]) h t
+<span class="lineno" id=line8></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line9></span>       ;
+<span class="lineno" id=line10></span>     }
+<span class="lineno" id=line11></span>  
+</pre></p></div></div><h1 id='Lists_and_Strings_h'><img src='/share/src/web/images/minus.gif' id='Lists and Strings' onclick='toggle(this,"Lists_and_Strings_d")' alt='+'/> 9 Lists and Strings</h1><div id='Lists_and_Strings_d' style='display:block'>
+<h2 id='Pack_list_of_strings_into_a_string_with_separator_<code>cat</code>_h'><img src='/share/src/web/images/minus.gif' id='Pack list of strings into a string with separator <code>cat</code>' onclick='toggle(this,"Pack_list_of_strings_into_a_string_with_separator_<code>cat</code>_d")' alt='+'/> 9.1 Pack list of strings into a string with separator <code>cat</code></h2><div id='Pack_list_of_strings_into_a_string_with_separator_<code>cat</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Concatenate all the strings in a list with given separator.</span>
+<span class="lineno" id=line2></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cat (sep:<span class="library" title="binding of C++ string type">string</span>) (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]):<span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line3></span>    {
+<span class="lineno" id=line4></span>      <span class="big_keyword" title="Define a mutable variable">var</span> n = 0uz;
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="for loop">for</span> s <span class="small_keyword" title="membership operator, function mem">in</span> x perform n += s.<span class="library" title="number of elements in data structure">len</span>+1uz; 
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a mutable variable">var</span> r = <span class="fstring">""</span>;
+<span class="lineno" id=line7></span>      reserve (&amp;r,n);
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line9></span>      | #Empty =&gt; <span class="small_keyword" title="return">return</span> r;
+<span class="lineno" id=line10></span>      | Snoc (tail, head) =&gt; 
+<span class="lineno" id=line11></span>        r = head;
+<span class="lineno" id=line12></span>        <span class="big_keyword" title="Define a mutable variable">var</span> tl = tail;
+<span class="lineno" id=line13></span>    next:&gt;
+<span class="lineno" id=line14></span>        <span class="small_keyword" title="match statement or expression">match</span> tl <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line15></span>        | #Empty =&gt; <span class="small_keyword" title="return">return</span> r;
+<span class="lineno" id=line16></span>        | Snoc(t,h) =&gt;
+<span class="lineno" id=line17></span>          r += sep + h;
+<span class="lineno" id=line18></span>          tl = t;
+<span class="lineno" id=line19></span>          <span class="small_keyword" title="jump to label">goto</span> next;
+<span class="lineno" id=line20></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line21></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="return">return</span> r;
+<span class="lineno" id=line23></span>    }
+<span class="lineno" id=line24></span>  
+</pre></p></div><h2 id='Map_a_list_to_a_list_of_strings_and_cat_with_separator_<code>catmap</code>_h'><img src='/share/src/web/images/minus.gif' id='Map a list to a list of strings and cat with separator <code>catmap</code>' onclick='toggle(this,"Map_a_list_to_a_list_of_strings_and_cat_with_separator_<code>catmap</code>_d")' alt='+'/> 9.2 Map a list to a list of strings and cat with separator <code>catmap</code></h2><div id='Map_a_list_to_a_list_of_strings_and_cat_with_separator_<code>catmap</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> catmap[T] (sep:<span class="library" title="binding of C++ string type">string</span>) (f:T -&gt; <span class="library" title="binding of C++ string type">string</span>) (ls: <span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line2></span>      cat sep (<span class="library" title="return data structure with function applied to each value">map</span> f ls)
+<span class="lineno" id=line3></span>    ;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> strcat[T <span class="small_keyword" title="type-class constraint">with</span> Str[T]]  (sep: <span class="library" title="binding of C++ string type">string</span>) (ls: <span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line6></span>      catmap sep (<span class="library" title="Convert a value to a string">str</span> of (T)) ls
+<span class="lineno" id=line7></span>    ;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> strcat[T <span class="small_keyword" title="type-class constraint">with</span> Str[T]]  (ls: <span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line10></span>      catmap <span class="fstring">", "</span> (<span class="library" title="Convert a value to a string">str</span> of (T)) ls
+<span class="lineno" id=line11></span>    ;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>   
+</pre></p></div></div><h1 id='Searching_h'><img src='/share/src/web/images/minus.gif' id='Searching' onclick='toggle(this,"Searching_d")' alt='+'/> 10 Searching</h1><div id='Searching_d' style='display:block'>
+<h2 id='Value_membership_h'><img src='/share/src/web/images/minus.gif' id='Value membership' onclick='toggle(this,"Value_membership_d")' alt='+'/> 10.1 Value membership</h2><div id='Value_membership_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Return true if one value in a list satisfies the predicate.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem[T] (eq:T -&gt; bool) (xs:<span class="library" title="functional, singly linked list">list</span>[T]) : bool =&gt;
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line4></span>      | #Empty =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line5></span>      | Snoc(t,h) =&gt; <span class="small_keyword" title="conditional">if</span> eq(h) <span class="small_keyword" title="conditional">then</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="conditional">else</span> mem eq t <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line6></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line7></span>    ;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="doccomment">Return true if one value in the list satisfies the relation </span>
+<span class="lineno" id=line10></span>    <span class="doccomment">in the left slot with </span>
+<span class="lineno" id=line11></span>    <span class="doccomment">the given element on the right slot.</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem[T, U] (eq:T * U -&gt; bool) (xs:<span class="library" title="functional, singly linked list">list</span>[T]) (e:U) : bool =&gt;
+<span class="lineno" id=line13></span>      mem (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:T) =&gt; eq(x, e)) xs
+<span class="lineno" id=line14></span>    ;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="doccomment">Construe a list as a set, imbuing it with a membership</span>
+<span class="lineno" id=line17></span>    <span class="doccomment">test, provided the element type has an equality operator.</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] Set[<span class="library" title="functional, singly linked list">list</span>[T],T] {
+<span class="lineno" id=line19></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\in">\(\in\)</span> (x:T, a:<span class="library" title="functional, singly linked list">list</span>[T]) =&gt; mem[T,T] eq of (T * T) a x;
+<span class="lineno" id=line20></span>    }
+<span class="lineno" id=line21></span>  
+</pre></p></div><h2 id='Value_Find_by_relation_<code>find</code>_h'><img src='/share/src/web/images/minus.gif' id='Value Find by relation <code>find</code>' onclick='toggle(this,"Value_Find_by_relation_<code>find</code>_d")' alt='+'/> 10.2 Value Find by relation <code>find</code></h2><div id='Value_Find_by_relation_<code>find</code>_d' style='display:block'>
+<p>Returns option.
+</p><pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">return option of the first element in a list satisfying the predicate.</span>
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find[T] (eq:T -&gt; bool) (xs:<span class="library" title="functional, singly linked list">list</span>[T]) : <span class="library" title="option type: Some x or None">opt</span>[T] =&gt;
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line4></span>      | #Empty =&gt; None[T]
+<span class="lineno" id=line5></span>      | Snoc(t,h) =&gt; <span class="small_keyword" title="conditional">if</span> eq(h) <span class="small_keyword" title="conditional">then</span> Some h <span class="small_keyword" title="conditional">else</span> find eq t <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line6></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line7></span>    ;
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">Return option the first value in the list satisfies the relation </span>
+<span class="lineno" id=line11></span>    <span class="doccomment">in the left slot with </span>
+<span class="lineno" id=line12></span>    <span class="doccomment">the given element on the right slot.</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find[T, U] (eq:T * U -&gt; bool) (xs:<span class="library" title="functional, singly linked list">list</span>[T]) (e:U) : <span class="library" title="option type: Some x or None">opt</span>[T] =&gt;
+<span class="lineno" id=line14></span>      find (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:T) =&gt; eq(x, e)) xs;
+<span class="lineno" id=line15></span>    ;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="doccomment">Return a sub list with elements satisfying the given predicate.</span>
+<span class="lineno" id=line18></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> filter[T] (P:T -&gt; bool) (x:<span class="library" title="functional, singly linked list">list</span>[T]) : <span class="library" title="functional, singly linked list">list</span>[T] =
+<span class="lineno" id=line19></span>    {
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (inp:<span class="library" title="functional, singly linked list">list</span>[T], out: <span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line21></span>        <span class="small_keyword" title="match statement or expression">match</span> inp <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line22></span>        | #Empty =&gt; <span class="library" title="return data structure with elements reversed">rev</span> out
+<span class="lineno" id=line23></span>        | Snoc(t,h) =&gt;
+<span class="lineno" id=line24></span>          <span class="small_keyword" title="conditional">if</span> P(h) <span class="small_keyword" title="conditional">then</span> aux(t,Snoc(out,h))
+<span class="lineno" id=line25></span>          <span class="small_keyword" title="conditional">else</span> aux (t,out)
+<span class="lineno" id=line26></span>          <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line27></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line28></span>      ;
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="return">return</span> aux (x,Empty[T]);
+<span class="lineno" id=line30></span>    }
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>    <span class="doccomment">Push element onto front of list if there isn't one in the</span>
+<span class="lineno" id=line33></span>    <span class="doccomment">list already satisfying the relation.</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> prepend_unique[T] (eq: T * T -&gt; bool) (x:<span class="library" title="functional, singly linked list">list</span>[T]) (e:T) : <span class="library" title="functional, singly linked list">list</span>[T] =&gt;
+<span class="lineno" id=line35></span>      <span class="small_keyword" title="conditional">if</span> mem eq x e <span class="small_keyword" title="conditional">then</span> x <span class="small_keyword" title="conditional">else</span> Snoc(x,e) <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line36></span>    ;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="doccomment">Attach element to tail of list if there isn't one in the</span>
+<span class="lineno" id=line39></span>    <span class="doccomment">list already satisfying the relation.</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> insert_unique[T] (eq: T * T -&gt; bool) (x:<span class="library" title="functional, singly linked list">list</span>[T]) (e:T) : <span class="library" title="functional, singly linked list">list</span>[T] =&gt;
+<span class="lineno" id=line41></span>      <span class="small_keyword" title="conditional">if</span> mem eq x e <span class="small_keyword" title="conditional">then</span> x <span class="small_keyword" title="conditional">else</span> <span class="library" title="return data structure with elements reversed">rev</span>$ Snoc (<span class="library" title="return data structure with elements reversed">rev</span> x,e) <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line42></span>    ;
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>    <span class="doccomment">Remove all elements from a list satisfying relation.</span>
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> remove[T] (eq: T * T -&gt; bool) (x:<span class="library" title="functional, singly linked list">list</span>[T]) (e:T) : <span class="library" title="functional, singly linked list">list</span>[T] =&gt;
+<span class="lineno" id=line46></span>      filter (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (y:T) =&gt; <span class="small_keyword" title="logical negation">not</span> eq (e,y)) x
+<span class="lineno" id=line47></span>    ;
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="doccomment">Attach element to tail of list if there isn't one in the</span>
+<span class="lineno" id=line50></span>    <span class="doccomment">list already satisfying the relation (tail-rec).</span>
+<span class="lineno" id=line51></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> append_unique[T] (eq: T * T -&gt; bool) (x:<span class="library" title="functional, singly linked list">list</span>[T]) (e:T) : <span class="library" title="functional, singly linked list">list</span>[T] = {
+<span class="lineno" id=line52></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (inp:<span class="library" title="functional, singly linked list">list</span>[T], out: <span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line53></span>        <span class="small_keyword" title="match statement or expression">match</span> inp <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line54></span>        | #Empty =&gt; <span class="library" title="return data structure with elements reversed">rev</span>$ Snoc(out,e)
+<span class="lineno" id=line55></span>        | Snoc(t,h) =&gt;
+<span class="lineno" id=line56></span>          <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> eq (h, e) <span class="small_keyword" title="conditional">then</span> aux(t,Snoc(out,h))
+<span class="lineno" id=line57></span>          <span class="small_keyword" title="conditional">else</span> aux (t,out)
+<span class="lineno" id=line58></span>          <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line59></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line60></span>      ;
+<span class="lineno" id=line61></span>      <span class="small_keyword" title="return">return</span> aux (x,Empty[T]);
+<span class="lineno" id=line62></span>    }
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>    <span class="doccomment">Take the first k elements from a list.</span>
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> take[T] (k:<span class="library" title="binding of C int type">int</span>) (lst:<span class="library" title="functional, singly linked list">list</span>[T]) : <span class="library" title="functional, singly linked list">list</span>[T] =&gt;
+<span class="lineno" id=line66></span>      <span class="small_keyword" title="conditional">if</span> k &lt;= 0 <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line67></span>        <span class="library" title="functional, singly linked list">list</span>[T] ()
+<span class="lineno" id=line68></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line69></span>        <span class="small_keyword" title="match statement or expression">match</span> lst <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line70></span>          | #Empty =&gt; <span class="library" title="functional, singly linked list">list</span>[T] ()
+<span class="lineno" id=line71></span>          | Snoc(xs,x) =&gt; join (<span class="library" title="functional, singly linked list">list</span>[T] x) (take[T] (k - 1) xs)
+<span class="lineno" id=line72></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line73></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line74></span>    ;
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    <span class="doccomment">Drop the first k elements from a list.</span>
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> drop[T] (k:<span class="library" title="binding of C int type">int</span>) (lst:<span class="library" title="functional, singly linked list">list</span>[T]) : <span class="library" title="functional, singly linked list">list</span>[T] =&gt;
+<span class="lineno" id=line78></span>      <span class="small_keyword" title="conditional">if</span> k &lt;= 0 <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line79></span>        lst
+<span class="lineno" id=line80></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line81></span>        <span class="small_keyword" title="match statement or expression">match</span> lst <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line82></span>          | #Empty =&gt; <span class="library" title="functional, singly linked list">list</span>[T] ()
+<span class="lineno" id=line83></span>          | Snoc(xs,x) =&gt; drop (k - 1) xs
+<span class="lineno" id=line84></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line85></span>    ;
+<span class="lineno" id=line86></span>  
+<span class="lineno" id=line87></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> scroll1[T] (left: <span class="library" title="functional, singly linked list">list</span>[T], right: <span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line88></span>      <span class="small_keyword" title="match statement or expression">match</span> left <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line89></span>      | h ! t =&gt; t, h ! right
+<span class="lineno" id=line90></span>      | _ =&gt; left, right
+<span class="lineno" id=line91></span>    ;
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> scroll[T] (lr:<span class="library" title="functional, singly linked list">list</span>[T] * <span class="library" title="functional, singly linked list">list</span>[T]) (n:<span class="library" title="binding of C int type">int</span>) =&gt;
+<span class="lineno" id=line93></span>      <span class="small_keyword" title="conditional">if</span> n &lt;= 0 <span class="small_keyword" title="conditional">then</span> lr <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line94></span>      scroll (scroll1 lr) (n - 1)
+<span class="lineno" id=line95></span>    ;
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>    <span class="comment">// return revhead, tail where revhead is first k elements</span>
+<span class="lineno" id=line98></span>    <span class="comment">// of lst, in reverse order, and tail is what is left over</span>
+<span class="lineno" id=line99></span>    <span class="comment">// cannot fail: if k is not big enough the tail just ends</span>
+<span class="lineno" id=line100></span>    <span class="comment">// up empty and the function is equivalent to rev.</span>
+<span class="lineno" id=line101></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> revsplit[T] (k:<span class="library" title="binding of C int type">int</span>) (lst:<span class="library" title="functional, singly linked list">list</span>[T]) : <span class="library" title="functional, singly linked list">list</span>[T] * <span class="library" title="functional, singly linked list">list</span>[T] =&gt;
+<span class="lineno" id=line102></span>      <span class="small_keyword" title="let binder">let</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> aux (k:<span class="library" title="binding of C int type">int</span>) (revhead:<span class="library" title="functional, singly linked list">list</span>[T]) (tail:<span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line103></span>        <span class="small_keyword" title="conditional">if</span> k &lt;=0 <span class="small_keyword" title="conditional">then</span> revhead,tail
+<span class="lineno" id=line104></span>        <span class="small_keyword" title="conditional">else</span> <span class="small_keyword" title="match statement or expression">match</span> tail <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line105></span>        | #Empty =&gt; revhead, tail
+<span class="lineno" id=line106></span>        | h ! t =&gt; aux (k - 1) (h!revhead) t
+<span class="lineno" id=line107></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line108></span>      <span class="small_keyword" title="membership operator, function mem">in</span> aux k Empty[T] lst
+<span class="lineno" id=line109></span>    ;
+<span class="lineno" id=line110></span>   
+<span class="lineno" id=line111></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> list_eq[T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] (a:<span class="library" title="functional, singly linked list">list</span>[T], b:<span class="library" title="functional, singly linked list">list</span>[T]): bool =&gt;
+<span class="lineno" id=line112></span>      <span class="small_keyword" title="match statement or expression">match</span> a, b <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line113></span>      | #Empty, #Empty =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line114></span>      | #Empty, _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line115></span>      | _,#Empty =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line116></span>      | Snoc(ta,ha), Snoc(tb,hb) =&gt; 
+<span class="lineno" id=line117></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> (ha == hb) <span class="small_keyword" title="conditional">then</span> <span class="library" title="false value">false</span>
+<span class="lineno" id=line118></span>        <span class="small_keyword" title="conditional">else</span> list_eq (ta, tb)
+<span class="lineno" id=line119></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line120></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line121></span>    ;
+<span class="lineno" id=line122></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] Eq[<span class="library" title="functional, singly linked list">list</span>[T]] { 
+<span class="lineno" id=line123></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> ==(a:<span class="library" title="functional, singly linked list">list</span>[T], b:<span class="library" title="functional, singly linked list">list</span>[T])=&gt; list_eq(a,b); 
+<span class="lineno" id=line124></span>    } 
+<span class="lineno" id=line125></span>   
+</pre></p></div></div><h1 id='Sort_h'><img src='/share/src/web/images/minus.gif' id='Sort' onclick='toggle(this,"Sort_d")' alt='+'/> 11 Sort</h1><div id='Sort_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="doccomment">Sort a list with given less than operator, which must be</span>
+<span class="lineno" id=line2></span>    <span class="doccomment">total order. Uses varray sort (which uses STL sort).</span>
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> sort[T] (lt:T*T-&gt;bool) (x:<span class="library" title="functional, singly linked list">list</span>[T])=
+<span class="lineno" id=line4></span>    {
+<span class="lineno" id=line5></span>      <span class="big_keyword" title="Define an immutable value">val</span> n = <span class="library" title="number of elements in data structure">len</span> x;
+<span class="lineno" id=line6></span>      <span class="big_keyword" title="Define a mutable variable">var</span> a = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[T]$ n;
+<span class="lineno" id=line7></span>      <span class="library" title="call procedure on each element of data structure">iter</span> (<span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (e:T) { a+=e; }) x;
+<span class="lineno" id=line8></span>      sort lt a;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a mutable variable">var</span> r = Empty[T];
+<span class="lineno" id=line10></span>      <span class="small_keyword" title="conditional">if</span> n &gt; 0uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line11></span>        <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> n - 1uz <span class="small_keyword" title="downwards counting for loop">downto</span> 0uz <span class="small_keyword" title="imperative code begins">do</span> r = Snoc(r,a.i); <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="return">return</span> r;
+<span class="lineno" id=line14></span>    }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="doccomment">Sort a list with default total order.</span>
+<span class="lineno" id=line17></span>    <span class="doccomment">Uses varray sort (which uses STL sort).</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> sort[T <span class="small_keyword" title="type-class constraint">with</span> Tord[T]](x:<span class="library" title="functional, singly linked list">list</span>[T])=&gt; sort lt x;
+<span class="lineno" id=line19></span>      
+</pre></p></div><h1 id='Streaming_list_h'><img src='/share/src/web/images/minus.gif' id='Streaming list' onclick='toggle(this,"Streaming_list_d")' alt='+'/> 12 Streaming list</h1><div id='Streaming_list_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Iterable[<span class="library" title="functional, singly linked list">list</span>[T],T] {
+<span class="lineno" id=line2></span>    <span class="doccomment">Convert a list to a stream.</span>
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator (<span class="big_keyword" title="Define a mutable variable">var</span> xs:<span class="library" title="functional, singly linked list">list</span>[T]) () = {
+<span class="lineno" id=line4></span>        <span class="hack">C_hack</span>::ignore(&amp;xs); <span class="comment">// fool use before init</span>
+<span class="lineno" id=line5></span>        <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line6></span>          <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>          | Snoc(t,h) =&gt; xs = t; <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some h;
+<span class="lineno" id=line8></span>          | #Empty =&gt; <span class="small_keyword" title="return">return</span> None[T];
+<span class="lineno" id=line9></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line10></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line11></span>      }
+<span class="lineno" id=line12></span>    }
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span>[T] Streamable[<span class="library" title="functional, singly linked list">list</span>[T],T];
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> [T <span class="small_keyword" title="type-class constraint">with</span> Str[T]] Str[<span class="library" title="functional, singly linked list">list</span>[T]];
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> [T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] Set[<span class="library" title="functional, singly linked list">list</span>[T],T];
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span>[T] ArrayValue[<span class="library" title="functional, singly linked list">list</span>[T],T];
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  }
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Open a module or class">open</span> [T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] Eq[List::<span class="library" title="functional, singly linked list">list</span>[T]];
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  <span class="comment">//open [T with Str[T]] Str[list[T]];</span>
+<span class="lineno" id=line24></span>  <span class="comment">//open [T with Eq[T]] Set[list[T],T];</span>
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  <span class="comment">// display list as string given element type with str operator</span>
+<span class="lineno" id=line27></span>  <span class="comment">// elements are separated by a comma and one space</span>
+<span class="lineno" id=line28></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Show[T]] Str[List::<span class="library" title="functional, singly linked list">list</span>[T]] {
+<span class="lineno" id=line29></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (xs:List::<span class="library" title="functional, singly linked list">list</span>[T]) =&gt;
+<span class="lineno" id=line30></span>      <span class="fstring">'list('</span> +
+<span class="lineno" id=line31></span>        <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line32></span>        | #Empty =&gt; <span class="fstring">''</span>
+<span class="lineno" id=line33></span>        | Snoc(os,o) =&gt;
+<span class="lineno" id=line34></span>            List::<span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (
+<span class="lineno" id=line35></span>              <span class="big_keyword" title="Define a function with no side-effects">fun</span> (a:<span class="library" title="binding of C++ string type">string</span>) (b:T):<span class="library" title="binding of C++ string type">string</span> =&gt; a + <span class="fstring">', '</span> + (repr b)
+<span class="lineno" id=line36></span>            ) (repr o) os
+<span class="lineno" id=line37></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line38></span>      + <span class="fstring">')'</span>
+<span class="lineno" id=line39></span>    ;
+<span class="lineno" id=line40></span>  }
+<span class="lineno" id=line41></span>  
+</pre></p></div><h1 id='Association_List_h'><img src='/share/src/web/images/minus.gif' id='Association List' onclick='toggle(this,"Association_List_d")' alt='+'/> 13 Association List</h1><div id='Association_List_d' style='display:block'>
+<p>A list of pairs
+</p><pre class='inclusion'>
+share/lib/std/datatype/assoc_list.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Assoc_list
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> assoc_list[A,B] = List::<span class="library" title="functional, singly linked list">list</span>[A*B];
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="comment">// check is the key (left element) of a pair</span>
+<span class="lineno" id=line6></span>    <span class="comment">// satisfies the predicate</span>
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem[A,B] (eq:A -&gt; bool) (xs:assoc_list[A,B]) : bool =&gt;
+<span class="lineno" id=line8></span>      List::mem (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (a:A, b:B) =&gt; eq a) xs;
+<span class="lineno" id=line9></span>    ;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="comment">// check is the key (left element) of a pair</span>
+<span class="lineno" id=line12></span>    <span class="comment">// satisfies the relation to given element </span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem[A,B,T] (eq:A * T -&gt; bool) (xs:assoc_list[A,B]) (e:T) : bool =&gt;
+<span class="lineno" id=line14></span>      mem (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (a:A) =&gt; eq(a, e)) xs;
+<span class="lineno" id=line15></span>    ;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[A,B] Set[assoc_list[A,B], A] {
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> mem[A,B <span class="small_keyword" title="type-class constraint">with</span> Eq[A]] (xs:assoc_list[A,B]) (e:A) : bool =&gt; 
+<span class="lineno" id=line19></span>        mem eq of (A * A) xs e
+<span class="lineno" id=line20></span>      ;
+<span class="lineno" id=line21></span>    }
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="comment">// find optionally the first value whose associate key satisfies </span>
+<span class="lineno" id=line24></span>    <span class="comment">// the given predicate</span>
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find[A,B] (eq:A -&gt; bool) (xs:assoc_list[A,B]) : <span class="library" title="option type: Some x or None">opt</span>[B] =&gt;
+<span class="lineno" id=line26></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line27></span>      | #Empty =&gt; None[B]
+<span class="lineno" id=line28></span>      | Snoc (t,(a, b)) =&gt; <span class="small_keyword" title="conditional">if</span> eq(a) <span class="small_keyword" title="conditional">then</span> Some b <span class="small_keyword" title="conditional">else</span> find eq t <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line30></span>    ;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>    <span class="comment">// find optionally the first value whose associate key (left slot)</span>
+<span class="lineno" id=line33></span>    <span class="comment">// satisfies the given relation to the given element (right slot) </span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find[A,B,T] (eq:A * T -&gt; bool) (xs:assoc_list[A,B]) (e:T) : <span class="library" title="option type: Some x or None">opt</span>[B] =&gt;
+<span class="lineno" id=line35></span>      find (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (a:A) =&gt; eq (a, e)) xs;
+<span class="lineno" id=line36></span>    ;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> find[A,B <span class="small_keyword" title="type-class constraint">with</span> Eq[A]] (xs:assoc_list[A,B]) (e:A) : <span class="library" title="option type: Some x or None">opt</span>[B] =&gt;
+<span class="lineno" id=line39></span>      find eq of (A * A) xs e
+<span class="lineno" id=line40></span>    ;
+<span class="lineno" id=line41></span>  }
+<span class="lineno" id=line42></span>  
+</pre></p></div><h1 id='Purely_Functional_Random_Access_List._h'><img src='/share/src/web/images/minus.gif' id='Purely Functional Random Access List.' onclick='toggle(this,"Purely_Functional_Random_Access_List._d")' alt='+'/> 14 Purely Functional Random Access List.</h1><div id='Purely_Functional_Random_Access_List._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/ralist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Purely functional Random Access List.</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">Based on design from Okasaki, Purely Functional Datastructures.</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">Transcribed from Hongwei Xi's encoding for ATS2 library.</span>
+<span class="lineno" id=line4></span>  <span class="doccomment">//$ An ralist provides O(log N) indexed access and amortised</span>
+<span class="lineno" id=line5></span>  <span class="doccomment">O(1) consing. This is roughly the closest thing to</span>
+<span class="lineno" id=line6></span>  <span class="doccomment">purely functional array available.</span>
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a type class">class</span> Ralist
+<span class="lineno" id=line9></span>  {
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="doccomment">Auxilliary data structure.</span>
+<span class="lineno" id=line12></span>    variant pt[a] = | N1 of a | N2 of pt[a] * pt[a];
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>    <span class="doccomment">Type of an ralist.</span>
+<span class="lineno" id=line15></span>    variant ralist[a] = 
+<span class="lineno" id=line16></span>      | RAnil
+<span class="lineno" id=line17></span>      | RAevn of ralist[a]
+<span class="lineno" id=line18></span>      | RAodd of pt[a] * ralist[a]
+<span class="lineno" id=line19></span>    ;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="doccomment">Length of an ralist.</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ralist_length[a] : ralist[a] -&gt; <span class="library" title="binding of C int type">int</span> =
+<span class="lineno" id=line23></span>      | #RAnil =&gt; 0
+<span class="lineno" id=line24></span>      | RAevn xxs =&gt; 2 * ralist_length xxs
+<span class="lineno" id=line25></span>      | RAodd (_,xxs) =&gt; 2 * ralist_length xxs + 1
+<span class="lineno" id=line26></span>    ;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cons[a] <span class="comment">// O(1), amortized</span>
+<span class="lineno" id=line29></span>      (x0: pt[a], xs: ralist[a]): ralist [a] =&gt;
+<span class="lineno" id=line30></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line31></span>      | #RAnil =&gt; RAodd (x0, RAnil[a])
+<span class="lineno" id=line32></span>      | RAevn xxs =&gt; RAodd (x0, xxs)
+<span class="lineno" id=line33></span>      | RAodd (x1, xxs) =&gt;
+<span class="lineno" id=line34></span>          <span class="small_keyword" title="let binder">let</span> x0x1 = N2 (x0, x1) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line35></span>          RAevn (cons (x0x1, xxs) )
+<span class="lineno" id=line36></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>  ;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>    <span class="doccomment">Cons: new list with extra value at the head.</span>
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ralist_cons[a] (x:a, xs: ralist[a]) =&gt;
+<span class="lineno" id=line40></span>      cons (N1 x, xs)
+<span class="lineno" id=line41></span>    ;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="doccomment">Check for an empty list.</span>
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ralist_empty[a]: ralist[a] -&gt; bool  =
+<span class="lineno" id=line45></span>    | #RAnil =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line46></span>    | _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line47></span>    ;
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> uncons[a] (xs: ralist[a], phd: &amp;pt[a], ptl: &amp;ralist[a]) 
+<span class="lineno" id=line50></span>    {
+<span class="lineno" id=line51></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line52></span>      | RAevn xss =&gt; 
+<span class="lineno" id=line53></span>        <span class="big_keyword" title="Define a mutable variable">var</span> nxx: pt[a];
+<span class="lineno" id=line54></span>        <span class="big_keyword" title="Define a mutable variable">var</span> xxs: ralist[a];
+<span class="lineno" id=line55></span>        uncons (xss,&amp;nxx, &amp;xxs);
+<span class="lineno" id=line56></span>        <span class="small_keyword" title="match statement or expression">match</span> nxx <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line57></span>        | N2(x0,x1) =&gt; 
+<span class="lineno" id=line58></span>          phd &lt;- x0;
+<span class="lineno" id=line59></span>          ptl &lt;- RAodd (x1,xxs);
+<span class="lineno" id=line60></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>; 
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>      | RAodd (x0,xss) =&gt;
+<span class="lineno" id=line63></span>        phd &lt;- x0;
+<span class="lineno" id=line64></span>        <span class="small_keyword" title="match statement or expression">match</span> xss <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line65></span>        | #RAnil =&gt; ptl &lt;- RAnil[a];
+<span class="lineno" id=line66></span>        | _ =&gt; ptl &lt;- RAevn xss;
+<span class="lineno" id=line67></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line68></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line69></span>    }
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>    <span class="doccomment">Proedure to split a non-empty ralist</span>
+<span class="lineno" id=line72></span>    <span class="doccomment">into a head element and a tail.</span>
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ralist_uncons[a] (xs: ralist[a], phd: &amp;a, ptl: &amp;ralist[a])
+<span class="lineno" id=line74></span>    {
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a mutable variable">var</span> nx: pt[a];
+<span class="lineno" id=line76></span>      uncons (xs, &amp;nx, ptl);
+<span class="lineno" id=line77></span>      <span class="small_keyword" title="match statement or expression">match</span> nx <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line78></span>      | N1 (x1) =&gt; phd &lt;- x1;
+<span class="lineno" id=line79></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line80></span>    }
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>    <span class="doccomment">User define pattern matching support</span>
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> _match_ctor_Cons[T] (x:ralist[T]) =&gt;<span class="small_keyword" title="logical negation">not</span> ( ralist_empty x);
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> _match_ctor_Empty[T] (x:ralist[T]) =&gt; ralist_empty x;
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> _ctor_arg_Cons[T] (x:ralist[T]) : T * ralist[T] =
+<span class="lineno" id=line87></span>    {
+<span class="lineno" id=line88></span>      <span class="big_keyword" title="Define a mutable variable">var</span> elt : T;
+<span class="lineno" id=line89></span>      <span class="big_keyword" title="Define a mutable variable">var</span> tail : ralist[T];
+<span class="lineno" id=line90></span>      ralist_uncons (x, &amp;elt, &amp;tail);
+<span class="lineno" id=line91></span>      <span class="small_keyword" title="return">return</span> elt,tail;
+<span class="lineno" id=line92></span>    }
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>  
+<span class="lineno" id=line95></span>    <span class="doccomment">Head element of a non-empty ralist.</span>
+<span class="lineno" id=line96></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ralist_head[a] (xs: ralist[a]) : a =
+<span class="lineno" id=line97></span>    {
+<span class="lineno" id=line98></span>      <span class="big_keyword" title="Define a mutable variable">var</span> nx: a;
+<span class="lineno" id=line99></span>      <span class="big_keyword" title="Define a mutable variable">var</span> xxs: ralist[a];
+<span class="lineno" id=line100></span>      ralist_uncons (xs, &amp;nx, &amp;xxs);
+<span class="lineno" id=line101></span>      <span class="small_keyword" title="return">return</span> nx;
+<span class="lineno" id=line102></span>    }
+<span class="lineno" id=line103></span>  
+<span class="lineno" id=line104></span>    <span class="doccomment">Tail list of a non-empty ralist.</span>
+<span class="lineno" id=line105></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ralist_tail[a] (xs: ralist[a]) : ralist[a] =
+<span class="lineno" id=line106></span>    {
+<span class="lineno" id=line107></span>      <span class="big_keyword" title="Define a mutable variable">var</span> nx: a;
+<span class="lineno" id=line108></span>      <span class="big_keyword" title="Define a mutable variable">var</span> xxs: ralist[a];
+<span class="lineno" id=line109></span>      ralist_uncons (xs, &amp;nx, &amp;xxs);
+<span class="lineno" id=line110></span>      <span class="small_keyword" title="return">return</span> xxs;
+<span class="lineno" id=line111></span>    }
+<span class="lineno" id=line112></span>  
+<span class="lineno" id=line113></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> lookup[a]
+<span class="lineno" id=line114></span>    (
+<span class="lineno" id=line115></span>      xs: ralist [a], 
+<span class="lineno" id=line116></span>      i: <span class="library" title="binding of C int type">int</span> 
+<span class="lineno" id=line117></span>    ) : pt[a] =&gt;
+<span class="lineno" id=line118></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line119></span>      | RAevn xxs =&gt; 
+<span class="lineno" id=line120></span>        <span class="small_keyword" title="let binder">let</span> x01 = lookup (xxs, i/2) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line121></span>        <span class="small_keyword" title="conditional">if</span> i % 2 == 0 <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line122></span>          <span class="small_keyword" title="let binder">let</span> N2 (x0, _) = x01 <span class="small_keyword" title="membership operator, function mem">in</span> x0 
+<span class="lineno" id=line123></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line124></span>          <span class="small_keyword" title="let binder">let</span> N2 (_, x1) = x01 <span class="small_keyword" title="membership operator, function mem">in</span> x1
+<span class="lineno" id=line125></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line126></span>  
+<span class="lineno" id=line127></span>      | RAodd (x, xxs) =&gt; 
+<span class="lineno" id=line128></span>        <span class="small_keyword" title="conditional">if</span> i == 0 <span class="small_keyword" title="conditional">then</span> x <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line129></span>          <span class="small_keyword" title="let binder">let</span> x01 = lookup (xxs, (i - 1)/2) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line130></span>          <span class="small_keyword" title="conditional">if</span> i % 2 == 0 <span class="small_keyword" title="conditional">then</span>
+<span class="lineno" id=line131></span>            <span class="small_keyword" title="let binder">let</span> N2 (_, x1) = x01 <span class="small_keyword" title="membership operator, function mem">in</span> x1 
+<span class="lineno" id=line132></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line133></span>            <span class="small_keyword" title="let binder">let</span> N2 (x0, _) = x01 <span class="small_keyword" title="membership operator, function mem">in</span> x0
+<span class="lineno" id=line134></span>          <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line135></span>        <span class="small_keyword" title="conditional">endif</span> 
+<span class="lineno" id=line136></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line137></span>    ;
+<span class="lineno" id=line138></span>  
+<span class="lineno" id=line139></span>    <span class="doccomment">Random access to an ralist. Unchecked.</span>
+<span class="lineno" id=line140></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ralist_lookup[a] (xs:ralist[a],i:<span class="library" title="binding of C int type">int</span>)=&gt;
+<span class="lineno" id=line141></span>      <span class="small_keyword" title="let binder">let</span> N1 x = lookup (xs,i) <span class="small_keyword" title="membership operator, function mem">in</span> x
+<span class="lineno" id=line142></span>    ;
+<span class="lineno" id=line143></span>  
+<span class="lineno" id=line144></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fupdate[a]
+<span class="lineno" id=line145></span>    (
+<span class="lineno" id=line146></span>      xs: ralist[a] , 
+<span class="lineno" id=line147></span>      i:<span class="library" title="binding of C int type">int</span>, 
+<span class="lineno" id=line148></span>      f: pt[a] -&gt; pt[a]
+<span class="lineno" id=line149></span>    ) : ralist[a] =&gt;
+<span class="lineno" id=line150></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line151></span>      | RAevn (xxs) =&gt; RAevn (fupdate2 (xxs, i, f))
+<span class="lineno" id=line152></span>      | RAodd (x, xxs) =&gt;
+<span class="lineno" id=line153></span>        <span class="small_keyword" title="conditional">if</span> i == 0 <span class="small_keyword" title="conditional">then</span> RAodd (f x, xxs) 
+<span class="lineno" id=line154></span>        <span class="small_keyword" title="conditional">else</span> RAodd (x, fupdate2 (xxs, i - 1, f))
+<span class="lineno" id=line155></span>        <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line156></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line157></span>    ;
+<span class="lineno" id=line158></span>  
+<span class="lineno" id=line159></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fupdate2[a]
+<span class="lineno" id=line160></span>    (
+<span class="lineno" id=line161></span>      xxs: ralist[a],
+<span class="lineno" id=line162></span>      i: <span class="library" title="binding of C int type">int</span>,
+<span class="lineno" id=line163></span>      f: pt[a] -&gt; pt[a]
+<span class="lineno" id=line164></span>    ) : ralist[a] =&gt;
+<span class="lineno" id=line165></span>        <span class="small_keyword" title="conditional">if</span> i % 2 == 0 <span class="small_keyword" title="conditional">then</span> 
+<span class="lineno" id=line166></span>        <span class="small_keyword" title="let binder">let</span> f1 = 
+<span class="lineno" id=line167></span>          <span class="big_keyword" title="Define a function with no side-effects">fun</span> (xx: pt[a]): pt[a] =&gt;
+<span class="lineno" id=line168></span>          <span class="small_keyword" title="let binder">let</span> N2 (x0, x1) = xx <span class="small_keyword" title="membership operator, function mem">in</span> N2 (f x0, x1)
+<span class="lineno" id=line169></span>        <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line170></span>        fupdate (xxs, i / 2, f1)
+<span class="lineno" id=line171></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line172></span>        <span class="small_keyword" title="let binder">let</span> f1 = 
+<span class="lineno" id=line173></span>          <span class="big_keyword" title="Define a function with no side-effects">fun</span> (xx: pt[a]): pt[a] =&gt;
+<span class="lineno" id=line174></span>          <span class="small_keyword" title="let binder">let</span> N2 (x0, x1) = xx <span class="small_keyword" title="membership operator, function mem">in</span> N2 (x0, f x1)
+<span class="lineno" id=line175></span>        <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line176></span>        fupdate (xxs, i / 2, f1)
+<span class="lineno" id=line177></span>    ;
+<span class="lineno" id=line178></span>  
+<span class="lineno" id=line179></span>    <span class="doccomment">Return a list with the i'th element replaced by x0.</span>
+<span class="lineno" id=line180></span>    <span class="doccomment">Index is unchecked.</span>
+<span class="lineno" id=line181></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ralist_update[a] (xs:ralist[a], i:<span class="library" title="binding of C int type">int</span>, x0:a) =&gt;
+<span class="lineno" id=line182></span>      <span class="small_keyword" title="let binder">let</span> f = <span class="big_keyword" title="Define a function with no side-effects">fun</span> (z:pt[a]) : pt[a] =&gt; N1 x0 <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line183></span>      fupdate (xs,i,f)
+<span class="lineno" id=line184></span>    ;
+<span class="lineno" id=line185></span>  
+<span class="lineno" id=line186></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> foreach[a]
+<span class="lineno" id=line187></span>    (
+<span class="lineno" id=line188></span>      xs: ralist[a],
+<span class="lineno" id=line189></span>      f: pt[a] -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>
+<span class="lineno" id=line190></span>    )
+<span class="lineno" id=line191></span>    { 
+<span class="lineno" id=line192></span>      <span class="small_keyword" title="match statement or expression">match</span> xs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line193></span>      | RAevn (xxs) =&gt; foreach2 (xxs, f);
+<span class="lineno" id=line194></span>      | RAodd (x, xxs) =&gt;
+<span class="lineno" id=line195></span>        f x;
+<span class="lineno" id=line196></span>        <span class="small_keyword" title="match statement or expression">match</span> xxs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line197></span>        | #RAnil =&gt; ;
+<span class="lineno" id=line198></span>        | _ =&gt; foreach2 (xxs, f);
+<span class="lineno" id=line199></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line200></span>      | #RAnil =&gt; ;
+<span class="lineno" id=line201></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line202></span>    }
+<span class="lineno" id=line203></span>  
+<span class="lineno" id=line204></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> foreach2[a]
+<span class="lineno" id=line205></span>    (
+<span class="lineno" id=line206></span>      xxs: ralist[a], 
+<span class="lineno" id=line207></span>      f: pt[a] -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>
+<span class="lineno" id=line208></span>    )
+<span class="lineno" id=line209></span>    {
+<span class="lineno" id=line210></span>      <span class="big_keyword" title="Define a mutable variable">var</span> f1 = 
+<span class="lineno" id=line211></span>        <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (xx: pt[a]) {
+<span class="lineno" id=line212></span>          <span class="small_keyword" title="match statement or expression">match</span> xx <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line213></span>          | N2 (x0, x1) =&gt; f (x0); f (x1);
+<span class="lineno" id=line214></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line215></span>        }
+<span class="lineno" id=line216></span>      ;
+<span class="lineno" id=line217></span>      foreach (xxs, f1);
+<span class="lineno" id=line218></span>    }
+<span class="lineno" id=line219></span>  
+<span class="lineno" id=line220></span>    <span class="doccomment">Callback based iteration.</span>
+<span class="lineno" id=line221></span>    <span class="doccomment">Apply procedure to each element of the ralist.</span>
+<span class="lineno" id=line222></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ralist_foreach[a] 
+<span class="lineno" id=line223></span>    (
+<span class="lineno" id=line224></span>      xs: ralist[a],
+<span class="lineno" id=line225></span>      f: a -&gt; <span class="library" title="Type with no values, returning void indicates a procedure">void</span>
+<span class="lineno" id=line226></span>    )
+<span class="lineno" id=line227></span>    { 
+<span class="lineno" id=line228></span>      <span class="big_keyword" title="Define a mutable variable">var</span> f2 = 
+<span class="lineno" id=line229></span>        <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> (x:pt[a]) {
+<span class="lineno" id=line230></span>          <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line231></span>          | N1 y =&gt; f y;
+<span class="lineno" id=line232></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line233></span>        }
+<span class="lineno" id=line234></span>      ;
+<span class="lineno" id=line235></span>      foreach (xs, f2);
+<span class="lineno" id=line236></span>    }
+<span class="lineno" id=line237></span>  
+<span class="lineno" id=line238></span>    <span class="doccomment">Convert ralist to a string.</span>
+<span class="lineno" id=line239></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[a <span class="small_keyword" title="type-class constraint">with</span> Str[a]] Str[ralist[a]] 
+<span class="lineno" id=line240></span>    {
+<span class="lineno" id=line241></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (xx: ralist[a]):<span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line242></span>        <span class="big_keyword" title="Define a mutable variable">var</span> xs = xx;
+<span class="lineno" id=line243></span>        <span class="big_keyword" title="Define a mutable variable">var</span> x: a;
+<span class="lineno" id=line244></span>        <span class="big_keyword" title="Define a mutable variable">var</span> s = <span class="fstring">""</span>;
+<span class="lineno" id=line245></span>        <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> ralist_empty xs <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line246></span>          ralist_uncons (xs,&amp;x,&amp;xs);
+<span class="lineno" id=line247></span>          s += (<span class="small_keyword" title="conditional">if</span> s != <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">","</span> <span class="small_keyword" title="conditional">else</span> <span class="fstring">""</span>) + <span class="library" title="Convert a value to a string">str</span> x;
+<span class="lineno" id=line248></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line249></span>        <span class="small_keyword" title="return">return</span> s;
+<span class="lineno" id=line250></span>      }
+<span class="lineno" id=line251></span>    }
+<span class="lineno" id=line252></span>  
+<span class="lineno" id=line253></span>    <span class="comment">// TODO: list membership, folds, etc</span>
+<span class="lineno" id=line254></span>  }
+<span class="lineno" id=line255></span>  
+<span class="lineno" id=line256></span>  
+</pre></p></div><h1 id='Dlist_h'><img src='/share/src/web/images/minus.gif' id='Dlist' onclick='toggle(this,"Dlist_d")' alt='+'/> 15 Dlist</h1><div id='Dlist_d' style='display:block'>
+<p>A dlist_t is a doubly linked mutable list.
+It is suitable for use as non-thread-safe queue.
+</p><pre class='inclusion'>
+share/lib/std/datatype/dlist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> DList[T]
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> dnode_t=
+<span class="lineno" id=line4></span>    (
+<span class="lineno" id=line5></span>      data: T,
+<span class="lineno" id=line6></span>      next: cptr[dnode_t], <span class="comment">// possibly NULL</span>
+<span class="lineno" id=line7></span>      prev: cptr[dnode_t]  <span class="comment">// possibly NULL</span>
+<span class="lineno" id=line8></span>    );
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> dlist_t = (first:cptr[dnode_t], last:cptr[dnode_t]);
+<span class="lineno" id=line10></span>      <span class="comment">// invariant: if first is null, so is last!</span>
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> dlist_t () =&gt; (first=nullptr[dnode_t],last=nullptr[dnode_t]);
+<span class="lineno" id=line13></span>  
+</pre></p><h2 id='Length_<code>len</code>_h'><img src='/share/src/web/images/minus.gif' id='Length <code>len</code>' onclick='toggle(this,"Length_<code>len</code>_d")' alt='+'/> 15.1 Length <code>len</code></h2><div id='Length_<code>len</code>_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/dlist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="number of elements in data structure">len</span> (x:dlist_t) = {
+<span class="lineno" id=line2></span>      <span class="big_keyword" title="Define a mutable variable">var</span> n = 0;
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> first : cptr[dnode_t] = x.first;
+<span class="lineno" id=line4></span>    again:&gt;
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="match statement or expression">match</span> first <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line6></span>      | #nullptr =&gt; <span class="small_keyword" title="return">return</span> n;
+<span class="lineno" id=line7></span>      | Ptr p =&gt; ++n; first = p*.next;
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="jump to label">goto</span> again; 
+<span class="lineno" id=line10></span>    }
+<span class="lineno" id=line11></span>  
+</pre></p></div><h2 id='Inspection_h'><img src='/share/src/web/images/minus.gif' id='Inspection' onclick='toggle(this,"Inspection_d")' alt='+'/> 15.2 Inspection</h2><div id='Inspection_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/dlist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> peek_front (dl:dlist_t) : <span class="library" title="option type: Some x or None">opt</span>[T] =&gt; 
+<span class="lineno" id=line2></span>      <span class="small_keyword" title="match statement or expression">match</span> dl.first <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line3></span>      | #nullptr =&gt; None[T]
+<span class="lineno" id=line4></span>      | Ptr p =&gt; Some p*.data
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line6></span>    ;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> peek_back (dl:dlist_t) : <span class="library" title="option type: Some x or None">opt</span>[T] =&gt; 
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="match statement or expression">match</span> dl.last <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line10></span>      | #nullptr =&gt; None[T]
+<span class="lineno" id=line11></span>      | Ptr p =&gt; Some p*.data
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line13></span>    ;
+<span class="lineno" id=line14></span>  
+</pre></p></div><h2 id='Insertion_h'><img src='/share/src/web/images/minus.gif' id='Insertion' onclick='toggle(this,"Insertion_d")' alt='+'/> 15.3 Insertion</h2><div id='Insertion_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/dlist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_front (dl:&amp;dlist_t, v:T) { 
+<span class="lineno" id=line2></span>      <span class="big_keyword" title="Define a mutable variable">var</span> oldfirst = dl*.first;
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> node = unbox (new (data=v, next=oldfirst, prev=nullptr[dnode_t])); 
+<span class="lineno" id=line4></span>      dl.first &lt;- Ptr node;
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="match statement or expression">match</span> oldfirst <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>      | #nullptr =&gt; dl.last
+<span class="lineno" id=line7></span>      | Ptr p =&gt; p.prev 
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span> &lt;- Ptr node; 
+<span class="lineno" id=line9></span>    }
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_back (dl:&amp;dlist_t, v:T) {
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a mutable variable">var</span> oldlast = dl*.last;
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a mutable variable">var</span> node = unbox (new (data=v, next=nullptr[dnode_t], prev=oldlast)); 
+<span class="lineno" id=line14></span>      dl.last &lt;- Ptr node;
+<span class="lineno" id=line15></span>      <span class="small_keyword" title="match statement or expression">match</span> oldlast <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line16></span>      | #nullptr =&gt; dl.first
+<span class="lineno" id=line17></span>      | Ptr p =&gt; p.next
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span> &lt;- Ptr node; 
+<span class="lineno" id=line19></span>    }
+<span class="lineno" id=line20></span>  
+</pre></p></div><h2 id='Deletion_h'><img src='/share/src/web/images/minus.gif' id='Deletion' onclick='toggle(this,"Deletion_d")' alt='+'/> 15.4 Deletion</h2><div id='Deletion_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/dlist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pop_front (dl:&amp;dlist_t): <span class="library" title="option type: Some x or None">opt</span>[T] = {
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="match statement or expression">match</span> dl*.first <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line4></span>      | #nullptr =&gt; <span class="small_keyword" title="return">return</span> None[T];
+<span class="lineno" id=line5></span>      | Ptr p =&gt; 
+<span class="lineno" id=line6></span>        <span class="small_keyword" title="match statement or expression">match</span> p*.next <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line7></span>        | #nullptr =&gt;
+<span class="lineno" id=line8></span>          dl.first &lt;- nullptr[dnode_t];
+<span class="lineno" id=line9></span>          dl.last &lt;- nullptr[dnode_t];
+<span class="lineno" id=line10></span>        | _ =&gt;
+<span class="lineno" id=line11></span>          dl.first &lt;- p*.next;
+<span class="lineno" id=line12></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line13></span>        <span class="small_keyword" title="return">return</span> Some p*.data;
+<span class="lineno" id=line14></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line15></span>    }
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pop_back (dl:&amp;dlist_t): <span class="library" title="option type: Some x or None">opt</span>[T] = {
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="match statement or expression">match</span> dl*.last <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line19></span>      | #nullptr =&gt; <span class="small_keyword" title="return">return</span> None[T];
+<span class="lineno" id=line20></span>      | Ptr p =&gt; 
+<span class="lineno" id=line21></span>        <span class="small_keyword" title="match statement or expression">match</span> p*.prev <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line22></span>        | #nullptr =&gt;
+<span class="lineno" id=line23></span>          dl.first &lt;- nullptr[dnode_t];
+<span class="lineno" id=line24></span>          dl.last &lt;- nullptr[dnode_t];
+<span class="lineno" id=line25></span>        | _ =&gt;
+<span class="lineno" id=line26></span>          dl.last &lt;- p*.prev;
+<span class="lineno" id=line27></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line28></span>        <span class="small_keyword" title="return">return</span> Some p*.data;
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line30></span>    }
+<span class="lineno" id=line31></span>  
+</pre></p></div><h2 id='Use_as_a_queue_h'><img src='/share/src/web/images/minus.gif' id='Use as a queue' onclick='toggle(this,"Use_as_a_queue_d")' alt='+'/> 15.5 Use as a queue</h2><div id='Use_as_a_queue_d' style='display:block'>
+<p>We can implement enqueue and dequeue at either end, we'll make
+enqueue push_front and dequeue pop_back for no particular reason.
+</p><pre class='inclusion'>
+share/lib/std/datatype/dlist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> queue_t = dlist_t;
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> enqueue (q:&amp;queue_t) (v:T) =&gt; push_front (q,v);
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> dequeue (q:&amp;queue_t) :<span class="library" title="option type: Some x or None">opt</span>[T] =&gt; pop_back q;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> queue_t () =&gt; dlist_t ();
+</pre></p></div><h2 id='Queue_iterator_h'><img src='/share/src/web/images/minus.gif' id='Queue iterator' onclick='toggle(this,"Queue_iterator_d")' alt='+'/> 15.6 Queue iterator</h2><div id='Queue_iterator_d' style='display:block'>
+<p>Fetch everything from a queue.
+</p><pre class='inclusion'>
+share/lib/std/datatype/dlist.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator (q:&amp;queue_t) () =&gt; dequeue q;
+<span class="lineno" id=line2></span>  }
+<span class="lineno" id=line3></span>  
+</pre></p></div></div><h1 id='S-expressions_h'><img src='/share/src/web/images/minus.gif' id='S-expressions' onclick='toggle(this,"S-expressions_d")' alt='+'/> 16 S-expressions</h1><div id='S-expressions_d' style='display:block'>
+<p>A scheme like data structure.
+</p><pre class='inclusion'>
+share/lib/std/datatype/sexpr.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> S_expr 
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    variant sexpr[T] = Leaf of T | Tree of <span class="library" title="functional, singly linked list">list</span>[sexpr[T]]; 
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span>[T,U] (_f:U-&gt;T-&gt;U) (init:U) (x:sexpr[T]):U =&gt;
+<span class="lineno" id=line6></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>      | Leaf a =&gt; _f init a
+<span class="lineno" id=line8></span>      | Tree b =&gt; List::<span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (S_expr::<span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> _f) init b
+<span class="lineno" id=line9></span>    ;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="call procedure on each element of data structure">iter</span>[T] (_f:T-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) (x:sexpr[T]) {
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line13></span>      | Leaf a =&gt; _f a;
+<span class="lineno" id=line14></span>      | Tree b =&gt; List::<span class="library" title="call procedure on each element of data structure">iter</span> (S_expr::<span class="library" title="call procedure on each element of data structure">iter</span> _f) b;
+<span class="lineno" id=line15></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line16></span>    }
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="return data structure with function applied to each value">map</span>[T,U] (_f:T-&gt;U) (x:sexpr[T]):sexpr[U] =&gt;
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line20></span>      | Leaf a =&gt; Leaf (_f a)
+<span class="lineno" id=line21></span>      | Tree b =&gt; Tree ( List::<span class="library" title="return data structure with function applied to each value">map</span> (S_expr::<span class="library" title="return data structure with function applied to each value">map</span> _f) b )
+<span class="lineno" id=line22></span>    ;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] Set[sexpr[T],T] {
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\in">\(\in\)</span> (elt:T, x:sexpr[T]) =&gt; 
+<span class="lineno" id=line26></span>        <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:bool) (v:T) =&gt; acc <span class="small_keyword" title="logical disjunction">or</span> v == elt) <span class="library" title="false value">false</span> x; 
+<span class="lineno" id=line27></span>    }
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Str[T]] Str[sexpr[T]] {
+<span class="lineno" id=line29></span>      <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>(x:sexpr[T])=&gt;
+<span class="lineno" id=line30></span>        <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line31></span>        | Leaf a =&gt; <span class="library" title="Convert a value to a string">str</span> a
+<span class="lineno" id=line32></span>        | Tree b =&gt; <span class="library" title="Convert a value to a string">str</span> b 
+<span class="lineno" id=line33></span>      ;
+<span class="lineno" id=line34></span>    }
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>  }
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>  <span class="big_keyword" title="Open a module or class">open</span>[T <span class="small_keyword" title="type-class constraint">with</span> Str[T]] Str[S_expr::sexpr[T]];
+<span class="lineno" id=line39></span>  <span class="big_keyword" title="Open a module or class">open</span>[T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] Set[S_expr::sexpr[T],T];
+<span class="lineno" id=line40></span>  
+</pre></p></div><h1 id='LS-expressions_h'><img src='/share/src/web/images/minus.gif' id='LS-expressions' onclick='toggle(this,"LS-expressions_d")' alt='+'/> 17 LS-expressions</h1><div id='LS-expressions_d' style='display:block'>
+<p>A scheme like data structure, similar to sexpr, only in this variant
+the tree nodes also have labels.
+</p><pre class='inclusion'>
+share/lib/std/datatype/lsexpr.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> LS_expr 
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>    variant lsexpr[T,L] = | Leaf of T | Tree of L * <span class="library" title="functional, singly linked list">list</span>[lsexpr[T,L]]; 
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span>[T,L,U] (_f:U-&gt;T-&gt;U) (_g:U-&gt;L-&gt;U) (init:U) (x:lsexpr[T,L]):U =&gt;
+<span class="lineno" id=line6></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>      | Leaf a =&gt; _f init a
+<span class="lineno" id=line8></span>      | Tree (a,b) =&gt; List::<span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> (LS_expr::<span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> _f _g) (_g init a) b
+<span class="lineno" id=line9></span>    ;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="call procedure on each element of data structure">iter</span>[T,L] (_f:T-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) (_g:L-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) (x:lsexpr[T,L]) {
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line13></span>      | Leaf a =&gt; _f a;
+<span class="lineno" id=line14></span>      | Tree (a,b) =&gt; _g a; List::<span class="library" title="call procedure on each element of data structure">iter</span> (LS_expr::<span class="library" title="call procedure on each element of data structure">iter</span> _f _g) b;
+<span class="lineno" id=line15></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line16></span>    }
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="return data structure with function applied to each value">map</span>[T,L,U,V] (_f:T-&gt;U) (_g:L-&gt;V) (x:lsexpr[T,L]):lsexpr[U,V] =&gt;
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line20></span>      | Leaf a =&gt; Leaf[U,V] (_f a)
+<span class="lineno" id=line21></span>      | Tree (a,b) =&gt; Tree ( _g a, List::<span class="library" title="return data structure with function applied to each value">map</span> (LS_expr::<span class="library" title="return data structure with function applied to each value">map</span> _f _g) b )
+<span class="lineno" id=line22></span>    ;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T,L <span class="small_keyword" title="type-class constraint">with</span> Str[T], Str[L]] Str[lsexpr[T,L]] {
+<span class="lineno" id=line25></span>      <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>(x:lsexpr[T,L])=&gt;
+<span class="lineno" id=line26></span>        <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line27></span>        | Leaf a =&gt; <span class="library" title="Convert a value to a string">str</span> a
+<span class="lineno" id=line28></span>        | Tree (a,b) =&gt; <span class="library" title="Convert a value to a string">str</span> a + <span class="fstring">"("</span> + <span class="library" title="Convert a value to a string">str</span> b  + <span class="fstring">")"</span>
+<span class="lineno" id=line29></span>      ;
+<span class="lineno" id=line30></span>    }
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>  }
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>  <span class="big_keyword" title="Open a module or class">open</span>[T,L <span class="small_keyword" title="type-class constraint">with</span> Str[T], Str[L]] Str[LS_expr::lsexpr[T,L]];
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

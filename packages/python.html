@@ -1,0 +1,750 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Python Bindings</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Python Core",
+"API builder"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Python Core_h')"> <a href="#Python_Core_h">Python Core</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#API builder_h')"> <a href="#API_builder_h">API builder</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<p>Felix can generate Python 3.x modules. At the time of writing
+this packages, the compiler cannot yet generate types. But the modules
+should be enough to start, provided we can actually write CPython
+compatible functions to put in the modules.
+</p><h1 id='Python_Core_h'><img src='/share/src/web/images/minus.gif' id='Python Core' onclick='toggle(this,"Python_Core_d")' alt='+'/> 1 Python Core</h1><div id='Python_Core_d' style='display:block'>
+<p>We provide C bindings for some basic Python stuff. This stuff
+is all as reentrant as possible even though Python is not.
+</p><p>At this stage, the API binds, but some functions are known
+to be wrong because they incorrectly use a non-existent C
+type.
+</p><pre class='inclusion'>
+share/lib/python/pycore.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// generated originally from Cython/Includes/cpython directory</span>
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"pycore"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> Py_None : PyObject = <span class="fstring">"Py_None"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="comment">// Core</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/ref"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="comment">// numbers</span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/bool"</span>;
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/float"</span>;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/int"</span>;
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/long"</span>;
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/complex"</span>;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="comment">// concrete data types</span>
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/string"</span>;
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/bytes"</span>;
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/tuple"</span>;
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/list"</span>;
+<span class="lineno" id=line22></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/dict"</span>;
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/buffer"</span>;
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/oldbuffer"</span>;
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/unicode"</span>;
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/bytearray"</span>;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/iterator"</span>;
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/slice"</span>;
+<span class="lineno" id=line30></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> Py_Ellipsis: PyObject = <span class="fstring">"Py_Ellipsis"</span>;
+<span class="lineno" id=line31></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/set"</span>;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="comment">// abstract daya types</span>
+<span class="lineno" id=line34></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/sequence"</span>;
+<span class="lineno" id=line35></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/mapping"</span>;
+<span class="lineno" id=line36></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/number"</span>;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>  <span class="comment">// Weird stuff</span>
+<span class="lineno" id=line39></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/object"</span>;
+<span class="lineno" id=line40></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/instance"</span>;
+<span class="lineno" id=line41></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/method"</span>;
+<span class="lineno" id=line42></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/function"</span>;
+<span class="lineno" id=line43></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/module"</span>;
+<span class="lineno" id=line44></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/type"</span>;
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  <span class="comment">// program</span>
+<span class="lineno" id=line47></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/version"</span>;
+<span class="lineno" id=line48></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/pystate"</span>;
+<span class="lineno" id=line49></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/pylifecycle"</span>;
+<span class="lineno" id=line50></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/exc"</span>;
+<span class="lineno" id=line51></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/pythread"</span>;
+<span class="lineno" id=line52></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/pystate"</span>;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>  <span class="comment">// misc</span>
+<span class="lineno" id=line55></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/descr"</span>;
+<span class="lineno" id=line56></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/memoryview"</span>;
+<span class="lineno" id=line57></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> PyMemoryView_GetContiguous:PyObject * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C char type">char</span> -&gt; PyObject = 
+<span class="lineno" id=line58></span>    <span class="fstring">"PyMemoryView_GetContiguous($a)"</span>
+<span class="lineno" id=line59></span>  ;
+<span class="lineno" id=line60></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/weakref"</span>;
+<span class="lineno" id=line61></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/pycapsule"</span>;
+<span class="lineno" id=line62></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/cobject"</span>;
+<span class="lineno" id=line63></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> PyCObject_FromVoidPtrAndDesc:
+<span class="lineno" id=line64></span>    <span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span> * (<span class="library" title="special binding of C void* type">address</span> * <span class="library" title="special binding of C void* type">address</span> --&gt; 0) -&gt; PyObject
+<span class="lineno" id=line65></span>  ;
+<span class="lineno" id=line66></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/ceval"</span>;
+<span class="lineno" id=line67></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/mem"</span>;
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>  <span class="comment">// Core Object Protocol</span>
+<span class="lineno" id=line70></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> PyObject = <span class="fstring">"PyObject*"</span>;
+<span class="lineno" id=line71></span>  <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> header_version : <span class="library" title="binding of C unsigned int type">uint</span> = <span class="fstring">"PY_VERSION_HEX"</span>;
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>  <span class="big_keyword" title="Define a set of primitive type by binding to C types with the same name">ctypes</span>
+<span class="lineno" id=line74></span>    Py_ssize_t, PY_LONG_LONG, uPY_LONG_LONG, Py_complex, Py_buffer, _inittab,
+<span class="lineno" id=line75></span>    PyTypeObject,wrapperbase,PyInterpreterState,PyThreadState,
+<span class="lineno" id=line76></span>    PyGILState_STATE,
+<span class="lineno" id=line77></span>    wchar_t, <span class="comment">// Felix refuses to defined wchar because its crap ..</span>
+<span class="lineno" id=line78></span>    PyOS_sighandler_t,
+<span class="lineno" id=line79></span>    PyCapsule_Destructor,
+<span class="lineno" id=line80></span>    Py_tss_t, PyThread_type_lock,
+<span class="lineno" id=line81></span>    PyGenObject,
+<span class="lineno" id=line82></span>    Py_UCS4 <span class="comment">// probably should be uint32 or int32 ..</span>
+<span class="lineno" id=line83></span>  ;
+<span class="lineno" id=line84></span>  
+</pre></p></div><h1 id='API_builder_h'><img src='/share/src/web/images/minus.gif' id='API builder' onclick='toggle(this,"API_builder_d")' alt='+'/> 2 API builder</h1><div id='API_builder_d' style='display:block'>
+<p>Script used originally to build API from sibling cython repository.
+</p><pre class='inclusion'>
+$PWD/src/tools/scancython.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> comment_line = RE2 <span class="fstring">" *#.*"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> varargs_fundef_line = RE2 r<span class="fstring">" *(.*) (\w+)\((.*\.\.\.)\)(.*)"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fundef_line = RE2 r<span class="fstring">" *(.* \*?)(\w+)\((.*)\)(.*)"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt1 = RE2 r<span class="fstring">"(\w+)"</span>; <span class="comment">// one word</span>
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt2 = RE2 r<span class="fstring">"(\w+) +\w+"</span>; <span class="comment">// two words</span>
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="comment">// special cases</span>
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt2a = RE2 r<span class="fstring">"(unsigned long) \w+"</span>; <span class="comment">// two words</span>
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  <span class="comment">// C array like things rep as pointers</span>
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt3 = RE2 r<span class="fstring">"(char \*)(\w+)?"</span>; <span class="comment">// C string</span>
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt4 = RE2 r<span class="fstring">"(const char \*)(\w+)?"</span>; <span class="comment">// input C string</span>
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt4a = RE2 r<span class="fstring">"(const wchar_t \*)(\w+)?"</span>; <span class="comment">// input C string</span>
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt5 = RE2 r<span class="fstring">"(Py_UCS4 \*)(\w+)?"</span>; <span class="comment">// unicode string</span>
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt6 = RE2 r<span class="fstring">"(const Py_UCS4 \*)(\w+)?"</span>; <span class="comment">// unicode string</span>
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="comment">// Python object </span>
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt7 = RE2 r<span class="fstring">"(PyObject ?\* ?)(\w+)?"</span>;
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt7a = RE2 r<span class="fstring">"(PyObject ?\* *\*)(\w+)?"</span>;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>  <span class="comment">// general cases</span>
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt8 = RE2 r<span class="fstring">"(\w+) *\* ?(\w+)?"</span>;
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt8a = RE2 r<span class="fstring">"(\w+) *\*\* ?(\w+)?"</span>;
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt9 = RE2 r<span class="fstring">"void \(\*destr\)\(void \*\)"</span>;
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Define a mutable variable">var</span> argt10 = RE2 r<span class="fstring">"void \(\*func\)\(\)"</span>;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> strip_param (s:<span class="library" title="binding of C++ string type">string</span>) { 
+<span class="lineno" id=line30></span>    <span class="comment">// unfortunately chainmatch is a statement only</span>
+<span class="lineno" id=line31></span>    chainmatch Re2::Match (argt1, s) <span class="small_keyword" title="type-class constraint">with</span>  
+<span class="lineno" id=line32></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> v.1;
+<span class="lineno" id=line33></span>    ormatch Re2::Match (argt2, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line34></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> v.1;
+<span class="lineno" id=line35></span>    ormatch Re2::Match (argt2a, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line36></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"ulong"</span>;
+<span class="lineno" id=line37></span>    ormatch Re2::Match (argt3, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line38></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"+char"</span>;
+<span class="lineno" id=line39></span>    ormatch Re2::Match (argt4, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line40></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"+char"</span>;
+<span class="lineno" id=line41></span>    ormatch Re2::Match (argt4a, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line42></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"+wchar_t"</span>;
+<span class="lineno" id=line43></span>    ormatch Re2::Match (argt5, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line44></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"+Py_UCS4"</span>;
+<span class="lineno" id=line45></span>    ormatch Re2::Match (argt6, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line46></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"+Py_UCS4"</span>;
+<span class="lineno" id=line47></span>    ormatch Re2::Match (argt7, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line48></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"/* weak */ PyObject"</span>;
+<span class="lineno" id=line49></span>    ormatch Re2::Match (argt7a, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line50></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"&amp;PyObject"</span>;
+<span class="lineno" id=line51></span>    ormatch Re2::Match (argt8, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line52></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"&amp;"</span>+v.1;
+<span class="lineno" id=line53></span>    ormatch Re2::Match (argt8a, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line54></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"&amp;(&amp;"</span> +v.1+<span class="fstring">")"</span>;
+<span class="lineno" id=line55></span>    ormatch Re2::Match (argt9, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line56></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"(address--&gt;0)"</span>;
+<span class="lineno" id=line57></span>    ormatch Re2::Match (argt10, s) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line58></span>    | Some v =&gt; <span class="small_keyword" title="return">return</span> <span class="fstring">"(1--&gt;0)"</span>;
+<span class="lineno" id=line59></span>    | _ =&gt; 
+<span class="lineno" id=line60></span>      <span class="small_keyword" title="conditional">if</span> s == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line61></span>        <span class="small_keyword" title="return">return</span> <span class="fstring">"1"</span>; 
+<span class="lineno" id=line62></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line63></span>        <span class="small_keyword" title="return">return</span> <span class="fstring">"/* %%%%% cant parse: '"</span> + s + <span class="fstring">"' */"</span>;
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line65></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line66></span>  }
+<span class="lineno" id=line67></span>  
+<span class="lineno" id=line68></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> fixtype (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; 
+<span class="lineno" id=line69></span>    <span class="small_keyword" title="let binder">let</span> x = strip s <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line70></span>    <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line71></span>    | <span class="fstring">"cdef PyTypeObject *"</span> =&gt; <span class="fstring">"&amp;PyTypeObject"</span>
+<span class="lineno" id=line72></span>    | <span class="fstring">"PyInterpreterState *"</span> =&gt; <span class="fstring">"&amp;PyInterpreterState"</span>
+<span class="lineno" id=line73></span>    | <span class="fstring">"PyThreadState *"</span> =&gt; <span class="fstring">"&amp;PyThreadState"</span>
+<span class="lineno" id=line74></span>    | <span class="fstring">"Py_buffer *"</span> =&gt; <span class="fstring">"&amp;Py_buffer"</span>
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    | <span class="fstring">"ob"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line77></span>    | <span class="fstring">"PyObject*"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line78></span>    | <span class="fstring">"PyObject *"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line79></span>    | <span class="fstring">"PyObject**"</span> =&gt; <span class="fstring">"&amp;PyObject"</span>
+<span class="lineno" id=line80></span>    | <span class="fstring">"object"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line81></span>    | <span class="fstring">"bytearray"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>    | <span class="fstring">"bint"</span> =&gt; <span class="fstring">"bool"</span>
+<span class="lineno" id=line84></span>  
+<span class="lineno" id=line85></span>    | <span class="fstring">"list"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line86></span>    | <span class="fstring">"dict"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line87></span>    | <span class="fstring">"tuple"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line88></span>    | <span class="fstring">"slice"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line89></span>    | <span class="fstring">"bytes"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line90></span>    | <span class="fstring">"type"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line91></span>    | <span class="fstring">"descr"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line92></span>    | <span class="fstring">"unicode"</span> =&gt; <span class="fstring">"PyObject"</span>
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>    | <span class="fstring">"size_t"</span> =&gt; <span class="fstring">"size"</span>
+<span class="lineno" id=line95></span>    | <span class="fstring">"unsigned long"</span> =&gt; <span class="fstring">"ulong"</span>
+<span class="lineno" id=line96></span>    | <span class="fstring">"char*"</span> =&gt; <span class="fstring">"+char"</span>
+<span class="lineno" id=line97></span>    | <span class="fstring">"wchar_t *"</span> =&gt; <span class="fstring">"+wchar_t"</span>
+<span class="lineno" id=line98></span>    | <span class="fstring">"const char *"</span> =&gt; <span class="fstring">"+char"</span>
+<span class="lineno" id=line99></span>    | <span class="fstring">"void *"</span> =&gt; <span class="fstring">"address"</span>
+<span class="lineno" id=line100></span>    | <span class="fstring">"void*"</span> =&gt; <span class="fstring">"address"</span>
+<span class="lineno" id=line101></span>    | <span class="fstring">"&amp;void"</span> =&gt; <span class="fstring">"address"</span>
+<span class="lineno" id=line102></span>    | <span class="fstring">"&amp;Py_UNICODE"</span> =&gt; <span class="fstring">"+char"</span> <span class="comment">// UTF8 encoding</span>
+<span class="lineno" id=line103></span>    | <span class="fstring">"Py_UNICODE*"</span> =&gt; <span class="fstring">"+char"</span> <span class="comment">// UTF8 encoding</span>
+<span class="lineno" id=line104></span>    | <span class="fstring">"Py_UCS4*"</span> =&gt; <span class="fstring">"+Py_UCS4"</span> <span class="comment">// UCS4 encoding </span>
+<span class="lineno" id=line105></span>    | <span class="fstring">"Py_UCS4"</span> =&gt; <span class="fstring">"Py_UCS4"</span>   <span class="comment">// UCS4 encoding</span>
+<span class="lineno" id=line106></span>    | <span class="fstring">"PY_INT64_T"</span> =&gt; <span class="fstring">"int64"</span>
+<span class="lineno" id=line107></span>    | <span class="fstring">"Py_tss_t *"</span> =&gt; <span class="fstring">"&amp;Py_tss_t"</span>
+<span class="lineno" id=line108></span>    | _ =&gt; s
+<span class="lineno" id=line109></span>  ;
+<span class="lineno" id=line110></span>  
+<span class="lineno" id=line111></span>  <span class="big_keyword" title="Define a mutable variable">var</span> exclude = ([
+<span class="lineno" id=line112></span>    <span class="fstring">"PyString_FromFormatV"</span>,
+<span class="lineno" id=line113></span>    <span class="fstring">"PyBytes_FromFormatV"</span>,
+<span class="lineno" id=line114></span>    <span class="fstring">"PyDescr_NewWrapper"</span>, <span class="comment">// return type in descr.pxd not specified</span>
+<span class="lineno" id=line115></span>    <span class="fstring">"PyCObject_FromVoidPtrAndDesc"</span>,
+<span class="lineno" id=line116></span>    <span class="fstring">"PyThread_start_new_thread"</span>
+<span class="lineno" id=line117></span>  ]);
+<span class="lineno" id=line118></span>  
+<span class="lineno" id=line119></span>  
+<span class="lineno" id=line120></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> translate (iname,data) {
+<span class="lineno" id=line121></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Processing "</span> + iname;
+<span class="lineno" id=line122></span>  
+<span class="lineno" id=line123></span>    <span class="comment">// split raw data into lines</span>
+<span class="lineno" id=line124></span>    <span class="big_keyword" title="Define a mutable variable">var</span> lines = split (data, <span class="fstring">"\n"</span>);
+<span class="lineno" id=line125></span>  
+<span class="lineno" id=line126></span>    <span class="comment">// strip out comments and blank lines</span>
+<span class="lineno" id=line127></span>    <span class="big_keyword" title="Define a mutable variable">var</span> stripped = Empty[<span class="library" title="binding of C++ string type">string</span>]; 
+<span class="lineno" id=line128></span>    <span class="small_keyword" title="for loop">for</span> line <span class="small_keyword" title="membership operator, function mem">in</span> lines <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line129></span>      <span class="small_keyword" title="conditional">if</span> strip line != <span class="fstring">""</span> 
+<span class="lineno" id=line130></span>        <span class="small_keyword" title="match statement or expression">match</span> Re2::Match (comment_line, line) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line131></span>        | None =&gt;  stripped += line;
+<span class="lineno" id=line132></span>        | _ =&gt; ;
+<span class="lineno" id=line133></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line134></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line135></span>  
+<span class="lineno" id=line136></span>    <span class="big_keyword" title="Define a mutable variable">var</span> processed = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line137></span>    <span class="small_keyword" title="for loop">for</span> line <span class="small_keyword" title="membership operator, function mem">in</span> stripped <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line138></span>      chainmatch Re2::Match (varargs_fundef_line, line) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line139></span>      | Some _ =&gt; processed += <span class="fstring">"// Varargs fundef: "</span> + line; 
+<span class="lineno" id=line140></span>      ormatch Re2::Match (fundef_line, line) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line141></span>      | None =&gt; processed += <span class="fstring">"// Nonfunction line: "</span> + line;
+<span class="lineno" id=line142></span>      | Some v =&gt; 
+<span class="lineno" id=line143></span>        processed += <span class="fstring">"// FUNCTION: "</span> + line;
+<span class="lineno" id=line144></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ret = strip v.1;
+<span class="lineno" id=line145></span>        <span class="big_keyword" title="Define a mutable variable">var</span> name = v.2;
+<span class="lineno" id=line146></span>        <span class="big_keyword" title="Define a mutable variable">var</span> argstring = v.3;
+<span class="lineno" id=line147></span>        <span class="big_keyword" title="Define a mutable variable">var</span> exc = v.4;
+<span class="lineno" id=line148></span>        <span class="big_keyword" title="Define a mutable variable">var</span> args = unbox$ List::<span class="library" title="return data structure with function applied to each value">map</span> (strip of <span class="library" title="binding of C++ string type">string</span>) (split (argstring, <span class="fstring">","</span>));
+<span class="lineno" id=line149></span>        <span class="comment">//println$ "  ret    = " + ret;</span>
+<span class="lineno" id=line150></span>        <span class="comment">//println$ "  name   = " + name;</span>
+<span class="lineno" id=line151></span>        <span class="comment">//println$ "  args   = " + args.str;</span>
+<span class="lineno" id=line152></span>        <span class="comment">//for arg in args do</span>
+<span class="lineno" id=line153></span>        <span class="comment">//  println$ "             " + strip_param arg;</span>
+<span class="lineno" id=line154></span>        <span class="comment">//done</span>
+<span class="lineno" id=line155></span>        <span class="comment">//println$ "  exc    = " + exc;</span>
+<span class="lineno" id=line156></span>        <span class="small_keyword" title="conditional">if</span> name <span class="small_keyword" title="membership operator, function mem">in</span> exclude <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line157></span>          ;
+<span class="lineno" id=line158></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line159></span>          <span class="big_keyword" title="Define a mutable variable">var</span> argts = unbox$ List::<span class="library" title="return data structure with function applied to each value">map</span> strip_param args;
+<span class="lineno" id=line160></span>          <span class="big_keyword" title="Define a mutable variable">var</span> fargs = 
+<span class="lineno" id=line161></span>            <span class="small_keyword" title="match statement or expression">match</span> argts <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line162></span>            | Empty =&gt; <span class="fstring">"1"</span> 
+<span class="lineno" id=line163></span>            | _ =&gt; strcat <span class="fstring">" * "</span> (List::<span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:<span class="library" title="binding of C++ string type">string</span>) =&gt; fixtype x) argts) 
+<span class="lineno" id=line164></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line165></span>          ;
+<span class="lineno" id=line166></span>          <span class="big_keyword" title="Define a mutable variable">var</span> cargs = <span class="small_keyword" title="match statement or expression">match</span> argts <span class="small_keyword" title="type-class constraint">with</span> | Empty =&gt; <span class="fstring">"()"</span> | _ =&gt; <span class="fstring">"($a)"</span>;
+<span class="lineno" id=line167></span>          <span class="big_keyword" title="Define a mutable variable">var</span> binder = <span class="small_keyword" title="match statement or expression">match</span> ret <span class="small_keyword" title="type-class constraint">with</span> | <span class="fstring">"void"</span> =&gt; <span class="fstring">"proc"</span> | _ =&gt; <span class="fstring">"gen"</span>;
+<span class="lineno" id=line168></span>          <span class="big_keyword" title="Define a mutable variable">var</span> terminator = <span class="small_keyword" title="match statement or expression">match</span> ret <span class="small_keyword" title="type-class constraint">with</span> | <span class="fstring">"void"</span> =&gt; <span class="fstring">";"</span> | _ =&gt; <span class="fstring">""</span>;
+<span class="lineno" id=line169></span>          <span class="big_keyword" title="Define a mutable variable">var</span> fret = <span class="small_keyword" title="match statement or expression">match</span> ret <span class="small_keyword" title="type-class constraint">with</span> | <span class="fstring">"void"</span> =&gt; <span class="fstring">""</span> | _ =&gt; <span class="fstring">" -&gt; "</span> + fixtype ret;
+<span class="lineno" id=line170></span>          <span class="big_keyword" title="Define a mutable variable">var</span> cast = <span class="small_keyword" title="match statement or expression">match</span> ret <span class="small_keyword" title="type-class constraint">with</span> | <span class="fstring">"const char *"</span> =&gt; <span class="fstring">"(char*)"</span> | _ =&gt; <span class="fstring">""</span>;
+<span class="lineno" id=line171></span>          <span class="big_keyword" title="Define a mutable variable">var</span> cdef = <span class="small_keyword" title="conditional">if</span> cast == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> <span class="fstring">" = "</span> + <span class="fstring">"'"</span> + cast+name + cargs + terminator <span class="fstring">"'"</span>;  
+<span class="lineno" id=line172></span>          <span class="big_keyword" title="Define a mutable variable">var</span> outline = <span class="fstring">"  "</span> binder + <span class="fstring">" "</span> + name + <span class="fstring">": "</span> +  fargs + fret + cdef + <span class="fstring">";"</span>
+<span class="lineno" id=line173></span>          ;
+<span class="lineno" id=line174></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ outline;
+<span class="lineno" id=line175></span>          processed += outline + <span class="fstring">"\n"</span>;
+<span class="lineno" id=line176></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line177></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line178></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line179></span>    <span class="small_keyword" title="return">return</span> strcat <span class="fstring">"\n"</span> processed;
+<span class="lineno" id=line180></span>  }
+<span class="lineno" id=line181></span>  
+<span class="lineno" id=line182></span>  <span class="big_keyword" title="Define a mutable variable">var</span> exclude_file = 
+<span class="lineno" id=line183></span>    <span class="fstring">'__init__.pxd'</span>,
+<span class="lineno" id=line184></span>    <span class="fstring">'array.pxd'</span>,     <span class="comment">// external module..</span>
+<span class="lineno" id=line185></span>    <span class="fstring">'datetime.pxd'</span>,  <span class="comment">// external module ..</span>
+<span class="lineno" id=line186></span>    <span class="fstring">'getargs.pxd'</span>,   <span class="comment">// wa_args stuff, no use</span>
+<span class="lineno" id=line187></span>    <span class="fstring">'longintrepr.pxd'</span>, <span class="comment">// internal repr details, omit</span>
+<span class="lineno" id=line188></span>    <span class="fstring">'pyport.pxd'</span>  <span class="comment">// RUBBISH DO NOT USE</span>
+<span class="lineno" id=line189></span>  ;
+<span class="lineno" id=line190></span>  
+<span class="lineno" id=line191></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> mainline () {
+<span class="lineno" id=line192></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Cython library scanner"</span>;
+<span class="lineno" id=line193></span>  
+<span class="lineno" id=line194></span>    <span class="comment">// design to run in Felix repository, with cython installed as a sibling directory</span>
+<span class="lineno" id=line195></span>    <span class="big_keyword" title="Define a mutable variable">var</span> dirname = <span class="fstring">"../cython/Cython/Includes/cpython"</span>;
+<span class="lineno" id=line196></span>    <span class="big_keyword" title="Define a mutable variable">var</span> regex = RE2 <span class="fstring">".*\\.pxd"</span>;
+<span class="lineno" id=line197></span>    <span class="big_keyword" title="Define a mutable variable">var</span> files = FileSystem::regfilesin(dirname, regex);
+<span class="lineno" id=line198></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ files;
+<span class="lineno" id=line199></span>    FileSystem::unlink <span class="fstring">"cpython_api"</span>;
+<span class="lineno" id=line200></span>    <span class="small_keyword" title="for loop">for</span> base <span class="small_keyword" title="membership operator, function mem">in</span> files <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line201></span>      <span class="small_keyword" title="conditional">if</span> base <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> exclude_file <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line202></span>        <span class="big_keyword" title="Define a mutable variable">var</span> iname = Filename::join (dirname, base);
+<span class="lineno" id=line203></span>        <span class="big_keyword" title="Define a mutable variable">var</span> bbase = Filename::strip_extension base;
+<span class="lineno" id=line204></span>        <span class="big_keyword" title="Define a mutable variable">var</span> oname = <span class="fstring">"src/packages/py_"</span> +bbase+<span class="fstring">".fdoc"</span>;
+<span class="lineno" id=line205></span>        <span class="big_keyword" title="Define a mutable variable">var</span> inp = load iname;
+<span class="lineno" id=line206></span>        <span class="big_keyword" title="Define a mutable variable">var</span> out = <span class="fstring">""</span>;
+<span class="lineno" id=line207></span>        out += <span class="fstring">"@title Python C API "</span> + bbase + <span class="fstring">"\n"</span>;
+<span class="lineno" id=line208></span>        out += <span class="fstring">"@tangler "</span>+bbase <span class="fstring">".flx = share/lib/python/"</span>+bbase+<span class="fstring">".flx\n"</span>;
+<span class="lineno" id=line209></span>        out += <span class="fstring">"@h1 "</span> + bbase + <span class="fstring">"\n"</span>;
+<span class="lineno" id=line210></span>        out += <span class="fstring">"@tangle "</span> + bbase + <span class="fstring">".flx\n"</span>;
+<span class="lineno" id=line211></span>        out += translate (base,inp);
+<span class="lineno" id=line212></span>        out += <span class="fstring">"@\n"</span>;
+<span class="lineno" id=line213></span>        save (oname, out);
+<span class="lineno" id=line214></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line215></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line216></span>  }
+<span class="lineno" id=line217></span>  
+<span class="lineno" id=line218></span>  mainline;
+</pre></p><p> 
+</p><pre class='inclusion'>
+$PWD/src/tools/pycheck.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"python/pycore"</span>;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> ptest(q:PyObject,w:PyObject):PyObject {
+<span class="lineno" id=line6></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ Py_GetVersion();
+<span class="lineno" id=line7></span>    Py_Initialize();
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a mutable variable">var</span> x : PyObject = PyLong_FromLong (42);
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a mutable variable">var</span> y : <span class="library" title="binding of C long type">long</span> = PyLong_AsLong (x);
+<span class="lineno" id=line11></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ PyLong_Check x;
+<span class="lineno" id=line12></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ y;
+<span class="lineno" id=line13></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ (f<span class="fstring">"%x"</span> header_version);
+<span class="lineno" id=line14></span>    <span class="small_keyword" title="return">return</span> x;
+<span class="lineno" id=line15></span>  }
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="hack">C_hack</span>::ignore (ptest(Py_None,Py_None));
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> python <span class="big_keyword" title="Define a function with no side-effects">fun</span> ptest of (PyObject * PyObject) as <span class="fstring">"ptest"</span>;
+</pre></p><pre class='inclusion'>
+$PWD/src/config/macosx/pycore.fpc</pre>
+<p><pre class="prefmtbg">Name: Pycore
+Description: Macosx bindings to Python shared run time library core.
+cflags: -I/Library/Frameworks/Python.framework/Versions/3.8/Headers
+includes: '"Python.h"'
+provides_dlib: /Library/Frameworks/Python.framework/Versions/3.8/Python
+// My install of the official python doesn't include a static archive. Morons!
+// The brew install does. Oh well...
+//provides_slib: /Library/Frameworks/Python.framework/Versions/3.8/lib/ -lpython3.8
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

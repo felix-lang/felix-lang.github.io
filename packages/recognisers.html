@@ -1,0 +1,1256 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>String Matching recogniser_base</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Recognisers",
+"Buffer type",
+"A string matcher.",
+"Whitespace matcher.",
+"C++ comment matcher",
+"Nested C comment matcher",
+"Felix comments",
+"regex matcher.",
+"Identifier matcher.",
+"Integer matcher.",
+"Felix integer matcher.",
+"Felix float matcher.",
+"String Literal matcher.",
+"End of string matcher",
+"Longest match",
+"Match to eos",
+"Lazy Syntactic form"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Recognisers_h')"> <a href="#Recognisers_h">Recognisers</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Buffer_type_h">Buffer type</a></div>
+      <div class=m2><a href="#A_string_matcher._h">A string matcher.</a></div>
+      <div class=m2><a href="#Whitespace_matcher._h">Whitespace matcher.</a></div>
+      <div class=m2><a href="#C++_comment_matcher_h">C++ comment matcher</a></div>
+      <div class=m2><a href="#Nested_C_comment_matcher_h">Nested C comment matcher</a></div>
+      <div class=m2><a href="#Felix_comments_h">Felix comments</a></div>
+      <div class=m2><a href="#regex_matcher._h">regex matcher.</a></div>
+      <div class=m2><a href="#Identifier_matcher._h">Identifier matcher.</a></div>
+      <div class=m2><a href="#Integer_matcher._h">Integer matcher.</a></div>
+      <div class=m2><a href="#Felix_integer_matcher._h">Felix integer matcher.</a></div>
+      <div class=m2><a href="#Felix_float_matcher._h">Felix float matcher.</a></div>
+      <div class=m2><a href="#String_Literal_matcher._h">String Literal matcher.</a></div>
+      <div class=m2><a href="#End_of_string_matcher_h">End of string matcher</a></div>
+      <div class=m2><a href="#Longest_match_h">Longest match</a></div>
+      <div class=m2><a href="#Match_to_eos_h">Match to eos</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Lazy Syntactic form_h')"> <a href="#Lazy_Syntactic_form_h">Lazy Syntactic form</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Recognisers_h'><img src='/share/src/web/images/minus.gif' id='Recognisers' onclick='toggle(this,"Recognisers_d")' alt='+'/> 1 Recognisers</h1><div id='Recognisers_d' style='display:block'>
+<p>A recogniser is a component which tries to match the prefix of a string.
+If it succeeds it returns the position of the first character not matched.
+</p><h2 id='Buffer_type_h'><img src='/share/src/web/images/minus.gif' id='Buffer type' onclick='toggle(this,"Buffer_type_d")' alt='+'/> 1.1 Buffer type</h2><div id='Buffer_type_d' style='display:block'>
+<p>Recognisers work on an array of chars in memory. We use a Google
+StringPiece to represent it. 
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/chips"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> RecogniserBase
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Open a module or class">open</span> BaseChips; <span class="comment">//needed for pipe symbol to work</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a structure">struct</span> Buffer
+<span class="lineno" id=line7></span>  {
+<span class="lineno" id=line8></span>    sp: <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C char type">char</span>];
+<span class="lineno" id=line9></span>    pos: <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> atend =&gt; self.pos &gt;= self.sp.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get =&gt; 
+<span class="lineno" id=line14></span>      <span class="small_keyword" title="conditional">if</span> self.atend <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C char type">char</span> <span class="fstring">""</span> 
+<span class="lineno" id=line15></span>      <span class="small_keyword" title="conditional">else</span> (self.sp) . (self.pos)
+<span class="lineno" id=line16></span>    ;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> next { 
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> self*.atend <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line20></span>        pre_incr self.pos;
+<span class="lineno" id=line21></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line22></span>    }
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> advanced =&gt;
+<span class="lineno" id=line25></span>      <span class="small_keyword" title="conditional">if</span> self.atend <span class="small_keyword" title="conditional">then</span> self
+<span class="lineno" id=line26></span>      <span class="small_keyword" title="conditional">else</span> Buffer (self.sp, self.pos + 1)
+<span class="lineno" id=line27></span>    ;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> lookahead (i:<span class="library" title="binding of C int type">int</span>) =&gt;
+<span class="lineno" id=line30></span>      <span class="small_keyword" title="conditional">if</span> self.pos + i &gt; self.sp.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span> <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C char type">char</span> <span class="fstring">""</span>
+<span class="lineno" id=line31></span>      <span class="small_keyword" title="conditional">elif</span> self.pos + i &lt; 0 <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C char type">char</span> <span class="fstring">""</span>
+<span class="lineno" id=line32></span>      <span class="small_keyword" title="conditional">else</span> (self.sp) . (self.pos + i)
+<span class="lineno" id=line33></span>    ;
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> stl_end =&gt; Buffer (self.sp,self.sp.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>);
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>  <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> Buffer (p:<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C char type">char</span>]) =&gt;
+<span class="lineno" id=line41></span>    Buffer (p,0)
+<span class="lineno" id=line42></span>  ;
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>  <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> Buffer (p:<span class="library" title="binding of C++ string type">string</span>) =&gt;
+<span class="lineno" id=line45></span>    Buffer (p.varray_nonul,0)
+<span class="lineno" id=line46></span>  ;
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>  <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> Buffer (p: &amp;<span class="library" title="binding of C++ string type">string</span>) =&gt;
+<span class="lineno" id=line49></span>    Buffer (*p)
+<span class="lineno" id=line50></span>  ;
+<span class="lineno" id=line51></span>  
+<span class="lineno" id=line52></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[Buffer] {
+<span class="lineno" id=line53></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (b:Buffer) =&gt; <span class="fstring">"@"</span>+b.pos.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line54></span>  }
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> comparable (a: Buffer, b: Buffer) =&gt;
+<span class="lineno" id=line57></span>    a.sp.stl_begin == b.sp.stl_begin
+<span class="lineno" id=line58></span>  ; 
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>  <span class="comment">// hack, ignore underlying data.. FIXME</span>
+<span class="lineno" id=line61></span>  <span class="comment">// No, cost. comparable is required but we don't want to</span>
+<span class="lineno" id=line62></span>  <span class="comment">// pay the cost of invoking it when we actually know</span>
+<span class="lineno" id=line63></span>  <span class="comment">// in a parser, for example, there's only one buffer</span>
+<span class="lineno" id=line64></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[Buffer] {
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == (a:Buffer, b:Buffer) =&gt; a.pos == b.pos;
+<span class="lineno" id=line66></span>  }
+<span class="lineno" id=line67></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Tord[Buffer] {
+<span class="lineno" id=line68></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; (a:Buffer, b:Buffer) =&gt; a.pos &lt; b.pos;
+<span class="lineno" id=line69></span>  }
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>  <span class="big_keyword" title="Open a module or class">open</span> Eq[Buffer];
+<span class="lineno" id=line72></span>  <span class="big_keyword" title="Open a module or class">open</span> Tord[Buffer];
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>  <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C++ string type">string</span> (a:Buffer, b:Buffer) =
+<span class="lineno" id=line75></span>  {
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a mutable variable">var</span> x = <span class="fstring">""</span>;
+<span class="lineno" id=line77></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> a.pos ..&lt; b.pos <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line78></span>      x += a.sp.i;
+<span class="lineno" id=line79></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line80></span>    <span class="small_keyword" title="return">return</span> x;
+<span class="lineno" id=line81></span>  }
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> recog_t = BaseChips::iochip_t[Buffer,Buffer];
+<span class="lineno" id=line84></span>  <span class="comment">// rendering lazy terms to actual recognizer</span>
+<span class="lineno" id=line85></span>  
+</pre></p></div><h2 id='A_string_matcher._h'><img src='/share/src/web/images/minus.gif' id='A string matcher.' onclick='toggle(this,"A_string_matcher._d")' alt='+'/> 1.2 A string matcher.</h2><div id='A_string_matcher._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_string (s:<span class="library" title="binding of C++ string type">string</span>)
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>  nextmatch:&gt;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line8></span>    <span class="comment">//println$ "Match " + s + " at " + b.str;</span>
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0..&lt; s.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line10></span>      <span class="small_keyword" title="conditional">if</span> s.[i] != b.get <span class="small_keyword" title="jump to label">goto</span> nextmatch;
+<span class="lineno" id=line11></span>      b&amp;.next;
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line13></span>    <span class="comment">//println$ "Matched " + s + " to " + b.str;</span>
+<span class="lineno" id=line14></span>    <span class="library" title="Print a string to a stream">write</span> (io.out, b);
+<span class="lineno" id=line15></span>    <span class="small_keyword" title="jump to label">goto</span> nextmatch;  
+<span class="lineno" id=line16></span>  }
+<span class="lineno" id=line17></span>  
+</pre></p></div><h2 id='Whitespace_matcher._h'><img src='/share/src/web/images/minus.gif' id='Whitespace matcher.' onclick='toggle(this,"Whitespace_matcher._d")' alt='+'/> 1.3 Whitespace matcher.</h2><div id='Whitespace_matcher._d' style='display:block'>
+<p>Note: never fails.
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_white 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> b.atend <span class="small_keyword" title="logical conjunction">and</span> b.get &lt;= <span class="library" title="binding of C char type">char</span> <span class="fstring">' '</span> perform b&amp;.next;
+<span class="lineno" id=line9></span>      <span class="library" title="Print a string to a stream">write</span> (io.out,b);
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line11></span>  }
+<span class="lineno" id=line12></span>  
+</pre></p></div><h2 id='C++_comment_matcher_h'><img src='/share/src/web/images/minus.gif' id='C++ comment matcher' onclick='toggle(this,"C++_comment_matcher_d")' alt='+'/> 1.4 C++ comment matcher</h2><div id='C++_comment_matcher_d' style='display:block'>
+<p>Note: cannot fail.
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_cxx_comment 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>  again:&gt;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b_saved = b;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="conditional">if</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"/"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line11></span>    b&amp;.next;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="conditional">if</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"/"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line14></span>    b&amp;.next;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> b.atend <span class="small_keyword" title="logical conjunction">and</span> <span class="small_keyword" title="logical negation">not</span> (b.get == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\n"</span>)  perform b&amp;.next;
+<span class="lineno" id=line17></span>    b&amp;.next; <span class="comment">// works fine even if atend</span>
+<span class="lineno" id=line18></span>  ok:&gt;
+<span class="lineno" id=line19></span>    <span class="library" title="Print a string to a stream">write</span> (io.out,b);
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line21></span>  bad:&gt;
+<span class="lineno" id=line22></span>    <span class="library" title="Print a string to a stream">write</span> (io.out,b_saved);
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line24></span>  }
+<span class="lineno" id=line25></span>  
+</pre></p></div><h2 id='Nested_C_comment_matcher_h'><img src='/share/src/web/images/minus.gif' id='Nested C comment matcher' onclick='toggle(this,"Nested_C_comment_matcher_d")' alt='+'/> 1.5 Nested C comment matcher</h2><div id='Nested_C_comment_matcher_d' style='display:block'>
+<p>Note: cannot fail.
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_nested_c_comment 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>  again:&gt;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> depth = 0;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b_saved = b;
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="conditional">if</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"/"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line11></span>    b&amp;.next;
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="conditional">if</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"*"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  nest:&gt;
+<span class="lineno" id=line15></span>    b&amp;.next;
+<span class="lineno" id=line16></span>    ++depth;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>  scan:&gt;
+<span class="lineno" id=line19></span>    <span class="small_keyword" title="conditional">if</span> b.get == <span class="fstring">"/"</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// start nested comment</span>
+<span class="lineno" id=line20></span>      b&amp;.next;
+<span class="lineno" id=line21></span>      <span class="small_keyword" title="conditional">if</span> b.get == <span class="fstring">"*"</span> <span class="small_keyword" title="jump to label">goto</span> nest;
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="jump to label">goto</span> scan;
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="small_keyword" title="conditional">if</span> b.get == <span class="fstring">"*"</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// end comment group</span>
+<span class="lineno" id=line26></span>      b&amp;.next;
+<span class="lineno" id=line27></span>      <span class="small_keyword" title="conditional">if</span> b.get == <span class="fstring">"/"</span> <span class="small_keyword" title="jump to label">goto</span> unnest;
+<span class="lineno" id=line28></span>      <span class="small_keyword" title="jump to label">goto</span> scan;
+<span class="lineno" id=line29></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>    b&amp;.next;
+<span class="lineno" id=line32></span>    <span class="small_keyword" title="jump to label">goto</span> scan;
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>  unnest:&gt;
+<span class="lineno" id=line35></span>    b&amp;.next;
+<span class="lineno" id=line36></span>    --depth;
+<span class="lineno" id=line37></span>    <span class="small_keyword" title="conditional">if</span> depth &gt; 0 <span class="small_keyword" title="jump to label">goto</span> scan;
+<span class="lineno" id=line38></span>    <span class="library" title="Print a string to a stream">write</span> (io.out,b);
+<span class="lineno" id=line39></span>    <span class="small_keyword" title="jump to label">goto</span> again; 
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>  bad:&gt;
+<span class="lineno" id=line42></span>    <span class="library" title="Print a string to a stream">write</span> (io.out,b_saved);
+<span class="lineno" id=line43></span>    <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line44></span>  }
+<span class="lineno" id=line45></span>  
+</pre></p></div><h2 id='Felix_comments_h'><img src='/share/src/web/images/minus.gif' id='Felix comments' onclick='toggle(this,"Felix_comments_d")' alt='+'/> 1.6 Felix comments</h2><div id='Felix_comments_d' style='display:block'>
+<p>Note: can fail.
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_felix_white
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line6></span>  {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ri,wi= #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ro,wo= #mk_ioschannel_pair[Buffer];
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> w = BaseChips::pipeline_list ([match_white, match_nested_c_comment, match_cxx_comment]);
+<span class="lineno" id=line10></span>    <span class="small_keyword" title="defines the topology of chip connections">circuit</span>
+<span class="lineno" id=line11></span>       wire ri <span class="small_keyword" title="substring range separator">to</span> w.inp
+<span class="lineno" id=line12></span>       wire wo <span class="small_keyword" title="substring range separator">to</span> w.out
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="defines the topology of chip connections">endcircuit</span>
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  again:&gt;    
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a mutable variable">var</span> start = read io.inp;
+<span class="lineno" id=line17></span>  more:&gt;
+<span class="lineno" id=line18></span>    <span class="library" title="Print a string to a stream">write</span> (wi, start);
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fin = read ro;
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="conditional">if</span> fin != start <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line21></span>      start = fin;
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="jump to label">goto</span> more;
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="library" title="Print a string to a stream">write</span> (io.out, fin);
+<span class="lineno" id=line26></span>    <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line27></span>  }
+<span class="lineno" id=line28></span>  
+</pre></p></div><h2 id='regex_matcher._h'><img src='/share/src/web/images/minus.gif' id='regex matcher.' onclick='toggle(this,"regex_matcher._d")' alt='+'/> 1.7 regex matcher.</h2><div id='regex_matcher._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_regex (r:RE2)
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line8></span>  <span class="comment">//println$ "Match regex " + r.str;</span>
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a mutable variable">var</span> matched = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (1uz,StringPiece());
+<span class="lineno" id=line10></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Match(r,StringPiece(b.sp),b.pos,ANCHOR_START,matched.stl_begin,1);
+<span class="lineno" id=line11></span>  <span class="comment">//println$ "Match result " + result.str;</span>
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line13></span>  <span class="comment">//println$ "Matched OK, match len = " + matched.0.len.str;</span>
+<span class="lineno" id=line14></span>        <span class="big_keyword" title="Define a mutable variable">var</span> b2 = Buffer (b.sp,b.pos+matched.0.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>);
+<span class="lineno" id=line15></span>  <span class="comment">//println$ "Writing buffer = " + b2.str;</span>
+<span class="lineno" id=line16></span>        <span class="library" title="Print a string to a stream">write</span>(io.out,b2);
+<span class="lineno" id=line17></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line18></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line19></span>  }
+<span class="lineno" id=line20></span>  
+</pre></p></div><h2 id='Identifier_matcher._h'><img src='/share/src/web/images/minus.gif' id='Identifier matcher.' onclick='toggle(this,"Identifier_matcher._d")' alt='+'/> 1.8 Identifier matcher.</h2><div id='Identifier_matcher._d' style='display:block'>
+<p>For C like identifiers.
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> cident_matcher = match_regex (RE2 <span class="fstring">"[A-Za-z][A-Za-z0-9_]*"</span>);
+<span class="lineno" id=line2></span>  <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> flxident_matcher = match_regex (RE2 <span class="fstring">"[A-Za-z_][A-Za-z0-9_']*"</span>);
+<span class="lineno" id=line3></span>  <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> texident_matcher = match_regex (RE2 <span class="fstring">"\\\\[A-Za-z]+"</span>);
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> flx_n_ident_matcher
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line7></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line9></span>  {
+<span class="lineno" id=line10></span>  nextnident:&gt;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="conditional">if</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"n"</span> <span class="small_keyword" title="jump to label">goto</span> nextnident;
+<span class="lineno" id=line13></span>    b&amp;.next;
+<span class="lineno" id=line14></span>    <span class="small_keyword" title="conditional">if</span> b.get == <span class="library" title="binding of C char type">char</span> <span class="fstring">"'"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line15></span>      b&amp;.next;
+<span class="lineno" id=line16></span>      <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> b.atend <span class="small_keyword" title="logical conjunction">and</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"'"</span> perform b&amp;.next;
+<span class="lineno" id=line17></span>      b&amp;.next;
+<span class="lineno" id=line18></span>      <span class="library" title="Print a string to a stream">write</span> (io.out, b);
+<span class="lineno" id=line19></span>    <span class="small_keyword" title="conditional">elif</span> b.get == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line20></span>      b&amp;.next;
+<span class="lineno" id=line21></span>      <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> b.atend <span class="small_keyword" title="logical conjunction">and</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> perform b&amp;.next;
+<span class="lineno" id=line22></span>      b&amp;.next;
+<span class="lineno" id=line23></span>      <span class="library" title="Print a string to a stream">write</span> (io.out, b);
+<span class="lineno" id=line24></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line25></span>    <span class="small_keyword" title="jump to label">goto</span> nextnident;
+<span class="lineno" id=line26></span>  }
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> felix_identifier_matcher 
+<span class="lineno" id=line29></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line30></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line31></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line32></span>  {
+<span class="lineno" id=line33></span>    <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> x = BaseChips::tryall_list 
+<span class="lineno" id=line34></span>      ([
+<span class="lineno" id=line35></span>        flxident_matcher, 
+<span class="lineno" id=line36></span>        texident_matcher,
+<span class="lineno" id=line37></span>        flx_n_ident_matcher
+<span class="lineno" id=line38></span>      ])
+<span class="lineno" id=line39></span>    ;
+<span class="lineno" id=line40></span>    <span class="small_keyword" title="defines the topology of chip connections">circuit</span>
+<span class="lineno" id=line41></span>      wire io.inp <span class="small_keyword" title="substring range separator">to</span> x.inp
+<span class="lineno" id=line42></span>      wire io.out <span class="small_keyword" title="substring range separator">to</span> x.out
+<span class="lineno" id=line43></span>    <span class="small_keyword" title="defines the topology of chip connections">endcircuit</span>
+<span class="lineno" id=line44></span>  }
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>  
+</pre></p></div><h2 id='Integer_matcher._h'><img src='/share/src/web/images/minus.gif' id='Integer matcher.' onclick='toggle(this,"Integer_matcher._d")' alt='+'/> 1.9 Integer matcher.</h2><div id='Integer_matcher._d' style='display:block'>
+<p>For plain identifiers.
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> decimal_integer_matcher = match_regex (RE2 <span class="fstring">"[0-9]+"</span>);
+<span class="lineno" id=line2></span>  
+</pre></p></div><h2 id='Felix_integer_matcher._h'><img src='/share/src/web/images/minus.gif' id='Felix integer matcher.' onclick='toggle(this,"Felix_integer_matcher._d")' alt='+'/> 1.10 Felix integer matcher.</h2><div id='Felix_integer_matcher._d' style='display:block'>
+<p>With radix prefix, and allows embedded underscores.
+Will recognise repeated underscores and trailing
+underscores even though these are not allowed.
+I mean, what should we do if we find them?
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> felix_integer_matcher 
+<span class="lineno" id=line3></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line6></span>  {
+<span class="lineno" id=line7></span>  nexttry:&gt;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line9></span>  <span class="comment">//println$ "Felix integer matcher "+b.str;</span>
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ch = b.get;
+<span class="lineno" id=line11></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"0"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line14></span>      b&amp;.next;
+<span class="lineno" id=line15></span>      ch = b.get;
+<span class="lineno" id=line16></span>  <span class="comment">//println$ "felix_integer got leading 0, next char " + ch;</span>
+<span class="lineno" id=line17></span>      <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"bB"</span> <span class="small_keyword" title="jump to label">goto</span> nextbinary;
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"oO"</span> <span class="small_keyword" title="jump to label">goto</span> nextoctal;
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"dD0123456789_"</span> <span class="small_keyword" title="jump to label">goto</span> nextdecimal;
+<span class="lineno" id=line20></span>      <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"xX"</span> <span class="small_keyword" title="jump to label">goto</span> nexthex;
+<span class="lineno" id=line21></span>  <span class="comment">//println$ "Bad radix";</span>
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line23></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line24></span>    <span class="small_keyword" title="jump to label">goto</span> decimal;
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  nextbinary:&gt;
+<span class="lineno" id=line27></span>    b&amp;.next;
+<span class="lineno" id=line28></span>  binary:&gt;
+<span class="lineno" id=line29></span>    ch = b.get;
+<span class="lineno" id=line30></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_01234567"</span> <span class="small_keyword" title="jump to label">goto</span> nextbinary;
+<span class="lineno" id=line31></span>    <span class="small_keyword" title="jump to label">goto</span> suffix;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  nextoctal:&gt;
+<span class="lineno" id=line34></span>    b&amp;.next;
+<span class="lineno" id=line35></span>  octal:&gt;
+<span class="lineno" id=line36></span>    ch = b.get;
+<span class="lineno" id=line37></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_01234567"</span> <span class="small_keyword" title="jump to label">goto</span> nextoctal;
+<span class="lineno" id=line38></span>    <span class="small_keyword" title="jump to label">goto</span> suffix;
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>  nextdecimal:&gt;
+<span class="lineno" id=line42></span>    b&amp;.next;
+<span class="lineno" id=line43></span>  decimal:&gt;
+<span class="lineno" id=line44></span>    ch = b.get;
+<span class="lineno" id=line45></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> nextdecimal;
+<span class="lineno" id=line46></span>    <span class="small_keyword" title="jump to label">goto</span> suffix;
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>  nexthex:&gt;
+<span class="lineno" id=line49></span>    b&amp;.next;
+<span class="lineno" id=line50></span>  hex:&gt;
+<span class="lineno" id=line51></span>    ch = b.get;
+<span class="lineno" id=line52></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_0123456789ABCDEFabcdef"</span> <span class="small_keyword" title="jump to label">goto</span> nexthex;
+<span class="lineno" id=line53></span>    <span class="small_keyword" title="jump to label">goto</span> suffix;
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>  suffix:&gt;
+<span class="lineno" id=line56></span>    <span class="comment">// 3 char suffix</span>
+<span class="lineno" id=line57></span>    <span class="small_keyword" title="conditional">if</span> <span class="fstring">""</span> + toupper (b.get) + toupper (b.lookahead 1) + toupper (b.lookahead 2) <span class="small_keyword" title="membership operator, function mem">in</span> 
+<span class="lineno" id=line58></span>      ([
+<span class="lineno" id=line59></span>        <span class="fstring">"I16"</span>, <span class="fstring">"I32"</span>,<span class="fstring">"I64"</span>,
+<span class="lineno" id=line60></span>        <span class="fstring">"U16"</span>, <span class="fstring">"U32"</span>,<span class="fstring">"U64"</span>
+<span class="lineno" id=line61></span>      ])
+<span class="lineno" id=line62></span>    <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line63></span>      b&amp;.next;
+<span class="lineno" id=line64></span>      b&amp;.next;
+<span class="lineno" id=line65></span>      b&amp;.next;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="comment">// 2 char suffix</span>
+<span class="lineno" id=line68></span>    <span class="small_keyword" title="conditional">elif</span> <span class="fstring">""</span> + toupper (b.get) + toupper (b.lookahead 1) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line69></span>      ([
+<span class="lineno" id=line70></span>        <span class="fstring">"LL"</span>,<span class="fstring">"I8"</span>,<span class="fstring">"U8"</span>,
+<span class="lineno" id=line71></span>        <span class="fstring">"UT"</span>,<span class="fstring">"US"</span>,<span class="fstring">"UD"</span>,<span class="fstring">"UL"</span>,<span class="fstring">"UV"</span>,<span class="fstring">"UZ"</span>,<span class="fstring">"UJ"</span>,
+<span class="lineno" id=line72></span>        <span class="fstring">"TU"</span>,<span class="fstring">"SU"</span>,<span class="fstring">"DU"</span>,<span class="fstring">"LU"</span>,<span class="fstring">"VU"</span>,<span class="fstring">"ZU"</span>,<span class="fstring">"JU"</span>
+<span class="lineno" id=line73></span>      ])
+<span class="lineno" id=line74></span>    <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line75></span>      b&amp;.next;
+<span class="lineno" id=line76></span>      b&amp;.next;
+<span class="lineno" id=line77></span>  
+<span class="lineno" id=line78></span>    <span class="comment">// one char suffix</span>
+<span class="lineno" id=line79></span>    <span class="small_keyword" title="conditional">elif</span> <span class="fstring">""</span> + toupper (b.get) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line80></span>      ([
+<span class="lineno" id=line81></span>        <span class="fstring">'T'</span>, <span class="comment">// tiny</span>
+<span class="lineno" id=line82></span>        <span class="fstring">'S'</span>, <span class="comment">// short</span>
+<span class="lineno" id=line83></span>        <span class="fstring">'I'</span>, <span class="comment">// int</span>
+<span class="lineno" id=line84></span>        <span class="fstring">'L'</span>, <span class="comment">// long</span>
+<span class="lineno" id=line85></span>        <span class="fstring">'V'</span>, <span class="comment">// long long</span>
+<span class="lineno" id=line86></span>        <span class="fstring">"Z"</span>, <span class="comment">// size</span>
+<span class="lineno" id=line87></span>        <span class="fstring">"J"</span>, <span class="comment">// intmax</span>
+<span class="lineno" id=line88></span>        <span class="fstring">"P"</span>, <span class="comment">// intptr</span>
+<span class="lineno" id=line89></span>        <span class="fstring">"D"</span>  <span class="comment">// ptrdiff</span>
+<span class="lineno" id=line90></span>      ])
+<span class="lineno" id=line91></span>    <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line92></span>      b&amp;.next;
+<span class="lineno" id=line93></span>    <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line94></span>    <span class="small_keyword" title="jump to label">goto</span> ok;
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>  ok:&gt;
+<span class="lineno" id=line97></span>  <span class="comment">//println$ "Felix integer ok";</span>
+<span class="lineno" id=line98></span>    <span class="library" title="Print a string to a stream">write</span> (io.out,b);
+<span class="lineno" id=line99></span>    <span class="small_keyword" title="jump to label">goto</span> nexttry;
+<span class="lineno" id=line100></span>  
+<span class="lineno" id=line101></span>  bad:&gt;
+<span class="lineno" id=line102></span>  <span class="comment">//println$ "Felix integer bad";</span>
+<span class="lineno" id=line103></span>    <span class="small_keyword" title="jump to label">goto</span> nexttry;
+<span class="lineno" id=line104></span>  }
+<span class="lineno" id=line105></span>  
+</pre></p></div><h2 id='Felix_float_matcher._h'><img src='/share/src/web/images/minus.gif' id='Felix float matcher.' onclick='toggle(this,"Felix_float_matcher._d")' alt='+'/> 1.11 Felix float matcher.</h2><div id='Felix_float_matcher._d' style='display:block'>
+<p>//$ Follows ISO C89, except that we allow underscores;
+//$ AND we require both leading and trailing digits so that
+//$ x.0 works for tuple projections and 0.f is a function
+//$ application
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> felix_float_literal_matcher 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>  nexttry:&gt;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ch = b.get;
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"0"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line10></span>      b&amp;.next;
+<span class="lineno" id=line11></span>      ch = b.get;
+<span class="lineno" id=line12></span>  <span class="comment">//println$ "felix_integer got leading 0, next char " + ch;</span>
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"dD0123456789_"</span> <span class="small_keyword" title="jump to label">goto</span> nextdecimal;
+<span class="lineno" id=line14></span>      <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"xX"</span> <span class="small_keyword" title="jump to label">goto</span> nexthex;
+<span class="lineno" id=line15></span>  <span class="comment">//println$ "Bad radix";</span>
+<span class="lineno" id=line16></span>      <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line18></span>    <span class="small_keyword" title="jump to label">goto</span> decimal;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  nextdecimal:&gt;
+<span class="lineno" id=line22></span>    b&amp;.next;
+<span class="lineno" id=line23></span>  decimal:&gt;
+<span class="lineno" id=line24></span>    ch = b.get;
+<span class="lineno" id=line25></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> nextdecimal;
+<span class="lineno" id=line26></span>    <span class="small_keyword" title="conditional">if</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"."</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line27></span>    b&amp;.next;
+<span class="lineno" id=line28></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line29></span>    b&amp;.next;
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>  nextdecimalfrac:&gt;
+<span class="lineno" id=line32></span>    b&amp;.next;
+<span class="lineno" id=line33></span>  decimalfrac:&gt;
+<span class="lineno" id=line34></span>    ch = b.get;
+<span class="lineno" id=line35></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> nexthexfrac;
+<span class="lineno" id=line36></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"Ee"</span> <span class="small_keyword" title="jump to label">goto</span> ok;
+<span class="lineno" id=line37></span>    b&amp;.next;
+<span class="lineno" id=line38></span>    <span class="small_keyword" title="conditional">if</span> b.get == <span class="library" title="binding of C char type">char</span> <span class="fstring">"-"</span> perform b&amp;.next;
+<span class="lineno" id=line39></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line40></span>  nextdecexp:&gt;
+<span class="lineno" id=line41></span>    b&amp;.next;
+<span class="lineno" id=line42></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> suffix;
+<span class="lineno" id=line43></span>    <span class="small_keyword" title="jump to label">goto</span> nextdecexp;
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>  nexthex:&gt;
+<span class="lineno" id=line46></span>    b&amp;.next;
+<span class="lineno" id=line47></span>  hex:&gt;
+<span class="lineno" id=line48></span>    ch = b.get;
+<span class="lineno" id=line49></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_0123456789ABCDEFabcdef"</span> <span class="small_keyword" title="jump to label">goto</span> nexthex;
+<span class="lineno" id=line50></span>    <span class="small_keyword" title="conditional">if</span> b.get != <span class="library" title="binding of C char type">char</span> <span class="fstring">"."</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line51></span>    b&amp;.next;
+<span class="lineno" id=line52></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789ABCDEFabcdef"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line53></span>    b&amp;.next;
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>  nexthexfrac:&gt;
+<span class="lineno" id=line56></span>    b&amp;.next;
+<span class="lineno" id=line57></span>  hexfrac:&gt;
+<span class="lineno" id=line58></span>    ch = b.get;
+<span class="lineno" id=line59></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"_0123456789ABCDEFabcdef"</span> <span class="small_keyword" title="jump to label">goto</span> nexthexfrac;
+<span class="lineno" id=line60></span>    <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"Pp"</span> <span class="small_keyword" title="jump to label">goto</span> ok;
+<span class="lineno" id=line61></span>    b&amp;.next;
+<span class="lineno" id=line62></span>    <span class="small_keyword" title="conditional">if</span> b.get == <span class="library" title="binding of C char type">char</span> <span class="fstring">"-"</span> perform b&amp;.next;
+<span class="lineno" id=line63></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line64></span>  nexthexexp:&gt;
+<span class="lineno" id=line65></span>    b&amp;.next;
+<span class="lineno" id=line66></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789"</span> <span class="small_keyword" title="jump to label">goto</span> suffix;
+<span class="lineno" id=line67></span>    <span class="small_keyword" title="jump to label">goto</span> nexthexexp;
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>  suffix:&gt;
+<span class="lineno" id=line70></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"fFlL"</span> perform b&amp;.next;
+<span class="lineno" id=line71></span>  
+<span class="lineno" id=line72></span>  ok:&gt;
+<span class="lineno" id=line73></span>  <span class="comment">//println$ "Felix float ok";</span>
+<span class="lineno" id=line74></span>    <span class="library" title="Print a string to a stream">write</span> (io.out,b);
+<span class="lineno" id=line75></span>    <span class="small_keyword" title="jump to label">goto</span> nexttry;
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>  bad:&gt;
+<span class="lineno" id=line78></span>  <span class="comment">//println$ "Felix integer bad";</span>
+<span class="lineno" id=line79></span>    <span class="small_keyword" title="jump to label">goto</span> nexttry;
+<span class="lineno" id=line80></span>  }
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>  
+</pre></p></div><h2 id='String_Literal_matcher._h'><img src='/share/src/web/images/minus.gif' id='String Literal matcher.' onclick='toggle(this,"String_Literal_matcher._d")' alt='+'/> 1.12 String Literal matcher.</h2><div id='String_Literal_matcher._d' style='display:block'>
+<p>One shot. Simple, matches single or double quoted
+string not spanning lines, with no escape codes, 
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_string_literal 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>  restart:&gt;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line8></span>    <span class="small_keyword" title="conditional">if</span> b.atend <span class="small_keyword" title="jump to label">goto</span> restart; <span class="comment">// end of data</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a mutable variable">var</span> leadin = b.get;
+<span class="lineno" id=line10></span>  <span class="comment">//println$ "string literal matcher got char " + leadin.str;</span>
+<span class="lineno" id=line11></span>    <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> (leadin <span class="small_keyword" title="membership operator, function mem">in</span> (<span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span>, <span class="library" title="binding of C char type">char</span> <span class="fstring">"'"</span>)) <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line12></span>  <span class="comment">//println$ "Got valid string start .. ";</span>
+<span class="lineno" id=line13></span>    b&amp;.next; 
+<span class="lineno" id=line14></span>    <span class="small_keyword" title="conditional">if</span> b.atend <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ch = b.get;
+<span class="lineno" id=line16></span>    <span class="small_keyword" title="while loop">while</span> ch != leadin <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line17></span>      b&amp;.next;
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="conditional">if</span> b.atend <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line19></span>      ch = b.get;
+<span class="lineno" id=line20></span>      <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\n"</span> <span class="small_keyword" title="jump to label">goto</span> restart; <span class="comment">// end of line</span>
+<span class="lineno" id=line21></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line22></span>    b&amp;.next;
+<span class="lineno" id=line23></span>    io.out `(<span class="library" title="Print a string to a stream">write</span>) b;  
+<span class="lineno" id=line24></span>    <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line25></span>  }
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> match_string_literal_backquote
+<span class="lineno" id=line28></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line30></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line31></span>  {
+<span class="lineno" id=line32></span>  restart:&gt;
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line34></span>    <span class="small_keyword" title="conditional">if</span> b.atend <span class="small_keyword" title="jump to label">goto</span> restart; <span class="comment">// end of data</span>
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Define a mutable variable">var</span> leadin = b.get;
+<span class="lineno" id=line36></span>  <span class="comment">//println$ "string literal matcher got char " + leadin.str;</span>
+<span class="lineno" id=line37></span>    <span class="small_keyword" title="conditional">if</span> leadin != <span class="library" title="binding of C char type">char</span> <span class="fstring">'`'</span> <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line38></span>  <span class="comment">//println$ "Got valid string start .. ";</span>
+<span class="lineno" id=line39></span>    b&amp;.next; 
+<span class="lineno" id=line40></span>    <span class="small_keyword" title="conditional">if</span> b.atend <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a mutable variable">var</span> ch = b.get;
+<span class="lineno" id=line42></span>    <span class="small_keyword" title="while loop">while</span> ch != leadin <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line43></span>      b&amp;.next;
+<span class="lineno" id=line44></span>      <span class="small_keyword" title="conditional">if</span> b.atend <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line45></span>      ch = b.get;
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\n"</span> <span class="small_keyword" title="jump to label">goto</span> restart; <span class="comment">// end of line</span>
+<span class="lineno" id=line47></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line48></span>    b&amp;.next;
+<span class="lineno" id=line49></span>    io.out `(<span class="library" title="Print a string to a stream">write</span>) b;  
+<span class="lineno" id=line50></span>    <span class="small_keyword" title="jump to label">goto</span> restart;
+<span class="lineno" id=line51></span>  }
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> felix_string_literal_matcher
+<span class="lineno" id=line54></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line55></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line56></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line57></span>  {
+<span class="lineno" id=line58></span>  restart:&gt;
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = read io.inp;
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a mutable variable">var</span> triple = <span class="library" title="false value">false</span>; <span class="comment">// single quoted</span>
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a mutable variable">var</span> escape = <span class="library" title="binding of C char type">char</span> <span class="fstring">""</span>; <span class="comment">// no escape</span>
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>    <span class="comment">// r: raw string, f: function, c: C string</span>
+<span class="lineno" id=line64></span>    <span class="comment">// add others here</span>
+<span class="lineno" id=line65></span>  
+<span class="lineno" id=line66></span>    <span class="comment">// check for raw prefix r</span>
+<span class="lineno" id=line67></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"r"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line68></span>      <span class="small_keyword" title="conditional">if</span> b.lookahead 1 != <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line69></span>      b&amp;.next;
+<span class="lineno" id=line70></span>      <span class="small_keyword" title="jump to label">goto</span> strlit;
+<span class="lineno" id=line71></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="comment">// check for other prefixen</span>
+<span class="lineno" id=line74></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"cf"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line75></span>      <span class="small_keyword" title="conditional">if</span> b.lookahead 1 != <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="jump to label">goto</span> bad;
+<span class="lineno" id=line76></span>      b&amp;.next;
+<span class="lineno" id=line77></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>    <span class="comment">// normal escaping on</span>
+<span class="lineno" id=line80></span>    escape = <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span>;
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>  strlit:&gt;
+<span class="lineno" id=line83></span>    <span class="small_keyword" title="conditional">if</span> b.get <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"'\"</span><span class="fstring">" goto bad;
+<span class="lineno" id=line84></span>    var first_leadin = b.get;
+<span class="lineno" id=line85></span>    b&amp;.next;
+<span class="lineno" id=line86></span>    if b.get == first_leadin and b.lookahead 1 == first_leadin do
+<span class="lineno" id=line87></span>      triple = true;
+<span class="lineno" id=line88></span>      b&amp;.next; 
+<span class="lineno" id=line89></span>      b&amp;.next; 
+<span class="lineno" id=line90></span>    done
+<span class="lineno" id=line91></span>  
+<span class="lineno" id=line92></span>  //println$ "</span>Leadin=<span class="fstring">" + first_leadin + "</span>, triple=<span class="fstring">" + triple.str + "</span>, escape=<span class="fstring">" + escape.str;
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>  eatup:&gt;
+<span class="lineno" id=line95></span>  //println$ "</span>Eatup <span class="fstring">" + b.get;
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>    if b.get == escape goto doescape;
+<span class="lineno" id=line98></span>    if not triple and b.get == "</span><span class="tex_symbol" title="\n">\(\n\)</span><span class="fstring">"  goto bad; // newline in string
+<span class="lineno" id=line99></span>    if not triple and b.get == first_leadin do
+<span class="lineno" id=line100></span>      b&amp;.next;
+<span class="lineno" id=line101></span>      goto ok;
+<span class="lineno" id=line102></span>    done
+<span class="lineno" id=line103></span>  
+<span class="lineno" id=line104></span>    if triple and 
+<span class="lineno" id=line105></span>      b.get == first_leadin and 
+<span class="lineno" id=line106></span>      b.lookahead 1 == first_leadin and 
+<span class="lineno" id=line107></span>      b.lookahead 2 == first_leadin
+<span class="lineno" id=line108></span>    do
+<span class="lineno" id=line109></span>      b&amp;.next;
+<span class="lineno" id=line110></span>      b&amp;.next;
+<span class="lineno" id=line111></span>      b&amp;.next;
+<span class="lineno" id=line112></span>      goto ok;
+<span class="lineno" id=line113></span>    done
+<span class="lineno" id=line114></span>  
+<span class="lineno" id=line115></span>    b&amp;.next;
+<span class="lineno" id=line116></span>    goto eatup;
+<span class="lineno" id=line117></span>  
+<span class="lineno" id=line118></span>  
+<span class="lineno" id=line119></span>  doescape:&gt;
+<span class="lineno" id=line120></span>  //println$ "</span>Escape<span class="fstring">";
+<span class="lineno" id=line121></span>    b&amp;.next;
+<span class="lineno" id=line122></span>    b&amp;.next;
+<span class="lineno" id=line123></span>    goto eatup;
+<span class="lineno" id=line124></span>  
+<span class="lineno" id=line125></span>  ok:&gt;
+<span class="lineno" id=line126></span>    write (io.out, b);
+<span class="lineno" id=line127></span>    goto restart;
+<span class="lineno" id=line128></span>  
+<span class="lineno" id=line129></span>  bad:&gt;
+<span class="lineno" id=line130></span>    goto restart;
+<span class="lineno" id=line131></span>  }
+<span class="lineno" id=line132></span>  
+<span class="lineno" id=line133></span>  </span>
+</pre></p></div><h2 id='End_of_string_matcher_h'><img src='/share/src/web/images/minus.gif' id='End of string matcher' onclick='toggle(this,"End_of_string_matcher_d")' alt='+'/> 1.13 End of string matcher</h2><div id='End_of_string_matcher_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> eos_matcher 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = read io.inp;
+<span class="lineno" id=line8></span>      <span class="small_keyword" title="conditional">if</span> x.atend perform <span class="library" title="Print a string to a stream">write</span> (io.out,x);
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line10></span>  }
+<span class="lineno" id=line11></span>  
+</pre></p></div><h2 id='Longest_match_h'><img src='/share/src/web/images/minus.gif' id='Longest match' onclick='toggle(this,"Longest_match_d")' alt='+'/> 1.14 Longest match</h2><div id='Longest_match_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> longest_match (a: <span class="library" title="functional, singly linked list">list</span>[recog_t])
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a mutable variable">var</span> x = read io.inp;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> results = None[Buffer];
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> storemax[T <span class="small_keyword" title="type-class constraint">with</span> Tord [T]] (p: &amp;<span class="library" title="option type: Some x or None">opt</span>[T]) (a:T) {
+<span class="lineno" id=line9></span>      <span class="small_keyword" title="match statement or expression">match</span> *p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line10></span>      | None =&gt; p &lt;- Some a;
+<span class="lineno" id=line11></span>      | Some v =&gt; <span class="small_keyword" title="conditional">if</span> a &gt; v perform p &lt;- Some a;
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line13></span>    }
+<span class="lineno" id=line14></span>    <span class="small_keyword" title="for loop">for</span> r <span class="small_keyword" title="membership operator, function mem">in</span> a <span class="small_keyword" title="call a procedure">call</span>
+<span class="lineno" id=line15></span>      run (x.value |-&gt; r |-&gt; (storemax &amp;results).procedure)
+<span class="lineno" id=line16></span>    ;
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="match statement or expression">match</span> results <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line18></span>    | None =&gt; ;
+<span class="lineno" id=line19></span>    | Some answer =&gt; <span class="library" title="Print a string to a stream">write</span> (io.out, answer);
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line21></span>  }
+<span class="lineno" id=line22></span>  
+</pre></p></div><h2 id='Match_to_eos_h'><img src='/share/src/web/images/minus.gif' id='Match to eos' onclick='toggle(this,"Match_to_eos_d")' alt='+'/> 1.15 Match to eos</h2><div id='Match_to_eos_d' style='display:block'>
+<p>Equivalent to .* but faster.
+</p><pre class='inclusion'>
+share/lib/std/strings/recogniser_base.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> toeos_matcher 
+<span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line4></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;Buffer
+<span class="lineno" id=line5></span>  {
+<span class="lineno" id=line6></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = read io.inp;
+<span class="lineno" id=line8></span>      <span class="library" title="Print a string to a stream">write</span> (io.out,x.stl_end);
+<span class="lineno" id=line9></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line10></span>  }
+<span class="lineno" id=line11></span>  }
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>  
+</pre></p></div></div><h1 id='Lazy_Syntactic_form_h'><img src='/share/src/web/images/minus.gif' id='Lazy Syntactic form' onclick='toggle(this,"Lazy_Syntactic_form_d")' alt='+'/> 2 Lazy Syntactic form</h1><div id='Lazy_Syntactic_form_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/strings/recognisers.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// this is a function, so it cannot construct pipeline</span>
+<span class="lineno" id=line2></span>  <span class="comment">// chips, because they actually spawn the components internally</span>
+<span class="lineno" id=line3></span>  <span class="comment">// and functions can't do service calls.</span>
+<span class="lineno" id=line4></span>  <span class="comment">//</span>
+<span class="lineno" id=line5></span>  <span class="comment">// So instead we just return a function 1-&gt;recog_t which does the</span>
+<span class="lineno" id=line6></span>  <span class="comment">// job on invocation.</span>
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/strings/recogniser_base"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/strings/grammars"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a type class">class</span> Recognisers
+<span class="lineno" id=line11></span>  {
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> RecogniserBase;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Open a module or class">open</span> BaseChips;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> ntdef_t = <span class="library" title="binding of C++ string type">string</span> * recog_t;
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> gramlib_t = Grammars[recog_t]::gramlib_t;
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> prod_t = Grammars[recog_t]::prod_t;
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> grammar_t = Grammars[recog_t]::grammar_t;
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> find (v:<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[ntdef_t]) (nt:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C size_t type">size</span> = 
+<span class="lineno" id=line21></span>  {
+<span class="lineno" id=line22></span>    <span class="small_keyword" title="for loop">for</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0uz ..&lt; v.<span class="library" title="number of elements in data structure">len</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line23></span>      <span class="small_keyword" title="conditional">if</span> v.i.0 == nt <span class="small_keyword" title="return">return</span> i;
+<span class="lineno" id=line24></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line26></span>  }
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> render_prod 
+<span class="lineno" id=line30></span>    (lib:gramlib_t,v:<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[ntdef_t]) 
+<span class="lineno" id=line31></span>    (p:prod_t) 
+<span class="lineno" id=line32></span>  : recog_t =&gt;
+<span class="lineno" id=line33></span>    <span class="small_keyword" title="match statement or expression">match</span> p <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line34></span>    | `Terminal (s,r) =&gt; r 
+<span class="lineno" id=line35></span>    | `Epsilon =&gt;  epsilon[Buffer] 
+<span class="lineno" id=line36></span>    | `Seq ps =&gt;  pipeline_list (
+<span class="lineno" id=line37></span>        <span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (p:prod_t) =&gt; render_prod (lib,v) p) ps) 
+<span class="lineno" id=line38></span>    | `Alt ps =&gt;   tryall_list (
+<span class="lineno" id=line39></span>        <span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (p:prod_t) =&gt; render_prod (lib,v) p) ps) 
+<span class="lineno" id=line40></span>    | `Nonterminal nt =&gt; 
+<span class="lineno" id=line41></span>      <span class="small_keyword" title="let binder">let</span> idx = find v nt <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line42></span>      <span class="small_keyword" title="let binder">let</span> pslot = -(v.stl_begin + idx) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line43></span>      <span class="small_keyword" title="let binder">let</span> pchip = pslot . 1 <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line44></span>      BaseChips::deref_first_read pchip
+<span class="lineno" id=line45></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line46></span>  ;
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> recogniser
+<span class="lineno" id=line49></span>    (start:<span class="library" title="binding of C++ string type">string</span>, lib:gramlib_t) : recog_t =
+<span class="lineno" id=line50></span>  {
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a mutable variable">var</span> cl = Grammars[recog_t]::closure (start,lib);
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>      <span class="comment">// allocate a varray with a slot for each nonterminal</span>
+<span class="lineno" id=line54></span>      <span class="big_keyword" title="Define a mutable variable">var</span> n = cl.<span class="library" title="number of elements in data structure">len</span>;
+<span class="lineno" id=line55></span>      <span class="big_keyword" title="Define a mutable variable">var</span> v = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span> * recog_t] n;
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>      <span class="comment">// populate the varray with the terminal names and a dummy chip</span>
+<span class="lineno" id=line58></span>      <span class="small_keyword" title="for loop">for</span> nt <span class="small_keyword" title="membership operator, function mem">in</span> cl <span class="small_keyword" title="call a procedure">call</span> <span class="comment">// initialise array</span>
+<span class="lineno" id=line59></span>        push_back (v,(nt,BaseChips::epsilon[Buffer]))
+<span class="lineno" id=line60></span>      ;
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>      <span class="comment">// now assign the real recogniser_base to the array</span>
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a mutable variable">var</span> index = 0uz;
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="for loop">for</span> nt <span class="small_keyword" title="membership operator, function mem">in</span> cl <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line65></span>        <span class="small_keyword" title="match statement or expression">match</span> find lib nt <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line66></span>        | None =&gt; <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line67></span>        | Some prod =&gt;
+<span class="lineno" id=line68></span>          <span class="comment">// get wrapped recogniser</span>
+<span class="lineno" id=line69></span>          <span class="big_keyword" title="Define a mutable variable">var</span> entry = render_prod (lib, v) prod;
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>          <span class="comment">// address of the slot</span>
+<span class="lineno" id=line72></span>          <span class="big_keyword" title="Define a mutable variable">var</span> pentry : &amp;recog_t = (-(v.stl_begin+index)).1;
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>          <span class="comment">// overwrite dummy value</span>
+<span class="lineno" id=line75></span>          pentry &lt;- entry;
+<span class="lineno" id=line76></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line77></span>        ++index;
+<span class="lineno" id=line78></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line79></span>      <span class="small_keyword" title="return">return</span> v.(find v start).1;
+<span class="lineno" id=line80></span>  }
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="small_keyword" title="membership operator, function mem">in</span> (s:<span class="library" title="binding of C++ string type">string</span>) (g:grammar_t) =
+<span class="lineno" id=line83></span>  {
+<span class="lineno" id=line84></span>    <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> false_if_got (pr: &amp;bool)
+<span class="lineno" id=line85></span>       <span class="small_keyword" title="the parameter of a chip">connector</span> io
+<span class="lineno" id=line86></span>         <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;Buffer
+<span class="lineno" id=line87></span>    {
+<span class="lineno" id=line88></span>      <span class="hack">C_hack</span>::ignore$ read io.inp;
+<span class="lineno" id=line89></span>      pr &lt;- <span class="library" title="truth value">true</span>;
+<span class="lineno" id=line90></span>    }
+<span class="lineno" id=line91></span>    <span class="big_keyword" title="Define a mutable variable">var</span> r = recogniser g;
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line93></span>    run (s.Buffer.value |-&gt; r |-&gt; eos_matcher |-&gt; false_if_got &amp;<span class="small_keyword" title="value of function return used in post condition">result</span>);
+<span class="lineno" id=line94></span>    <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line95></span>  }
+<span class="lineno" id=line96></span>  
+<span class="lineno" id=line97></span>  } <span class="comment">// Recognisers</span>
+<span class="lineno" id=line98></span>  
+<span class="lineno" id=line99></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

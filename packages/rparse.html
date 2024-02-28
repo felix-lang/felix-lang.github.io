@@ -1,0 +1,644 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Felix library add ons</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Synopsis",
+"Resource files",
+"Interim Build script.",
+"test"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Synopsis_h')"> <a href="#Synopsis_h">Synopsis</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Resource files_h')"> <a href="#Resource_files_h">Resource files</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Interim Build script._h')"> <a href="#Interim_Build_script._h">Interim Build script.</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#test_h')"> <a href="#test_h">test</a></div>
+      <div class=sm id=menu4>
+      </div>
+    <script>counter_max=4;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Synopsis_h'><img src='/share/src/web/images/minus.gif' id='Synopsis' onclick='toggle(this,"Synopsis_d")' alt='+'/> 1 Synopsis</h1><div id='Synopsis_d' style='display:block'>
+<p>This package contains part of the Felix standard library
+written in Felix. The code is compiled into a normal
+binary static archive and dll/shared library and installed
+into the target RTL directory. The C++ header is installed there too.
+</p><p>The interface, being generated, is stored in the target
+branch of the standard library.
+</p><p>This is an experiment, the provided bash script works only
+on Unix. 
+</p><p>The code here is for the respectful parser which
+allows a string to be split in the usual way, but
+respecting quotes and escapes, that is, quoted or
+escaped split characters are ignored.
+</p><p>Note: this code cannot be used to build Felix because
+Felix is required to build it. The bootstrap version
+of Felix may not have all the required capabilities.
+</p><pre class='inclusion'>
+share/src/flxlibs/rparse.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> NewRespectfulParser 
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>      <span class="big_keyword" title="generate extern "C" wrapper">export</span> variant quote_action_t = 
+<span class="lineno" id=line4></span>        | ignore-quote
+<span class="lineno" id=line5></span>        | keep-quote
+<span class="lineno" id=line6></span>        | drop-quote
+<span class="lineno" id=line7></span>      ; 
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="generate extern "C" wrapper">export</span> variant dquote_action_t = 
+<span class="lineno" id=line9></span>        | ignore-dquote
+<span class="lineno" id=line10></span>        | keep-dquote
+<span class="lineno" id=line11></span>        | drop-dquote
+<span class="lineno" id=line12></span>      ; 
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="generate extern "C" wrapper">export</span> variant escape_action_t = 
+<span class="lineno" id=line14></span>        | ignore-escape
+<span class="lineno" id=line15></span>        | keep-escape
+<span class="lineno" id=line16></span>        | drop-escape
+<span class="lineno" id=line17></span>      ; 
+<span class="lineno" id=line18></span>      <span class="big_keyword" title="Define an alias for a type expression">typedef</span> action_t = (quote:quote_action_t, dquote:dquote_action_t, escape:escape_action_t);
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>      <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="fstring">"rparse_mode_t"</span> variant mode_t  = | copying | skipping | quote | dquote | escape-copying | escape-quote | escape-dquote;
+<span class="lineno" id=line21></span>      <span class="big_keyword" title="Define an alias for a type expression">typedef</span> state_t = (mode:mode_t, current:<span class="library" title="binding of C++ string type">string</span>, parsed: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] );
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> respectful_parse (action:action_t) (<span class="big_keyword" title="Define a mutable variable">var</span> state:state_t) (<span class="big_keyword" title="Define a mutable variable">var</span> s:<span class="library" title="binding of C++ string type">string</span>) : state_t = 
+<span class="lineno" id=line24></span>      {
+<span class="lineno" id=line25></span>        <span class="big_keyword" title="Define a mutable variable">var</span> mode = state.mode;
+<span class="lineno" id=line26></span>        <span class="big_keyword" title="Define a mutable variable">var</span> current = state.current;
+<span class="lineno" id=line27></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>        <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> handlecopying(ch:<span class="library" title="binding of C char type">char</span>) 
+<span class="lineno" id=line30></span>        {
+<span class="lineno" id=line31></span>          <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"'"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line32></span>            <span class="small_keyword" title="match statement or expression">match</span> action.quote <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line33></span>            | #ignore-quote =&gt; 
+<span class="lineno" id=line34></span>              current += ch;
+<span class="lineno" id=line35></span>            | #keep-quote =&gt;
+<span class="lineno" id=line36></span>              current += ch;
+<span class="lineno" id=line37></span>              mode = quote;
+<span class="lineno" id=line38></span>            | #drop-quote =&gt;
+<span class="lineno" id=line39></span>              mode = quote;
+<span class="lineno" id=line40></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line41></span>          <span class="small_keyword" title="conditional">elif</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line42></span>            <span class="small_keyword" title="match statement or expression">match</span> action.dquote <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line43></span>            | #ignore-dquote =&gt; 
+<span class="lineno" id=line44></span>              current += ch;
+<span class="lineno" id=line45></span>            | #keep-dquote =&gt;
+<span class="lineno" id=line46></span>              current += ch;
+<span class="lineno" id=line47></span>              mode = dquote;
+<span class="lineno" id=line48></span>            | #drop-dquote =&gt;
+<span class="lineno" id=line49></span>              mode = dquote;
+<span class="lineno" id=line50></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line51></span>          <span class="small_keyword" title="conditional">elif</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'\\'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line52></span>            <span class="small_keyword" title="match statement or expression">match</span> action.escape <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line53></span>            | #ignore-escape =&gt; 
+<span class="lineno" id=line54></span>              current += ch;
+<span class="lineno" id=line55></span>            | #keep-escape =&gt;
+<span class="lineno" id=line56></span>              current += ch;
+<span class="lineno" id=line57></span>              mode = escape-copying;
+<span class="lineno" id=line58></span>            | #drop-escape =&gt;
+<span class="lineno" id=line59></span>              mode = escape-copying;
+<span class="lineno" id=line60></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line61></span>          <span class="small_keyword" title="conditional">elif</span> ord ch &lt;= <span class="fstring">' '</span>.<span class="library" title="binding of C char type">char</span>.ord  <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// can't happen if called from skipping</span>
+<span class="lineno" id=line62></span>            <span class="small_keyword" title="value of function return used in post condition">result</span> += current;
+<span class="lineno" id=line63></span>            current = <span class="fstring">""</span>;
+<span class="lineno" id=line64></span>            mode = skipping;
+<span class="lineno" id=line65></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line66></span>            current += ch;
+<span class="lineno" id=line67></span>            mode = copying;
+<span class="lineno" id=line68></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line69></span>        } <span class="comment">//nested proc</span>
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>        <span class="small_keyword" title="for loop">for</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> s <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line72></span>          <span class="small_keyword" title="match statement or expression">match</span> mode <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line73></span>          | #copying =&gt; handlecopying ch;
+<span class="lineno" id=line74></span>          | #quote =&gt;
+<span class="lineno" id=line75></span>            <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"'"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line76></span>              <span class="small_keyword" title="match statement or expression">match</span> action.quote <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line77></span>              | #ignore-quote =&gt; 
+<span class="lineno" id=line78></span>                <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line79></span>                <span class="comment">//current += ch;</span>
+<span class="lineno" id=line80></span>              | #keep-quote =&gt;
+<span class="lineno" id=line81></span>                current += ch;
+<span class="lineno" id=line82></span>                mode = copying;
+<span class="lineno" id=line83></span>              | #drop-quote =&gt;
+<span class="lineno" id=line84></span>                mode = copying;
+<span class="lineno" id=line85></span>              <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line86></span>            <span class="small_keyword" title="conditional">elif</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line87></span>              <span class="small_keyword" title="match statement or expression">match</span> action.escape <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line88></span>              | #ignore-escape =&gt; 
+<span class="lineno" id=line89></span>                current += ch;
+<span class="lineno" id=line90></span>              | #keep-escape =&gt;
+<span class="lineno" id=line91></span>                current += ch;
+<span class="lineno" id=line92></span>                mode = escape-quote;
+<span class="lineno" id=line93></span>              | #drop-escape =&gt;
+<span class="lineno" id=line94></span>                mode = escape-quote;
+<span class="lineno" id=line95></span>              <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line96></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line97></span>              current += ch;
+<span class="lineno" id=line98></span>            <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>          | #dquote =&gt;
+<span class="lineno" id=line101></span>            <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line102></span>              <span class="small_keyword" title="match statement or expression">match</span> action.dquote <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line103></span>              | #ignore-dquote =&gt; 
+<span class="lineno" id=line104></span>                <span class="big_keyword" title="Run time assertion">assert</span> <span class="library" title="false value">false</span>;
+<span class="lineno" id=line105></span>                <span class="comment">//current += ch;</span>
+<span class="lineno" id=line106></span>              | #keep-dquote =&gt;
+<span class="lineno" id=line107></span>                current += ch;
+<span class="lineno" id=line108></span>                mode = copying;
+<span class="lineno" id=line109></span>              | #drop-dquote =&gt;
+<span class="lineno" id=line110></span>                mode = copying;
+<span class="lineno" id=line111></span>              <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line112></span>            <span class="small_keyword" title="conditional">elif</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line113></span>              <span class="small_keyword" title="match statement or expression">match</span> action.escape <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line114></span>              | #ignore-escape =&gt; 
+<span class="lineno" id=line115></span>                current += ch;
+<span class="lineno" id=line116></span>              | #keep-escape =&gt;
+<span class="lineno" id=line117></span>                current += ch;
+<span class="lineno" id=line118></span>                mode = escape-dquote;
+<span class="lineno" id=line119></span>              | #drop-escape =&gt;
+<span class="lineno" id=line120></span>                mode = escape-dquote;
+<span class="lineno" id=line121></span>              <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line122></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line123></span>              current += ch;
+<span class="lineno" id=line124></span>            <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line125></span>  
+<span class="lineno" id=line126></span>          | #escape-copying =&gt;
+<span class="lineno" id=line127></span>             current += ch;
+<span class="lineno" id=line128></span>             mode = copying;
+<span class="lineno" id=line129></span>  
+<span class="lineno" id=line130></span>          | #escape-quote =&gt;
+<span class="lineno" id=line131></span>             current += ch;
+<span class="lineno" id=line132></span>             mode = quote;
+<span class="lineno" id=line133></span>  
+<span class="lineno" id=line134></span>          | #escape-dquote =&gt;
+<span class="lineno" id=line135></span>             current += ch;
+<span class="lineno" id=line136></span>             mode = dquote;
+<span class="lineno" id=line137></span>  
+<span class="lineno" id=line138></span>          | #skipping =&gt;
+<span class="lineno" id=line139></span>            <span class="small_keyword" title="conditional">if</span> ord ch &gt; <span class="fstring">' '</span>.<span class="library" title="binding of C char type">char</span>.ord  <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line140></span>              handlecopying ch;
+<span class="lineno" id=line141></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line142></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line143></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line144></span>        <span class="small_keyword" title="return">return</span> (mode=mode, current=current, parsed=state.parsed + <span class="small_keyword" title="value of function return used in post condition">result</span>);
+<span class="lineno" id=line145></span>      }
+<span class="lineno" id=line146></span>    
+<span class="lineno" id=line147></span>    <span class="comment">// simplified one shot parser.</span>
+<span class="lineno" id=line148></span>    <span class="comment">// ignores mismatched quotes and backslashes.</span>
+<span class="lineno" id=line149></span>    <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> respectful_split (action:RespectfulParser::action_t) (s:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = 
+<span class="lineno" id=line150></span>    {
+<span class="lineno" id=line151></span>      <span class="big_keyword" title="Define a mutable variable">var</span> state = RespectfulParser::respectful_parse
+<span class="lineno" id=line152></span>        action 
+<span class="lineno" id=line153></span>        (
+<span class="lineno" id=line154></span>          mode=RespectfulParser::skipping, 
+<span class="lineno" id=line155></span>          current=<span class="fstring">""</span>, 
+<span class="lineno" id=line156></span>          parsed=Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line157></span>        ) 
+<span class="lineno" id=line158></span>        s
+<span class="lineno" id=line159></span>      ;
+<span class="lineno" id=line160></span>      <span class="comment">// ignore mismatched quotes and backslashes.</span>
+<span class="lineno" id=line161></span>      <span class="small_keyword" title="match statement or expression">match</span> state.mode <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line162></span>      | #skipping =&gt; ;
+<span class="lineno" id=line163></span>      | _ =&gt; state.parsed = state.parsed + state.current;
+<span class="lineno" id=line164></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line165></span>      <span class="small_keyword" title="return">return</span> state.parsed;
+<span class="lineno" id=line166></span>   
+<span class="lineno" id=line167></span>    }
+<span class="lineno" id=line168></span>  
+<span class="lineno" id=line169></span>    <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> default_respectful_split (s:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line170></span>      respectful_split (
+<span class="lineno" id=line171></span>        quote=RespectfulParser::keep-quote, 
+<span class="lineno" id=line172></span>        dquote=RespectfulParser::keep-dquote, 
+<span class="lineno" id=line173></span>        escape=RespectfulParser::keep-escape
+<span class="lineno" id=line174></span>      ) 
+<span class="lineno" id=line175></span>      s
+<span class="lineno" id=line176></span>    ; 
+<span class="lineno" id=line177></span>  }
+</pre></p></div><h1 id='Resource_files_h'><img src='/share/src/web/images/minus.gif' id='Resource files' onclick='toggle(this,"Resource_files_d")' alt='+'/> 2 Resource files</h1><div id='Resource_files_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/src/config/unix/rparse.fpc</pre>
+<p><pre class="prefmtbg">Description: Respectful Parser, binary edition
+Location: Part of the standard library
+provides_slib: -lrparse_static
+provides_dlib: -lrparse_dynamic
+</pre></p><pre class='inclusion'>
+$PWD/src/config/win/rparse.fpc</pre>
+<p><pre class="prefmtbg">Description: Respectful Parser, binary edition
+Location: Part of the standard library
+provides_slib: /DEFAULTLIB:librparse_static
+provides_dlib: /DEFAULTLIB:librparse_dynamic
+</pre></p></div><h1 id='Interim_Build_script._h'><img src='/share/src/web/images/minus.gif' id='Interim Build script.' onclick='toggle(this,"Interim_Build_script._d")' alt='+'/> 3 Interim Build script.</h1><div id='Interim_Build_script._d' style='display:block'>
+<p>This is an interim build script for bash only.
+Until a proper Felix tool can be organised!
+</p><pre class='inclusion'>
+$PWD/build_rparse.sh</pre>
+<p><pre class="prefmtbg">rm -rf rparse
+build/release/host/bin/flx --felix=build.fpc --bundle-dir=rparse --staticlib -ox librparse_static build/release/share/src/flxlibs/rparse.flx
+build/release/host/bin/flx --felix=build.fpc --bundle-dir=rparse -c -ox librparse_dynamic build/release/share/src/flxlibs/rparse.flx
+mkdir -p build/release/host/lib/std/strings
+cp rparse/rparse_interface.flx build/release/host/lib/std/strings
+cp rparse/librparse_dynamic.dylib build/release/host/lib/rtl
+cp rparse/librparse_static.a build/release/host/lib/rtl
+cp rparse/rparse.hpp build/release/host/lib/rtl
+cp rparse/rparse.includes build/release/host/lib/rtl
+cp src/config/unix/rparse.fpc build/release/host/config
+</pre></p></div><h1 id='test_h'><img src='/share/src/web/images/minus.gif' id='test' onclick='toggle(this,"test_d")' alt='+'/> 4 test</h1><div id='test_d' style='display:block'>
+<p>Note: currently interfaces don't contain package
+requjirements! So we have to add it manually!
+</p><pre class='inclusion'>
+$PWD/testrparse.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/strings/rparse_interface"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> s = <span class="fstring">'Hello "world ish" stuff'</span>; 
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> k = rparse_interface::default_respectful_split s;
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ s <span class="fstring">" splits to "</span> + k.<span class="library" title="Convert a value to a string">str</span>;
+</pre></p><pre class='inclusion'>
+$PWD/test_rparse.sh</pre>
+<p><pre class="prefmtbg">build/release/host/bin/flx --felix=build.fpc --static --pkg=rparse testrparse.flx
+build/release/host/bin/flx --felix=build.fpc --pkg=rparse testrparse.flx
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

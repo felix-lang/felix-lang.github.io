@@ -1,0 +1,1226 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ["script","noscript","style","textarea"]
+    }
+  });
+</script>
+<title>Core Type Constructors</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Core Type Classes",
+"Type Functors",
+"Option",
+"Slice",
+"Operations on sums of units",
+"Category Theoretic Functional Operations",
+"Tuples"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Core Type Classes_h')"> <a href="#Core_Type_Classes_h">Core Type Classes</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Type Functors_h')"> <a href="#Type_Functors_h">Type Functors</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Option_h')"> <a href="#Option_h">Option</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Slice_h')"> <a href="#Slice_h">Slice</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Operations on sums of units_h')"> <a href="#Operations_on_sums_of_units_h">Operations on sums of units</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Category Theoretic Functional Operations_h')"> <a href="#Category_Theoretic_Functional_Operations_h">Category Theoretic Functional Operations</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Tuples_h')"> <a href="#Tuples_h">Tuples</a></div>
+      <div class=sm id=menu7>
+      </div>
+    <script>counter_max=7;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Core_Type_Classes_h'><img src='/share/src/web/images/minus.gif' id='Core Type Classes' onclick='toggle(this,"Core_Type_Classes_d")' alt='+'/> 1 Core Type Classes</h1><div id='Core_Type_Classes_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/special.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// Core types and type classes</span>
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> <span class="library" title="Type a non-returning function returns">any</span> = <span class="library" title="Type a non-returning function returns">any</span>;
+<span class="lineno" id=line5></span>  
+</pre></p></div><h1 id='Type_Functors_h'><img src='/share/src/web/images/minus.gif' id='Type Functors' onclick='toggle(this,"Type_Functors_d")' alt='+'/> 2 Type Functors</h1><div id='Type_Functors_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/typing.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Typing
+<span class="lineno" id=line2></span>  {
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>    typefun dom(t:TYPE):TYPE =&gt;
+<span class="lineno" id=line5></span>      <span class="small_keyword" title="type match expression">typematch</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>      | ?a -&gt; _ =&gt; a
+<span class="lineno" id=line7></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line8></span>    ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    typefun cod(t:TYPE):TYPE =&gt;
+<span class="lineno" id=line11></span>      <span class="small_keyword" title="type match expression">typematch</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line12></span>      | _ -&gt; ?b =&gt; b
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line14></span>    ;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    typefun prj1(t:TYPE):TYPE =&gt;
+<span class="lineno" id=line17></span>      <span class="small_keyword" title="type match expression">typematch</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line18></span>      | ?a * _ =&gt; a
+<span class="lineno" id=line19></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line20></span>    ;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    typefun prj2(t:TYPE):TYPE =&gt;
+<span class="lineno" id=line23></span>      <span class="small_keyword" title="type match expression">typematch</span> t <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line24></span>      | _ * ?b =&gt; b
+<span class="lineno" id=line25></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line26></span>    ;
+<span class="lineno" id=line27></span>  <span class="comment">/*
+<span class="lineno" id=line28></span>    // THESE SHOULD PROBABLY BE FIXED OR DELETED
+<span class="lineno" id=line29></span>    typefun type_lnot(x:TYPE):TYPE=&gt;
+<span class="lineno" id=line30></span>      typematch x with
+<span class="lineno" id=line31></span>      | 0 =&gt; 1
+<span class="lineno" id=line32></span>      | _ =&gt; 0
+<span class="lineno" id=line33></span>      endmatch
+<span class="lineno" id=line34></span>    ;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    typefun type_land(x:TYPE, y:TYPE):TYPE =&gt;
+<span class="lineno" id=line37></span>      typematch (x,  y) with
+<span class="lineno" id=line38></span>      | 0, _ =&gt; 0
+<span class="lineno" id=line39></span>      | _,0 =&gt; 0
+<span class="lineno" id=line40></span>      | _,_ =&gt; 1
+<span class="lineno" id=line41></span>      endmatch
+<span class="lineno" id=line42></span>    ;
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>    typefun type_lor(x:TYPE, y:TYPE):TYPE=&gt;
+<span class="lineno" id=line45></span>      typematch (x,  y) with
+<span class="lineno" id=line46></span>      | 0, 0 =&gt; 0
+<span class="lineno" id=line47></span>      | _,_ =&gt; 1
+<span class="lineno" id=line48></span>      endmatch
+<span class="lineno" id=line49></span>    ;
+<span class="lineno" id=line50></span>  
+<span class="lineno" id=line51></span>    typefun type_eq(x:TYPE, y:TYPE):TYPE=&gt;
+<span class="lineno" id=line52></span>      typematch x with
+<span class="lineno" id=line53></span>      | y =&gt; typematch y with | x =&gt; 1 | _ =&gt; 0 endmatch
+<span class="lineno" id=line54></span>      | _ =&gt; 0
+<span class="lineno" id=line55></span>      endmatch
+<span class="lineno" id=line56></span>    ;
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>    typefun type_ne (x:TYPE, y:TYPE):TYPE=&gt; type_lnot (type_eq (x , y));
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>    typefun type_le (x:TYPE, y:TYPE):TYPE=&gt;
+<span class="lineno" id=line61></span>      typematch x with
+<span class="lineno" id=line62></span>      | y =&gt; 1 
+<span class="lineno" id=line63></span>      | _ =&gt; 0
+<span class="lineno" id=line64></span>      endmatch
+<span class="lineno" id=line65></span>    ;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    typefun type_ge (x:TYPE, y:TYPE):TYPE=&gt;
+<span class="lineno" id=line68></span>      typematch y with
+<span class="lineno" id=line69></span>      | x =&gt; 1 
+<span class="lineno" id=line70></span>      | _ =&gt; 0
+<span class="lineno" id=line71></span>      endmatch
+<span class="lineno" id=line72></span>    ;
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>    typefun type_gt (x:TYPE, y:TYPE):TYPE=&gt; type_le (y, x);
+<span class="lineno" id=line75></span>    typefun type_lt (x:TYPE, y:TYPE):TYPE=&gt; type_ge (y, x);
+<span class="lineno" id=line76></span>  */</span>
+<span class="lineno" id=line77></span>  
+<span class="lineno" id=line78></span>    <span class="comment">// Polymorphic type comparisons, including subtyping AND subsumption</span>
+<span class="lineno" id=line79></span>    typefun is_subtype (arg:TYPE, param:TYPE):BOOL =&gt;
+<span class="lineno" id=line80></span>      subtypematch arg <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line81></span>      | param =&gt; TRUE
+<span class="lineno" id=line82></span>      | _ =&gt; FALSE
+<span class="lineno" id=line83></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line84></span>    ;
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>    typefun is_supertype (param:TYPE, arg:TYPE):BOOL =&gt;
+<span class="lineno" id=line87></span>      subtypematch arg <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line88></span>      | param =&gt; TRUE
+<span class="lineno" id=line89></span>      | _ =&gt; FALSE
+<span class="lineno" id=line90></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line91></span>    ;
+<span class="lineno" id=line92></span>  
+<span class="lineno" id=line93></span>    typefun type_eq(a:TYPE, b:TYPE):BOOL =&gt;
+<span class="lineno" id=line94></span>      <span class="small_keyword" title="type match expression">typematch</span> a <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line95></span>      | b =&gt; TRUE
+<span class="lineno" id=line96></span>      | _ =&gt; FALSE
+<span class="lineno" id=line97></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line98></span>    ;
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> memcount[t] : <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"#memcount"</span>;
+<span class="lineno" id=line101></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> arrayindexcount[t] : <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"#arrayindexcount"</span>;
+<span class="lineno" id=line102></span>  
+<span class="lineno" id=line103></span>    <span class="comment">// forward functor composition (1 argument)</span>
+<span class="lineno" id=line104></span>    typefun <span class="tex_symbol" title="\circ">\(\circ\)</span> (f:TYPE-&gt;TYPE, g:TYPE-&gt;TYPE):TYPE-&gt;TYPE =&gt; 
+<span class="lineno" id=line105></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (T:TYPE):TYPE =&gt; f(g T)
+<span class="lineno" id=line106></span>    ;
+<span class="lineno" id=line107></span>  
+<span class="lineno" id=line108></span>    <span class="comment">// reverse functor composition (1 argument)</span>
+<span class="lineno" id=line109></span>    typefun <span class="tex_symbol" title="\odot">\(\odot\)</span> (f:TYPE-&gt;TYPE, g:TYPE-&gt;TYPE):TYPE-&gt;TYPE =&gt; 
+<span class="lineno" id=line110></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (T:TYPE):TYPE =&gt; g(f T)
+<span class="lineno" id=line111></span>    ;
+<span class="lineno" id=line112></span>  
+<span class="lineno" id=line113></span>  
+<span class="lineno" id=line114></span>  }
+<span class="lineno" id=line115></span>  
+</pre></p></div><h1 id='Option_h'><img src='/share/src/web/images/minus.gif' id='Option' onclick='toggle(this,"Option_d")' alt='+'/> 3 Option</h1><div id='Option_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/option.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// Note: some felix internals expect this to be defined here, not in a class, and</span>
+<span class="lineno" id=line3></span>  <span class="comment">// in this order.  Don't mess with it!</span>
+<span class="lineno" id=line4></span>  publish <span class="fstring">"option type"</span>
+<span class="lineno" id=line5></span>  variant <span class="library" title="option type: Some x or None">opt</span>[T] =
+<span class="lineno" id=line6></span>    | None
+<span class="lineno" id=line7></span>    | Some of T
+<span class="lineno" id=line8></span>  ;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Option {
+<span class="lineno" id=line11></span>   
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Show[T]] Str[<span class="library" title="option type: Some x or None">opt</span>[T]] {
+<span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x:<span class="library" title="option type: Some x or None">opt</span>[T]) =&gt;
+<span class="lineno" id=line14></span>        <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line15></span>        | Some x =&gt; <span class="fstring">"Some "</span> + (<span class="library" title="Convert a value to a string">str</span> x)
+<span class="lineno" id=line16></span>        | #None =&gt; <span class="fstring">"None"</span>
+<span class="lineno" id=line17></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line18></span>      ;
+<span class="lineno" id=line19></span>    }
+<span class="lineno" id=line20></span>   
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T <span class="small_keyword" title="type-class constraint">with</span> Eq[T]] Eq[<span class="library" title="option type: Some x or None">opt</span>[T]] {
+<span class="lineno" id=line22></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : <span class="library" title="option type: Some x or None">opt</span>[T] * <span class="library" title="option type: Some x or None">opt</span>[T] -&gt; bool =
+<span class="lineno" id=line23></span>      | None, None =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line24></span>      | Some x, Some y =&gt; x == y
+<span class="lineno" id=line25></span>      | _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line26></span>      ;
+<span class="lineno" id=line27></span>    }
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span>[T] Eq[T];
+<span class="lineno" id=line29></span>   
+<span class="lineno" id=line30></span>    <span class="comment">// Return the value of the option if it has any, otherwise</span>
+<span class="lineno" id=line31></span>    <span class="comment">// returns the default value provided</span>
+<span class="lineno" id=line32></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> or_else[T] (x:<span class="library" title="option type: Some x or None">opt</span>[T]) (d:T) : T =&gt;
+<span class="lineno" id=line33></span>       <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line34></span>       | Some v =&gt; v
+<span class="lineno" id=line35></span>       | #None =&gt; d
+<span class="lineno" id=line36></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line37></span>       ;
+<span class="lineno" id=line38></span>    
+<span class="lineno" id=line39></span>    <span class="comment">// Returns the first option if it has the value, otherwise</span>
+<span class="lineno" id=line40></span>    <span class="comment">// the second option</span>
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> or_else[T] (x:<span class="library" title="option type: Some x or None">opt</span>[T]) (alt:<span class="library" title="option type: Some x or None">opt</span>[T]) : <span class="library" title="option type: Some x or None">opt</span>[T] =&gt;
+<span class="lineno" id=line42></span>       <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line43></span>       | Some _ =&gt; x
+<span class="lineno" id=line44></span>       | #None =&gt; alt
+<span class="lineno" id=line45></span>       <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line46></span>       ;
+<span class="lineno" id=line47></span>    
+<span class="lineno" id=line48></span>    <span class="comment">// If the option has a value, call the given procedure on it</span>
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> <span class="library" title="call procedure on each element of data structure">iter</span>[T] (_f:T-&gt;<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) (x:<span class="library" title="option type: Some x or None">opt</span>[T]) =&gt;
+<span class="lineno" id=line50></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line51></span>      | #None =&gt; {}
+<span class="lineno" id=line52></span>      | Some v =&gt; { _f v; }
+<span class="lineno" id=line53></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line54></span>      ;
+<span class="lineno" id=line55></span>    
+<span class="lineno" id=line56></span>    <span class="comment">// Convert an option to a list with either zero or one elements</span>
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span>[T] <span class="library" title="functional, singly linked list">list</span>[T] (x:<span class="library" title="option type: Some x or None">opt</span>[T]) =&gt; 
+<span class="lineno" id=line58></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line59></span>      | #None =&gt; <span class="library" title="functional, singly linked list">list</span>[T]()
+<span class="lineno" id=line60></span>      | Some v =&gt; <span class="library" title="functional, singly linked list">list</span>[T](v) 
+<span class="lineno" id=line61></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line62></span>    ;
+<span class="lineno" id=line63></span>    
+<span class="lineno" id=line64></span>    <span class="comment">// True if this option has no value</span>
+<span class="lineno" id=line65></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_empty[T] : <span class="library" title="option type: Some x or None">opt</span>[T] -&gt; 2 =
+<span class="lineno" id=line66></span>      | #None =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line67></span>      | _ =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line68></span>    ;
+<span class="lineno" id=line69></span>    
+<span class="lineno" id=line70></span>    <span class="comment">// True if this option has a value</span>
+<span class="lineno" id=line71></span>    <span class="qualifier" title="A function depending only on its parameters">pure</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> is_defined[T] : <span class="library" title="option type: Some x or None">opt</span>[T] -&gt; 2 =
+<span class="lineno" id=line72></span>      | #None =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line73></span>      | _ =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line74></span>    ;
+<span class="lineno" id=line75></span>    
+<span class="lineno" id=line76></span>    <span class="comment">// Get the optional value; aborts if no value is available</span>
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get[T] : <span class="library" title="option type: Some x or None">opt</span>[T] -&gt; T =
+<span class="lineno" id=line78></span>      | Some v =&gt; v
+<span class="lineno" id=line79></span>    ;
+<span class="lineno" id=line80></span>    
+<span class="lineno" id=line81></span>    <span class="comment">// If the option has a value, apply the function to it and return a new Some value.</span>
+<span class="lineno" id=line82></span>    <span class="comment">// If the option has no value, returns None</span>
+<span class="lineno" id=line83></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="return data structure with function applied to each value">map</span>[T,U] (_f:T-&gt;U) (x:<span class="library" title="option type: Some x or None">opt</span>[T]): <span class="library" title="option type: Some x or None">opt</span>[U] =&gt; 
+<span class="lineno" id=line84></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line85></span>      | #None =&gt; None[U]
+<span class="lineno" id=line86></span>      | Some v =&gt; Some(_f v) 
+<span class="lineno" id=line87></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line88></span>    ;
+<span class="lineno" id=line89></span>    
+<span class="lineno" id=line90></span>    <span class="comment">// Mimics the filter operation on a list.</span>
+<span class="lineno" id=line91></span>    <span class="comment">// If there is a value and the predicate returns false for that value, return</span>
+<span class="lineno" id=line92></span>    <span class="comment">// None.  Otherwise return the same option object.</span>
+<span class="lineno" id=line93></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> filter[T] (P:T -&gt; bool) (x:<span class="library" title="option type: Some x or None">opt</span>[T]) : <span class="library" title="option type: Some x or None">opt</span>[T] =&gt;
+<span class="lineno" id=line94></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line95></span>      | Some v =&gt; <span class="small_keyword" title="conditional">if</span> P(v) <span class="small_keyword" title="conditional">then</span> x <span class="small_keyword" title="conditional">else</span> None[T] <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line96></span>      | #None =&gt; x
+<span class="lineno" id=line97></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line98></span>    ;
+<span class="lineno" id=line99></span>    
+<span class="lineno" id=line100></span>    <span class="comment">// Make option types iterable.  Iteration will loop once</span>
+<span class="lineno" id=line101></span>    <span class="comment">// if there is a value.  It's a handy shortcut for using</span>
+<span class="lineno" id=line102></span>    <span class="comment">// the value if you don't care about the None case.</span>
+<span class="lineno" id=line103></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator[T] (<span class="big_keyword" title="Define a mutable variable">var</span> x:<span class="library" title="option type: Some x or None">opt</span>[T]) () = {
+<span class="lineno" id=line104></span>      <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> x;
+<span class="lineno" id=line105></span>      <span class="small_keyword" title="return">return</span> None[T];
+<span class="lineno" id=line106></span>    }
+<span class="lineno" id=line107></span>  }
+<span class="lineno" id=line108></span>  
+<span class="lineno" id=line109></span>  <span class="big_keyword" title="Define a type class">class</span> DefaultValue[T] {
+<span class="lineno" id=line110></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> default[T]: 1-&gt;T;
+<span class="lineno" id=line111></span>  
+<span class="lineno" id=line112></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> or_default[T]  (x:<span class="library" title="option type: Some x or None">opt</span>[T]) () =&gt;
+<span class="lineno" id=line113></span>                 x.or_else #default[T]
+<span class="lineno" id=line114></span>         ;
+<span class="lineno" id=line115></span>    
+<span class="lineno" id=line116></span>  }
+<span class="lineno" id=line117></span>  
+</pre></p></div><h1 id='Slice_h'><img src='/share/src/web/images/minus.gif' id='Slice' onclick='toggle(this,"Slice_d")' alt='+'/> 4 Slice</h1><div id='Slice_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/slice.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Slice {
+<span class="lineno" id=line3></span>  variant slice[T] =
+<span class="lineno" id=line4></span>    | Slice_all
+<span class="lineno" id=line5></span>    | Slice_from of T
+<span class="lineno" id=line6></span>    | Slice_from_counted of T * <span class="library" title="binding of C int type">int</span> <span class="comment">/* second arg is count */</span>
+<span class="lineno" id=line7></span>    | Slice_to_incl of T
+<span class="lineno" id=line8></span>    | Slice_to_excl of T
+<span class="lineno" id=line9></span>    | Slice_range_incl of T * T
+<span class="lineno" id=line10></span>    | Slice_range_excl of T * T
+<span class="lineno" id=line11></span>    | Slice_one of T
+<span class="lineno" id=line12></span>    | Slice_none
+<span class="lineno" id=line13></span>  ;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> min[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (x:slice[T]) =&gt; <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line16></span>    | ( Slice_all 
+<span class="lineno" id=line17></span>      | Slice_to_incl _ 
+<span class="lineno" id=line18></span>      | Slice_to_excl
+<span class="lineno" id=line19></span>      ) =&gt; #minval[T]
+<span class="lineno" id=line20></span>    | (Slice_from i 
+<span class="lineno" id=line21></span>      | Slice_from_counted (i,_) 
+<span class="lineno" id=line22></span>      | Slice_range_incl (i,_) 
+<span class="lineno" id=line23></span>      | Slice_range_excl (i,_) 
+<span class="lineno" id=line24></span>      | Slice_one i 
+<span class="lineno" id=line25></span>      ) =&gt; i
+<span class="lineno" id=line26></span>    | Slice_none =&gt; #maxval[T]
+<span class="lineno" id=line27></span>  ;
+<span class="lineno" id=line28></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> max[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (x:slice[T]) =&gt; <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line29></span>    | ( Slice_all 
+<span class="lineno" id=line30></span>      | Slice_from _
+<span class="lineno" id=line31></span>      ) =&gt; #maxval[T]
+<span class="lineno" id=line32></span>    | Slice_from_counted (i,n) =&gt; pred (advance (n, i))
+<span class="lineno" id=line33></span>    | Slice_to_incl i =&gt; i
+<span class="lineno" id=line34></span>    | Slice_to_excl i =&gt; pred i
+<span class="lineno" id=line35></span>    | Slice_range_incl (_,i) =&gt; i
+<span class="lineno" id=line36></span>    | Slice_range_excl (_,i) =&gt; pred i
+<span class="lineno" id=line37></span>    | Slice_one i =&gt; i
+<span class="lineno" id=line38></span>    | Slice_none =&gt; #minval  
+<span class="lineno" id=line39></span>  ;
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> normalise_to_inclusive_range[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (x:slice[T]) =&gt;
+<span class="lineno" id=line42></span>    <span class="small_keyword" title="let binder">let</span> l = x.min <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line43></span>    <span class="small_keyword" title="let binder">let</span> u = x.max <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line44></span>    <span class="small_keyword" title="conditional">if</span> l &lt;= u <span class="small_keyword" title="conditional">then</span> Slice_range_incl (l,u) 
+<span class="lineno" id=line45></span>    <span class="small_keyword" title="conditional">else</span> Slice_none[T]
+<span class="lineno" id=line46></span>  ;
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cap">\(\cap\)</span>[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (x:slice[T], y:slice[T]) =&gt;
+<span class="lineno" id=line49></span>    <span class="small_keyword" title="let binder">let</span> l = max (min x, min y) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line50></span>    <span class="small_keyword" title="let binder">let</span> u = min (max x, max y) <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line51></span>    <span class="small_keyword" title="conditional">if</span>  l &lt;= u <span class="small_keyword" title="conditional">then</span> Slice_range_incl (l,u) 
+<span class="lineno" id=line52></span>    <span class="small_keyword" title="conditional">else</span> Slice_none[T]
+<span class="lineno" id=line53></span>  ;
+<span class="lineno" id=line54></span>  
+<span class="lineno" id=line55></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\in">\(\in\)</span>[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (x:T, s:slice[T]) =&gt; 
+<span class="lineno" id=line56></span>    <span class="small_keyword" title="match statement or expression">match</span> s <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line57></span>    | #Slice_all =&gt; <span class="library" title="truth value">true</span>
+<span class="lineno" id=line58></span>    | Slice_from i =&gt; x &gt;= i
+<span class="lineno" id=line59></span>    | Slice_from_counted (i,n) =&gt; x &gt;= i <span class="small_keyword" title="logical conjunction">and</span> x &lt; advance (n, i)
+<span class="lineno" id=line60></span>    | Slice_to_incl j =&gt; x &lt;= j
+<span class="lineno" id=line61></span>    | Slice_to_excl j =&gt; x &lt; j
+<span class="lineno" id=line62></span>    | Slice_range_incl (i,j) =&gt; x &gt;= i <span class="small_keyword" title="logical conjunction">and</span> x &lt;= j
+<span class="lineno" id=line63></span>    | Slice_range_excl (i,j) =&gt; x &gt;= i <span class="small_keyword" title="logical conjunction">and</span> x &lt; j 
+<span class="lineno" id=line64></span>    | Slice_one i =&gt; i == x
+<span class="lineno" id=line65></span>    | Slice_none =&gt; <span class="library" title="false value">false</span>
+<span class="lineno" id=line66></span>  ;
+<span class="lineno" id=line67></span>  
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (s:slice[T]) =&gt;
+<span class="lineno" id=line70></span>    <span class="small_keyword" title="match statement or expression">match</span> s <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line71></span>    | Slice_one x =&gt; { <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some x; <span class="small_keyword" title="return">return</span> None[T]; }
+<span class="lineno" id=line72></span>    | Slice_range_incl (first, last) =&gt; slice_range_incl first last
+<span class="lineno" id=line73></span>    | Slice_range_excl (first, last) =&gt; slice_range_excl first last
+<span class="lineno" id=line74></span>    | Slice_to_incl (last) =&gt; slice_range_incl #minval[T] last
+<span class="lineno" id=line75></span>    | Slice_to_excl (last) =&gt; slice_range_excl #minval[T] last
+<span class="lineno" id=line76></span>    | Slice_from (first) =&gt; slice_range_incl first #maxval[T]
+<span class="lineno" id=line77></span>    | Slice_from_counted (first, count) =&gt; slice_from_counted first count
+<span class="lineno" id=line78></span>    | #Slice_all =&gt; slice_range_incl #minval #maxval
+<span class="lineno" id=line79></span>    | #Slice_none =&gt; { <span class="small_keyword" title="return">return</span> None[T]; } 
+<span class="lineno" id=line80></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line81></span>  ;
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>  <span class="comment">// Note: guarrantees no overflow</span>
+<span class="lineno" id=line84></span>  <span class="comment">// handles all cases for all integers correctly</span>
+<span class="lineno" id=line85></span>  <span class="comment">// produces nothing if first &gt; last</span>
+<span class="lineno" id=line86></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slice_range_incl[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (first:T) (last:T) () = {
+<span class="lineno" id=line87></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i = first;
+<span class="lineno" id=line88></span>    <span class="small_keyword" title="while loop">while</span> i &lt; last <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line89></span>      <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some i; 
+<span class="lineno" id=line90></span>      i = succ i;
+<span class="lineno" id=line91></span>    <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line92></span>    <span class="small_keyword" title="conditional">if</span> i == last perform <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some i;
+<span class="lineno" id=line93></span>    <span class="small_keyword" title="return">return</span> None[T]; 
+<span class="lineno" id=line94></span>  }
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slice_range_excl[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (first:T) (limit:T) () = {
+<span class="lineno" id=line97></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i = first;
+<span class="lineno" id=line98></span>    <span class="small_keyword" title="while loop">while</span> i &lt; limit <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line99></span>      <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some i; 
+<span class="lineno" id=line100></span>      i = succ i;
+<span class="lineno" id=line101></span>    <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line102></span>    <span class="small_keyword" title="return">return</span> None[T]; 
+<span class="lineno" id=line103></span>  }
+<span class="lineno" id=line104></span>  
+<span class="lineno" id=line105></span>  
+<span class="lineno" id=line106></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> slice_from_counted[T <span class="small_keyword" title="type-class constraint">with</span> BoundRandomSequence[T]] (first:T) (count:<span class="library" title="binding of C int type">int</span>) () = {
+<span class="lineno" id=line107></span>    <span class="big_keyword" title="Define a mutable variable">var</span> k = count; 
+<span class="lineno" id=line108></span>    <span class="small_keyword" title="while loop">while</span> k &gt; 0 <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line109></span>      <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some (advance (count - k, first)); 
+<span class="lineno" id=line110></span>      k = k - 1;
+<span class="lineno" id=line111></span>    <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line112></span>    <span class="small_keyword" title="return">return</span> None[T]; 
+<span class="lineno" id=line113></span>  }
+<span class="lineno" id=line114></span>  
+<span class="lineno" id=line115></span>  <span class="comment">// hack so for in f do .. done will work too</span>
+<span class="lineno" id=line116></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator[t] (f:1-&gt;<span class="library" title="option type: Some x or None">opt</span>[t]) =&gt; f;
+<span class="lineno" id=line117></span>  
+<span class="lineno" id=line118></span>  <span class="comment">// slice index calculator</span>
+<span class="lineno" id=line119></span>  
+<span class="lineno" id=line120></span>  <span class="comment">// Given length n, begin b and end e indicies</span>
+<span class="lineno" id=line121></span>  <span class="comment">// normalise so either 0 &lt;= b &lt;= e &lt;= n or m = 0</span>
+<span class="lineno" id=line122></span>  <span class="comment">// </span>
+<span class="lineno" id=line123></span>  <span class="comment">// if m = 0 ignore b,e and use empty slice</span>
+<span class="lineno" id=line124></span>  <span class="comment">// otherwise return a slice starting at b inclusive</span>
+<span class="lineno" id=line125></span>  <span class="comment">// and ending at e exclusive, length m &gt; 0</span>
+<span class="lineno" id=line126></span>  
+<span class="lineno" id=line127></span>  <span class="comment">// Normalised form allows negative indices.</span>
+<span class="lineno" id=line128></span>  <span class="comment">// However out of range indices are trimmed back:</span>
+<span class="lineno" id=line129></span>  <span class="comment">// the calculation is NOT modular.</span>
+<span class="lineno" id=line130></span>  
+<span class="lineno" id=line131></span>  
+<span class="lineno" id=line132></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> cal_slice (n:<span class="library" title="binding of C int type">int</span>, <span class="big_keyword" title="Define a mutable variable">var</span> b:<span class="library" title="binding of C int type">int</span>, <span class="big_keyword" title="Define a mutable variable">var</span> e:<span class="library" title="binding of C int type">int</span>) = {
+<span class="lineno" id=line133></span>    <span class="small_keyword" title="conditional">if</span> b&lt;0 <span class="small_keyword" title="imperative code begins">do</span> b = b + n; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line134></span>    <span class="small_keyword" title="conditional">if</span> b&lt;0 <span class="small_keyword" title="imperative code begins">do</span> b = 0; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line135></span>    <span class="small_keyword" title="conditional">if</span> b&gt;=n <span class="small_keyword" title="imperative code begins">do</span> b = n; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line136></span>    <span class="comment">// assert 0 &lt;= b &lt;= n (valid index or one past end)</span>
+<span class="lineno" id=line137></span>    <span class="small_keyword" title="conditional">if</span> e&lt;0 <span class="small_keyword" title="imperative code begins">do</span>  e = e + n; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line138></span>    <span class="small_keyword" title="conditional">if</span> e&lt;0 <span class="small_keyword" title="imperative code begins">do</span>  e = 0; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line139></span>    <span class="small_keyword" title="conditional">if</span> e&gt;=n <span class="small_keyword" title="imperative code begins">do</span> e = n; <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line140></span>    <span class="comment">// assert 0 &lt;= e &lt;= n (valid index or one pas end)</span>
+<span class="lineno" id=line141></span>    <span class="big_keyword" title="Define a mutable variable">var</span> m = e - b; 
+<span class="lineno" id=line142></span>    <span class="small_keyword" title="conditional">if</span> m&lt;0 <span class="small_keyword" title="imperative code begins">do</span> m = 0; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line143></span>    <span class="comment">// assert 0 &lt;= m &lt;= n (if m &gt; 0 then b &lt; e else m = 0)</span>
+<span class="lineno" id=line144></span>    <span class="small_keyword" title="return">return</span> b,e,m;
+<span class="lineno" id=line145></span>    <span class="comment">// assert m = 0 or  0 &lt;= b &lt;= e &lt;= n and 0 &lt; m &lt; n</span>
+<span class="lineno" id=line146></span>  }
+<span class="lineno" id=line147></span>  
+<span class="lineno" id=line148></span>  variant gslice[T] =
+<span class="lineno" id=line149></span>    | GSlice of slice[T]
+<span class="lineno" id=line150></span>    | GSSList of <span class="library" title="functional, singly linked list">list</span>[gslice[T]]
+<span class="lineno" id=line151></span>    | GSIList of <span class="library" title="functional, singly linked list">list</span>[T]
+<span class="lineno" id=line152></span>    | GSIter of 1 -&gt; <span class="library" title="option type: Some x or None">opt</span>[T]
+<span class="lineno" id=line153></span>    | GSMap of (T -&gt; T) * gslice[T]
+<span class="lineno" id=line154></span>  ;
+<span class="lineno" id=line155></span>  
+<span class="lineno" id=line156></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> gslist_iterator[T <span class="small_keyword" title="type-class constraint">with</span> Integer[T]] (ls: <span class="library" title="functional, singly linked list">list</span>[gslice[T]]) () : <span class="library" title="option type: Some x or None">opt</span>[T] =
+<span class="lineno" id=line157></span>  {
+<span class="lineno" id=line158></span>    <span class="big_keyword" title="Define a mutable variable">var</span> current = ls;
+<span class="lineno" id=line159></span>  next:&gt;
+<span class="lineno" id=line160></span>    <span class="small_keyword" title="match statement or expression">match</span> current <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line161></span>    | #Empty =&gt; <span class="small_keyword" title="return">return</span> None[T];
+<span class="lineno" id=line162></span>    | Cons (gs, tail) =&gt;
+<span class="lineno" id=line163></span>      <span class="small_keyword" title="for loop">for</span> v <span class="small_keyword" title="membership operator, function mem">in</span> gs <span class="small_keyword" title="imperative code begins">do</span> <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some v; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line164></span>      current = tail;
+<span class="lineno" id=line165></span>      <span class="small_keyword" title="jump to label">goto</span> next;
+<span class="lineno" id=line166></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line167></span>  }
+<span class="lineno" id=line168></span>  
+<span class="lineno" id=line169></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> gsmap_iterator[T] (f:T-&gt;T) (<span class="big_keyword" title="Define a mutable variable">var</span> gs:gslice[T]) () : <span class="library" title="option type: Some x or None">opt</span>[T] =
+<span class="lineno" id=line170></span>  {
+<span class="lineno" id=line171></span>    <span class="small_keyword" title="for loop">for</span> v <span class="small_keyword" title="membership operator, function mem">in</span> gs <span class="small_keyword" title="imperative code begins">do</span> <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> v.f.Some; <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line172></span>    <span class="small_keyword" title="return">return</span> None[T];
+<span class="lineno" id=line173></span>  }
+<span class="lineno" id=line174></span>  
+<span class="lineno" id=line175></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator[T <span class="small_keyword" title="type-class constraint">with</span> Integer[T]] (gs:gslice[T]) =&gt;
+<span class="lineno" id=line176></span>    <span class="small_keyword" title="match statement or expression">match</span> gs <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line177></span>    | GSlice s =&gt; iterator s
+<span class="lineno" id=line178></span>    | GSSList ls =&gt; gslist_iterator ls
+<span class="lineno" id=line179></span>    | GSIList ls =&gt; iterator ls
+<span class="lineno" id=line180></span>    | GSIter it =&gt; it
+<span class="lineno" id=line181></span>    | GSMap (f,gs) =&gt; gsmap_iterator f gs
+<span class="lineno" id=line182></span>  ;
+<span class="lineno" id=line183></span>  
+<span class="lineno" id=line184></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> +[T <span class="small_keyword" title="type-class constraint">with</span> Integer[T]] (x:gslice[T], y:gslice[T]) =&gt;
+<span class="lineno" id=line185></span>    GSSList (<span class="library" title="functional, singly linked list">list</span> (x,y))
+<span class="lineno" id=line186></span>  ;
+<span class="lineno" id=line187></span>  
+<span class="lineno" id=line188></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> +[T <span class="small_keyword" title="type-class constraint">with</span> Integer[T]] (x:gslice[T], y:slice[T]) =&gt;
+<span class="lineno" id=line189></span>   x + GSlice y
+<span class="lineno" id=line190></span>  ;
+<span class="lineno" id=line191></span>  
+<span class="lineno" id=line192></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> +[T <span class="small_keyword" title="type-class constraint">with</span> Integer[T]] (x:slice[T], y:gslice[T]) =&gt;
+<span class="lineno" id=line193></span>   GSlice x + y
+<span class="lineno" id=line194></span>  ;
+<span class="lineno" id=line195></span>  
+<span class="lineno" id=line196></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> +[T <span class="small_keyword" title="type-class constraint">with</span> Integer[T]] (x:slice[T], y:slice[T]) =&gt;
+<span class="lineno" id=line197></span>   GSlice x + GSlice y
+<span class="lineno" id=line198></span>  ;
+<span class="lineno" id=line199></span>  
+<span class="lineno" id=line200></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="return data structure with function applied to each value">map</span>[T <span class="small_keyword" title="type-class constraint">with</span> Integer[T]] (f:T-&gt;T) (gs:gslice[T]) =&gt;
+<span class="lineno" id=line201></span>    GSMap (f,gs)
+<span class="lineno" id=line202></span>  ;
+<span class="lineno" id=line203></span>  }
+<span class="lineno" id=line204></span>  
+</pre></p></div><h1 id='Operations_on_sums_of_units_h'><img src='/share/src/web/images/minus.gif' id='Operations on sums of units' onclick='toggle(this,"Operations_on_sums_of_units_d")' alt='+'/> 5 Operations on sums of units</h1><div id='Operations_on_sums_of_units_d' style='display:block'>
+<p>Treated as finite cyclic groups.
+</p><pre class='inclusion'>
+share/lib/std/datatype/unitsum.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// -----------------------------------------------------------------------------</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> <span class="library" title="Type with no values, returning void indicates a procedure">void</span> = 0;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> <span class="library" title="Type with one values (), the empty tuple">unit</span> = 1;
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[<span class="library" title="Type with no values, returning void indicates a procedure">void</span>] {
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x:<span class="library" title="Type with no values, returning void indicates a procedure">void</span>) =&gt; <span class="fstring">"void"</span>;
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Open a module or class">open</span> Show[<span class="library" title="Type with no values, returning void indicates a procedure">void</span>];
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[<span class="library" title="Type with one values (), the empty tuple">unit</span>] {
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x:<span class="library" title="Type with one values (), the empty tuple">unit</span>) =&gt; <span class="fstring">"()"</span>;
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Open a module or class">open</span> Show[<span class="library" title="Type with one values (), the empty tuple">unit</span>];
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T:COMPACTLINEAR] Eq[T] {
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == (x:T,y:T) =&gt; <span class="small_keyword" title="Integer index of value of a sum type">caseno</span> x ==<span class="small_keyword" title="Integer index of value of a sum type">caseno</span> y;
+<span class="lineno" id=line19></span>  }
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T:COMPACTLINEAR] Tord[T] {
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; (x:T,y:T) =&gt; <span class="small_keyword" title="Integer index of value of a sum type">caseno</span> x &lt; <span class="small_keyword" title="Integer index of value of a sum type">caseno</span> y;
+<span class="lineno" id=line22></span>  }
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T:COMPACTLINEAR] ForwardSequence[T] {
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> succ (x:T) =&gt; (<span class="small_keyword" title="Integer index of value of a sum type">caseno</span> x + 1) :&gt;&gt; T;
+<span class="lineno" id=line25></span>  }
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T:COMPACTLINEAR] BidirectionalSequence[T] {
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pred (x:T) =&gt; (<span class="small_keyword" title="Integer index of value of a sum type">caseno</span> x - 1) :&gt;&gt; T;
+<span class="lineno" id=line28></span>  }
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T:COMPACTLINEAR] UpperBoundTotalOrder[T] {
+<span class="lineno" id=line30></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> maxval () =&gt; (memcount[T].<span class="library" title="binding of C int type">int</span> - 1) :&gt;&gt; T;
+<span class="lineno" id=line31></span>  }
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T:COMPACTLINEAR] LowerBoundTotalOrder[T] {
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> minval () =&gt; 0 :&gt;&gt; T;
+<span class="lineno" id=line35></span>  }
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T:COMPACTLINEAR] RandomSequence[T] {
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> advance (amt: <span class="library" title="binding of C int type">int</span>,  pos:T) =&gt; (<span class="small_keyword" title="Integer index of value of a sum type">caseno</span> pos + amt) :&gt;&gt; T;
+<span class="lineno" id=line39></span>  }
+<span class="lineno" id=line40></span>  <span class="big_keyword" title="Open a module or class">open</span>[T:COMPACTLINEAR] BoundRandomSequence[T];
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>  typefun n<span class="fstring">"`+"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_add"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line44></span>  typefun n<span class="fstring">"`-"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_diff"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line45></span>  typefun n<span class="fstring">"`*"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_mul"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line46></span>  typefun n<span class="fstring">"`/"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_div"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line47></span>  typefun n<span class="fstring">"`%"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_mod"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>  typefun n<span class="fstring">"_unitsum_min"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_min"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line50></span>  typefun n<span class="fstring">"_unitsum_max"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_max"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line51></span>  typefun n<span class="fstring">"_unitsum_gcd"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_gcd"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line52></span>  typefun n<span class="fstring">"_unitsum_lcm"</span> (x:UNITSUM,y:UNITSUM):UNITSUM =&gt; _typeop (<span class="fstring">"_unitsum_lcm"</span>,(x,y),UNITSUM);
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>  typefun n<span class="fstring">"`&lt;"</span> (x:UNITSUM,y:UNITSUM):BOOL=&gt; _typeop (<span class="fstring">"_unitsum_lt"</span>,(x,y),BOOL);
+<span class="lineno" id=line55></span>  typefun n<span class="fstring">"`&gt;"</span> (x:UNITSUM,y:UNITSUM):BOOL=&gt; _typeop (<span class="fstring">"_unitsum_lt"</span>,(y,x),BOOL);
+<span class="lineno" id=line56></span>  typefun n<span class="fstring">"`=="</span> (x:UNITSUM,y:UNITSUM):BOOL=&gt; x `&lt; y <span class="small_keyword" title="logical conjunction">and</span> y `&lt; x;
+</pre></p><p>// -----------------------------------------------------------------------------
+</p></div><h1 id='Category_Theoretic_Functional_Operations_h'><img src='/share/src/web/images/minus.gif' id='Category Theoretic Functional Operations' onclick='toggle(this,"Category_Theoretic_Functional_Operations_d")' alt='+'/> 6 Category Theoretic Functional Operations</h1><div id='Category_Theoretic_Functional_Operations_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/functional.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">Categorical Operators</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Functional
+<span class="lineno" id=line4></span>  {
+<span class="lineno" id=line5></span>    <span class="comment">// note: in Felix, products are uniquely decomposable, but arrows</span>
+<span class="lineno" id=line6></span>    <span class="comment">// are not. So we cannot overload based on arrow factorisation.</span>
+<span class="lineno" id=line7></span>    <span class="comment">// for example, the curry functions can be overloaded but</span>
+<span class="lineno" id=line8></span>    <span class="comment">// the uncurry functions cannot be</span>
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="comment">// Note: Felix is not powerful enough to generalise these</span>
+<span class="lineno" id=line11></span>    <span class="comment">// operation in user code, i.e. polyadic programming</span>
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="doccomment">change star into arrow (2 components)</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> curry[u,v,r] (f:u*v-&gt;r) : u -&gt; v -&gt; r =&gt; <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) (y:v) =&gt; f (x,y);
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="doccomment">change star into arrow (3 components)</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> curry[u,v,w,r] (f:u*v*w-&gt;r) : u -&gt; v -&gt; w -&gt; r =&gt; <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) (y:v) (z:w) =&gt; f (x,y,z);
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>    <span class="doccomment">change arrow into star (arity 2)</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> uncurry2[u,v,r] (f:u-&gt;v-&gt;r) : u * v -&gt; r =&gt; <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u,y:v) =&gt; f x y;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="doccomment">change arrow into star (arity 3)</span>
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> uncurry3[u,v,w,r] (f:u-&gt;v-&gt;w-&gt;r) : u * v * w -&gt; r =&gt; <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u,y:v,z:w) =&gt; f x y z;
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>    <span class="doccomment">argument order permutation (2 components)</span>
+<span class="lineno" id=line26></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> twist[u,v,r] (f:u*v-&gt;r) : v * u -&gt; r =&gt; <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:v,y:u) =&gt; f (y,x);
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    <span class="doccomment">projection 1 (2 components)</span>
+<span class="lineno" id=line29></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> proj1[u1,u2,r1,r2] (f:u1*u2-&gt;r1*r2) : u1 * u2 -&gt; r1 =&gt; 
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u1*u2) =&gt; <span class="small_keyword" title="match statement or expression">match</span> f x <span class="small_keyword" title="type-class constraint">with</span> | a,_ =&gt; a <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>    <span class="doccomment">projection 2 (2 components)</span>
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> proj2[u1,u2,r1,r2] (f:u1*u2-&gt;r1*r2) : u1 * u2 -&gt; r2 =&gt; 
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u1*u2) =&gt; <span class="small_keyword" title="match statement or expression">match</span> f x <span class="small_keyword" title="type-class constraint">with</span> | _,b =&gt; b <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    <span class="comment">// aka \delta or diagonal function </span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> dup[T] (x:T) =&gt; x,x;
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="doccomment">unique product (of above projections)</span>
+<span class="lineno" id=line40></span>    <span class="comment">// if f: C-&gt; A and g: C -&gt; B there is a unique function</span>
+<span class="lineno" id=line41></span>    <span class="comment">// &lt;f,g&gt;: C -&gt; A * B such that f = &lt;f,g&gt; \odot \pi0 and</span>
+<span class="lineno" id=line42></span>    <span class="comment">// g = &lt;f,g&gt; \odot pi1</span>
+<span class="lineno" id=line43></span>    <span class="comment">// WHAT IS THE FUNCTION CALLED?</span>
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> prdx[u1,r1,r2] (f1:u1-&gt;r1,f2:u1-&gt;r2) : u1 -&gt; r1 * r2 =&gt; 
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x1:u1) =&gt; f1 x1, f2 x1;
+<span class="lineno" id=line47></span>  
+<span class="lineno" id=line48></span>    <span class="doccomment">series composition (2 functions)</span>
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> compose[u,v,w] (f:v-&gt;w, g:u-&gt;v) : u -&gt; w =&gt; 
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt; f (g x)
+<span class="lineno" id=line51></span>    ;
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>    <span class="doccomment">series composition (2 functions)</span>
+<span class="lineno" id=line54></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> compose[u,v,w] (f:v-&gt;.w, g:u-&gt;.v) : u -&gt;. w =&gt; 
+<span class="lineno" id=line55></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt;. f (g x)
+<span class="lineno" id=line56></span>    ;
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\circ">\(\circ\)</span> [u,v,w] (f:v-&gt;w, g:u-&gt;v) : u -&gt; w =&gt; 
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt; f (g x)
+<span class="lineno" id=line60></span>    ;
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\circ">\(\circ\)</span> [u,v,w] (f:v-&gt;.w, g:u-&gt;.v) : u -&gt;. w =&gt; 
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt;. f (g x)
+<span class="lineno" id=line64></span>    ;
+<span class="lineno" id=line65></span>  
+<span class="lineno" id=line66></span>    <span class="doccomment">series reverse composition (2 functions)</span>
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> rev_compose[u,v,w] (f:u-&gt;v, g:v-&gt;w) : u -&gt; w =&gt; 
+<span class="lineno" id=line68></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt; g (f x)
+<span class="lineno" id=line69></span>    ;
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>    <span class="doccomment">series reverse composition (2 functions)</span>
+<span class="lineno" id=line72></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> rev_compose[u,v,w] (f:u-&gt;.v, g:v-&gt;.w) : u -&gt;. w =&gt; 
+<span class="lineno" id=line73></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt;. g (f x)
+<span class="lineno" id=line74></span>    ;
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    <span class="doccomment">series reverse composition (2 functions)</span>
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\odot">\(\odot\)</span>[u,v,w] (f:u-&gt;v, g:v-&gt;w) : u -&gt; w =&gt; 
+<span class="lineno" id=line78></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt; g (f x)
+<span class="lineno" id=line79></span>    ;
+<span class="lineno" id=line80></span>  
+<span class="lineno" id=line81></span>    <span class="doccomment">series reverse composition (2 functions)</span>
+<span class="lineno" id=line82></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\odot">\(\odot\)</span>[u,v,w] (f:u-&gt;.v, g:v-&gt;.w) : u -&gt;. w =&gt; 
+<span class="lineno" id=line83></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt;. g (f x)
+<span class="lineno" id=line84></span>    ;
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>    <span class="doccomment">series reverse composition (2 functions)</span>
+<span class="lineno" id=line87></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cdot">\(\cdot\)</span>[u,v,w] (f:u-&gt;v, g:v-&gt;w) : u -&gt; w =&gt; 
+<span class="lineno" id=line88></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt; g (f x)
+<span class="lineno" id=line89></span>    ;
+<span class="lineno" id=line90></span>  
+<span class="lineno" id=line91></span>    <span class="doccomment">series reverse composition (2 functions)</span>
+<span class="lineno" id=line92></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="tex_symbol" title="\cdot">\(\cdot\)</span>[u,v,w] (f:u-&gt;.v, g:v-&gt;.w) : u -&gt; w =&gt; 
+<span class="lineno" id=line93></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:u) =&gt;. g (f x)
+<span class="lineno" id=line94></span>    ;
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>    <span class="comment">// these are in the wrong place but they have to go somewhere!</span>
+<span class="lineno" id=line97></span>    <span class="comment">// these are bindings to C function types and also, conditionally,</span>
+<span class="lineno" id=line98></span>    <span class="comment">// clang block function types.</span>
+<span class="lineno" id=line99></span>    <span class="comment">// </span>
+<span class="lineno" id=line100></span>    <span class="comment">// They're provided so C parameter types as for the T, P1, P2 </span>
+<span class="lineno" id=line101></span>    <span class="comment">// in C notation T (*f) (P1 p1, P2 p2)</span>
+<span class="lineno" id=line102></span>    <span class="comment">// are syntactically atomic since Felix doesn't know how to ravel</span>
+<span class="lineno" id=line103></span>    <span class="comment">// the name in complicated types...</span>
+<span class="lineno" id=line104></span>    <span class="comment">// </span>
+<span class="lineno" id=line105></span>    <span class="comment">// the c variants are for C functions</span>
+<span class="lineno" id=line106></span>    <span class="comment">// the b variants are for clang block functions</span>
+<span class="lineno" id=line107></span>    <span class="comment">// the integer indicates the number of type variables required</span>
+<span class="lineno" id=line108></span>  
+<span class="lineno" id=line109></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cproc1[R] = <span class="fstring">"typename _type1&lt;?1&gt;::cproc"</span>;
+<span class="lineno" id=line110></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cfun1[R] = <span class="fstring">"typename _type1&lt;?1&gt;::cfun"</span>;
+<span class="lineno" id=line111></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bproc1[R] = <span class="fstring">"typename _type1&lt;?1&gt;::bproc"</span>;
+<span class="lineno" id=line112></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bfun1[R] = <span class="fstring">"typename _type1&lt;?1&gt;::bfun"</span>;
+<span class="lineno" id=line113></span>  
+<span class="lineno" id=line114></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cproc2[R,P1] = <span class="fstring">"typename _type2&lt;?1,?2&gt;::cproc"</span>;
+<span class="lineno" id=line115></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cfun2[R,P1] = <span class="fstring">"typename _type2&lt;?1,?2&gt;::cfun"</span>;
+<span class="lineno" id=line116></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bproc2[R,P1] = <span class="fstring">"typename _type2&lt;?1,?2&gt;::bproc"</span>;
+<span class="lineno" id=line117></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bfun2[R,P1] = <span class="fstring">"typename _type2&lt;?1,?2&gt;::bfun"</span>;
+<span class="lineno" id=line118></span>  
+<span class="lineno" id=line119></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cproc3[R,P1,P2] = <span class="fstring">"typename _type3&lt;?1,?2,?3&gt;::cproc"</span>;
+<span class="lineno" id=line120></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cfun3[R,P1,P2] = <span class="fstring">"typename _type3&lt;?1,?2,?3&gt;::cfun"</span>;
+<span class="lineno" id=line121></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bproc3[R,P1,P2] = <span class="fstring">"typename _type3&lt;?1,?2,?3&gt;::bproc"</span>;
+<span class="lineno" id=line122></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bfun3[R,P1,P2] = <span class="fstring">"typename _type3&lt;?1,?2,?3&gt;::bfun"</span>;
+<span class="lineno" id=line123></span>  
+<span class="lineno" id=line124></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cproc4[R,P1,P2,P3] = <span class="fstring">"typename _type4&lt;?1,?2,?3,?4&gt;::cproc"</span>;
+<span class="lineno" id=line125></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cfun4[R,P1,P2,P3] = <span class="fstring">"typename _type4&lt;?1,?2,?3,?4&gt;::cfun"</span>;
+<span class="lineno" id=line126></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bproc4[R,P1,P2,P3] = <span class="fstring">"typename _type4&lt;?1,?2,?3,?4&gt;::bproc"</span>;
+<span class="lineno" id=line127></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bfun4[R,P1,P2,P3] = <span class="fstring">"typename _type4&lt;?1,?2,?3,?4&gt;::bfun"</span>;
+<span class="lineno" id=line128></span>  
+<span class="lineno" id=line129></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cproc5[R,P1,P2,P3,P4] = <span class="fstring">"typename _type5&lt;?1,?2,?3,?4,?5&gt;::cproc"</span>;
+<span class="lineno" id=line130></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> cfun5[R,P1,P2,P3,P4] = <span class="fstring">"typename _type5&lt;?1,?2,?3,?4,?5&gt;::cfun"</span>;
+<span class="lineno" id=line131></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bproc5[R,P1,P2,P3,P4] = <span class="fstring">"typename _type5&lt;?1,?2,?3,?4,?5&gt;::bproc"</span>;
+<span class="lineno" id=line132></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> bfun5[R,P1,P2,P3,P4] = <span class="fstring">"typename _type5&lt;?1,?2,?3,?4,?5&gt;::bfun"</span>;
+<span class="lineno" id=line133></span>  
+<span class="lineno" id=line134></span>  }
+<span class="lineno" id=line135></span>  
+</pre></p></div><h1 id='Tuples_h'><img src='/share/src/web/images/minus.gif' id='Tuples' onclick='toggle(this,"Tuples_d")' alt='+'/> 7 Tuples</h1><div id='Tuples_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/datatype/tuple.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">//------------------------------------------------------------------------------</span>
+<span class="lineno" id=line3></span>  <span class="comment">// Class Str: convert to string</span>
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="comment">// Tuple class for inner tuple listing</span>
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a type class">class</span> Tuple[U] {
+<span class="lineno" id=line7></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> tuple_str (x:U) =&gt; <span class="library" title="Convert a value to a string">str</span> x;
+<span class="lineno" id=line8></span>  }
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[U,V <span class="small_keyword" title="type-class constraint">with</span> Str[U], Tuple[V]] Tuple[U ** V] {
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> tuple_str (x: U ** V) =&gt;
+<span class="lineno" id=line12></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line13></span>      | a ,, b =&gt; <span class="library" title="Convert a value to a string">str</span> a +<span class="fstring">", "</span> + tuple_str b
+<span class="lineno" id=line14></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line15></span>    ;
+<span class="lineno" id=line16></span>  }
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[U,V <span class="small_keyword" title="type-class constraint">with</span> Str[U], Str[V]] Tuple[U * V] {
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> tuple_str (x: U * V) =&gt;
+<span class="lineno" id=line20></span>      <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line21></span>      | a , b =&gt; <span class="library" title="Convert a value to a string">str</span> a +<span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> b
+<span class="lineno" id=line22></span>      <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line23></span>    ;
+<span class="lineno" id=line24></span>  }
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  <span class="comment">// actual Str class impl.</span>
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> [U, V <span class="small_keyword" title="type-class constraint">with</span> Tuple[U ** V]] Str[U ** V] {
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x: U ** V) =&gt; <span class="fstring">"("</span> + tuple_str x +<span class="fstring">")"</span>;
+<span class="lineno" id=line29></span>  }
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T,U] Str[T*U] {
+<span class="lineno" id=line32></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (t:T, u:U) =&gt; <span class="fstring">"("</span>+<span class="library" title="Convert a value to a string">str</span> t + <span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> u+<span class="fstring">")"</span>;
+<span class="lineno" id=line33></span>  }
+<span class="lineno" id=line34></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[T] Str[T*T] {
+<span class="lineno" id=line35></span>     <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (t1:T, t2:T) =&gt; <span class="fstring">"("</span>+<span class="library" title="Convert a value to a string">str</span> t1 + <span class="fstring">", "</span> + <span class="library" title="Convert a value to a string">str</span> t2+<span class="fstring">")"</span>;
+<span class="lineno" id=line36></span>  }
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>  <span class="big_keyword" title="Open a module or class">open</span>[U, V <span class="small_keyword" title="type-class constraint">with</span> Tuple[U **V]] Str [U**V];
+<span class="lineno" id=line39></span>  <span class="big_keyword" title="Open a module or class">open</span>[U, V <span class="small_keyword" title="type-class constraint">with</span> Str[U], Str[V]] Str [U*V];
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>  <span class="comment">//------------------------------------------------------------------------------</span>
+<span class="lineno" id=line43></span>  <span class="comment">// Class Eq: Equality</span>
+<span class="lineno" id=line44></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> [T,U <span class="small_keyword" title="type-class constraint">with</span> Eq[T], Eq[U]] Eq[T ** U] {
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : (T ** U) * (T ** U) -&gt; bool =
+<span class="lineno" id=line46></span>    | (ah ,, at) , (bh ,, bt) =&gt; ah == bh <span class="small_keyword" title="logical conjunction">and</span> at == bt;
+<span class="lineno" id=line47></span>    ;
+<span class="lineno" id=line48></span>  }
+<span class="lineno" id=line49></span>  
+<span class="lineno" id=line50></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t,u <span class="small_keyword" title="type-class constraint">with</span> Eq[t],Eq[u]] Eq[t*u] {
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : (t * u) * (t * u) -&gt; bool =
+<span class="lineno" id=line52></span>    | (x1,y1),(x2,y2) =&gt; x1==x2 <span class="small_keyword" title="logical conjunction">and</span> y1 == y2
+<span class="lineno" id=line53></span>    ;
+<span class="lineno" id=line54></span>  }
+<span class="lineno" id=line55></span>  
+<span class="lineno" id=line56></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="type-class constraint">with</span> Eq[t]] Eq[t*t] {
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : (t * t) * (t * t) -&gt; bool =
+<span class="lineno" id=line58></span>    | (x1,y1),(x2,y2) =&gt; x1==x2 <span class="small_keyword" title="logical conjunction">and</span> y1 == y2
+<span class="lineno" id=line59></span>    ;
+<span class="lineno" id=line60></span>  }
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>  <span class="comment">//------------------------------------------------------------------------------</span>
+<span class="lineno" id=line63></span>  <span class="comment">// Class Tord: Total Order</span>
+<span class="lineno" id=line64></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> [T,U <span class="small_keyword" title="type-class constraint">with</span> Tord[T], Tord[U]] Tord[T ** U] {
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : (T ** U) * (T ** U) -&gt; bool =
+<span class="lineno" id=line66></span>    | (ah ,, at) , (bh ,, bt) =&gt; ah &lt; bh <span class="small_keyword" title="logical disjunction">or</span> ah == bh <span class="small_keyword" title="logical conjunction">and</span> at &lt; bt;
+<span class="lineno" id=line67></span>    ;
+<span class="lineno" id=line68></span>  }
+<span class="lineno" id=line69></span>  
+<span class="lineno" id=line70></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t,u <span class="small_keyword" title="type-class constraint">with</span> Tord[t],Tord[u]] Tord[t*u] {
+<span class="lineno" id=line71></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : (t * u) * (t * u) -&gt; bool =
+<span class="lineno" id=line72></span>    | (x1,y1),(x2,y2) =&gt; x1 &lt; x2 <span class="small_keyword" title="logical disjunction">or</span> x1 == x2 <span class="small_keyword" title="logical conjunction">and</span> y1 &lt; y2
+<span class="lineno" id=line73></span>    ;
+<span class="lineno" id=line74></span>  }
+<span class="lineno" id=line75></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span>[t <span class="small_keyword" title="type-class constraint">with</span> Tord[t]] Tord[t*t] {
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> &lt; : (t * t) * (t * t) -&gt; bool =
+<span class="lineno" id=line77></span>    | (x1,y1),(x2,y2) =&gt; x1 &lt; x2 <span class="small_keyword" title="logical disjunction">or</span> x1 == x2 <span class="small_keyword" title="logical conjunction">and</span> y1 &lt; y2
+<span class="lineno" id=line78></span>    ;
+<span class="lineno" id=line79></span>  }
+<span class="lineno" id=line80></span>  <span class="big_keyword" title="Open a module or class">open</span> [T,U <span class="small_keyword" title="type-class constraint">with</span> Tord[T], Tord[U]] Tord[T ** U];
+<span class="lineno" id=line81></span>  <span class="big_keyword" title="Open a module or class">open</span> [T,U <span class="small_keyword" title="type-class constraint">with</span> Tord[T], Tord[U]] Tord[T * U];
+<span class="lineno" id=line82></span>  <span class="big_keyword" title="Open a module or class">open</span> [T <span class="small_keyword" title="type-class constraint">with</span> Tord[T]] Tord[T * T];
+<span class="lineno" id=line83></span>  
+<span class="lineno" id=line84></span>  <span class="comment">/* type equality now requires type_eq!
+<span class="lineno" id=line85></span>  //------------------------------------------------------------------------------
+<span class="lineno" id=line86></span>  // Generic Field access
+<span class="lineno" id=line87></span>  fun field[n,t,u where n==0] (a:t,b:u)=&gt;a;
+<span class="lineno" id=line88></span>  fun field[n,t,u where n==1] (a:t,b:u)=&gt;b;
+<span class="lineno" id=line89></span>  
+<span class="lineno" id=line90></span>  fun field[n,t,u,v where n==0] (a:t,b:u,c:v)=&gt;a;
+<span class="lineno" id=line91></span>  fun field[n,t,u,v where n==1] (a:t,b:u,c:v)=&gt;b;
+<span class="lineno" id=line92></span>  fun field[n,t,u,v where n==2] (a:t,b:u,c:v)=&gt;c;
+<span class="lineno" id=line93></span>  
+<span class="lineno" id=line94></span>  fun field[n,t,u,v,w where n==0] (a:t,b:u,c:v,d:w)=&gt;a;
+<span class="lineno" id=line95></span>  fun field[n,t,u,v,w where n==1] (a:t,b:u,c:v,d:w)=&gt;b;
+<span class="lineno" id=line96></span>  fun field[n,t,u,v,w where n==2] (a:t,b:u,c:v,d:w)=&gt;c;
+<span class="lineno" id=line97></span>  fun field[n,t,u,v,w where n==3] (a:t,b:u,c:v,d:w)=&gt;d;
+<span class="lineno" id=line98></span>  
+<span class="lineno" id=line99></span>  fun field[n,t,u,v,w,x where n==0] (a:t,b:u,c:v,d:w,e:x)=&gt;a;
+<span class="lineno" id=line100></span>  fun field[n,t,u,v,w,x where n==1] (a:t,b:u,c:v,d:w,e:x)=&gt;b;
+<span class="lineno" id=line101></span>  fun field[n,t,u,v,w,x where n==2] (a:t,b:u,c:v,d:w,e:x)=&gt;c;
+<span class="lineno" id=line102></span>  fun field[n,t,u,v,w,x where n==3] (a:t,b:u,c:v,d:w,e:x)=&gt;d;
+<span class="lineno" id=line103></span>  fun field[n,t,u,v,w,x where n==4] (a:t,b:u,c:v,d:w,e:x)=&gt;e;
+<span class="lineno" id=line104></span>  */</span>
+<span class="lineno" id=line105></span>  
+<span class="lineno" id=line106></span>  <span class="comment">//------------------------------------------------------------------------------</span>
+<span class="lineno" id=line107></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> parallel_tuple_comp
+<span class="lineno" id=line108></span>  {
+<span class="lineno" id=line109></span>    <span class="doccomment">parallel composition</span>
+<span class="lineno" id=line110></span>    <span class="comment">// notation: f \times g</span>
+<span class="lineno" id=line111></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ravel[u1,u2,r1,r2] (f1:u1-&gt;r1,f2:u2-&gt;r2) : u1 * u2 -&gt; r1 * r2 =&gt; 
+<span class="lineno" id=line112></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x1:u1,x2:u2) =&gt; f1 x1, f2 x2;
+<span class="lineno" id=line113></span>  
+<span class="lineno" id=line114></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ravel[u1,u2,u3,r1,r2,r3] (
+<span class="lineno" id=line115></span>       f1:u1-&gt;r1,
+<span class="lineno" id=line116></span>       f2:u2-&gt;r2,
+<span class="lineno" id=line117></span>       f3:u3-&gt;r3
+<span class="lineno" id=line118></span>      ) : u1 * u2 * u3 -&gt; r1 * r2 * r3 =&gt; 
+<span class="lineno" id=line119></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x1:u1,x2:u2,x3:u3) =&gt; f1 x1, f2 x2, f3 x3;
+<span class="lineno" id=line120></span>  
+<span class="lineno" id=line121></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ravel[u1,u2,u3,u4,r1,r2,r3,r4] (
+<span class="lineno" id=line122></span>       f1:u1-&gt;r1,
+<span class="lineno" id=line123></span>       f2:u2-&gt;r2,
+<span class="lineno" id=line124></span>       f3:u3-&gt;r3,
+<span class="lineno" id=line125></span>       f4:u4-&gt;r4
+<span class="lineno" id=line126></span>      ) : u1 * u2 * u3 * u4 -&gt; r1 * r2 * r3 * r4=&gt; 
+<span class="lineno" id=line127></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x1:u1,x2:u2,x3:u3,x4:u4) =&gt; f1 x1, f2 x2, f3 x3, f4 x4;
+<span class="lineno" id=line128></span>  
+<span class="lineno" id=line129></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ravel[u1,u2,u3,u4,u5,r1,r2,r3,r4,r5] (
+<span class="lineno" id=line130></span>       f1:u1-&gt;r1,
+<span class="lineno" id=line131></span>       f2:u2-&gt;r2,
+<span class="lineno" id=line132></span>       f3:u3-&gt;r3,
+<span class="lineno" id=line133></span>       f4:u4-&gt;r4,
+<span class="lineno" id=line134></span>       f5:u5-&gt;r5
+<span class="lineno" id=line135></span>      ) : u1 * u2 * u3 * u4 * u5 -&gt; r1 * r2 * r3 * r4 * r5 =&gt; 
+<span class="lineno" id=line136></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> (x1:u1,x2:u2,x3:u3,x4:u4,x5:u5) =&gt; f1 x1, f2 x2, f3 x3, f4 x4, f5 x5;
+<span class="lineno" id=line137></span>  
+<span class="lineno" id=line138></span>  }
+<span class="lineno" id=line139></span>  
+<span class="lineno" id=line140></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

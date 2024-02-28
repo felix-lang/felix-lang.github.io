@@ -1,0 +1,1779 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Program</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Synopsis",
+"Environment Variables",
+"Command Line Options",
+"Process",
+"Posix Errno",
+"Posix Process",
+"Win32 Process",
+"System Call",
+"Shell",
+"Posix Shell (Bash)",
+"Win32 Shell (cmd.exe)",
+"Signals",
+"Posix Signal",
+"Win32 Signal"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Synopsis_h')"> <a href="#Synopsis_h">Synopsis</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Environment Variables_h')"> <a href="#Environment_Variables_h">Environment Variables</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Command Line Options_h')"> <a href="#Command_Line_Options_h">Command Line Options</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Process_h')"> <a href="#Process_h">Process</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Posix Errno_h')"> <a href="#Posix_Errno_h">Posix Errno</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Posix Process_h')"> <a href="#Posix_Process_h">Posix Process</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Win32 Process_h')"> <a href="#Win32_Process_h">Win32 Process</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#System Call_h')"> <a href="#System_Call_h">System Call</a></div>
+      <div class=sm id=menu8>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#Shell_h')"> <a href="#Shell_h">Shell</a></div>
+      <div class=sm id=menu9>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#Posix Shell (Bash)_h')"> <a href="#Posix_Shell_(Bash)_h">Posix Shell (Bash)</a></div>
+      <div class=sm id=menu10>
+      </div>
+      <div class=m1 onclick="mshow('menu11','#Win32 Shell (cmd.exe)_h')"> <a href="#Win32_Shell_(cmd.exe)_h">Win32 Shell (cmd.exe)</a></div>
+      <div class=sm id=menu11>
+      </div>
+      <div class=m1 onclick="mshow('menu12','#Signals_h')"> <a href="#Signals_h">Signals</a></div>
+      <div class=sm id=menu12>
+      </div>
+      <div class=m1 onclick="mshow('menu13','#Posix Signal_h')"> <a href="#Posix_Signal_h">Posix Signal</a></div>
+      <div class=sm id=menu13>
+      </div>
+      <div class=m1 onclick="mshow('menu14','#Win32 Signal_h')"> <a href="#Win32_Signal_h">Win32 Signal</a></div>
+      <div class=sm id=menu14>
+      </div>
+    <script>counter_max=14;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Synopsis_h'><img src='/share/src/web/images/minus.gif' id='Synopsis' onclick='toggle(this,"Synopsis_d")' alt='+'/> 1 Synopsis</h1><div id='Synopsis_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/cmdopt"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/system"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/shell"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/dynlink"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/env"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/process"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/signal"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  
+</pre></p></div><h1 id='Environment_Variables_h'><img src='/share/src/web/images/minus.gif' id='Environment Variables' onclick='toggle(this,"Environment_Variables_d")' alt='+'/> 2 Environment Variables</h1><div id='Environment_Variables_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/env.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Access environment variables.</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Env_class[os]
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="doccomment">Separator for filename lists</span>
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> pathsep: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">Get the value of a given variable.</span>
+<span class="lineno" id=line8></span>    <span class="doccomment">Returns empty string if the variable doesn't exist.</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> getenv:<span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line10></span>      <span class="fstring">"::flx::rtl::strutil::atostr(std::getenv($1.c_str()))"</span>
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>, Cxx_headers::cstdlib;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> issetenv(s:<span class="library" title="binding of C++ string type">string</span>)=&gt; getenv s != <span class="fstring">""</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="doccomment">Get the value of a given variable.</span>
+<span class="lineno" id=line16></span>    <span class="doccomment">Returns specified default if the variable doesn't exist.</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> getenv(name:<span class="library" title="binding of C++ string type">string</span>,dflt:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span>=&gt;<span class="small_keyword" title="let binder">let</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = getenv(name) <span class="small_keyword" title="membership operator, function mem">in</span> 
+<span class="lineno" id=line18></span>      <span class="small_keyword" title="conditional">if</span> String::<span class="library" title="number of elements in data structure">len</span> <span class="small_keyword" title="value of function return used in post condition">result</span> != 0uz <span class="small_keyword" title="conditional">then</span> <span class="small_keyword" title="value of function return used in post condition">result</span> <span class="small_keyword" title="conditional">else</span> dflt <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line19></span>    ;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> getenvlist (name:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] =&gt;
+<span class="lineno" id=line22></span>       split (getenv name, #pathsep)
+<span class="lineno" id=line23></span>    ;
+<span class="lineno" id=line24></span>  }
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Env_class[Win32] { <span class="big_keyword" title="Define a function with no side-effects">fun</span> pathsep() =&gt; <span class="fstring">";"</span>; }
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Env_class[Posix] { <span class="big_keyword" title="Define a function with no side-effects">fun</span> pathsep() =&gt; <span class="fstring">":"</span>; }
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a type class">class</span> Env
+<span class="lineno" id=line30></span>  {
+<span class="lineno" id=line31></span>    <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line32></span>      <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Env_class[Win32];
+<span class="lineno" id=line33></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line34></span>      <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Env_class[Posix];
+<span class="lineno" id=line35></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line36></span>  }
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>  
+</pre></p></div><h1 id='Command_Line_Options_h'><img src='/share/src/web/images/minus.gif' id='Command Line Options' onclick='toggle(this,"Command_Line_Options_d")' alt='+'/> 3 Command Line Options</h1><div id='Command_Line_Options_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/cmdopt.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> CmdOpt 
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="comment">// Convert key/value pairs represented like -I path</span>
+<span class="lineno" id=line5></span>    <span class="comment">// into form --include=path</span>
+<span class="lineno" id=line6></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cvt-key-arg (keys: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>]) (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) = 
+<span class="lineno" id=line7></span>    {
+<span class="lineno" id=line8></span>       <span class="big_keyword" title="Define a mutable variable">var</span> out = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line9></span>       <span class="big_keyword" title="Define a mutable variable">var</span> inp = x.iterator;
+<span class="lineno" id=line10></span>       <span class="small_keyword" title="for loop">for</span> word <span class="small_keyword" title="membership operator, function mem">in</span> inp <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line11></span>         <span class="small_keyword" title="match statement or expression">match</span> keys.find word <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line12></span>         | #None =&gt; out = Cons (word,out);
+<span class="lineno" id=line13></span>         | Some prefix =&gt; 
+<span class="lineno" id=line14></span>           <span class="small_keyword" title="match statement or expression">match</span> inp() <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line15></span>           | #None =&gt; <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Error, expected argument to option "</span> + word;
+<span class="lineno" id=line16></span>           | Some arg =&gt; out = Cons (prefix+<span class="fstring">"="</span> + arg, out);
+<span class="lineno" id=line17></span>           <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line18></span>         <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line19></span>       <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line20></span>       <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> out;
+<span class="lineno" id=line21></span>    }
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="comment">// Parse key value pairs represented by --key=value.</span>
+<span class="lineno" id=line24></span>    <span class="comment">// Allows multiple values to be given.</span>
+<span class="lineno" id=line25></span>    <span class="comment">// Stores reversed list of values.</span>
+<span class="lineno" id=line26></span>    <span class="comment">// Returns ordered list of non-handled elements.</span>
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Define a mutable variable">var</span> rekv = RE2 <span class="fstring">"(--.*)=(.*)"</span>;
+<span class="lineno" id=line28></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> parse-key-multi-value (keys:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (d:strdict[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]]) (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =
+<span class="lineno" id=line29></span>    {
+<span class="lineno" id=line30></span>      <span class="big_keyword" title="Define a mutable variable">var</span> out = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line31></span>      <span class="big_keyword" title="Define a mutable variable">var</span> va = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (StringPiece <span class="fstring">""</span>, StringPiece <span class="fstring">""</span>, StringPiece <span class="fstring">""</span>);
+<span class="lineno" id=line32></span>      <span class="small_keyword" title="for loop">for</span> <span class="library" title="option type: Some x or None">opt</span> <span class="small_keyword" title="membership operator, function mem">in</span> x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line33></span>        <span class="small_keyword" title="conditional">if</span> Match (rekv, StringPiece (<span class="library" title="option type: Some x or None">opt</span>), 0,ANCHOR_BOTH, va.stl_begin, va.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line34></span>          <span class="big_keyword" title="Define a mutable variable">var</span> key = va . 1 . <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line35></span>          <span class="small_keyword" title="conditional">if</span> key <span class="small_keyword" title="membership operator, function mem">in</span> keys <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line36></span>            <span class="big_keyword" title="Define an immutable value">val</span> value= va . 2 . <span class="library" title="binding of C++ string type">string</span> ;
+<span class="lineno" id=line37></span>            <span class="big_keyword" title="Define an immutable value">val</span> nuval = Cons (value, d.get_dflt (key,Empty[<span class="library" title="binding of C++ string type">string</span>]));
+<span class="lineno" id=line38></span>            d.add key nuval;
+<span class="lineno" id=line39></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line40></span>            out = Cons (<span class="library" title="option type: Some x or None">opt</span>, out);
+<span class="lineno" id=line41></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line42></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line43></span>          out = Cons (<span class="library" title="option type: Some x or None">opt</span>, out);
+<span class="lineno" id=line44></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line45></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> out;
+<span class="lineno" id=line47></span>    }
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="comment">// Parse key value pairs represented by --key=value.</span>
+<span class="lineno" id=line50></span>    <span class="comment">// Keys must be unique.</span>
+<span class="lineno" id=line51></span>    <span class="comment">// Stores reversed list of values.</span>
+<span class="lineno" id=line52></span>    <span class="comment">// Returns ordered list of non-handled elements.</span>
+<span class="lineno" id=line53></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> parse-key-single-value (keys:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (d:strdict[<span class="library" title="binding of C++ string type">string</span>]) (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =
+<span class="lineno" id=line54></span>    {
+<span class="lineno" id=line55></span>      <span class="big_keyword" title="Define a mutable variable">var</span> out = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line56></span>      <span class="big_keyword" title="Define a mutable variable">var</span> va = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (StringPiece <span class="fstring">""</span>, StringPiece <span class="fstring">""</span>, StringPiece <span class="fstring">""</span>);
+<span class="lineno" id=line57></span>      <span class="small_keyword" title="for loop">for</span> <span class="library" title="option type: Some x or None">opt</span> <span class="small_keyword" title="membership operator, function mem">in</span> x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line58></span>        <span class="small_keyword" title="conditional">if</span> Match (rekv, StringPiece (<span class="library" title="option type: Some x or None">opt</span>), 0,ANCHOR_BOTH, va.stl_begin, va.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line59></span>          <span class="big_keyword" title="Define a mutable variable">var</span> key = va . 1 . <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line60></span>          <span class="small_keyword" title="conditional">if</span> key <span class="small_keyword" title="membership operator, function mem">in</span> keys <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line61></span>            <span class="big_keyword" title="Define an immutable value">val</span> value= va . 2 . <span class="library" title="binding of C++ string type">string</span> ;
+<span class="lineno" id=line62></span>            <span class="small_keyword" title="match statement or expression">match</span> d.get key <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line63></span>            | #None =&gt; d.add key value;
+<span class="lineno" id=line64></span>            | _ =&gt; <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Duplicate option '"</span> + <span class="library" title="option type: Some x or None">opt</span> +<span class="fstring">"'"</span>;
+<span class="lineno" id=line65></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line66></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line67></span>            <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Invalid option '"</span> + <span class="library" title="option type: Some x or None">opt</span>+<span class="fstring">"'"</span>;
+<span class="lineno" id=line68></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line69></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line70></span>          out = Cons (<span class="library" title="option type: Some x or None">opt</span>, out);
+<span class="lineno" id=line71></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line72></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line73></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> out;
+<span class="lineno" id=line74></span>    }
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>  
+<span class="lineno" id=line77></span>    <span class="comment">// Parse keys given by --key.</span>
+<span class="lineno" id=line78></span>    <span class="comment">// Allows multiple values.</span>
+<span class="lineno" id=line79></span>    <span class="comment">// Stores count of occurences.</span>
+<span class="lineno" id=line80></span>    <span class="big_keyword" title="Define a mutable variable">var</span> rek = RE2 <span class="fstring">"(--.*)"</span>;
+<span class="lineno" id=line81></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> parse-key (keys:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) (d:strdict[<span class="library" title="binding of C int type">int</span>]) (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =
+<span class="lineno" id=line82></span>    {
+<span class="lineno" id=line83></span>      <span class="big_keyword" title="Define a mutable variable">var</span> out = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line84></span>      <span class="big_keyword" title="Define a mutable variable">var</span> va = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (StringPiece <span class="fstring">""</span>, StringPiece <span class="fstring">""</span>);
+<span class="lineno" id=line85></span>      <span class="small_keyword" title="for loop">for</span> <span class="library" title="option type: Some x or None">opt</span> <span class="small_keyword" title="membership operator, function mem">in</span> x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line86></span>        <span class="small_keyword" title="conditional">if</span> Match (rek, StringPiece (<span class="library" title="option type: Some x or None">opt</span>), 0,ANCHOR_BOTH, va.stl_begin, va.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line87></span>          <span class="big_keyword" title="Define a mutable variable">var</span> key = va . 1 . <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line88></span>          <span class="small_keyword" title="conditional">if</span> key <span class="small_keyword" title="membership operator, function mem">in</span> keys <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line89></span>            <span class="big_keyword" title="Define an immutable value">val</span> nuval =d.get_dflt (key,0) + 1;
+<span class="lineno" id=line90></span>            d.add key nuval;
+<span class="lineno" id=line91></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line92></span>            <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Invalid option '"</span> + <span class="library" title="option type: Some x or None">opt</span>+<span class="fstring">"'"</span>;
+<span class="lineno" id=line93></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line94></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line95></span>          out = Cons (<span class="library" title="option type: Some x or None">opt</span>, out);
+<span class="lineno" id=line96></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line97></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line98></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> out;
+<span class="lineno" id=line99></span>    }
+<span class="lineno" id=line100></span>  
+<span class="lineno" id=line101></span>    <span class="comment">// Parse keys given by -abcd</span>
+<span class="lineno" id=line102></span>    <span class="comment">// Allows multiple values.</span>
+<span class="lineno" id=line103></span>    <span class="comment">// Stores count of occurences.</span>
+<span class="lineno" id=line104></span>    <span class="comment">// Replaces option letter with specified long option key.</span>
+<span class="lineno" id=line105></span>    <span class="comment">// Returns ordered list of non-handled elements.</span>
+<span class="lineno" id=line106></span>    <span class="big_keyword" title="Define a mutable variable">var</span> resw = RE2 <span class="fstring">"(-.*)"</span>;
+<span class="lineno" id=line107></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> parse-switches (switchmap: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C++ string type">string</span>] ) (d:strdict[<span class="library" title="binding of C int type">int</span>]) (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) =
+<span class="lineno" id=line108></span>    {
+<span class="lineno" id=line109></span>      <span class="big_keyword" title="Define a mutable variable">var</span> out = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line110></span>      <span class="big_keyword" title="Define a mutable variable">var</span> va = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (StringPiece <span class="fstring">""</span>, StringPiece <span class="fstring">""</span>);
+<span class="lineno" id=line111></span>      <span class="small_keyword" title="for loop">for</span> <span class="library" title="option type: Some x or None">opt</span> <span class="small_keyword" title="membership operator, function mem">in</span> x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line112></span>        <span class="small_keyword" title="conditional">if</span> Match (resw, StringPiece (<span class="library" title="option type: Some x or None">opt</span>), 0,ANCHOR_BOTH, va.stl_begin, va.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line113></span>          <span class="big_keyword" title="Define a mutable variable">var</span> switches = va . 1 . <span class="library" title="binding of C++ string type">string</span> . [1 <span class="small_keyword" title="substring range separator">to</span>];
+<span class="lineno" id=line114></span>          <span class="small_keyword" title="for loop">for</span> switch <span class="small_keyword" title="membership operator, function mem">in</span> switches <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line115></span>            <span class="small_keyword" title="match statement or expression">match</span> switchmap.find switch <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line116></span>            | #None =&gt;
+<span class="lineno" id=line117></span>              <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Invalid option "</span> + <span class="library" title="option type: Some x or None">opt</span> + <span class="fstring">" char '"</span> + <span class="library" title="Convert a value to a string">str</span> switch+<span class="fstring">"'"</span>;
+<span class="lineno" id=line118></span>            | Some key=&gt;
+<span class="lineno" id=line119></span>              <span class="big_keyword" title="Define an immutable value">val</span> nuval = d.get_dflt (key,0) + 1;
+<span class="lineno" id=line120></span>              d.add key nuval;
+<span class="lineno" id=line121></span>            <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line122></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line123></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line124></span>          out = Cons (<span class="library" title="option type: Some x or None">opt</span>, out);
+<span class="lineno" id=line125></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line126></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line127></span>      <span class="small_keyword" title="return">return</span> <span class="library" title="return data structure with elements reversed">rev</span> out;
+<span class="lineno" id=line128></span>    }
+<span class="lineno" id=line129></span>  
+<span class="lineno" id=line130></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> cmdspec_t = (
+<span class="lineno" id=line131></span>      split-key-value-spec: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line132></span>      multi-valued-keys-spec: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>], 
+<span class="lineno" id=line133></span>      single-valued-keys-spec: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>], 
+<span class="lineno" id=line134></span>      switches-spec: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>], 
+<span class="lineno" id=line135></span>      short-switch-map-spec: <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C char type">char</span> * <span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line136></span>    );
+<span class="lineno" id=line137></span>  
+<span class="lineno" id=line138></span>    <span class="big_keyword" title="Define an alias for a type expression">typedef</span> cmdopt-parse-result_t = (
+<span class="lineno" id=line139></span>       multi-valued-keys : strdict[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]],
+<span class="lineno" id=line140></span>       single-valued-keys : strdict[<span class="library" title="binding of C++ string type">string</span>],
+<span class="lineno" id=line141></span>       switches : strdict[<span class="library" title="binding of C int type">int</span>],
+<span class="lineno" id=line142></span>       positional : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line143></span>    );
+<span class="lineno" id=line144></span>  
+<span class="lineno" id=line145></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> cmdopt-parse-result_t () =&gt;
+<span class="lineno" id=line146></span>    (
+<span class="lineno" id=line147></span>      multi-valued-keys = strdict[<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]](), 
+<span class="lineno" id=line148></span>      single-valued-keys = strdict[<span class="library" title="binding of C++ string type">string</span>](),
+<span class="lineno" id=line149></span>      switches = strdict[<span class="library" title="binding of C int type">int</span>](),
+<span class="lineno" id=line150></span>      positional = Empty[<span class="library" title="binding of C++ string type">string</span>]
+<span class="lineno" id=line151></span>    );
+<span class="lineno" id=line152></span>  
+<span class="lineno" id=line153></span>    <span class="qualifier" title="Function or procedure which must not be inlined">noinline</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> parse-cmdline (spec:cmdspec_t) (x:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : cmdopt-parse-result_t = {
+<span class="lineno" id=line154></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = cmdopt-parse-result_t ();
+<span class="lineno" id=line155></span>      <span class="big_keyword" title="Define a mutable variable">var</span> nonk = unbox$ cvt-key-arg spec.split-key-value-spec x;
+<span class="lineno" id=line156></span>      nonk = unbox$ parse-key-multi-value spec.multi-valued-keys-spec <span class="small_keyword" title="value of function return used in post condition">result</span>.multi-valued-keys nonk;
+<span class="lineno" id=line157></span>      nonk = unbox$ parse-key-single-value spec.single-valued-keys-spec <span class="small_keyword" title="value of function return used in post condition">result</span>.single-valued-keys nonk;
+<span class="lineno" id=line158></span>      nonk = unbox$ parse-key spec.switches-spec <span class="small_keyword" title="value of function return used in post condition">result</span>.switches nonk;
+<span class="lineno" id=line159></span>      &amp;<span class="small_keyword" title="value of function return used in post condition">result</span>.positional &lt;- unbox$ parse-switches spec.short-switch-map-spec <span class="small_keyword" title="value of function return used in post condition">result</span>.switches nonk;
+<span class="lineno" id=line160></span>      <span class="small_keyword" title="return">return</span> <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line161></span>    }
+<span class="lineno" id=line162></span>  }
+<span class="lineno" id=line163></span>  
+</pre></p></div><h1 id='Process_h'><img src='/share/src/web/images/minus.gif' id='Process' onclick='toggle(this,"Process_d")' alt='+'/> 4 Process</h1><div id='Process_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/process.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Process_class[os, process_status_t]
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> popen_in : <span class="library" title="binding of C++ string type">string</span> -&gt; Cstdio::ifile;
+<span class="lineno" id=line5></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pclose: Cstdio::ifile -&gt; process_status_t; 
+<span class="lineno" id=line6></span>  }
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Define a type class">class</span> Process {
+<span class="lineno" id=line9></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Win32Process;
+<span class="lineno" id=line11></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> PosixProcess;
+<span class="lineno" id=line13></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+</pre></p></div><h1 id='Posix_Errno_h'><img src='/share/src/web/images/minus.gif' id='Posix Errno' onclick='toggle(this,"Posix_Errno_d")' alt='+'/> 5 Posix Errno</h1><div id='Posix_Errno_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/posix/errno.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Errno 
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="qualifier" title="A Plain Old Data type, which needs no finalisation">pod</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> errno_t = <span class="fstring">"int"</span> <span class="big_keyword" title="specify requirements">requires</span> C89_headers::errno_h;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span> : errno_t = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> errno_t : <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[errno_t] {
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : errno_t * errno_t -&gt; bool= <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line9></span>    }
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[errno_t];
+<span class="lineno" id=line11></span>   
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> errno : errno_t = <span class="fstring">"errno"</span>; <span class="comment">// SUCKS</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ENOERROR : errno_t = <span class="fstring">"0"</span>;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> EACCES: errno_t;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ENOENT: errno_t;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> EAGAIN: errno_t;
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ENOMEM: errno_t;
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> EEXIST: errno_t;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> EINVAL: errno_t;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> EINTR: errno_t; <span class="comment">// call interrupted by a signal</span>
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> maybe_exit(<span class="big_keyword" title="Define a mutable variable">var</span> n:<span class="library" title="binding of C int type">int</span>) { <span class="small_keyword" title="conditional">if</span> n != 0 <span class="small_keyword" title="imperative code begins">do</span> System::exit(errno.<span class="library" title="binding of C int type">int</span>); <span class="small_keyword" title="end of body">done</span> }
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> maybe_exit(<span class="big_keyword" title="Define a mutable variable">var</span> n:errno_t) { <span class="small_keyword" title="conditional">if</span> n != ENOERROR  <span class="small_keyword" title="imperative code begins">do</span> System::exit(n.<span class="library" title="binding of C int type">int</span>); <span class="small_keyword" title="end of body">done</span> }
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> maybe_exit() { <span class="small_keyword" title="conditional">if</span> errno != ENOERROR <span class="small_keyword" title="imperative code begins">do</span> System::exit(errno.<span class="library" title="binding of C int type">int</span>); <span class="small_keyword" title="end of body">done</span> }
+<span class="lineno" id=line25></span>  
+<span class="lineno" id=line26></span>    <span class="comment">// Unfortunately we get the crappy GNU version of strerror_r </span>
+<span class="lineno" id=line27></span>    <span class="comment">// even if we don't define _GNU_SOURCE</span>
+<span class="lineno" id=line28></span>    <span class="comment">// This stupidity returns a char*, instead of a void.</span>
+<span class="lineno" id=line29></span>    <span class="comment">// Unfortunately moron compilers complain about not using</span>
+<span class="lineno" id=line30></span>    <span class="comment">// the returned result, but there is no legal way to use a void.</span>
+<span class="lineno" id=line31></span>    <span class="comment">// There is no way out.</span>
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> strerror_r: errno_t *  carray[<span class="library" title="binding of C char type">char</span>] * <span class="library" title="binding of C size_t type">size</span>  = <span class="fstring">"(void)strerror_s($2, $3, $1);"</span> 
+<span class="lineno" id=line35></span>      <span class="big_keyword" title="specify requirements">requires</span> C89_headers::string_h <span class="comment">/* on Linux.. on OSX it's in stdio.h */</span>
+<span class="lineno" id=line36></span>    ;
+<span class="lineno" id=line37></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line38></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> strerror_r: errno_t * carray[<span class="library" title="binding of C char type">char</span>] * <span class="library" title="binding of C size_t type">size</span>  = 
+<span class="lineno" id=line39></span>      <span class="fstring">"""
+<span class="lineno" id=line40></span>      strerror_r($1, $2, $3);
+<span class="lineno" id=line41></span>      """</span> 
+<span class="lineno" id=line42></span>      <span class="big_keyword" title="specify requirements">requires</span> C89_headers::string_h 
+<span class="lineno" id=line43></span>    ;
+<span class="lineno" id=line44></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> strerror(e:errno_t) : <span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="conditional">if</span> e.<span class="library" title="binding of C int type">int</span> == 0 <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line47></span>        <span class="small_keyword" title="return">return</span> <span class="fstring">"OK"</span>; 
+<span class="lineno" id=line48></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line49></span>        <span class="big_keyword" title="Define a mutable variable">var</span> b:<span class="library" title="array type, a tuple of all components the same type">array</span>[<span class="library" title="binding of C char type">char</span>,1000];
+<span class="lineno" id=line50></span>        <span class="big_keyword" title="Define a mutable variable">var</span> bad = <span class="fstring">"[strerror_r] Failed to find text for error number "</span> + e.<span class="library" title="binding of C int type">int</span>.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line51></span>        <span class="big_keyword" title="Define a mutable variable">var</span> p = bad._unsafe_cstr;
+<span class="lineno" id=line52></span>        CString::strncpy (carray (&amp;b),p,1000.<span class="library" title="binding of C size_t type">size</span>); <span class="comment">// safe because bad is a variable</span>
+<span class="lineno" id=line53></span>        Memory::free p.<span class="library" title="special binding of C void* type">address</span>;
+<span class="lineno" id=line54></span>        strerror_r(e,carray (&amp;b), b.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C size_t type">size</span>);
+<span class="lineno" id=line55></span>        <span class="small_keyword" title="return">return</span> <span class="library" title="binding of C++ string type">string</span>( carray (&amp;b));
+<span class="lineno" id=line56></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line57></span>    }
+<span class="lineno" id=line58></span>   
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> strerror()=&gt; strerror errno;
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[errno_t] { <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (e:errno_t) =&gt; strerror e; }
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Str[errno_t];
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>    <span class="comment">// Auto error check support</span>
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a type class">class</span> Check[T] 
+<span class="lineno" id=line66></span>    {
+<span class="lineno" id=line67></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> int_to_proc (<span class="big_keyword" title="Define a mutable variable">var</span> x:<span class="library" title="binding of C int type">int</span>) { <span class="small_keyword" title="conditional">if</span> x == -1 <span class="small_keyword" title="imperative code begins">do</span> ehandler; <span class="small_keyword" title="end of body">done</span> }
+<span class="lineno" id=line68></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> int_to_int (<span class="big_keyword" title="Define a mutable variable">var</span> x:<span class="library" title="binding of C int type">int</span>) = { <span class="small_keyword" title="conditional">if</span> x == -1 <span class="small_keyword" title="imperative code begins">do</span> ehandler; <span class="small_keyword" title="end of body">done</span> <span class="small_keyword" title="return">return</span> x; }
+<span class="lineno" id=line69></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> pointer_to_pointer[U] (<span class="big_keyword" title="Define a mutable variable">var</span> p:&amp;U) = { <span class="small_keyword" title="conditional">if</span> <span class="hack">C_hack</span>::isNULL p <span class="small_keyword" title="imperative code begins">do</span> #ehandler; <span class="small_keyword" title="end of body">done</span> <span class="small_keyword" title="return">return</span> p; }
+<span class="lineno" id=line70></span>      <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> ehandler: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="Type a non-returning function returns">any</span>;
+<span class="lineno" id=line71></span>    }
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> check_ignore = <span class="fstring">""</span>;
+<span class="lineno" id=line74></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Check[check_ignore] 
+<span class="lineno" id=line75></span>    {
+<span class="lineno" id=line76></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> ehandler ():<span class="library" title="Type a non-returning function returns">any</span> = {}
+<span class="lineno" id=line77></span>    }
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> check_throw = <span class="fstring">""</span>;
+<span class="lineno" id=line79></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Check[check_throw] 
+<span class="lineno" id=line80></span>    {
+<span class="lineno" id=line81></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> ehandler ():<span class="library" title="Type a non-returning function returns">any</span> = { raise #strerror; }
+<span class="lineno" id=line82></span>    }
+<span class="lineno" id=line83></span>  }
+<span class="lineno" id=line84></span>  
+</pre></p></div><h1 id='Posix_Process_h'><img src='/share/src/web/images/minus.gif' id='Posix Process' onclick='toggle(this,"Posix_Process_d")' alt='+'/> 6 Posix Process</h1><div id='Posix_Process_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/posix/process.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> PosixProcess {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Open a module or class">open</span> PosixSignal;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Process_class[Posix, process_status_t] 
+<span class="lineno" id=line6></span>    {
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> popen_in: <span class="library" title="binding of C++ string type">string</span> -&gt; Cstdio::ifile = <span class="fstring">'popen($1.c_str(), "r")'</span> 
+<span class="lineno" id=line8></span>        <span class="big_keyword" title="specify requirements">requires</span> C89_headers::stdio_h;
+<span class="lineno" id=line9></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pclose: Cstdio::ifile -&gt; process_status_t = <span class="fstring">"pclose($1)"</span>;
+<span class="lineno" id=line10></span>    }
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Process_class[Posix, process_status_t];
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> process_status_t = <span class="fstring">"int"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_wait_h;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span>:process_status_t = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> process_status_t : <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> int_of_process_status_t: process_status_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"(int)$1"</span>;
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> WIFCONTINUED: process_status_t -&gt; bool = <span class="fstring">"WIFCONTINUED($1)!=0"</span>;
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> WIFEXITED: process_status_t -&gt; bool = <span class="fstring">"WIFEXITED($1)!=0"</span>;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> WIFSIGNALED: process_status_t -&gt; bool = <span class="fstring">"WIFSIGNALED($1)!=0"</span>;
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> WIFSTOPPED: process_status_t -&gt; bool = <span class="fstring">"WIFSTOPPED($1)!=0"</span>;
+<span class="lineno" id=line22></span>  
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> WEXITSTATUS: process_status_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"WEXITSTATUS($1)"</span>;
+<span class="lineno" id=line24></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> WTERMSIG: process_status_t -&gt; signal_t = <span class="fstring">"WTERMSIG($1)"</span>;
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> WSTOPSIG: process_status_t -&gt; signal_t = <span class="fstring">"WSTOPSIG($1)"</span>;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="comment">// OSX only, not in Posix</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span>  WCOREDUMP: process_status_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"WCOREDUMP($1)"</span>;
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>(x:process_status_t) = {
+<span class="lineno" id=line32></span>      <span class="small_keyword" title="conditional">if</span> WIFEXITED x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line33></span>         <span class="big_keyword" title="Define an immutable value">val</span> e = x.WEXITSTATUS;
+<span class="lineno" id=line34></span>         <span class="small_keyword" title="return">return</span> <span class="fstring">"Exit "</span> + <span class="library" title="Convert a value to a string">str</span> e + <span class="fstring">": "</span> +e.errno_t.strerror;
+<span class="lineno" id=line35></span>      <span class="small_keyword" title="conditional">elif</span> WIFSIGNALED x <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line36></span>         <span class="big_keyword" title="Define an immutable value">val</span> s = x.WTERMSIG;
+<span class="lineno" id=line37></span>         <span class="small_keyword" title="return">return</span> <span class="fstring">"SIGNAL "</span> + s.<span class="library" title="binding of C int type">int</span>.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">": "</span> + s.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line38></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line39></span>         <span class="small_keyword" title="return">return</span> <span class="fstring">"Unknown temination status "</span> + x.<span class="library" title="binding of C int type">int</span>.<span class="library" title="Convert a value to a string">str</span>;
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line41></span>    }
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> environ: + (+<span class="library" title="binding of C char type">char</span>) = <span class="fstring">"environ"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> exec_result_t = <span class="fstring">"int"</span>;
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> bad_exec: exec_result_t = <span class="fstring">"-1"</span>;
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : exec_result_t * exec_result_t -&gt; bool= <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> execv:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) -&gt; exec_result_t = <span class="fstring">"execv($1, $2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> execvp:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) -&gt; exec_result_t = <span class="fstring">"execvp($1, $2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> execve:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) * + (+<span class="library" title="binding of C char type">char</span>) -&gt; exec_result_t = <span class="fstring">"execve($1, $2, $3)"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line52></span>  
+<span class="lineno" id=line53></span>    <span class="comment">// do NOT try to fork Felix programs, it doesn't work</span>
+<span class="lineno" id=line54></span>    <span class="comment">// because of threads already running. We use fork only</span>
+<span class="lineno" id=line55></span>    <span class="comment">// to preceed exec() calls.</span>
+<span class="lineno" id=line56></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> pid_t = <span class="fstring">"pid_t"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line57></span>  
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[pid_t] {
+<span class="lineno" id=line59></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: pid_t -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::strutil::str&lt;int&gt;($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line60></span>    }
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span>: pid_t = <span class="fstring">"((int)$1)"</span>;
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> child_process : pid_t = <span class="fstring">"0"</span>;
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> bad_process : pid_t = <span class="fstring">"-1"</span>;
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : pid_t * pid_t -&gt; bool= <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> fork: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; pid_t = <span class="fstring">"fork()"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line68></span>  
+<span class="lineno" id=line69></span>    variant spawn_result_t = 
+<span class="lineno" id=line70></span>    <span class="comment">// returned to parent process</span>
+<span class="lineno" id=line71></span>    | BadFork of errno_t  
+<span class="lineno" id=line72></span>    | ProcessId of pid_t 
+<span class="lineno" id=line73></span>  
+<span class="lineno" id=line74></span>    <span class="comment">// returned to child proces</span>
+<span class="lineno" id=line75></span>    | BadExec of errno_t 
+<span class="lineno" id=line76></span>    | BadSetup of <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line77></span>    ;
+<span class="lineno" id=line78></span>  
+<span class="lineno" id=line79></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnv(file: <span class="library" title="binding of C++ string type">string</span>, argv:+ (+<span class="library" title="binding of C char type">char</span>), setup:1-&gt;<span class="library" title="binding of C int type">int</span>) : spawn_result_t = {
+<span class="lineno" id=line80></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = fork();
+<span class="lineno" id=line81></span>      <span class="small_keyword" title="conditional">if</span> x == child_process <span class="small_keyword" title="imperative code begins">do</span>  <span class="comment">// CHILD</span>
+<span class="lineno" id=line82></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = #setup;
+<span class="lineno" id=line83></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line84></span>          <span class="small_keyword" title="return">return</span> BadSetup <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line85></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line86></span>        <span class="big_keyword" title="Define a mutable variable">var</span> y = execv(file.cstr, argv); 
+<span class="lineno" id=line87></span>        <span class="small_keyword" title="conditional">if</span> y == bad_exec <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line88></span>          <span class="small_keyword" title="return">return</span> BadExec errno; 
+<span class="lineno" id=line89></span>        <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line90></span>          <span class="small_keyword" title="return">return</span> ProcessId x; <span class="comment">// never taken! fool type system </span>
+<span class="lineno" id=line91></span>        <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line92></span>      <span class="small_keyword" title="conditional">elif</span> x == bad_process <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// PARENT </span>
+<span class="lineno" id=line93></span>        <span class="small_keyword" title="return">return</span> BadFork errno;
+<span class="lineno" id=line94></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line95></span>        <span class="small_keyword" title="return">return</span> ProcessId x;
+<span class="lineno" id=line96></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line97></span>    }
+<span class="lineno" id=line98></span>  
+<span class="lineno" id=line99></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnvp(file: <span class="library" title="binding of C++ string type">string</span>, argv:+ (+<span class="library" title="binding of C char type">char</span>), setup:1-&gt;<span class="library" title="binding of C int type">int</span>) : spawn_result_t = { 
+<span class="lineno" id=line100></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = fork();
+<span class="lineno" id=line101></span>      <span class="small_keyword" title="conditional">if</span> x == child_process <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// CHILD</span>
+<span class="lineno" id=line102></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = #setup;
+<span class="lineno" id=line103></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line104></span>          <span class="small_keyword" title="return">return</span> BadSetup <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line105></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line106></span>        <span class="big_keyword" title="Define a mutable variable">var</span> y = execvp(file.cstr, argv); 
+<span class="lineno" id=line107></span>        <span class="small_keyword" title="conditional">if</span> y == bad_exec <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line108></span>          <span class="small_keyword" title="return">return</span> BadExec errno; 
+<span class="lineno" id=line109></span>        <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line110></span>          <span class="small_keyword" title="return">return</span> ProcessId x; <span class="comment">// never taken! fool type system </span>
+<span class="lineno" id=line111></span>        <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line112></span>      <span class="small_keyword" title="conditional">elif</span> x == bad_process <span class="small_keyword" title="imperative code begins">do</span>  <span class="comment">// PARENT</span>
+<span class="lineno" id=line113></span>        <span class="small_keyword" title="return">return</span> BadFork errno;
+<span class="lineno" id=line114></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line115></span>        <span class="small_keyword" title="return">return</span> ProcessId x;
+<span class="lineno" id=line116></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line117></span>    }
+<span class="lineno" id=line118></span>  
+<span class="lineno" id=line119></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnve(file: <span class="library" title="binding of C++ string type">string</span>, argv:+ (+<span class="library" title="binding of C char type">char</span>), env: + (+<span class="library" title="binding of C char type">char</span>), setup:1-&gt;<span class="library" title="binding of C int type">int</span>) : spawn_result_t = {
+<span class="lineno" id=line120></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = fork();
+<span class="lineno" id=line121></span>      <span class="small_keyword" title="conditional">if</span> x == child_process <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// CHILD</span>
+<span class="lineno" id=line122></span>        <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = #setup;
+<span class="lineno" id=line123></span>        <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="value of function return used in post condition">result</span> != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line124></span>          <span class="small_keyword" title="return">return</span> BadSetup <span class="small_keyword" title="value of function return used in post condition">result</span>;
+<span class="lineno" id=line125></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line126></span>        <span class="big_keyword" title="Define a mutable variable">var</span> y = execve(file.cstr, argv, env); 
+<span class="lineno" id=line127></span>        <span class="small_keyword" title="conditional">if</span> y == bad_exec <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line128></span>          <span class="small_keyword" title="return">return</span> BadExec errno; 
+<span class="lineno" id=line129></span>        <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line130></span>          <span class="small_keyword" title="return">return</span> ProcessId x; <span class="comment">// never taken! fool type system</span>
+<span class="lineno" id=line131></span>        <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line132></span>      <span class="small_keyword" title="conditional">elif</span> x == bad_process <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// PARENT</span>
+<span class="lineno" id=line133></span>        <span class="small_keyword" title="return">return</span> BadFork errno;
+<span class="lineno" id=line134></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line135></span>        <span class="small_keyword" title="return">return</span> ProcessId x;
+<span class="lineno" id=line136></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line137></span>    }
+<span class="lineno" id=line138></span>  
+<span class="lineno" id=line139></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> process_status_options_t = <span class="fstring">"int"</span>;
+<span class="lineno" id=line140></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> WCONTINUED: process_status_options_t;
+<span class="lineno" id=line141></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> WNOHANG: process_status_options_t;
+<span class="lineno" id=line142></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> WUNTRACED: process_status_options_t;
+<span class="lineno" id=line143></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> WNONE: process_status_options_t=<span class="fstring">"0"</span>;
+<span class="lineno" id=line144></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> \| : process_status_options_t * process_status_options_t -&gt; process_status_options_t = <span class="fstring">"$1|$2"</span>;
+<span class="lineno" id=line145></span>  
+<span class="lineno" id=line146></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> waitpid: pid_t * &amp;process_status_t * process_status_options_t -&gt; pid_t <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::sys_wait_h;
+<span class="lineno" id=line147></span>  
+<span class="lineno" id=line148></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> waitpid(pid:pid_t) = {
+<span class="lineno" id=line149></span>      <span class="big_keyword" title="Define a mutable variable">var</span> status: process_status_t;
+<span class="lineno" id=line150></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pid' = waitpid(pid,&amp;status,WNONE);
+<span class="lineno" id=line151></span>      <span class="small_keyword" title="conditional">if</span> pid' == bad_process <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line152></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Waitpid failed .. fix me!"</span>;
+<span class="lineno" id=line153></span>        System::exit 1;
+<span class="lineno" id=line154></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line155></span>        <span class="small_keyword" title="return">return</span> status;
+<span class="lineno" id=line156></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line157></span>    }
+<span class="lineno" id=line158></span>  
+<span class="lineno" id=line159></span>    variant ProcesStatus = | Running | Stopped of process_status_t;
+<span class="lineno" id=line160></span>  
+<span class="lineno" id=line161></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> checkpid(pid:pid_t) = {
+<span class="lineno" id=line162></span>      <span class="big_keyword" title="Define a mutable variable">var</span> status: process_status_t;
+<span class="lineno" id=line163></span>      <span class="big_keyword" title="Define a mutable variable">var</span> pid' = waitpid(pid,&amp;status,WNOHANG);
+<span class="lineno" id=line164></span>      <span class="small_keyword" title="conditional">if</span> pid' == bad_process <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line165></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Waitpid failed .. fix me!"</span>;
+<span class="lineno" id=line166></span>        System::exit 1;
+<span class="lineno" id=line167></span>      <span class="small_keyword" title="conditional">elif</span> pid'.<span class="library" title="binding of C int type">int</span> == 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line168></span>        <span class="small_keyword" title="return">return</span> Running;
+<span class="lineno" id=line169></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line170></span>        <span class="small_keyword" title="return">return</span> Stopped status;
+<span class="lineno" id=line171></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line172></span>    }
+<span class="lineno" id=line173></span>  
+<span class="lineno" id=line174></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> kill: pid_t * signal_t -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line175></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> OUR_PROCESS_GROUP: pid_t = <span class="fstring">"0"</span>;
+<span class="lineno" id=line176></span>   
+<span class="lineno" id=line177></span>  }
+</pre></p></div><h1 id='Win32_Process_h'><img src='/share/src/web/images/minus.gif' id='Win32 Process' onclick='toggle(this,"Win32_Process_d")' alt='+'/> 7 Win32 Process</h1><div id='Win32_Process_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/win32/process.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Win32Process {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Open a module or class">open</span> Win32Signal;
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Process_class[Win32, process_status_t] 
+<span class="lineno" id=line6></span>    {
+<span class="lineno" id=line7></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> popen_in: <span class="library" title="binding of C++ string type">string</span> -&gt; Cstdio::ifile = <span class="fstring">'_popen($1.c_str(), "r")'</span> <span class="big_keyword" title="specify requirements">requires</span> C89_headers::stdio_h;
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> pclose: Cstdio::ifile -&gt; process_status_t = <span class="fstring">"_pclose($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> C89_headers::stdio_h;
+<span class="lineno" id=line9></span>    }
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Process_class[Win32, process_status_t];
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> process_status_t = <span class="fstring">"intptr_t"</span>;
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C intptr_t type">intptr</span>:process_status_t = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span>:process_status_t = <span class="fstring">"int($1)"</span>;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> process_status_t : <span class="library" title="binding of C intptr_t type">intptr</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> int_of_process_status_t: process_status_t -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"(int)$1"</span>;
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>  <span class="comment">/*
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>    fun WIFCONTINUED: process_status_t -&gt; bool = "WIFCONTINUED($1)!=0";
+<span class="lineno" id=line20></span>    fun WIFEXITED: process_status_t -&gt; bool = "WIFEXITED($1)!=0";
+<span class="lineno" id=line21></span>    fun WIFSIGNALED: process_status_t -&gt; bool = "WIFSIGNALED($1)!=0";
+<span class="lineno" id=line22></span>    fun WIFSTOPPED: process_status_t -&gt; bool = "WIFSTOPPED($1)!=0";
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    fun WEXITSTATUS: process_status_t -&gt; int = "WEXITSTATUS($1)";
+<span class="lineno" id=line25></span>    fun WTERMSIG: process_status_t -&gt; signal_t = "WTERMSIG($1)";
+<span class="lineno" id=line26></span>    fun WSTOPSIG: process_status_t -&gt; signal_t = "WSTOPSIG($1)";
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>    // OSX only, not in Posix
+<span class="lineno" id=line29></span>    fun  WCOREDUMP: process_status_t -&gt; int = "WCOREDUMP($1)";
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>    fun str(x:process_status_t) = {
+<span class="lineno" id=line33></span>      if WIFEXITED x do
+<span class="lineno" id=line34></span>         val e = x.WEXITSTATUS;
+<span class="lineno" id=line35></span>         return "Exit " + str e + ": " +e.errno_t.strerror;
+<span class="lineno" id=line36></span>      elif WIFSIGNALED x do
+<span class="lineno" id=line37></span>         val s = x.WTERMSIG;
+<span class="lineno" id=line38></span>         return "SIGNAL " + s.int.str + ": " + s.str;
+<span class="lineno" id=line39></span>      else
+<span class="lineno" id=line40></span>         return "Unknown temination status " + x.int.str;
+<span class="lineno" id=line41></span>      done
+<span class="lineno" id=line42></span>    }
+<span class="lineno" id=line43></span>  */</span>
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> environ: + (+<span class="library" title="binding of C char type">char</span>) = <span class="fstring">"environ"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> exec_result_t = <span class="fstring">"intptr_t"</span>;
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> bad_exec: exec_result_t = <span class="fstring">"intptr_t(-1)"</span>;
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : exec_result_t * exec_result_t -&gt; bool= <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line49></span>  
+<span class="lineno" id=line50></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> execv:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) -&gt; exec_result_t = <span class="fstring">"_execv($1, $2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::process_h;
+<span class="lineno" id=line51></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> execvp:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) -&gt; exec_result_t = <span class="fstring">"_execvp($1, $2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::process_h;
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> execve:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) * + (+<span class="library" title="binding of C char type">char</span>) -&gt; exec_result_t = <span class="fstring">"_execve($1, $2, $3)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::process_h;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>    <span class="comment">// do NOT try to fork Felix programs, it doesn't work</span>
+<span class="lineno" id=line55></span>    <span class="comment">// because of threads already running. We use fork only</span>
+<span class="lineno" id=line56></span>    <span class="comment">// to preceed exec() calls.</span>
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> pid_t = <span class="fstring">"intptr_t"</span> <span class="big_keyword" title="specify requirements">requires</span> Posix_headers::unistd_h;
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C intptr_t type">intptr</span>: pid_t = <span class="fstring">"($1)"</span>;
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> bad_process : pid_t = <span class="fstring">"intptr_t(-1)"</span>;
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : pid_t * pid_t -&gt; bool= <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line61></span>  
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[pid_t] {
+<span class="lineno" id=line63></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: pid_t -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">"::flx::rtl::strutil::str&lt;intptr_t&gt;($1)"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"flx_strutil"</span>;
+<span class="lineno" id=line64></span>    }
+<span class="lineno" id=line65></span>  
+<span class="lineno" id=line66></span>    variant spawn_result_t = 
+<span class="lineno" id=line67></span>    <span class="comment">// returned to parent process</span>
+<span class="lineno" id=line68></span>    | BadFork of errno_t  
+<span class="lineno" id=line69></span>    | ProcessId of pid_t 
+<span class="lineno" id=line70></span>  
+<span class="lineno" id=line71></span>    <span class="comment">// returned to child proces (can't happen on Windows)</span>
+<span class="lineno" id=line72></span>    | BadExec of errno_t 
+<span class="lineno" id=line73></span>    | BadSetup of <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line74></span>    ;
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnv:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) -&gt; pid_t = <span class="fstring">"_spawn(_P_NOWAIT,$1, $2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::process_h;
+<span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnvp:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) -&gt; pid_t = <span class="fstring">"_spawnvp(_P_NOWAIT,$1, $2)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::process_h; 
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnve:+<span class="library" title="binding of C char type">char</span> *  + (+<span class="library" title="binding of C char type">char</span>) * + (+<span class="library" title="binding of C char type">char</span>) -&gt; pid_t = <span class="fstring">"_spawnve(_P_NOWAIT,$1, $2, $3)"</span> <span class="big_keyword" title="specify requirements">requires</span> Win32_headers::process_h; 
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnv(file: <span class="library" title="binding of C++ string type">string</span>, argv:+ (+<span class="library" title="binding of C char type">char</span>), setup:1-&gt;<span class="library" title="binding of C int type">int</span>) : spawn_result_t = {
+<span class="lineno" id=line81></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = spawnv(file.cstr, argv); 
+<span class="lineno" id=line82></span>      <span class="small_keyword" title="conditional">if</span> x == bad_process <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// PARENT </span>
+<span class="lineno" id=line83></span>        <span class="small_keyword" title="return">return</span> BadFork errno;
+<span class="lineno" id=line84></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line85></span>        <span class="small_keyword" title="return">return</span> ProcessId x;
+<span class="lineno" id=line86></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line87></span>    }
+<span class="lineno" id=line88></span>  
+<span class="lineno" id=line89></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnvp(file: <span class="library" title="binding of C++ string type">string</span>, argv:+ (+<span class="library" title="binding of C char type">char</span>), setup:1-&gt;<span class="library" title="binding of C int type">int</span>) : spawn_result_t = { 
+<span class="lineno" id=line90></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = spawnvp(file.cstr, argv); 
+<span class="lineno" id=line91></span>      <span class="small_keyword" title="conditional">if</span> x == bad_process <span class="small_keyword" title="imperative code begins">do</span>  <span class="comment">// PARENT</span>
+<span class="lineno" id=line92></span>        <span class="small_keyword" title="return">return</span> BadFork errno;
+<span class="lineno" id=line93></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line94></span>        <span class="small_keyword" title="return">return</span> ProcessId x;
+<span class="lineno" id=line95></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line96></span>    }
+<span class="lineno" id=line97></span>  
+<span class="lineno" id=line98></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> spawnve(file: <span class="library" title="binding of C++ string type">string</span>, argv:+ (+<span class="library" title="binding of C char type">char</span>), env: + (+<span class="library" title="binding of C char type">char</span>), setup:1-&gt;<span class="library" title="binding of C int type">int</span>) : spawn_result_t = {
+<span class="lineno" id=line99></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = spawnve(file.cstr, argv, env); 
+<span class="lineno" id=line100></span>      <span class="small_keyword" title="conditional">if</span> x == bad_process <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// PARENT</span>
+<span class="lineno" id=line101></span>        <span class="small_keyword" title="return">return</span> BadFork errno;
+<span class="lineno" id=line102></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line103></span>        <span class="small_keyword" title="return">return</span> ProcessId x;
+<span class="lineno" id=line104></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line105></span>    }
+<span class="lineno" id=line106></span>  <span class="comment">/*
+<span class="lineno" id=line107></span>    type process_status_options_t = "int";
+<span class="lineno" id=line108></span>    const WCONTINUED: process_status_options_t;
+<span class="lineno" id=line109></span>    const WNOHANG: process_status_options_t;
+<span class="lineno" id=line110></span>    const WUNTRACED: process_status_options_t;
+<span class="lineno" id=line111></span>    const WNONE: process_status_options_t="0";
+<span class="lineno" id=line112></span>    fun \| : process_status_options_t * process_status_options_t -&gt; process_status_options_t = "$1|$2";
+<span class="lineno" id=line113></span>  
+<span class="lineno" id=line114></span>    // Use WaitForSingleObject
+<span class="lineno" id=line115></span>    gen waitpid: pid_t * &amp;process_status_t * process_status_options_t -&gt; pid_t requires Posix_headers::sys_wait_h;
+<span class="lineno" id=line116></span>  
+<span class="lineno" id=line117></span>    gen waitpid(pid:pid_t) = {
+<span class="lineno" id=line118></span>      var status: process_status_t;
+<span class="lineno" id=line119></span>      var pid' = waitpid(pid,&amp;status,WNONE);
+<span class="lineno" id=line120></span>      if pid' == bad_process do 
+<span class="lineno" id=line121></span>        println$ "Waitpid failed .. fix me!";
+<span class="lineno" id=line122></span>        System::exit 1;
+<span class="lineno" id=line123></span>      else
+<span class="lineno" id=line124></span>        return status;
+<span class="lineno" id=line125></span>      done
+<span class="lineno" id=line126></span>    }
+<span class="lineno" id=line127></span>  
+<span class="lineno" id=line128></span>    variant ProcesStatus = | Running | Stopped of process_status_t;
+<span class="lineno" id=line129></span>  
+<span class="lineno" id=line130></span>    gen checkpid(pid:pid_t) = {
+<span class="lineno" id=line131></span>      var status: process_status_t;
+<span class="lineno" id=line132></span>      var pid' = waitpid(pid,&amp;status,WNOHANG);
+<span class="lineno" id=line133></span>      if pid' == bad_process do 
+<span class="lineno" id=line134></span>        println$ "Waitpid failed .. fix me!";
+<span class="lineno" id=line135></span>        System::exit 1;
+<span class="lineno" id=line136></span>      elif pid'.int == 0 do
+<span class="lineno" id=line137></span>        return Running;
+<span class="lineno" id=line138></span>      else
+<span class="lineno" id=line139></span>        return Stopped status;
+<span class="lineno" id=line140></span>      done
+<span class="lineno" id=line141></span>    }
+<span class="lineno" id=line142></span>  
+<span class="lineno" id=line143></span>    gen kill: pid_t * signal_t -&gt; int;
+<span class="lineno" id=line144></span>    const OUR_PROCESS_GROUP: pid_t = "0";
+<span class="lineno" id=line145></span>  */</span> 
+<span class="lineno" id=line146></span>  }
+<span class="lineno" id=line147></span>  
+</pre></p></div><h1 id='System_Call_h'><img src='/share/src/web/images/minus.gif' id='System Call' onclick='toggle(this,"System_Call_d")' alt='+'/> 8 System Call</h1><div id='System_Call_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/system.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> System
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> argc:<span class="library" title="binding of C int type">int</span> = <span class="fstring">"ptf-&gt; argc"</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> _argv:&amp;&amp;<span class="library" title="binding of C char type">char</span>= <span class="fstring">"ptf-&gt; argv"</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> argv:<span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="binding of C++ string type">string</span> = <span class="fstring">'::std::string($1&lt;0||$1&gt;=ptf-&gt; argc??"":ptf-&gt; argv[$1])'</span> 
+<span class="lineno" id=line8></span>      <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> argv_dflt (x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="small_keyword" title="match statement or expression">match</span> argv x <span class="small_keyword" title="type-class constraint">with</span> | <span class="fstring">""</span> =&gt; y | a =&gt; a;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> args () =&gt; List::<span class="library" title="return data structure with function applied to each value">map</span> (argv) (List::range argc);
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> setargs : + (+<span class="library" title="binding of C char type">char</span>) * <span class="library" title="binding of C size_t type">size</span> = <span class="fstring">"ptf-&gt; argc=$2; ptf-&gt; argv=$1;"</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> setargs[N:UNITSUM] (a:<span class="library" title="binding of C++ string type">string</span>^N) 
+<span class="lineno" id=line15></span>    {
+<span class="lineno" id=line16></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> myget(i:<span class="library" title="binding of C size_t type">size</span>)=&gt;a.i.cstr;
+<span class="lineno" id=line17></span>      <span class="big_keyword" title="Define a mutable variable">var</span> x = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[+<span class="library" title="binding of C char type">char</span>] (a.<span class="library" title="number of elements in data structure">len</span>,a.<span class="library" title="number of elements in data structure">len</span>,myget);
+<span class="lineno" id=line18></span>      setargs (x.stl_begin,x.<span class="library" title="number of elements in data structure">len</span>);
+<span class="lineno" id=line19></span>    }
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> system (cmd:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C int type">int</span> =&gt; Shell::system(cmd);
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> exit: <span class="library" title="binding of C int type">int</span> -&gt; <span class="library" title="Type a non-returning function returns">any</span> = <span class="fstring">'::std::exit($1)'</span> <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> abort: 1 -&gt; <span class="library" title="Type a non-returning function returns">any</span> = 
+<span class="lineno" id=line24></span>      <span class="fstring">'(fprintf(stderr,"Felix code calling abort\\n"),::std::abort())'</span> 
+<span class="lineno" id=line25></span>      <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line26></span>    _gc_pointer <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> ptf_t = <span class="fstring">"thread_frame_t*"</span>;
+<span class="lineno" id=line27></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> ptf:ptf_t = <span class="fstring">"ptf"</span> <span class="big_keyword" title="specify requirements">requires</span> property <span class="fstring">"needs_ptf"</span>;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>    <span class="doccomment">pexit examines the return code from a system call.</span>
+<span class="lineno" id=line30></span>    <span class="doccomment">If the code is 0 it exists with 0.</span>
+<span class="lineno" id=line31></span>    <span class="doccomment">On Windows:</span>
+<span class="lineno" id=line32></span>    <span class="doccomment">   if the code is -1, it exits with errno.</span>
+<span class="lineno" id=line33></span>    <span class="doccomment">   otherwise code 3</span>
+<span class="lineno" id=line34></span>    <span class="doccomment">On Unix:</span>
+<span class="lineno" id=line35></span>    <span class="doccomment">  if the code is non-zero then</span>
+<span class="lineno" id=line36></span>    <span class="doccomment">    if the callout aborted, return its abort code.</span>
+<span class="lineno" id=line37></span>    <span class="doccomment">    if the callout died due to a signal, exit with code 2</span>
+<span class="lineno" id=line38></span>    <span class="doccomment">    otherwise exit with code 3</span>
+<span class="lineno" id=line39></span>    <span class="doccomment">In both these cases a non-zero return causes a message</span>
+<span class="lineno" id=line40></span>    <span class="doccomment">to be printed on stderr.</span>
+<span class="lineno" id=line41></span>  
+<span class="lineno" id=line42></span>    <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line43></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pexit(e:<span class="library" title="binding of C int type">int</span>)
+<span class="lineno" id=line44></span>      {
+<span class="lineno" id=line45></span>        <span class="small_keyword" title="conditional">if</span> e != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line46></span>          <span class="small_keyword" title="conditional">if</span> e == -1 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line47></span>            err :=  errno;
+<span class="lineno" id=line48></span>            eprintln$ <span class="fstring">"Error "</span>+err.<span class="library" title="Convert a value to a string">str</span>+<span class="fstring">" in flx: "</span> + strerror err;
+<span class="lineno" id=line49></span>            System::exit err.<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line50></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line51></span>            eprintln$ <span class="fstring">"Unknown error in shell "</span> + <span class="library" title="Convert a value to a string">str</span> e;
+<span class="lineno" id=line52></span>            System::exit 3;
+<span class="lineno" id=line53></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line54></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line55></span>        System::exit e;
+<span class="lineno" id=line56></span>      }
+<span class="lineno" id=line57></span>    <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line58></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> pexit(e:<span class="library" title="binding of C int type">int</span>)
+<span class="lineno" id=line59></span>      {
+<span class="lineno" id=line60></span>        <span class="small_keyword" title="conditional">if</span> e != 0 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line61></span>          <span class="small_keyword" title="conditional">if</span> PosixProcess::WIFEXITED e.PosixProcess::process_status_t <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line62></span>            err :=  PosixProcess::WEXITSTATUS e.PosixProcess::process_status_t;
+<span class="lineno" id=line63></span>            eprintln$ <span class="fstring">"Error "</span>+err.<span class="library" title="Convert a value to a string">str</span>+<span class="fstring">" in flx: "</span> + strerror err.errno_t;
+<span class="lineno" id=line64></span>            System::exit err;
+<span class="lineno" id=line65></span>          <span class="small_keyword" title="conditional">elif</span> PosixProcess::WIFSIGNALED e.PosixProcess::process_status_t <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line66></span>            sig := Process::WTERMSIG e.PosixProcess::process_status_t;
+<span class="lineno" id=line67></span>            eprintln$ <span class="fstring">"Shell terminated by signal "</span> + <span class="library" title="Convert a value to a string">str</span> sig;
+<span class="lineno" id=line68></span>            System::exit 2;
+<span class="lineno" id=line69></span>          <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line70></span>            eprintln$ <span class="fstring">"Unknown error in shell "</span> + <span class="library" title="Convert a value to a string">str</span> e;
+<span class="lineno" id=line71></span>            System::exit 3;
+<span class="lineno" id=line72></span>          <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line73></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line74></span>        System::exit e;
+<span class="lineno" id=line75></span>      }
+<span class="lineno" id=line76></span>    <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line77></span>  
+<span class="lineno" id=line78></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> get_stdout(x:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> =&gt; Shell::get_stdout x;
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>  }
+<span class="lineno" id=line81></span>  
+</pre></p></div><h1 id='Shell_h'><img src='/share/src/web/images/minus.gif' id='Shell' onclick='toggle(this,"Shell_d")' alt='+'/> 9 Shell</h1><div id='Shell_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/shell.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// Note Shell_class interface doesn't use process_status_t</span>
+<span class="lineno" id=line3></span>  <span class="comment">// but the implementation does.</span>
+<span class="lineno" id=line4></span>  
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a type class">class</span> Shell_class[OS, process_status_t]
+<span class="lineno" id=line6></span>  {
+<span class="lineno" id=line7></span>    <span class="comment">// Quote a single argument.</span>
+<span class="lineno" id=line8></span>    <span class="comment">// Note: kills Bash wildcard replacement.</span>
+<span class="lineno" id=line9></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_arg:string-&gt;<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_args (s:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="binding of C++ string type">string</span> =&gt; catmap[<span class="library" title="binding of C++ string type">string</span>] <span class="fstring">' '</span> quote_arg s;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="comment">// Mainly for Windows we need a way to quote command line strings too.</span>
+<span class="lineno" id=line13></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_line_for_system: string-&gt;<span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line16></span>  
+<span class="lineno" id=line17></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line18></span>    <span class="comment">// system() function</span>
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> raw_system: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="doccomment">basic command with line quoting.</span>
+<span class="lineno" id=line23></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> basic_system (cmd: <span class="library" title="binding of C++ string type">string</span>) :<span class="library" title="binding of C int type">int</span> =&gt; 
+<span class="lineno" id=line24></span>      cmd.quote_line_for_system.raw_system
+<span class="lineno" id=line25></span>    ;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="comment">// string argument</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> system (cmd:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line29></span>      <span class="small_keyword" title="conditional">if</span> Env::getenv <span class="fstring">"FLX_SHELL_ECHO"</span> != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line30></span>        eprintln$ <span class="fstring">"[system] "</span> + cmd;
+<span class="lineno" id=line31></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line32></span>      <span class="small_keyword" title="return">return</span> basic_system cmd;
+<span class="lineno" id=line33></span>    }
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>    <span class="comment">// list of string argument</span>
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> system (args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="binding of C int type">int</span> =&gt;
+<span class="lineno" id=line37></span>      args.quote_args.system
+<span class="lineno" id=line38></span>    ;
+<span class="lineno" id=line39></span>  
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> system[T <span class="small_keyword" title="type-class constraint">with</span> Iterable[T,<span class="library" title="binding of C++ string type">string</span>]] (args:T) : <span class="library" title="binding of C int type">int</span> =
+<span class="lineno" id=line41></span>    {
+<span class="lineno" id=line42></span>      <span class="big_keyword" title="Define a mutable variable">var</span> lst = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line43></span>      <span class="small_keyword" title="for loop">for</span> arg <span class="small_keyword" title="membership operator, function mem">in</span> args <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line44></span>        lst = lst + arg; 
+<span class="lineno" id=line45></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="return">return</span> system lst;
+<span class="lineno" id=line47></span>    }  
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="comment">//------------------------------------------------------------</span>
+<span class="lineno" id=line50></span>    <span class="comment">// popen() function (get_stdout)</span>
+<span class="lineno" id=line51></span>  
+<span class="lineno" id=line52></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_line_for_popen: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>    <span class="doccomment">get_stdout is a synchronous version of popen_in/pclose pair.</span>
+<span class="lineno" id=line55></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> raw_get_stdout : <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span>;
+<span class="lineno" id=line56></span>   
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> basic_get_stdout (cmd: <span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line58></span>      cmd.quote_line_for_popen.raw_get_stdout
+<span class="lineno" id=line59></span>    ;
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> get_stdout (cmd:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> = {
+<span class="lineno" id=line62></span>      <span class="small_keyword" title="conditional">if</span> Env::getenv <span class="fstring">"FLX_SHELL_ECHO"</span> != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line63></span>        eprintln$ <span class="fstring">"[get_stdout] "</span> + cmd;
+<span class="lineno" id=line64></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line65></span>      <span class="small_keyword" title="return">return</span> basic_get_stdout cmd;
+<span class="lineno" id=line66></span>    }
+<span class="lineno" id=line67></span>  
+<span class="lineno" id=line68></span>    <span class="comment">// arbitrary Streamable argument</span>
+<span class="lineno" id=line69></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> get_stdout (args:<span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>]) : <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> =&gt;
+<span class="lineno" id=line70></span>      args.quote_args.get_stdout
+<span class="lineno" id=line71></span>    ;
+<span class="lineno" id=line72></span>   
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> get_stdout[T <span class="small_keyword" title="type-class constraint">with</span> Iterable[T,<span class="library" title="binding of C++ string type">string</span>]] (args:T) : <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line74></span>    {
+<span class="lineno" id=line75></span>      <span class="big_keyword" title="Define a mutable variable">var</span> lst = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line76></span>      <span class="small_keyword" title="for loop">for</span> arg <span class="small_keyword" title="membership operator, function mem">in</span> args <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line77></span>        lst = lst + arg; 
+<span class="lineno" id=line78></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line79></span>      <span class="small_keyword" title="return">return</span> get_stdout lst;
+<span class="lineno" id=line80></span>    }  
+<span class="lineno" id=line81></span>  
+<span class="lineno" id=line82></span>  }
+<span class="lineno" id=line83></span>  
+<span class="lineno" id=line84></span>  <span class="big_keyword" title="Define a type class">class</span> Shell {
+<span class="lineno" id=line85></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line86></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> CmdExe;
+<span class="lineno" id=line87></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line88></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Bash;
+<span class="lineno" id=line89></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line90></span>  }
+<span class="lineno" id=line91></span>  
+</pre></p></div><h1 id='Posix_Shell_(Bash)_h'><img src='/share/src/web/images/minus.gif' id='Posix Shell (Bash)' onclick='toggle(this,"Posix_Shell_(Bash)_d")' alt='+'/> 10 Posix Shell (Bash)</h1><div id='Posix_Shell_(Bash)_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/posix/shell.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// Note: shell functions here only work with Bash.</span>
+<span class="lineno" id=line3></span>  <span class="comment">// However, the system() function always calls sh,</span>
+<span class="lineno" id=line4></span>  <span class="comment">// and sh is always an ash, which is almost always bash</span>
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  <span class="comment">/* GNU Bash 3-2 Man page
+<span class="lineno" id=line7></span>  QUOTING
+<span class="lineno" id=line8></span>         Quoting  is  used  to  remove  the  special meaning of certain characters or words to the shell.
+<span class="lineno" id=line9></span>         Quoting can be used to disable special treatment for special  characters,  to  prevent  reserved
+<span class="lineno" id=line10></span>         words from being recognized as such, and to prevent parameter expansion.
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>         Each  of  the metacharacters listed above under DEFINITIONS has special meaning to the shell and
+<span class="lineno" id=line13></span>         must be quoted if it is to represent itself.
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>         When the command history expansion facilities are being used (see HISTORY EXPANSION below),  the
+<span class="lineno" id=line16></span>         history expansion character, usually !, must be quoted to prevent history expansion.
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>         There are three quoting mechanisms: the escape character, single quotes, and double quotes.
+<span class="lineno" id=line19></span>  
+<span class="lineno" id=line20></span>         A  non-quoted backslash (\) is the escape character.  It preserves the literal value of the next
+<span class="lineno" id=line21></span>         character that follows, with the exception of &lt;newline&gt;.  If a \&lt;newline&gt; pair appears, and  the
+<span class="lineno" id=line22></span>         backslash is not itself quoted, the \&lt;newline&gt; is treated as a line continuation (that is, it is
+<span class="lineno" id=line23></span>         removed from the input stream and effectively ignored).
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>         Enclosing characters in single quotes preserves the literal value of each character  within  the
+<span class="lineno" id=line26></span>         quotes.   A single quote may not occur between single quotes, even when preceded by a backslash.
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>         Enclosing characters in double quotes preserves the literal value of all characters  within  the
+<span class="lineno" id=line29></span>         quotes,  with  the exception of $, `, \, and, when history expansion is enabled, !.  The charac-
+<span class="lineno" id=line30></span>         ters $ and ` retain their special meaning within double quotes.  The backslash retains its  spe-
+<span class="lineno" id=line31></span>         cial meaning only when followed by one of the following characters: $, `, ", \, or &lt;newline&gt;.  A
+<span class="lineno" id=line32></span>         double quote may be quoted within double quotes by preceding it with a backslash.   If  enabled,
+<span class="lineno" id=line33></span>         history  expansion  will be performed unless an !  appearing in double quotes is escaped using a
+<span class="lineno" id=line34></span>         backslash.  The backslash preceding the !  is not removed.
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>         The special parameters * and @ have special  meaning  when  in  double  quotes  (see  PARAMETERS
+<span class="lineno" id=line37></span>         below).
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>         Words  of the form $'string' are treated specially.  The word expands to string, with backslash-
+<span class="lineno" id=line40></span>         escaped characters replaced as specified by the ANSI C standard.  Backslash escape sequences, if
+<span class="lineno" id=line41></span>         present, are decoded as follows:
+<span class="lineno" id=line42></span>                \a     alert (bell)
+<span class="lineno" id=line43></span>                \b     backspace
+<span class="lineno" id=line44></span>                \e     an escape character
+<span class="lineno" id=line45></span>                \f     form feed
+<span class="lineno" id=line46></span>                \n     new line
+<span class="lineno" id=line47></span>                \r     carriage return
+<span class="lineno" id=line48></span>                \t     horizontal tab
+<span class="lineno" id=line49></span>                \v     vertical tab
+<span class="lineno" id=line50></span>                \\     backslash
+<span class="lineno" id=line51></span>                \'     single quote
+<span class="lineno" id=line52></span>                \nnn   the eight-bit character whose value is the octal value nnn (one to three digits)
+<span class="lineno" id=line53></span>                \xHH   the  eight-bit  character  whose value is the hexadecimal value HH (one or two hex
+<span class="lineno" id=line54></span>                       digits)
+<span class="lineno" id=line55></span>                \cx    a control-x character
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>         The expanded result is single-quoted, as if the dollar sign had not been present.
+<span class="lineno" id=line58></span>  
+<span class="lineno" id=line59></span>         A double-quoted string preceded by a dollar sign ($) will cause  the  string  to  be  translated
+<span class="lineno" id=line60></span>         according  to  the  current  locale.   If  the  current locale is C or POSIX, the dollar sign is
+<span class="lineno" id=line61></span>         ignored.  If the string is translated and replaced, the replacement is double-quoted.
+<span class="lineno" id=line62></span>  
+<span class="lineno" id=line63></span>  */</span>
+<span class="lineno" id=line64></span>  
+<span class="lineno" id=line65></span>  <span class="big_keyword" title="Define a type class">class</span> Bash {
+<span class="lineno" id=line66></span>  
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Shell_class[Posix, PosixProcess::process_status_t] {
+<span class="lineno" id=line68></span>      <span class="comment">// we can't use single quotes becase there's no way to represent a ' </span>
+<span class="lineno" id=line69></span>      <span class="comment">// in a single quoted string .. so we have to use double quotes and</span>
+<span class="lineno" id=line70></span>      <span class="comment">// backslash the 4 special characters: " $ \ `</span>
+<span class="lineno" id=line71></span>      <span class="comment">// I think this is all ..</span>
+<span class="lineno" id=line72></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_arg(s:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span>= {
+<span class="lineno" id=line73></span>        <span class="big_keyword" title="Define a mutable variable">var</span> r = <span class="fstring">""</span>;
+<span class="lineno" id=line74></span>        <span class="small_keyword" title="for loop">for</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> s <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line75></span>          <span class="small_keyword" title="conditional">if</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"\\\"</span><span class="fstring">" do   // leave $ and ` in there, unquoted.
+<span class="lineno" id=line76></span>            r += "</span>\\<span class="fstring">"+ str ch;
+<span class="lineno" id=line77></span>          else
+<span class="lineno" id=line78></span>            r+= ch;
+<span class="lineno" id=line79></span>          done
+<span class="lineno" id=line80></span>        done
+<span class="lineno" id=line81></span>        return '"</span><span class="fstring">'+r+'</span><span class="fstring">"';
+<span class="lineno" id=line82></span>      }
+<span class="lineno" id=line83></span>      fun quote_line_for_system (s:string) =&gt; s;
+<span class="lineno" id=line84></span>      fun quote_line_for_popen (s:string) =&gt; s + "</span> <span class="fstring">";
+<span class="lineno" id=line85></span>  
+<span class="lineno" id=line86></span>      //$ System command is ISO C and C++ standard.
+<span class="lineno" id=line87></span>      gen c_system: string -&gt; int = "</span>::std::system($1.c_str())<span class="fstring">"
+<span class="lineno" id=line88></span>        requires Cxx_headers::cstdlib
+<span class="lineno" id=line89></span>      ;
+<span class="lineno" id=line90></span>      gen raw_system (cmd:string) : int = {
+<span class="lineno" id=line91></span>        var result = c_system cmd;
+<span class="lineno" id=line92></span>        var posix_result = C_hack::cast[PosixProcess::process_status_t] result;
+<span class="lineno" id=line93></span>        if PosixProcess::WIFSIGNALED posix_result do 
+<span class="lineno" id=line94></span>          eprintln "</span>[system] Child process terminated by signal, aborting parent<span class="fstring">";
+<span class="lineno" id=line95></span>          System::exit 1;
+<span class="lineno" id=line96></span>        done
+<span class="lineno" id=line97></span>        return result;
+<span class="lineno" id=line98></span>      }
+<span class="lineno" id=line99></span>  
+<span class="lineno" id=line100></span>      gen raw_get_stdout(x:string) = {
+<span class="lineno" id=line101></span>        var fout = PosixProcess::popen_in(x+"</span> <span class="fstring">");
+<span class="lineno" id=line102></span>        if valid fout do
+<span class="lineno" id=line103></span>          var output = load fout;
+<span class="lineno" id=line104></span>  
+<span class="lineno" id=line105></span>          var result = PosixProcess::pclose fout; 
+<span class="lineno" id=line106></span>          if PosixProcess::WIFSIGNALED result do
+<span class="lineno" id=line107></span>            eprintln "</span>[get_stdout] Child process terminated by signal, aborting parent<span class="fstring">";
+<span class="lineno" id=line108></span>            System::exit 1;
+<span class="lineno" id=line109></span>          done
+<span class="lineno" id=line110></span>          return PosixProcess::WEXITSTATUS result, output;
+<span class="lineno" id=line111></span>        else
+<span class="lineno" id=line112></span>          println$ "</span>Unable <span class="small_keyword" title="substring range separator">to</span> run command <span class="fstring">'" + x "'</span><span class="fstring">";
+<span class="lineno" id=line113></span>          return -1,"</span><span class="fstring">";
+<span class="lineno" id=line114></span>        done
+<span class="lineno" id=line115></span>      }
+<span class="lineno" id=line116></span>  
+<span class="lineno" id=line117></span>      //$ Parse a bash command line into words.
+<span class="lineno" id=line118></span>      fun parse (s:string) : list[string] = 
+<span class="lineno" id=line119></span>      {
+<span class="lineno" id=line120></span>        var args = Empty[string];
+<span class="lineno" id=line121></span>        var current = "</span><span class="fstring">";
+<span class="lineno" id=line122></span>        variant mode_t = | copy | skip | quote | dquote | escape-copy | escape-dquote;
+<span class="lineno" id=line123></span>        var mode = skip;
+<span class="lineno" id=line124></span>        for ch in s do
+<span class="lineno" id=line125></span>          match mode with
+<span class="lineno" id=line126></span>          | #skip =&gt; 
+<span class="lineno" id=line127></span>            if ch == char "</span>\\<span class="fstring">" do
+<span class="lineno" id=line128></span>              mode = escape-copy;
+<span class="lineno" id=line129></span>            elif ch == char "</span><span class="fstring">'" do
+<span class="lineno" id=line130></span>              mode = quote;
+<span class="lineno" id=line131></span>            elif ch == char '</span><span class="fstring">"' do
+<span class="lineno" id=line132></span>              mode = dquote;
+<span class="lineno" id=line133></span>            elif ord ch &gt; ord (char ' ') do
+<span class="lineno" id=line134></span>              current += ch;
+<span class="lineno" id=line135></span>              mode = copy;
+<span class="lineno" id=line136></span>            done
+<span class="lineno" id=line137></span>  
+<span class="lineno" id=line138></span>          | #copy =&gt;
+<span class="lineno" id=line139></span>            if ch == char "</span>\\<span class="fstring">" do
+<span class="lineno" id=line140></span>              mode = escape-copy;
+<span class="lineno" id=line141></span>            elif ord ch &lt;= ord (char ' ') do
+<span class="lineno" id=line142></span>              mode = skip;
+<span class="lineno" id=line143></span>              args += current;
+<span class="lineno" id=line144></span>              current = "</span><span class="fstring">";
+<span class="lineno" id=line145></span>            elif ch == char "</span><span class="fstring">'" do
+<span class="lineno" id=line146></span>               mode = quote;
+<span class="lineno" id=line147></span>            elif ch == char '</span><span class="fstring">"' do
+<span class="lineno" id=line148></span>              mode = dquote;
+<span class="lineno" id=line149></span>            else
+<span class="lineno" id=line150></span>              current += ch;
+<span class="lineno" id=line151></span>            done
+<span class="lineno" id=line152></span>  
+<span class="lineno" id=line153></span>          | #escape-copy =&gt;
+<span class="lineno" id=line154></span>            current += ch;
+<span class="lineno" id=line155></span>            mode = copy;
+<span class="lineno" id=line156></span>  
+<span class="lineno" id=line157></span>          | #escape-dquote =&gt;
+<span class="lineno" id=line158></span>            mode = dquote;
+<span class="lineno" id=line159></span>            if ch in '"</span>\\$`<span class="fstring">' do
+<span class="lineno" id=line160></span>              current += ch;
+<span class="lineno" id=line161></span>            elif ch == char "'</span>n<span class="fstring">" do ;
+<span class="lineno" id=line162></span>            else 
+<span class="lineno" id=line163></span>              current += "</span>\\<span class="fstring">" + ch;
+<span class="lineno" id=line164></span>            done
+<span class="lineno" id=line165></span>    
+<span class="lineno" id=line166></span>          | #dquote =&gt;
+<span class="lineno" id=line167></span>            if ch == char '"</span><span class="fstring">' do
+<span class="lineno" id=line168></span>              mode = copy;
+<span class="lineno" id=line169></span>            elif ch == char "\\" do
+<span class="lineno" id=line170></span>              mode = escape-dquote;
+<span class="lineno" id=line171></span>            else
+<span class="lineno" id=line172></span>              current += ch;
+<span class="lineno" id=line173></span>            done
+<span class="lineno" id=line174></span>          | #quote =&gt;
+<span class="lineno" id=line175></span>            if ch == char "'</span><span class="fstring">" do
+<span class="lineno" id=line176></span>              mode = copy;
+<span class="lineno" id=line177></span>            else
+<span class="lineno" id=line178></span>              current += ch;
+<span class="lineno" id=line179></span>            done
+<span class="lineno" id=line180></span>          endmatch;
+<span class="lineno" id=line181></span>        done
+<span class="lineno" id=line182></span>        match mode with
+<span class="lineno" id=line183></span>        | #skip =&gt; ;
+<span class="lineno" id=line184></span>        | _ =&gt; args += current;
+<span class="lineno" id=line185></span>        endmatch; 
+<span class="lineno" id=line186></span>        return args;
+<span class="lineno" id=line187></span>      }
+<span class="lineno" id=line188></span>    }
+<span class="lineno" id=line189></span>    inherit Shell_class[Posix, PosixProcess::process_status_t];
+<span class="lineno" id=line190></span>  }
+<span class="lineno" id=line191></span>  
+<span class="lineno" id=line192></span>  </span>
+</pre></p></div><h1 id='Win32_Shell_(cmd.exe)_h'><img src='/share/src/web/images/minus.gif' id='Win32 Shell (cmd.exe)' onclick='toggle(this,"Win32_Shell_(cmd.exe)_d")' alt='+'/> 11 Win32 Shell (cmd.exe)</h1><div id='Win32_Shell_(cmd.exe)_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/win32/shell.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  
+<span class="lineno" id=line3></span>  <span class="comment">/* http://msdn.microsoft.com/en-us/library/17w5ykft.aspx
+<span class="lineno" id=line4></span>  Microsoft Specific
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  Microsoft C/C++ startup code uses the following rules when interpreting 
+<span class="lineno" id=line7></span>  arguments given on the operating system command line:
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>      Arguments are delimited by white space, which is either a space or a tab.
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>      The caret character (^) is not recognized as an escape character or delimiter. 
+<span class="lineno" id=line12></span>      The character is handled completely by the command-line parser in the 
+<span class="lineno" id=line13></span>      operating system before being passed to the argv array in the program.
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>      A string surrounded by double quotation marks ("string") is 
+<span class="lineno" id=line16></span>      interpreted as a single argument, regardless of white space contained within. 
+<span class="lineno" id=line17></span>      A quoted string can be embedded in an argument.
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>      A double quotation mark preceded by a backslash (\") is 
+<span class="lineno" id=line20></span>      interpreted as a literal double quotation mark character (").
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>      Backslashes are interpreted literally, unless they 
+<span class="lineno" id=line23></span>      immediately precede a double quotation mark.
+<span class="lineno" id=line24></span>  
+<span class="lineno" id=line25></span>      If an even number of backslashes is followed by a 
+<span class="lineno" id=line26></span>      double quotation mark, one backslash is placed in the argv
+<span class="lineno" id=line27></span>      array for every pair of backslashes, and the double quotation mark 
+<span class="lineno" id=line28></span>      is interpreted as a string delimiter.
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>      If an odd number of backslashes is followed by a 
+<span class="lineno" id=line31></span>      double quotation mark, one backslash is placed in the argv
+<span class="lineno" id=line32></span>      array for every pair of backslashes, and the double quotation mark
+<span class="lineno" id=line33></span>      is "escaped" by the remaining backslash, causing a literal 
+<span class="lineno" id=line34></span>      double quotation mark (") to be placed in argv.
+<span class="lineno" id=line35></span>  */</span>
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>  <span class="big_keyword" title="Define a type class">class</span> CmdExe
+<span class="lineno" id=line38></span>  {
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Shell_class[Win32, Win32Process::process_status_t]
+<span class="lineno" id=line40></span>    {
+<span class="lineno" id=line41></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_arg(s:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span> =&gt; <span class="fstring">'"'</span> + s + <span class="fstring">'"'</span>;
+<span class="lineno" id=line42></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_line_for_system(s:<span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="fstring">'"'</span> + s + <span class="fstring">'"'</span>;
+<span class="lineno" id=line43></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> quote_line_for_popen(s:<span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="fstring">'"'</span> + s + <span class="fstring">'"'</span>;
+<span class="lineno" id=line44></span>  
+<span class="lineno" id=line45></span>      <span class="doccomment">System command is ISO C and C++ standard.</span>
+<span class="lineno" id=line46></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> c_system: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">"::std::system($1.c_str())"</span>
+<span class="lineno" id=line47></span>        <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib
+<span class="lineno" id=line48></span>      ;
+<span class="lineno" id=line49></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> raw_system (cmd:<span class="library" title="binding of C++ string type">string</span>) =&gt; c_system cmd;
+<span class="lineno" id=line50></span>  
+<span class="lineno" id=line51></span>      <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> raw_get_stdout(x:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line52></span>        <span class="comment">//eprintln("CMD.EXE: raw_get_stout of " + x);</span>
+<span class="lineno" id=line53></span>        <span class="big_keyword" title="Define a mutable variable">var</span> fout = Win32Process::popen_in(x);
+<span class="lineno" id=line54></span>        <span class="small_keyword" title="conditional">if</span> valid fout <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line55></span>          <span class="big_keyword" title="Define a mutable variable">var</span> output = load fout;
+<span class="lineno" id=line56></span>          <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Win32Process::pclose fout; 
+<span class="lineno" id=line57></span>          <span class="small_keyword" title="return">return</span> Win32Process::int_of_process_status_t <span class="small_keyword" title="value of function return used in post condition">result</span>, output;
+<span class="lineno" id=line58></span>        <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line59></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Unable to run command '"</span> + x <span class="fstring">"'"</span>;
+<span class="lineno" id=line60></span>          <span class="small_keyword" title="return">return</span> -1,<span class="fstring">""</span>;
+<span class="lineno" id=line61></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line62></span>      }
+<span class="lineno" id=line63></span>  
+<span class="lineno" id=line64></span>      <span class="doccomment">Parse a CMD.EXE command line into words.</span>
+<span class="lineno" id=line65></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> parse (s:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C++ string type">string</span>] = 
+<span class="lineno" id=line66></span>      {
+<span class="lineno" id=line67></span>        <span class="big_keyword" title="Define a mutable variable">var</span> args = Empty[<span class="library" title="binding of C++ string type">string</span>];
+<span class="lineno" id=line68></span>        <span class="big_keyword" title="Define a mutable variable">var</span> current = <span class="fstring">""</span>;
+<span class="lineno" id=line69></span>        variant mode_t = | copy | skip | dquote | escape-copy | escape-dquote;
+<span class="lineno" id=line70></span>        <span class="big_keyword" title="Define a mutable variable">var</span> mode = skip;
+<span class="lineno" id=line71></span>        <span class="small_keyword" title="for loop">for</span> ch <span class="small_keyword" title="membership operator, function mem">in</span> s <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line72></span>          <span class="small_keyword" title="match statement or expression">match</span> mode <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line73></span>          | #skip =&gt; 
+<span class="lineno" id=line74></span>            <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line75></span>              mode = escape-copy;
+<span class="lineno" id=line76></span>            <span class="small_keyword" title="conditional">elif</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line77></span>              mode = dquote;
+<span class="lineno" id=line78></span>            <span class="small_keyword" title="conditional">elif</span> ord ch &gt; ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">' '</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line79></span>              current += ch;
+<span class="lineno" id=line80></span>              mode = copy;
+<span class="lineno" id=line81></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line82></span>  
+<span class="lineno" id=line83></span>          | #copy =&gt;
+<span class="lineno" id=line84></span>            <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line85></span>              mode = escape-copy;
+<span class="lineno" id=line86></span>            <span class="small_keyword" title="conditional">elif</span> ord ch &lt;= ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">' '</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line87></span>              mode = skip;
+<span class="lineno" id=line88></span>              args += current;
+<span class="lineno" id=line89></span>              current = <span class="fstring">""</span>;
+<span class="lineno" id=line90></span>            <span class="small_keyword" title="conditional">elif</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line91></span>              mode = dquote;
+<span class="lineno" id=line92></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line93></span>              current += ch;
+<span class="lineno" id=line94></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line95></span>  
+<span class="lineno" id=line96></span>          | #escape-copy =&gt;
+<span class="lineno" id=line97></span>            mode = copy;
+<span class="lineno" id=line98></span>            <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line99></span>              current += ch;
+<span class="lineno" id=line100></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line101></span>              current += <span class="fstring">"\\"</span> + ch;
+<span class="lineno" id=line102></span>            <span class="small_keyword" title="end of body">done</span> 
+<span class="lineno" id=line103></span>  
+<span class="lineno" id=line104></span>          | #escape-dquote =&gt;
+<span class="lineno" id=line105></span>            mode = dquote;
+<span class="lineno" id=line106></span>            <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line107></span>              current += ch;
+<span class="lineno" id=line108></span>            <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line109></span>              current += <span class="fstring">"\\"</span> + ch;
+<span class="lineno" id=line110></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line111></span>    
+<span class="lineno" id=line112></span>          | #dquote =&gt;
+<span class="lineno" id=line113></span>            <span class="small_keyword" title="conditional">if</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">'"'</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line114></span>              mode = copy;
+<span class="lineno" id=line115></span>            <span class="small_keyword" title="conditional">elif</span> ch == <span class="library" title="binding of C char type">char</span> <span class="fstring">"\\"</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line116></span>              mode = escape-dquote;
+<span class="lineno" id=line117></span>            <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line118></span>              current += ch;
+<span class="lineno" id=line119></span>            <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line120></span>          <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line121></span>        <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line122></span>        <span class="small_keyword" title="match statement or expression">match</span> mode <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line123></span>        | #skip =&gt; ;
+<span class="lineno" id=line124></span>        | _ =&gt; args += current;
+<span class="lineno" id=line125></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>; 
+<span class="lineno" id=line126></span>        <span class="small_keyword" title="return">return</span> args;
+<span class="lineno" id=line127></span>      }
+<span class="lineno" id=line128></span>    }
+<span class="lineno" id=line129></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Shell_class[Win32, Win32Process::process_status_t];
+<span class="lineno" id=line130></span>  
+<span class="lineno" id=line131></span>  }
+<span class="lineno" id=line132></span>  
+<span class="lineno" id=line133></span>  
+<span class="lineno" id=line134></span>  
+</pre></p></div><h1 id='Signals_h'><img src='/share/src/web/images/minus.gif' id='Signals' onclick='toggle(this,"Signals_d")' alt='+'/> 12 Signals</h1><div id='Signals_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/program/signal.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> ctrl_c_flag = """<span class="embedded_c">
+<span class="lineno" id=line3></span>    <span class="qualifier">static</span> bool ctrl_c_flag = false;
+<span class="lineno" id=line4></span>    bool get_ctrl_c_flag() { <span class="small_keyword">return</span> ctrl_c_flag; }
+<span class="lineno" id=line5></span>    <span class="qualifier">void</span> set_ctrl_c_flag(<span class="qualifier">int</span>) { ctrl_c_flag = true; }
+<span class="lineno" id=line6></span>  </span>""";
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Define a type class">class</span> Signal_class [os] {
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> get_ctrl_c_flag: 1 -&gt; bool <span class="big_keyword" title="specify requirements">requires</span> ctrl_c_flag;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> set_ctrl_c_flag: <span class="library" title="binding of C int type">int</span> <span class="big_keyword" title="specify requirements">requires</span> ctrl_c_flag;
+<span class="lineno" id=line12></span>    <span class="qualifier" title="Type of a function to be provided in type class instances">virtual</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> trap_ctrl_c: 1;
+<span class="lineno" id=line13></span>  
+<span class="lineno" id=line14></span>  }
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a type class">class</span> Signal {
+<span class="lineno" id=line17></span>  <span class="small_keyword" title="conditional">if</span> PLAT_WIN32 <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line18></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Win32Signal;
+<span class="lineno" id=line19></span>  <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> PosixSignal;
+<span class="lineno" id=line21></span>  <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line22></span>  }
+<span class="lineno" id=line23></span>  
+</pre></p></div><h1 id='Posix_Signal_h'><img src='/share/src/web/images/minus.gif' id='Posix Signal' onclick='toggle(this,"Posix_Signal_d")' alt='+'/> 13 Posix Signal</h1><div id='Posix_Signal_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/posix/signal.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> PosixSignal {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="specify requirements">requires</span> C89_headers::signal_h; 
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> signal_t = <span class="fstring">"int"</span>;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> signal_t: <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span>: signal_t = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> sig_t = <span class="fstring">"sig_t"</span>; <span class="comment">// what a pity posix calls the handler sig_t</span>
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> signal: signal_t * sig_t -&gt; sig_t = <span class="fstring">"signal($1, $2)"</span>;
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[signal_t] {
+<span class="lineno" id=line11></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : signal_t * signal_t -&gt;  bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line12></span>    }
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[signal_t];
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="comment">// http://pubs.opengroup.org/onlinepubs/009695399/basedefs/signal.h.html</span>
+<span class="lineno" id=line16></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> 
+<span class="lineno" id=line17></span>      SIGABRT, SIGALRM, SIGBUS, SIGCHLD, SIGCONT, SIGFPE, SIGHUP, SIGILL, SIGINT, SIGKILL,
+<span class="lineno" id=line18></span>      SIGPIPE, SIGQUIT, SIGSEGV, SIGSTOP, SIGTERM, SIGTSTP, SIGTTN, SIGTTOU, SIGUSR1, SIGUSR2,
+<span class="lineno" id=line19></span>      SIGPOLL, SIGPROF, SIGSYS, SIGTRAP, SIGURG, SIGVTALRM, SIGXCPU,SIGXSZ
+<span class="lineno" id=line20></span>    : signal_t;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[signal_t] {
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: signal_t -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line24></span>      | $(SIGABRT) =&gt;  <span class="fstring">"SIGABRT"</span> 
+<span class="lineno" id=line25></span>      | $(SIGALRM) =&gt;  <span class="fstring">"SIGALRM"</span> 
+<span class="lineno" id=line26></span>      | $(SIGBUS) =&gt;  <span class="fstring">"SIGBUS"</span> 
+<span class="lineno" id=line27></span>      | $(SIGCHLD) =&gt;  <span class="fstring">"SIGCHLD"</span> 
+<span class="lineno" id=line28></span>      | $(SIGCONT) =&gt;  <span class="fstring">"SIGCONT"</span> 
+<span class="lineno" id=line29></span>      | $(SIGFPE) =&gt;  <span class="fstring">"SIGFPE"</span> 
+<span class="lineno" id=line30></span>      | $(SIGHUP) =&gt;  <span class="fstring">"SIGHUP"</span> 
+<span class="lineno" id=line31></span>      | $(SIGILL) =&gt;  <span class="fstring">"SIGILL"</span> 
+<span class="lineno" id=line32></span>      | $(SIGINT) =&gt;  <span class="fstring">"SIGINT"</span> 
+<span class="lineno" id=line33></span>      | $(SIGKILL) =&gt;  <span class="fstring">"SIGKILL"</span>
+<span class="lineno" id=line34></span>      | $(SIGPIPE) =&gt;  <span class="fstring">"SIGPIPE"</span> 
+<span class="lineno" id=line35></span>      | $(SIGQUIT) =&gt;  <span class="fstring">"SIGQUIT"</span> 
+<span class="lineno" id=line36></span>      | $(SIGSEGV) =&gt;  <span class="fstring">"SIGSEGV"</span> 
+<span class="lineno" id=line37></span>      | $(SIGSTOP) =&gt;  <span class="fstring">"SIGSTOP"</span> 
+<span class="lineno" id=line38></span>      | $(SIGTERM) =&gt;  <span class="fstring">"SIGTERM"</span> 
+<span class="lineno" id=line39></span>      | $(SIGTSTP) =&gt;  <span class="fstring">"SIGTSTP"</span> 
+<span class="lineno" id=line40></span>      <span class="comment">// | $(SIGTTN) =&gt;  "SIGTTN"  // not in OSX</span>
+<span class="lineno" id=line41></span>      | $(SIGTTOU) =&gt;  <span class="fstring">"SIGTTOU"</span> 
+<span class="lineno" id=line42></span>      | $(SIGUSR1) =&gt;  <span class="fstring">"SIGUSR1"</span> 
+<span class="lineno" id=line43></span>      | $(SIGUSR2) =&gt;  <span class="fstring">"SIGUSR2"</span>
+<span class="lineno" id=line44></span>      <span class="comment">// | $(SIGPOLL) =&gt;  "SIGPOLL" // not in OSX</span>
+<span class="lineno" id=line45></span>      | $(SIGPROF) =&gt;  <span class="fstring">"SIGPROF"</span> 
+<span class="lineno" id=line46></span>      | $(SIGSYS) =&gt;  <span class="fstring">"SIGSYS"</span> 
+<span class="lineno" id=line47></span>      | $(SIGTRAP) =&gt;  <span class="fstring">"SIGTRAP"</span> 
+<span class="lineno" id=line48></span>      | $(SIGURG) =&gt;  <span class="fstring">"SIGURG"</span> 
+<span class="lineno" id=line49></span>      | $(SIGVTALRM) =&gt;  <span class="fstring">"SIGVTALRM"</span> 
+<span class="lineno" id=line50></span>      | $(SIGXCPU) =&gt;  <span class="fstring">"SIGXCPU"</span> 
+<span class="lineno" id=line51></span>      <span class="comment">// | $(SIGXSZ) =&gt;  "SIGXSZ" // not in OSX</span>
+<span class="lineno" id=line52></span>      | x =&gt; <span class="fstring">"signal "</span> + x.<span class="library" title="binding of C int type">int</span>.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line53></span>      ;
+<span class="lineno" id=line54></span>    }
+<span class="lineno" id=line55></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Str[signal_t];
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> "<span class="embedded_c"><span class="qualifier">void</span> null_signal_handler(<span class="qualifier">int</span>){}</span>";
+<span class="lineno" id=line58></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> null_signal_handler: sig_t;
+<span class="lineno" id=line59></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ignore_signal(s:signal_t) { <span class="hack">C_hack</span>::ignore(signal(s, null_signal_handler)); }
+<span class="lineno" id=line60></span>  
+<span class="lineno" id=line61></span>    <span class="comment">// http://pubs.opengroup.org/onlinepubs/007904975/functions/sigaction.html</span>
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> ctrl_c_handling = """<span class="embedded_c">
+<span class="lineno" id=line63></span>      <span class="qualifier">void</span> set_ctrl_c_flag(<span class="qualifier">int</span>);
+<span class="lineno" id=line64></span>      <span class="qualifier">void</span> trap_ctrl_c () {
+<span class="lineno" id=line65></span>        <span class="big_keyword">struct</span> sigaction sa;
+<span class="lineno" id=line66></span>        sa.sa_handler = set_ctrl_c_flag;
+<span class="lineno" id=line67></span>        sigemptyset(&amp;sa.sa_mask);
+<span class="lineno" id=line68></span>        sa.sa_flags = SA_RESTART;
+<span class="lineno" id=line69></span>        sigaction(SIGINT, &amp;sa, NULL);
+<span class="lineno" id=line70></span>     }
+<span class="lineno" id=line71></span>    </span>""" <span class="big_keyword" title="specify requirements">requires</span> ctrl_c_flag;
+<span class="lineno" id=line72></span>  
+<span class="lineno" id=line73></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Signal_class[Posix];
+<span class="lineno" id=line74></span>  
+<span class="lineno" id=line75></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Signal_class[Posix] {
+<span class="lineno" id=line76></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> trap_ctrl_c: <span class="library" title="Type with one values (), the empty tuple">unit</span> <span class="big_keyword" title="specify requirements">requires</span> ctrl_c_handling;
+<span class="lineno" id=line77></span>    }
+<span class="lineno" id=line78></span>  }
+<span class="lineno" id=line79></span>  
+<span class="lineno" id=line80></span>  
+</pre></p></div><h1 id='Win32_Signal_h'><img src='/share/src/web/images/minus.gif' id='Win32 Signal' onclick='toggle(this,"Win32_Signal_d")' alt='+'/> 14 Win32 Signal</h1><div id='Win32_Signal_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/win32/signal.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a type class">class</span> Win32Signal {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="specify requirements">requires</span> C89_headers::signal_h;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> signal_t = <span class="fstring">"int"</span>;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> signal_t: <span class="library" title="binding of C int type">int</span> = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a value constructor or conversion operator for a type">ctor</span> <span class="library" title="binding of C int type">int</span>: signal_t = <span class="fstring">"$1"</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> sig_t_def = "<span class="embedded_c"><span class="big_keyword">typedef</span> <span class="qualifier">void</span> (__cdecl *sig_t)(<span class="qualifier">int</span>);</span>";
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> sig_t = <span class="fstring">"sig_t"</span> <span class="big_keyword" title="specify requirements">requires</span> sig_t_def; 
+<span class="lineno" id=line10></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> signal: signal_t * sig_t -&gt; sig_t = <span class="fstring">"signal($1, $2)"</span>;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Eq[signal_t] {
+<span class="lineno" id=line12></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> == : signal_t * signal_t -&gt;  bool = <span class="fstring">"$1==$2"</span>;
+<span class="lineno" id=line13></span>    }
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Eq[signal_t];
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>    <span class="comment">// http://pubs.opengroup.org/onlinepubs/009695399/basedefs/signal.h.html</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> 
+<span class="lineno" id=line18></span>      SIGABRT,  SIGFPE, SIGILL, SIGINT, 
+<span class="lineno" id=line19></span>      SIGSEGV,  SIGTERM 
+<span class="lineno" id=line20></span>    : signal_t;
+<span class="lineno" id=line21></span>  
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[signal_t] {
+<span class="lineno" id=line23></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span>: signal_t -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line24></span>      | $(SIGABRT) =&gt;  <span class="fstring">"SIGABRT"</span> 
+<span class="lineno" id=line25></span>      | $(SIGFPE) =&gt;  <span class="fstring">"SIGFPE"</span> 
+<span class="lineno" id=line26></span>      | $(SIGILL) =&gt;  <span class="fstring">"SIGILL"</span> 
+<span class="lineno" id=line27></span>      | $(SIGINT) =&gt;  <span class="fstring">"SIGINT"</span> 
+<span class="lineno" id=line28></span>      | $(SIGSEGV) =&gt;  <span class="fstring">"SIGSEGV"</span> 
+<span class="lineno" id=line29></span>      | $(SIGTERM) =&gt;  <span class="fstring">"SIGTERM"</span> 
+<span class="lineno" id=line30></span>      | x =&gt; <span class="fstring">"signal "</span> + x.<span class="library" title="binding of C int type">int</span>.<span class="library" title="Convert a value to a string">str</span>
+<span class="lineno" id=line31></span>      ;
+<span class="lineno" id=line32></span>    }
+<span class="lineno" id=line33></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Str[signal_t];
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> "<span class="embedded_c"><span class="qualifier">void</span> null_signal_handler(<span class="qualifier">int</span>){}</span>";
+<span class="lineno" id=line36></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> null_signal_handler: sig_t;
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ignore_signal(s:signal_t) { <span class="hack">C_hack</span>::ignore(signal(s, null_signal_handler)); }
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="comment">// http://pubs.opengroup.org/onlinepubs/007904975/functions/sigaction.html</span>
+<span class="lineno" id=line40></span>    <span class="big_keyword" title="Specify C code to be inserted into implementation file">body</span> ctrl_c_handling = """<span class="embedded_c">
+<span class="lineno" id=line41></span>      <span class="qualifier">void</span> set_ctrl_c_flag(<span class="qualifier">int</span>);
+<span class="lineno" id=line42></span>      <span class="qualifier">void</span> trap_ctrl_c () {
+<span class="lineno" id=line43></span>       (<span class="qualifier">void</span>)signal(SIGINT,set_ctrl_c_flag); 
+<span class="lineno" id=line44></span>     }
+<span class="lineno" id=line45></span>    </span>""" <span class="big_keyword" title="specify requirements">requires</span> ctrl_c_flag;
+<span class="lineno" id=line46></span>  
+<span class="lineno" id=line47></span>    <span class="big_keyword" title="Inherit symbols into a module or typeclass">inherit</span> Signal_class[Win32];
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Signal_class[Win32] {
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> trap_ctrl_c: <span class="library" title="Type with one values (), the empty tuple">unit</span> <span class="big_keyword" title="specify requirements">requires</span> ctrl_c_handling;
+<span class="lineno" id=line51></span>    }
+<span class="lineno" id=line52></span>  }
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

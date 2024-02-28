@@ -1,0 +1,1824 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Blake3</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Portable C version from official repo",
+"Config"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span><a href='blake2.fdoc'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('prev')"
+  onmouseout="mouseout('prev')"
+  onclick="nop('prev')"
+  ><span id="prev"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span><span id="prev_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Prev</text></svg></span></span></a> <a href='blake4.fdoc'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('next')"
+  onmouseout="mouseout('next')"
+  onclick="nop('next')"
+  ><span id="next"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span><span id="next_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Next</text></svg></span></span></a> <a href='blakeindex.fdoc'><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('index')"
+  onmouseout="mouseout('index')"
+  onclick="nop('index')"
+  ><span id="index"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span><span id="index_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Index</text></svg></span></span></a>     <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Portable C version from official repo_h')"> <a href="#Portable_C_version_from_official_repo_h">Portable C version from official repo</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Config_h')"> <a href="#Config_h">Config</a></div>
+      <div class=sm id=menu2>
+      </div>
+    <script>counter_max=2;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Portable_C_version_from_official_repo_h'><img src='/share/src/web/images/minus.gif' id='Portable C version from official repo' onclick='toggle(this,"Portable_C_version_from_official_repo_d")' alt='+'/> 3.1 Portable C version from official repo</h1><div id='Portable_C_version_from_official_repo_d' style='display:block'>
+<pre class='inclusion'>
+share/src/blake3/blake3.h</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> BLAKE3_H
+#<span class="preproc">define</span> BLAKE3_H
+
+#<span class="preproc">include</span> <span class="fstring">&lt;stddef.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdint.h&gt;</span>
+
+#<span class="preproc">ifdef</span> __cplusplus
+<span class="qualifier">extern</span> <span class="fstring">"C"</span> {
+#<span class="preproc">endif</span>
+
+#<span class="preproc">define</span> BLAKE3_VERSION_STRING <span class="fstring">"1.3.3"</span>
+#<span class="preproc">define</span> BLAKE3_KEY_LEN 32
+#<span class="preproc">define</span> BLAKE3_OUT_LEN 32
+#<span class="preproc">define</span> BLAKE3_BLOCK_LEN 64
+#<span class="preproc">define</span> BLAKE3_CHUNK_LEN 1024
+#<span class="preproc">define</span> BLAKE3_MAX_DEPTH 54
+
+<span class="comment">// This struct is a private implementation detail. It has to be here because
+</span><span class="comment">// it's part of blake3_hasher below.
+</span><span class="big_keyword">typedef</span> <span class="big_keyword">struct</span> {
+  uint32_t cv[8];
+  uint64_t chunk_counter;
+  uint8_t buf[BLAKE3_BLOCK_LEN];
+  uint8_t buf_len;
+  uint8_t blocks_compressed;
+  uint8_t flags;
+} blake3_chunk_state;
+
+<span class="big_keyword">typedef</span> <span class="big_keyword">struct</span> {
+  uint32_t key[8];
+  blake3_chunk_state chunk;
+  uint8_t cv_stack_len;
+  <span class="comment">// The stack size is MAX_DEPTH + 1 because we do lazy merging. For example,
+</span>  <span class="comment">// with 7 chunks, we have 3 entries in the stack. Adding an 8th chunk
+</span>  <span class="comment">// requires a 4th entry, rather than merging everything down to 1, because we
+</span>  <span class="comment">// don't know whether more input is coming. This is different from how the
+</span>  <span class="comment">// reference implementation does things.
+</span>  uint8_t cv_stack[(BLAKE3_MAX_DEPTH + 1) * BLAKE3_OUT_LEN];
+} blake3_hasher;
+
+<span class="qualifier">const</span> <span class="qualifier">char</span> *blake3_version(<span class="qualifier">void</span>);
+<span class="qualifier">void</span> blake3_hasher_init(blake3_hasher *self);
+<span class="qualifier">void</span> blake3_hasher_init_keyed(blake3_hasher *self,
+                              <span class="qualifier">const</span> uint8_t key[BLAKE3_KEY_LEN]);
+<span class="qualifier">void</span> blake3_hasher_init_derive_key(blake3_hasher *self, <span class="qualifier">const</span> <span class="qualifier">char</span> *context);
+<span class="qualifier">void</span> blake3_hasher_init_derive_key_raw(blake3_hasher *self, <span class="qualifier">const</span> <span class="qualifier">void</span> *context,
+                                       size_t context_len);
+<span class="qualifier">void</span> blake3_hasher_update(blake3_hasher *self, <span class="qualifier">const</span> <span class="qualifier">void</span> *input,
+                          size_t input_len);
+<span class="qualifier">void</span> blake3_hasher_finalize(<span class="qualifier">const</span> blake3_hasher *self, uint8_t *out,
+                            size_t out_len);
+<span class="qualifier">void</span> blake3_hasher_finalize_seek(<span class="qualifier">const</span> blake3_hasher *self, uint64_t seek,
+                                 uint8_t *out, size_t out_len);
+<span class="qualifier">void</span> blake3_hasher_reset(blake3_hasher *self);
+
+#<span class="preproc">ifdef</span> __cplusplus
+}
+#<span class="preproc">endif</span>
+
+#<span class="preproc">endif</span> <span class="comment">/* BLAKE3_H **</span>/
+</pre></p><pre class='inclusion'>
+share/src/blake3/blake3_impl.h</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> BLAKE3_IMPL_H
+#<span class="preproc">define</span> BLAKE3_IMPL_H
+
+#<span class="preproc">include</span> <span class="fstring">&lt;assert.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdbool.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stddef.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdint.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"blake3.h"</span>
+
+<span class="comment">// internal flags
+</span><span class="big_keyword">enum</span> blake3_flags {
+  CHUNK_START         = 1 &lt;&lt; 0,
+  CHUNK_END           = 1 &lt;&lt; 1,
+  PARENT              = 1 &lt;&lt; 2,
+  ROOT                = 1 &lt;&lt; 3,
+  KEYED_HASH          = 1 &lt;&lt; 4,
+  DERIVE_KEY_CONTEXT  = 1 &lt;&lt; 5,
+  DERIVE_KEY_MATERIAL = 1 &lt;&lt; 6,
+};
+
+<span class="comment">// This C implementation tries to support recent versions of GCC, Clang, and
+</span><span class="comment">// MSVC.
+</span>#<span class="small_keyword">if</span> defined(_MSC_VER)
+#<span class="preproc">define</span> INLINE <span class="qualifier">static</span> __forceinline
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> INLINE <span class="qualifier">static</span> <span class="qualifier">inline</span> __attribute__((always_<span class="qualifier">inline</span>))
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> defined(__x86_64__) || defined(_M_X64) 
+#<span class="preproc">define</span> IS_X86
+#<span class="preproc">define</span> IS_X86_64
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> defined(__i386__) || defined(_M_IX86)
+#<span class="preproc">define</span> IS_X86
+#<span class="preproc">define</span> IS_X86_32
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> defined(__aarch64__) || defined(_M_ARM64)
+#<span class="preproc">define</span> IS_AARCH64
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> defined(IS_X86)
+#<span class="small_keyword">if</span> defined(_MSC_VER)
+#<span class="preproc">include</span> <span class="fstring">&lt;intrin.h&gt;</span>
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> !defined(BLAKE3_USE_NEON) 
+  <span class="comment">// If BLAKE3_USE_NEON not manually set, autodetect based on AArch64ness
+</span>  #<span class="small_keyword">if</span> defined(IS_AARCH64)
+    #<span class="preproc">define</span> BLAKE3_USE_NEON 1
+  #<span class="preproc">else</span>
+    #<span class="preproc">define</span> BLAKE3_USE_NEON 0
+  #<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> defined(IS_X86)
+#<span class="preproc">define</span> MAX_SIMD_DEGREE 16
+#elif BLAKE3_USE_NEON == 1
+#<span class="preproc">define</span> MAX_SIMD_DEGREE 4
+#<span class="preproc">else</span>
+#<span class="preproc">define</span> MAX_SIMD_DEGREE 1
+#<span class="preproc">endif</span>
+
+<span class="comment">// There are some places where we want a static size that's equal to the
+</span><span class="comment">// MAX_SIMD_DEGREE, but also at least 2.
+</span>#<span class="preproc">define</span> MAX_SIMD_DEGREE_OR_2 (MAX_SIMD_DEGREE &gt; 2 ? MAX_SIMD_DEGREE : 2)
+
+<span class="qualifier">static</span> <span class="qualifier">const</span> uint32_t IV[8] = {0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL,
+                               0xA54FF53AUL, 0x510E527FUL, 0x9B05688CUL,
+                               0x1F83D9ABUL, 0x5BE0CD19UL};
+
+<span class="qualifier">static</span> <span class="qualifier">const</span> uint8_t MSG_SCHEDULE[7][16] = {
+    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
+    {2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8},
+    {3, 4, 10, 12, 13, 2, 7, 14, 6, 5, 9, 0, 11, 15, 8, 1},
+    {10, 7, 12, 9, 14, 3, 13, 15, 4, 0, 11, 2, 5, 8, 1, 6},
+    {12, 13, 9, 11, 15, 10, 14, 8, 7, 2, 5, 3, 0, 1, 6, 4},
+    {9, 14, 11, 5, 8, 12, 15, 1, 13, 3, 0, 10, 2, 6, 4, 7},
+    {11, 15, 5, 0, 1, 9, 8, 6, 14, 10, 2, 12, 3, 4, 7, 13},
+};
+
+<span class="comment">/* Find index of the highest set bit **</span>/
+<span class="comment">/* x is assumed to be nonzero.       **</span>/
+<span class="qualifier">static</span> <span class="qualifier">unsigned</span> <span class="qualifier">int</span> highest_one(uint64_t x) {
+#<span class="small_keyword">if</span> defined(__GNUC__) || defined(__clang__)
+  <span class="small_keyword">return</span> 63 ^ (<span class="qualifier">unsigned</span> <span class="qualifier">int</span>)__builtin_clzll(x);
+#elif defined(_MSC_VER) &amp;&amp; defined(IS_X86_64)
+  <span class="qualifier">unsigned</span> <span class="qualifier">long</span> index;
+  _BitScanReverse64(&amp;index, x);
+  <span class="small_keyword">return</span> index;
+#elif defined(_MSC_VER) &amp;&amp; defined(IS_X86_32)
+  <span class="small_keyword">if</span>(x &gt;&gt; 32) {
+    <span class="qualifier">unsigned</span> <span class="qualifier">long</span> index;
+    _BitScanReverse(&amp;index, (<span class="qualifier">unsigned</span> <span class="qualifier">long</span>)(x &gt;&gt; 32));
+    <span class="small_keyword">return</span> 32 + index;
+  } else {
+    <span class="qualifier">unsigned</span> <span class="qualifier">long</span> index;
+    _BitScanReverse(&amp;index, (<span class="qualifier">unsigned</span> <span class="qualifier">long</span>)x);
+    <span class="small_keyword">return</span> index;
+  }
+#<span class="preproc">else</span>
+  <span class="qualifier">unsigned</span> <span class="qualifier">int</span> c = 0;
+  <span class="small_keyword">if</span>(x &amp; 0xffffffff00000000ULL) { x &gt;&gt;= 32; c += 32; }
+  <span class="small_keyword">if</span>(x &amp; 0x00000000ffff0000ULL) { x &gt;&gt;= 16; c += 16; }
+  <span class="small_keyword">if</span>(x &amp; 0x000000000000ff00ULL) { x &gt;&gt;=  8; c +=  8; }
+  <span class="small_keyword">if</span>(x &amp; 0x00000000000000f0ULL) { x &gt;&gt;=  4; c +=  4; }
+  <span class="small_keyword">if</span>(x &amp; 0x000000000000000cULL) { x &gt;&gt;=  2; c +=  2; }
+  <span class="small_keyword">if</span>(x &amp; 0x0000000000000002ULL) {           c +=  1; }
+  <span class="small_keyword">return</span> c;
+#<span class="preproc">endif</span>
+}
+
+<span class="comment">// Count the number of 1 bits.
+</span>INLINE <span class="qualifier">unsigned</span> <span class="qualifier">int</span> popcnt(uint64_t x) {
+#<span class="small_keyword">if</span> defined(__GNUC__) || defined(__clang__)
+  <span class="small_keyword">return</span> (<span class="qualifier">unsigned</span> <span class="qualifier">int</span>)__builtin_popcountll(x);
+#<span class="preproc">else</span>
+  <span class="qualifier">unsigned</span> <span class="qualifier">int</span> count = 0;
+  <span class="small_keyword">while</span> (x != 0) {
+    count += 1;
+    x &amp;= x - 1;
+  }
+  <span class="small_keyword">return</span> count;
+#<span class="preproc">endif</span>
+}
+
+<span class="comment">// Largest power of two less than or equal to x. As a special case, returns 1
+</span><span class="comment">// when x is 0. 
+</span>INLINE uint64_t round_down_to_power_of_2(uint64_t x) {
+  <span class="small_keyword">return</span> 1ULL &lt;&lt; highest_one(x | 1);
+}
+
+INLINE uint32_t counter_low(uint64_t counter) { <span class="small_keyword">return</span> (uint32_t)counter; }
+
+INLINE uint32_t counter_high(uint64_t counter) {
+  <span class="small_keyword">return</span> (uint32_t)(counter &gt;&gt; 32);
+}
+
+INLINE uint32_t load32(<span class="qualifier">const</span> <span class="qualifier">void</span> *src) {
+  <span class="qualifier">const</span> uint8_t *p = (<span class="qualifier">const</span> uint8_t *)src;
+  <span class="small_keyword">return</span> ((uint32_t)(p[0]) &lt;&lt; 0) | ((uint32_t)(p[1]) &lt;&lt; 8) |
+         ((uint32_t)(p[2]) &lt;&lt; 16) | ((uint32_t)(p[3]) &lt;&lt; 24);
+}
+
+INLINE <span class="qualifier">void</span> load_key_words(<span class="qualifier">const</span> uint8_t key[BLAKE3_KEY_LEN],
+                           uint32_t key_words[8]) {
+  key_words[0] = load32(&amp;key[0 * 4]);
+  key_words[1] = load32(&amp;key[1 * 4]);
+  key_words[2] = load32(&amp;key[2 * 4]);
+  key_words[3] = load32(&amp;key[3 * 4]);
+  key_words[4] = load32(&amp;key[4 * 4]);
+  key_words[5] = load32(&amp;key[5 * 4]);
+  key_words[6] = load32(&amp;key[6 * 4]);
+  key_words[7] = load32(&amp;key[7 * 4]);
+}
+
+INLINE <span class="qualifier">void</span> store32(<span class="qualifier">void</span> *dst, uint32_t w) {
+  uint8_t *p = (uint8_t *)dst;
+  p[0] = (uint8_t)(w &gt;&gt; 0);
+  p[1] = (uint8_t)(w &gt;&gt; 8);
+  p[2] = (uint8_t)(w &gt;&gt; 16);
+  p[3] = (uint8_t)(w &gt;&gt; 24);
+}
+
+INLINE <span class="qualifier">void</span> store_cv_words(uint8_t bytes_out[32], uint32_t cv_words[8]) {
+  store32(&amp;bytes_out[0 * 4], cv_words[0]);
+  store32(&amp;bytes_out[1 * 4], cv_words[1]);
+  store32(&amp;bytes_out[2 * 4], cv_words[2]);
+  store32(&amp;bytes_out[3 * 4], cv_words[3]);
+  store32(&amp;bytes_out[4 * 4], cv_words[4]);
+  store32(&amp;bytes_out[5 * 4], cv_words[5]);
+  store32(&amp;bytes_out[6 * 4], cv_words[6]);
+  store32(&amp;bytes_out[7 * 4], cv_words[7]);
+}
+
+<span class="qualifier">void</span> blake3_compress_in_place(uint32_t cv[8],
+                              <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                              uint8_t block_len, uint64_t counter,
+                              uint8_t flags);
+
+<span class="qualifier">void</span> blake3_compress_xof(<span class="qualifier">const</span> uint32_t cv[8],
+                         <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                         uint8_t block_len, uint64_t counter, uint8_t flags,
+                         uint8_t out[64]);
+
+<span class="qualifier">void</span> blake3_hash_many(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                      size_t blocks, <span class="qualifier">const</span> uint32_t key[8], uint64_t counter,
+                      bool increment_counter, uint8_t flags,
+                      uint8_t flags_start, uint8_t flags_end, uint8_t *out);
+
+size_t blake3_simd_degree(<span class="qualifier">void</span>);
+
+
+<span class="comment">// Declarations for implementation-specific functions.
+</span><span class="qualifier">void</span> blake3_compress_in_place_portable(uint32_t cv[8],
+                                       <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                       uint8_t block_len, uint64_t counter,
+                                       uint8_t flags);
+
+<span class="qualifier">void</span> blake3_compress_xof_portable(<span class="qualifier">const</span> uint32_t cv[8],
+                                  <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                  uint8_t block_len, uint64_t counter,
+                                  uint8_t flags, uint8_t out[64]);
+
+<span class="qualifier">void</span> blake3_hash_many_portable(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                               size_t blocks, <span class="qualifier">const</span> uint32_t key[8],
+                               uint64_t counter, bool increment_counter,
+                               uint8_t flags, uint8_t flags_start,
+                               uint8_t flags_end, uint8_t *out);
+
+#<span class="small_keyword">if</span> defined(IS_X86)
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE2)
+<span class="qualifier">void</span> blake3_compress_in_place_sse2(uint32_t cv[8],
+                                   <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                   uint8_t block_len, uint64_t counter,
+                                   uint8_t flags);
+<span class="qualifier">void</span> blake3_compress_xof_sse2(<span class="qualifier">const</span> uint32_t cv[8],
+                              <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                              uint8_t block_len, uint64_t counter,
+                              uint8_t flags, uint8_t out[64]);
+<span class="qualifier">void</span> blake3_hash_many_sse2(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                           size_t blocks, <span class="qualifier">const</span> uint32_t key[8],
+                           uint64_t counter, bool increment_counter,
+                           uint8_t flags, uint8_t flags_start,
+                           uint8_t flags_end, uint8_t *out);
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE41)
+<span class="qualifier">void</span> blake3_compress_in_place_sse41(uint32_t cv[8],
+                                    <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                    uint8_t block_len, uint64_t counter,
+                                    uint8_t flags);
+<span class="qualifier">void</span> blake3_compress_xof_sse41(<span class="qualifier">const</span> uint32_t cv[8],
+                               <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                               uint8_t block_len, uint64_t counter,
+                               uint8_t flags, uint8_t out[64]);
+<span class="qualifier">void</span> blake3_hash_many_sse41(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                            size_t blocks, <span class="qualifier">const</span> uint32_t key[8],
+                            uint64_t counter, bool increment_counter,
+                            uint8_t flags, uint8_t flags_start,
+                            uint8_t flags_end, uint8_t *out);
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX2)
+<span class="qualifier">void</span> blake3_hash_many_avx2(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                           size_t blocks, <span class="qualifier">const</span> uint32_t key[8],
+                           uint64_t counter, bool increment_counter,
+                           uint8_t flags, uint8_t flags_start,
+                           uint8_t flags_end, uint8_t *out);
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX512)
+<span class="qualifier">void</span> blake3_compress_in_place_avx512(uint32_t cv[8],
+                                     <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                     uint8_t block_len, uint64_t counter,
+                                     uint8_t flags);
+
+<span class="qualifier">void</span> blake3_compress_xof_avx512(<span class="qualifier">const</span> uint32_t cv[8],
+                                <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                uint8_t block_len, uint64_t counter,
+                                uint8_t flags, uint8_t out[64]);
+
+<span class="qualifier">void</span> blake3_hash_many_avx512(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                             size_t blocks, <span class="qualifier">const</span> uint32_t key[8],
+                             uint64_t counter, bool increment_counter,
+                             uint8_t flags, uint8_t flags_start,
+                             uint8_t flags_end, uint8_t *out);
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> BLAKE3_USE_NEON == 1
+<span class="qualifier">void</span> blake3_hash_many_neon(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                           size_t blocks, <span class="qualifier">const</span> uint32_t key[8],
+                           uint64_t counter, bool increment_counter,
+                           uint8_t flags, uint8_t flags_start,
+                           uint8_t flags_end, uint8_t *out);
+#<span class="preproc">endif</span>
+
+
+#<span class="preproc">endif</span> <span class="comment">/* BLAKE3_IMPL_H **</span>/
+</pre></p><pre class='inclusion'>
+share/src/blake3/blake3.c</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;assert.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdbool.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"blake3.h"</span>
+#<span class="preproc">include</span> <span class="fstring">"blake3_impl.h"</span>
+
+<span class="qualifier">const</span> <span class="qualifier">char</span> *blake3_version(<span class="qualifier">void</span>) { <span class="small_keyword">return</span> BLAKE3_VERSION_STRING; }
+
+INLINE <span class="qualifier">void</span> chunk_state_init(blake3_chunk_state *self, <span class="qualifier">const</span> uint32_t key[8],
+                             uint8_t flags) {
+  memcpy(self-&gt;cv, key, BLAKE3_KEY_LEN);
+  self-&gt;chunk_counter = 0;
+  memset(self-&gt;buf, 0, BLAKE3_BLOCK_LEN);
+  self-&gt;buf_len = 0;
+  self-&gt;blocks_compressed = 0;
+  self-&gt;flags = flags;
+}
+
+INLINE <span class="qualifier">void</span> chunk_state_reset(blake3_chunk_state *self, <span class="qualifier">const</span> uint32_t key[8],
+                              uint64_t chunk_counter) {
+  memcpy(self-&gt;cv, key, BLAKE3_KEY_LEN);
+  self-&gt;chunk_counter = chunk_counter;
+  self-&gt;blocks_compressed = 0;
+  memset(self-&gt;buf, 0, BLAKE3_BLOCK_LEN);
+  self-&gt;buf_len = 0;
+}
+
+INLINE size_t chunk_state_len(<span class="qualifier">const</span> blake3_chunk_state *self) {
+  <span class="small_keyword">return</span> (BLAKE3_BLOCK_LEN * (size_t)self-&gt;blocks_compressed) +
+         ((size_t)self-&gt;buf_len);
+}
+
+INLINE size_t chunk_state_fill_buf(blake3_chunk_state *self,
+                                   <span class="qualifier">const</span> uint8_t *input, size_t input_len) {
+  size_t take = BLAKE3_BLOCK_LEN - ((size_t)self-&gt;buf_len);
+  <span class="small_keyword">if</span> (take &gt; input_len) {
+    take = input_len;
+  }
+  uint8_t *dest = self-&gt;buf + ((size_t)self-&gt;buf_len);
+  memcpy(dest, input, take);
+  self-&gt;buf_len += (uint8_t)take;
+  <span class="small_keyword">return</span> take;
+}
+
+INLINE uint8_t chunk_state_maybe_start_flag(<span class="qualifier">const</span> blake3_chunk_state *self) {
+  <span class="small_keyword">if</span> (self-&gt;blocks_compressed == 0) {
+    <span class="small_keyword">return</span> CHUNK_START;
+  } else {
+    <span class="small_keyword">return</span> 0;
+  }
+}
+
+<span class="big_keyword">typedef</span> <span class="big_keyword">struct</span> {
+  uint32_t input_cv[8];
+  uint64_t counter;
+  uint8_t block[BLAKE3_BLOCK_LEN];
+  uint8_t block_len;
+  uint8_t flags;
+} output_t;
+
+INLINE output_t make_output(<span class="qualifier">const</span> uint32_t input_cv[8],
+                            <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                            uint8_t block_len, uint64_t counter,
+                            uint8_t flags) {
+  output_t ret;
+  memcpy(ret.input_cv, input_cv, 32);
+  memcpy(ret.block, block, BLAKE3_BLOCK_LEN);
+  ret.block_len = block_len;
+  ret.counter = counter;
+  ret.flags = flags;
+  <span class="small_keyword">return</span> ret;
+}
+
+<span class="comment">// Chaining values within a given chunk (specifically the compress_in_place
+</span><span class="comment">// interface) are represented as words. This avoids unnecessary bytes<->words
+</span><span class="comment">// conversion overhead in the portable implementation. However, the hash_many
+</span><span class="comment">// interface handles both user input and parent node blocks, so it accepts
+</span><span class="comment">// bytes. For that reason, chaining values in the CV stack are represented as
+</span><span class="comment">// bytes.
+</span>INLINE <span class="qualifier">void</span> output_chaining_value(<span class="qualifier">const</span> output_t *self, uint8_t cv[32]) {
+  uint32_t cv_words[8];
+  memcpy(cv_words, self-&gt;input_cv, 32);
+  blake3_compress_in_place(cv_words, self-&gt;block, self-&gt;block_len,
+                           self-&gt;counter, self-&gt;flags);
+  store_cv_words(cv, cv_words);
+}
+
+INLINE <span class="qualifier">void</span> output_root_bytes(<span class="qualifier">const</span> output_t *self, uint64_t seek, uint8_t *out,
+                              size_t out_len) {
+  uint64_t output_block_counter = seek / 64;
+  size_t offset_within_block = seek % 64;
+  uint8_t wide_buf[64];
+  <span class="small_keyword">while</span> (out_len &gt; 0) {
+    blake3_compress_xof(self-&gt;input_cv, self-&gt;block, self-&gt;block_len,
+                        output_block_counter, self-&gt;flags | ROOT, wide_buf);
+    size_t available_bytes = 64 - offset_within_block;
+    size_t memcpy_len;
+    <span class="small_keyword">if</span> (out_len &gt; available_bytes) {
+      memcpy_len = available_bytes;
+    } else {
+      memcpy_len = out_len;
+    }
+    memcpy(out, wide_buf + offset_within_block, memcpy_len);
+    out += memcpy_len;
+    out_len -= memcpy_len;
+    output_block_counter += 1;
+    offset_within_block = 0;
+  }
+}
+
+INLINE <span class="qualifier">void</span> chunk_state_update(blake3_chunk_state *self, <span class="qualifier">const</span> uint8_t *input,
+                               size_t input_len) {
+  <span class="small_keyword">if</span> (self-&gt;buf_len &gt; 0) {
+    size_t take = chunk_state_fill_buf(self, input, input_len);
+    input += take;
+    input_len -= take;
+    <span class="small_keyword">if</span> (input_len &gt; 0) {
+      blake3_compress_in_place(
+          self-&gt;cv, self-&gt;buf, BLAKE3_BLOCK_LEN, self-&gt;chunk_counter,
+          self-&gt;flags | chunk_state_maybe_start_flag(self));
+      self-&gt;blocks_compressed += 1;
+      self-&gt;buf_len = 0;
+      memset(self-&gt;buf, 0, BLAKE3_BLOCK_LEN);
+    }
+  }
+
+  <span class="small_keyword">while</span> (input_len &gt; BLAKE3_BLOCK_LEN) {
+    blake3_compress_in_place(self-&gt;cv, input, BLAKE3_BLOCK_LEN,
+                             self-&gt;chunk_counter,
+                             self-&gt;flags | chunk_state_maybe_start_flag(self));
+    self-&gt;blocks_compressed += 1;
+    input += BLAKE3_BLOCK_LEN;
+    input_len -= BLAKE3_BLOCK_LEN;
+  }
+
+  size_t take = chunk_state_fill_buf(self, input, input_len);
+  input += take;
+  input_len -= take;
+}
+
+INLINE output_t chunk_state_output(<span class="qualifier">const</span> blake3_chunk_state *self) {
+  uint8_t block_flags =
+      self-&gt;flags | chunk_state_maybe_start_flag(self) | CHUNK_END;
+  <span class="small_keyword">return</span> make_output(self-&gt;cv, self-&gt;buf, self-&gt;buf_len, self-&gt;chunk_counter,
+                     block_flags);
+}
+
+INLINE output_t parent_output(<span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                              <span class="qualifier">const</span> uint32_t key[8], uint8_t flags) {
+  <span class="small_keyword">return</span> make_output(key, block, BLAKE3_BLOCK_LEN, 0, flags | PARENT);
+}
+
+<span class="comment">// Given some input larger than one chunk, return the number of bytes that
+</span><span class="comment">// should go in the left subtree. This is the largest power-of-2 number of
+</span><span class="comment">// chunks that leaves at least 1 byte for the right subtree.
+</span>INLINE size_t left_len(size_t content_len) {
+  <span class="comment">// Subtract 1 to reserve at least one byte for the right side. content_len
+</span>  <span class="comment">// should always be greater than BLAKE3_CHUNK_LEN.
+</span>  size_t full_chunks = (content_len - 1) / BLAKE3_CHUNK_LEN;
+  <span class="small_keyword">return</span> round_down_to_power_of_2(full_chunks) * BLAKE3_CHUNK_LEN;
+}
+
+<span class="comment">// Use SIMD parallelism to hash up to MAX_SIMD_DEGREE chunks at the same time
+</span><span class="comment">// on a single thread. Write out the chunk chaining values and return the
+</span><span class="comment">// number of chunks hashed. These chunks are never the root and never empty;
+</span><span class="comment">// those cases use a different codepath.
+</span>INLINE size_t compress_chunks_parallel(<span class="qualifier">const</span> uint8_t *input, size_t input_len,
+                                       <span class="qualifier">const</span> uint32_t key[8],
+                                       uint64_t chunk_counter, uint8_t flags,
+                                       uint8_t *out) {
+#<span class="small_keyword">if</span> defined(BLAKE3_TESTING)
+  assert(0 &lt; input_len);
+  assert(input_len &lt;= MAX_SIMD_DEGREE * BLAKE3_CHUNK_LEN);
+#<span class="preproc">endif</span>
+
+  <span class="qualifier">const</span> uint8_t *chunks_array[MAX_SIMD_DEGREE];
+  size_t input_position = 0;
+  size_t chunks_array_len = 0;
+  <span class="small_keyword">while</span> (input_len - input_position &gt;= BLAKE3_CHUNK_LEN) {
+    chunks_array[chunks_array_len] = &amp;input[input_position];
+    input_position += BLAKE3_CHUNK_LEN;
+    chunks_array_len += 1;
+  }
+
+  blake3_hash_many(chunks_array, chunks_array_len,
+                   BLAKE3_CHUNK_LEN / BLAKE3_BLOCK_LEN, key, chunk_counter,
+                   true, flags, CHUNK_START, CHUNK_END, out);
+
+  <span class="comment">// Hash the remaining partial chunk, if there is one. Note that the empty
+</span>  <span class="comment">// chunk (meaning the empty message) is a different codepath.
+</span>  <span class="small_keyword">if</span> (input_len &gt; input_position) {
+    uint64_t counter = chunk_counter + (uint64_t)chunks_array_len;
+    blake3_chunk_state chunk_state;
+    chunk_state_init(&amp;chunk_state, key, flags);
+    chunk_state.chunk_counter = counter;
+    chunk_state_update(&amp;chunk_state, &amp;input[input_position],
+                       input_len - input_position);
+    output_t output = chunk_state_output(&amp;chunk_state);
+    output_chaining_value(&amp;output, &amp;out[chunks_array_len * BLAKE3_OUT_LEN]);
+    <span class="small_keyword">return</span> chunks_array_len + 1;
+  } else {
+    <span class="small_keyword">return</span> chunks_array_len;
+  }
+}
+
+<span class="comment">// Use SIMD parallelism to hash up to MAX_SIMD_DEGREE parents at the same time
+</span><span class="comment">// on a single thread. Write out the parent chaining values and return the
+</span><span class="comment">// number of parents hashed. (If there's an odd input chaining value left over,
+</span><span class="comment">// return it as an additional output.) These parents are never the root and
+</span><span class="comment">// never empty; those cases use a different codepath.
+</span>INLINE size_t compress_parents_parallel(<span class="qualifier">const</span> uint8_t *child_chaining_values,
+                                        size_t num_chaining_values,
+                                        <span class="qualifier">const</span> uint32_t key[8], uint8_t flags,
+                                        uint8_t *out) {
+#<span class="small_keyword">if</span> defined(BLAKE3_TESTING)
+  assert(2 &lt;= num_chaining_values);
+  assert(num_chaining_values &lt;= 2 * MAX_SIMD_DEGREE_OR_2);
+#<span class="preproc">endif</span>
+
+  <span class="qualifier">const</span> uint8_t *parents_array[MAX_SIMD_DEGREE_OR_2];
+  size_t parents_array_len = 0;
+  <span class="small_keyword">while</span> (num_chaining_values - (2 * parents_array_len) &gt;= 2) {
+    parents_array[parents_array_len] =
+        &amp;child_chaining_values[2 * parents_array_len * BLAKE3_OUT_LEN];
+    parents_array_len += 1;
+  }
+
+  blake3_hash_many(parents_array, parents_array_len, 1, key,
+                   0, <span class="comment">// Parents always use counter 0.
+</span>                   false, flags | PARENT,
+                   0, <span class="comment">// Parents have no start flags.
+</span>                   0, <span class="comment">// Parents have no end flags.
+</span>                   out);
+
+  <span class="comment">// If there's an odd child left over, it becomes an output.
+</span>  <span class="small_keyword">if</span> (num_chaining_values &gt; 2 * parents_array_len) {
+    memcpy(&amp;out[parents_array_len * BLAKE3_OUT_LEN],
+           &amp;child_chaining_values[2 * parents_array_len * BLAKE3_OUT_LEN],
+           BLAKE3_OUT_LEN);
+    <span class="small_keyword">return</span> parents_array_len + 1;
+  } else {
+    <span class="small_keyword">return</span> parents_array_len;
+  }
+}
+
+<span class="comment">// The wide helper function returns (writes out) an array of chaining values
+</span><span class="comment">// and returns the length of that array. The number of chaining values returned
+</span><span class="comment">// is the dynamically detected SIMD degree, at most MAX_SIMD_DEGREE. Or fewer,
+</span><span class="comment">// if the input is shorter than that many chunks. The reason for maintaining a
+</span><span class="comment">// wide array of chaining values going back up the tree, is to allow the
+</span><span class="comment">// implementation to hash as many parents in parallel as possible.
+</span><span class="comment">//
+</span><span class="comment">// As a special case when the SIMD degree is 1, this function will still return
+</span><span class="comment">// at least 2 outputs. This guarantees that this function doesn't perform the
+</span><span class="comment">// root compression. (If it did, it would use the wrong flags, and also we
+</span><span class="comment">// wouldn't be able to implement exendable output.) Note that this function is
+</span><span class="comment">// not used when the whole input is only 1 chunk long; that's a different
+</span><span class="comment">// codepath.
+</span><span class="comment">//
+</span><span class="comment">// Why not just have the caller split the input on the first update(), instead
+</span><span class="comment">// of implementing this special rule? Because we don't want to limit SIMD or
+</span><span class="comment">// multi-threading parallelism for that update().
+</span><span class="qualifier">static</span> size_t blake3_compress_subtree_wide(<span class="qualifier">const</span> uint8_t *input,
+                                           size_t input_len,
+                                           <span class="qualifier">const</span> uint32_t key[8],
+                                           uint64_t chunk_counter,
+                                           uint8_t flags, uint8_t *out) {
+  <span class="comment">// Note that the single chunk case does *not* bump the SIMD degree up to 2
+</span>  <span class="comment">// when it is 1. If this implementation adds multi-threading in the future,
+</span>  <span class="comment">// this gives us the option of multi-threading even the 2-chunk case, which
+</span>  <span class="comment">// can help performance on smaller platforms.
+</span>  <span class="small_keyword">if</span> (input_len &lt;= blake3_simd_degree() * BLAKE3_CHUNK_LEN) {
+    <span class="small_keyword">return</span> compress_chunks_parallel(input, input_len, key, chunk_counter, flags,
+                                    out);
+  }
+
+  <span class="comment">// With more than simd_degree chunks, we need to recurse. Start by dividing
+</span>  <span class="comment">// the input into left and right subtrees. (Note that this is only optimal
+</span>  <span class="comment">// as long as the SIMD degree is a power of 2. If we ever get a SIMD degree
+</span>  <span class="comment">// of 3 or something, we'll need a more complicated strategy.)
+</span>  size_t left_input_len = left_len(input_len);
+  size_t right_input_len = input_len - left_input_len;
+  <span class="qualifier">const</span> uint8_t *right_input = &amp;input[left_input_len];
+  uint64_t right_chunk_counter =
+      chunk_counter + (uint64_t)(left_input_len / BLAKE3_CHUNK_LEN);
+
+  <span class="comment">// Make space for the child outputs. Here we use MAX_SIMD_DEGREE_OR_2 to
+</span>  <span class="comment">// account for the special case of returning 2 outputs when the SIMD degree
+</span>  <span class="comment">// is 1.
+</span>  uint8_t cv_array[2 * MAX_SIMD_DEGREE_OR_2 * BLAKE3_OUT_LEN];
+  size_t degree = blake3_simd_degree();
+  <span class="small_keyword">if</span> (left_input_len &gt; BLAKE3_CHUNK_LEN &amp;&amp; degree == 1) {
+    <span class="comment">// The special case: We always use a degree of at least two, to make
+</span>    <span class="comment">// sure there are two outputs. Except, as noted above, at the chunk
+</span>    <span class="comment">// level, where we allow degree=1. (Note that the 1-chunk-input case is
+</span>    <span class="comment">// a different codepath.)
+</span>    degree = 2;
+  }
+  uint8_t *right_cvs = &amp;cv_array[degree * BLAKE3_OUT_LEN];
+
+  <span class="comment">// Recurse! If this implementation adds multi-threading support in the
+</span>  <span class="comment">// future, this is where it will go.
+</span>  size_t left_n = blake3_compress_subtree_wide(input, left_input_len, key,
+                                               chunk_counter, flags, cv_array);
+  size_t right_n = blake3_compress_subtree_wide(
+      right_input, right_input_len, key, right_chunk_counter, flags, right_cvs);
+
+  <span class="comment">// The special case again. If simd_degree=1, then we'll have left_n=1 and
+</span>  <span class="comment">// right_n=1. Rather than compressing them into a single output, return
+</span>  <span class="comment">// them directly, to make sure we always have at least two outputs.
+</span>  <span class="small_keyword">if</span> (left_n == 1) {
+    memcpy(out, cv_array, 2 * BLAKE3_OUT_LEN);
+    <span class="small_keyword">return</span> 2;
+  }
+
+  <span class="comment">// Otherwise, do one layer of parent node compression.
+</span>  size_t num_chaining_values = left_n + right_n;
+  <span class="small_keyword">return</span> compress_parents_parallel(cv_array, num_chaining_values, key, flags,
+                                   out);
+}
+
+<span class="comment">// Hash a subtree with compress_subtree_wide(), and then condense the resulting
+</span><span class="comment">// list of chaining values down to a single parent node. Don't compress that
+</span><span class="comment">// last parent node, however. Instead, return its message bytes (the
+</span><span class="comment">// concatenated chaining values of its children). This is necessary when the
+</span><span class="comment">// first call to update() supplies a complete subtree, because the topmost
+</span><span class="comment">// parent node of that subtree could end up being the root. It's also necessary
+</span><span class="comment">// for extended output in the general case.
+</span><span class="comment">//
+</span><span class="comment">// As with compress_subtree_wide(), this function is not used on inputs of 1
+</span><span class="comment">// chunk or less. That's a different codepath.
+</span>INLINE <span class="qualifier">void</span> compress_subtree_to_parent_node(
+    <span class="qualifier">const</span> uint8_t *input, size_t input_len, <span class="qualifier">const</span> uint32_t key[8],
+    uint64_t chunk_counter, uint8_t flags, uint8_t out[2 * BLAKE3_OUT_LEN]) {
+#<span class="small_keyword">if</span> defined(BLAKE3_TESTING)
+  assert(input_len &gt; BLAKE3_CHUNK_LEN);
+#<span class="preproc">endif</span>
+
+  uint8_t cv_array[MAX_SIMD_DEGREE_OR_2 * BLAKE3_OUT_LEN];
+  size_t num_cvs = blake3_compress_subtree_wide(input, input_len, key,
+                                                chunk_counter, flags, cv_array);
+  assert(num_cvs &lt;= MAX_SIMD_DEGREE_OR_2);
+
+  <span class="comment">// If MAX_SIMD_DEGREE is greater than 2 and there's enough input,
+</span>  <span class="comment">// compress_subtree_wide() returns more than 2 chaining values. Condense
+</span>  <span class="comment">// them into 2 by forming parent nodes repeatedly.
+</span>  uint8_t out_array[MAX_SIMD_DEGREE_OR_2 * BLAKE3_OUT_LEN / 2];
+  <span class="comment">// The second half of this loop condition is always true, and we just
+</span>  <span class="comment">// asserted it above. But GCC can't tell that it's always true, and if NDEBUG
+</span>  <span class="comment">// is set on platforms where MAX_SIMD_DEGREE_OR_2 == 2, GCC emits spurious
+</span>  <span class="comment">// warnings here. GCC 8.5 is particularly sensitive, so if you're changing
+</span>  <span class="comment">// this code, test it against that version.
+</span>  <span class="small_keyword">while</span> (num_cvs &gt; 2 &amp;&amp; num_cvs &lt;= MAX_SIMD_DEGREE_OR_2) {
+    num_cvs =
+        compress_parents_parallel(cv_array, num_cvs, key, flags, out_array);
+    memcpy(cv_array, out_array, num_cvs * BLAKE3_OUT_LEN);
+  }
+  memcpy(out, cv_array, 2 * BLAKE3_OUT_LEN);
+}
+
+INLINE <span class="qualifier">void</span> hasher_init_base(blake3_hasher *self, <span class="qualifier">const</span> uint32_t key[8],
+                             uint8_t flags) {
+  memcpy(self-&gt;key, key, BLAKE3_KEY_LEN);
+  chunk_state_init(&amp;self-&gt;chunk, key, flags);
+  self-&gt;cv_stack_len = 0;
+}
+
+<span class="qualifier">void</span> blake3_hasher_init(blake3_hasher *self) { hasher_init_base(self, IV, 0); }
+
+<span class="qualifier">void</span> blake3_hasher_init_keyed(blake3_hasher *self,
+                              <span class="qualifier">const</span> uint8_t key[BLAKE3_KEY_LEN]) {
+  uint32_t key_words[8];
+  load_key_words(key, key_words);
+  hasher_init_base(self, key_words, KEYED_HASH);
+}
+
+<span class="qualifier">void</span> blake3_hasher_init_derive_key_raw(blake3_hasher *self, <span class="qualifier">const</span> <span class="qualifier">void</span> *context,
+                                       size_t context_len) {
+  blake3_hasher context_hasher;
+  hasher_init_base(&amp;context_hasher, IV, DERIVE_KEY_CONTEXT);
+  blake3_hasher_update(&amp;context_hasher, context, context_len);
+  uint8_t context_key[BLAKE3_KEY_LEN];
+  blake3_hasher_finalize(&amp;context_hasher, context_key, BLAKE3_KEY_LEN);
+  uint32_t context_key_words[8];
+  load_key_words(context_key, context_key_words);
+  hasher_init_base(self, context_key_words, DERIVE_KEY_MATERIAL);
+}
+
+<span class="qualifier">void</span> blake3_hasher_init_derive_key(blake3_hasher *self, <span class="qualifier">const</span> <span class="qualifier">char</span> *context) {
+  blake3_hasher_init_derive_key_raw(self, context, strlen(context));
+}
+
+<span class="comment">// As described in hasher_push_cv() below, we do "lazy merging", delaying
+</span><span class="comment">// merges until right before the next CV is about to be added. This is
+</span><span class="comment">// different from the reference implementation. Another difference is that we
+</span><span class="comment">// aren't always merging 1 chunk at a time. Instead, each CV might represent
+</span><span class="comment">// any power-of-two number of chunks, as long as the smaller-above-larger stack
+</span><span class="comment">// order is maintained. Instead of the "count the trailing 0-bits" algorithm
+</span><span class="comment">// described in the spec, we use a "count the total number of 1-bits" variant
+</span><span class="comment">// that doesn't require us to retain the subtree size of the CV on top of the
+</span><span class="comment">// stack. The principle is the same: each CV that should remain in the stack is
+</span><span class="comment">// represented by a 1-bit in the total number of chunks (or bytes) so far.
+</span>INLINE <span class="qualifier">void</span> hasher_merge_cv_stack(blake3_hasher *self, uint64_t total_len) {
+  size_t post_merge_stack_len = (size_t)popcnt(total_len);
+  <span class="small_keyword">while</span> (self-&gt;cv_stack_len &gt; post_merge_stack_len) {
+    uint8_t *parent_node =
+        &amp;self-&gt;cv_stack[(self-&gt;cv_stack_len - 2) * BLAKE3_OUT_LEN];
+    output_t output = parent_output(parent_node, self-&gt;key, self-&gt;chunk.flags);
+    output_chaining_value(&amp;output, parent_node);
+    self-&gt;cv_stack_len -= 1;
+  }
+}
+
+<span class="comment">// In reference_impl.rs, we merge the new CV with existing CVs from the stack
+</span><span class="comment">// before pushing it. We can do that because we know more input is coming, so
+</span><span class="comment">// we know none of the merges are root.
+</span><span class="comment">//
+</span><span class="comment">// This setting is different. We want to feed as much input as possible to
+</span><span class="comment">// compress_subtree_wide(), without setting aside anything for the chunk_state.
+</span><span class="comment">// If the user gives us 64 KiB, we want to parallelize over all 64 KiB at once
+</span><span class="comment">// as a single subtree, if at all possible.
+</span><span class="comment">//
+</span><span class="comment">// This leads to two problems:
+</span><span class="comment">// 1) This 64 KiB input might be the only call that ever gets made to update.
+</span><span class="comment">//    In this case, the root node of the 64 KiB subtree would be the root node
+</span><span class="comment">//    of the whole tree, and it would need to be ROOT finalized. We can't
+</span><span class="comment">//    compress it until we know.
+</span><span class="comment">// 2) This 64 KiB input might complete a larger tree, whose root node is
+</span><span class="comment">//    similarly going to be the the root of the whole tree. For example, maybe
+</span><span class="comment">//    we have 196 KiB (that is, 128 + 64) hashed so far. We can't compress the
+</span><span class="comment">//    node at the root of the 256 KiB subtree until we know how to finalize it.
+</span><span class="comment">//
+</span><span class="comment">// The second problem is solved with "lazy merging". That is, when we're about
+</span><span class="comment">// to add a CV to the stack, we don't merge it with anything first, as the
+</span><span class="comment">// reference impl does. Instead we do merges using the *previous* CV that was
+</span><span class="comment">// added, which is sitting on top of the stack, and we put the new CV
+</span><span class="comment">// (unmerged) on top of the stack afterwards. This guarantees that we never
+</span><span class="comment">// merge the root node until finalize().
+</span><span class="comment">//
+</span><span class="comment">// Solving the first problem requires an additional tool,
+</span><span class="comment">// compress_subtree_to_parent_node(). That function always returns the top
+</span><span class="comment">// *two* chaining values of the subtree it's compressing. We then do lazy
+</span><span class="comment">// merging with each of them separately, so that the second CV will always
+</span><span class="comment">// remain unmerged. (That also helps us support extendable output when we're
+</span><span class="comment">// hashing an input all-at-once.)
+</span>INLINE <span class="qualifier">void</span> hasher_push_cv(blake3_hasher *self, uint8_t new_cv[BLAKE3_OUT_LEN],
+                           uint64_t chunk_counter) {
+  hasher_merge_cv_stack(self, chunk_counter);
+  memcpy(&amp;self-&gt;cv_stack[self-&gt;cv_stack_len * BLAKE3_OUT_LEN], new_cv,
+         BLAKE3_OUT_LEN);
+  self-&gt;cv_stack_len += 1;
+}
+
+<span class="qualifier">void</span> blake3_hasher_update(blake3_hasher *self, <span class="qualifier">const</span> <span class="qualifier">void</span> *input,
+                          size_t input_len) {
+  <span class="comment">// Explicitly checking for zero avoids causing UB by passing a null pointer
+</span>  <span class="comment">// to memcpy. This comes up in practice with things like:
+</span>  <span class="comment">//   std::vector<uint8_t> v;
+</span>  <span class="comment">//   blake3_hasher_update(&hasher, v.data(), v.size());
+</span>  <span class="small_keyword">if</span> (input_len == 0) {
+    <span class="small_keyword">return</span>;
+  }
+
+  <span class="qualifier">const</span> uint8_t *input_bytes = (<span class="qualifier">const</span> uint8_t *)input;
+
+  <span class="comment">// If we have some partial chunk bytes in the internal chunk_state, we need
+</span>  <span class="comment">// to finish that chunk first.
+</span>  <span class="small_keyword">if</span> (chunk_state_len(&amp;self-&gt;chunk) &gt; 0) {
+    size_t take = BLAKE3_CHUNK_LEN - chunk_state_len(&amp;self-&gt;chunk);
+    <span class="small_keyword">if</span> (take &gt; input_len) {
+      take = input_len;
+    }
+    chunk_state_update(&amp;self-&gt;chunk, input_bytes, take);
+    input_bytes += take;
+    input_len -= take;
+    <span class="comment">// If we've filled the current chunk and there's more coming, finalize this
+</span>    <span class="comment">// chunk and proceed. In this case we know it's not the root.
+</span>    <span class="small_keyword">if</span> (input_len &gt; 0) {
+      output_t output = chunk_state_output(&amp;self-&gt;chunk);
+      uint8_t chunk_cv[32];
+      output_chaining_value(&amp;output, chunk_cv);
+      hasher_push_cv(self, chunk_cv, self-&gt;chunk.chunk_counter);
+      chunk_state_reset(&amp;self-&gt;chunk, self-&gt;key, self-&gt;chunk.chunk_counter + 1);
+    } else {
+      <span class="small_keyword">return</span>;
+    }
+  }
+
+  <span class="comment">// Now the chunk_state is clear, and we have more input. If there's more than
+</span>  <span class="comment">// a single chunk (so, definitely not the root chunk), hash the largest whole
+</span>  <span class="comment">// subtree we can, with the full benefits of SIMD (and maybe in the future,
+</span>  <span class="comment">// multi-threading) parallelism. Two restrictions:
+</span>  <span class="comment">// - The subtree has to be a power-of-2 number of chunks. Only subtrees along
+</span>  <span class="comment">//   the right edge can be incomplete, and we don't know where the right edge
+</span>  <span class="comment">//   is going to be until we get to finalize().
+</span>  <span class="comment">// - The subtree must evenly divide the total number of chunks up until this
+</span>  <span class="comment">//   point (if total is not 0). If the current incomplete subtree is only
+</span>  <span class="comment">//   waiting for 1 more chunk, we can't hash a subtree of 4 chunks. We have
+</span>  <span class="comment">//   to complete the current subtree first.
+</span>  <span class="comment">// Because we might need to break up the input to form powers of 2, or to
+</span>  <span class="comment">// evenly divide what we already have, this part runs in a loop.
+</span>  <span class="small_keyword">while</span> (input_len &gt; BLAKE3_CHUNK_LEN) {
+    size_t subtree_len = round_down_to_power_of_2(input_len);
+    uint64_t count_so_far = self-&gt;chunk.chunk_counter * BLAKE3_CHUNK_LEN;
+    <span class="comment">// Shrink the subtree_len until it evenly divides the count so far. We know
+</span>    <span class="comment">// that subtree_len itself is a power of 2, so we can use a bitmasking
+</span>    <span class="comment">// trick instead of an actual remainder operation. (Note that if the caller
+</span>    <span class="comment">// consistently passes power-of-2 inputs of the same size, as is hopefully
+</span>    <span class="comment">// typical, this loop condition will always fail, and subtree_len will
+</span>    <span class="comment">// always be the full length of the input.)
+</span>    <span class="comment">//
+</span>    <span class="comment">// An aside: We don't have to shrink subtree_len quite this much. For
+</span>    <span class="comment">// example, if count_so_far is 1, we could pass 2 chunks to
+</span>    <span class="comment">// compress_subtree_to_parent_node. Since we'll get 2 CVs back, we'll still
+</span>    <span class="comment">// get the right answer in the end, and we might get to use 2-way SIMD
+</span>    <span class="comment">// parallelism. The problem with this optimization, is that it gets us
+</span>    <span class="comment">// stuck always hashing 2 chunks. The total number of chunks will remain
+</span>    <span class="comment">// odd, and we'll never graduate to higher degrees of parallelism. See
+</span>    <span class="comment">// https://github.com/BLAKE3-team/BLAKE3/issues/69.
+</span>    <span class="small_keyword">while</span> ((((uint64_t)(subtree_len - 1)) &amp; count_so_far) != 0) {
+      subtree_len /= 2;
+    }
+    <span class="comment">// The shrunken subtree_len might now be 1 chunk long. If so, hash that one
+</span>    <span class="comment">// chunk by itself. Otherwise, compress the subtree into a pair of CVs.
+</span>    uint64_t subtree_chunks = subtree_len / BLAKE3_CHUNK_LEN;
+    <span class="small_keyword">if</span> (subtree_len &lt;= BLAKE3_CHUNK_LEN) {
+      blake3_chunk_state chunk_state;
+      chunk_state_init(&amp;chunk_state, self-&gt;key, self-&gt;chunk.flags);
+      chunk_state.chunk_counter = self-&gt;chunk.chunk_counter;
+      chunk_state_update(&amp;chunk_state, input_bytes, subtree_len);
+      output_t output = chunk_state_output(&amp;chunk_state);
+      uint8_t cv[BLAKE3_OUT_LEN];
+      output_chaining_value(&amp;output, cv);
+      hasher_push_cv(self, cv, chunk_state.chunk_counter);
+    } else {
+      <span class="comment">// This is the high-performance happy path, though getting here depends
+</span>      <span class="comment">// on the caller giving us a long enough input.
+</span>      uint8_t cv_pair[2 * BLAKE3_OUT_LEN];
+      compress_subtree_to_parent_node(input_bytes, subtree_len, self-&gt;key,
+                                      self-&gt;chunk.chunk_counter,
+                                      self-&gt;chunk.flags, cv_pair);
+      hasher_push_cv(self, cv_pair, self-&gt;chunk.chunk_counter);
+      hasher_push_cv(self, &amp;cv_pair[BLAKE3_OUT_LEN],
+                     self-&gt;chunk.chunk_counter + (subtree_chunks / 2));
+    }
+    self-&gt;chunk.chunk_counter += subtree_chunks;
+    input_bytes += subtree_len;
+    input_len -= subtree_len;
+  }
+
+  <span class="comment">// If there's any remaining input less than a full chunk, add it to the chunk
+</span>  <span class="comment">// state. In that case, also do a final merge loop to make sure the subtree
+</span>  <span class="comment">// stack doesn't contain any unmerged pairs. The remaining input means we
+</span>  <span class="comment">// know these merges are non-root. This merge loop isn't strictly necessary
+</span>  <span class="comment">// here, because hasher_push_chunk_cv already does its own merge loop, but it
+</span>  <span class="comment">// simplifies blake3_hasher_finalize below.
+</span>  <span class="small_keyword">if</span> (input_len &gt; 0) {
+    chunk_state_update(&amp;self-&gt;chunk, input_bytes, input_len);
+    hasher_merge_cv_stack(self, self-&gt;chunk.chunk_counter);
+  }
+}
+
+<span class="qualifier">void</span> blake3_hasher_finalize(<span class="qualifier">const</span> blake3_hasher *self, uint8_t *out,
+                            size_t out_len) {
+  blake3_hasher_finalize_seek(self, 0, out, out_len);
+}
+
+<span class="qualifier">void</span> blake3_hasher_finalize_seek(<span class="qualifier">const</span> blake3_hasher *self, uint64_t seek,
+                                 uint8_t *out, size_t out_len) {
+  <span class="comment">// Explicitly checking for zero avoids causing UB by passing a null pointer
+</span>  <span class="comment">// to memcpy. This comes up in practice with things like:
+</span>  <span class="comment">//   std::vector<uint8_t> v;
+</span>  <span class="comment">//   blake3_hasher_finalize(&hasher, v.data(), v.size());
+</span>  <span class="small_keyword">if</span> (out_len == 0) {
+    <span class="small_keyword">return</span>;
+  }
+
+  <span class="comment">// If the subtree stack is empty, then the current chunk is the root.
+</span>  <span class="small_keyword">if</span> (self-&gt;cv_stack_len == 0) {
+    output_t output = chunk_state_output(&amp;self-&gt;chunk);
+    output_root_bytes(&amp;output, seek, out, out_len);
+    <span class="small_keyword">return</span>;
+  }
+  <span class="comment">// If there are any bytes in the chunk state, finalize that chunk and do a
+</span>  <span class="comment">// roll-up merge between that chunk hash and every subtree in the stack. In
+</span>  <span class="comment">// this case, the extra merge loop at the end of blake3_hasher_update
+</span>  <span class="comment">// guarantees that none of the subtrees in the stack need to be merged with
+</span>  <span class="comment">// each other first. Otherwise, if there are no bytes in the chunk state,
+</span>  <span class="comment">// then the top of the stack is a chunk hash, and we start the merge from
+</span>  <span class="comment">// that.
+</span>  output_t output;
+  size_t cvs_remaining;
+  <span class="small_keyword">if</span> (chunk_state_len(&amp;self-&gt;chunk) &gt; 0) {
+    cvs_remaining = self-&gt;cv_stack_len;
+    output = chunk_state_output(&amp;self-&gt;chunk);
+  } else {
+    <span class="comment">// There are always at least 2 CVs in the stack in this case.
+</span>    cvs_remaining = self-&gt;cv_stack_len - 2;
+    output = parent_output(&amp;self-&gt;cv_stack[cvs_remaining * 32], self-&gt;key,
+                           self-&gt;chunk.flags);
+  }
+  <span class="small_keyword">while</span> (cvs_remaining &gt; 0) {
+    cvs_remaining -= 1;
+    uint8_t parent_block[BLAKE3_BLOCK_LEN];
+    memcpy(parent_block, &amp;self-&gt;cv_stack[cvs_remaining * 32], 32);
+    output_chaining_value(&amp;output, &amp;parent_block[32]);
+    output = parent_output(parent_block, self-&gt;key, self-&gt;chunk.flags);
+  }
+  output_root_bytes(&amp;output, seek, out, out_len);
+}
+
+<span class="qualifier">void</span> blake3_hasher_reset(blake3_hasher *self) {
+  chunk_state_reset(&amp;self-&gt;chunk, self-&gt;key, 0);
+  self-&gt;cv_stack_len = 0;
+}
+</pre></p><pre class='inclusion'>
+share/src/blake3/blake3_dispatch.c</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;stdbool.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stddef.h&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;stdint.h&gt;</span>
+
+#<span class="preproc">include</span> <span class="fstring">"blake3_impl.h"</span>
+
+#<span class="small_keyword">if</span> defined(IS_X86)
+#undef IS_X86 <span class="comment">/* Unimplemented! **</span>/
+#<span class="preproc">endif</span>
+
+#<span class="preproc">define</span> MAYBE_UNUSED(x) (<span class="qualifier">void</span>)((x))
+
+#<span class="small_keyword">if</span> defined(IS_X86)
+<span class="qualifier">static</span> uint64_t xgetbv(<span class="qualifier">void</span>) {
+#<span class="small_keyword">if</span> defined(_MSC_VER)
+  <span class="small_keyword">return</span> _xgetbv(0);
+#<span class="preproc">else</span>
+  uint32_t eax = 0, edx = 0;
+  __asm__ __<span class="qualifier">volatile</span>__(<span class="fstring">"xgetbv\n"</span> : <span class="fstring">"=a"</span>(eax), <span class="fstring">"=d"</span>(edx) : <span class="fstring">"c"</span>(0));
+  <span class="small_keyword">return</span> ((uint64_t)edx &lt;&lt; 32) | eax;
+#<span class="preproc">endif</span>
+}
+
+<span class="qualifier">static</span> <span class="qualifier">void</span> cpuid(uint32_t out[4], uint32_t id) {
+#<span class="small_keyword">if</span> defined(_MSC_VER)
+  __cpuid((<span class="qualifier">int</span> *)out, id);
+#elif defined(__i386__) || defined(_M_IX86)
+  __asm__ __<span class="qualifier">volatile</span>__(<span class="fstring">"movl %%ebx, %1\n"</span>
+                       <span class="fstring">"cpuid\n"</span>
+                       <span class="fstring">"xchgl %1, %%ebx\n"</span>
+                       : <span class="fstring">"=a"</span>(out[0]), <span class="fstring">"=r"</span>(out[1]), <span class="fstring">"=c"</span>(out[2]), <span class="fstring">"=d"</span>(out[3])
+                       : <span class="fstring">"a"</span>(id));
+#<span class="preproc">else</span>
+  __asm__ __<span class="qualifier">volatile</span>__(<span class="fstring">"cpuid\n"</span>
+                       : <span class="fstring">"=a"</span>(out[0]), <span class="fstring">"=b"</span>(out[1]), <span class="fstring">"=c"</span>(out[2]), <span class="fstring">"=d"</span>(out[3])
+                       : <span class="fstring">"a"</span>(id));
+#<span class="preproc">endif</span>
+}
+
+<span class="qualifier">static</span> <span class="qualifier">void</span> cpuidex(uint32_t out[4], uint32_t id, uint32_t sid) {
+#<span class="small_keyword">if</span> defined(_MSC_VER)
+  __cpuidex((<span class="qualifier">int</span> *)out, id, sid);
+#elif defined(__i386__) || defined(_M_IX86)
+  __asm__ __<span class="qualifier">volatile</span>__(<span class="fstring">"movl %%ebx, %1\n"</span>
+                       <span class="fstring">"cpuid\n"</span>
+                       <span class="fstring">"xchgl %1, %%ebx\n"</span>
+                       : <span class="fstring">"=a"</span>(out[0]), <span class="fstring">"=r"</span>(out[1]), <span class="fstring">"=c"</span>(out[2]), <span class="fstring">"=d"</span>(out[3])
+                       : <span class="fstring">"a"</span>(id), <span class="fstring">"c"</span>(sid));
+#<span class="preproc">else</span>
+  __asm__ __<span class="qualifier">volatile</span>__(<span class="fstring">"cpuid\n"</span>
+                       : <span class="fstring">"=a"</span>(out[0]), <span class="fstring">"=b"</span>(out[1]), <span class="fstring">"=c"</span>(out[2]), <span class="fstring">"=d"</span>(out[3])
+                       : <span class="fstring">"a"</span>(id), <span class="fstring">"c"</span>(sid));
+#<span class="preproc">endif</span>
+}
+
+#<span class="preproc">endif</span>
+
+<span class="big_keyword">enum</span> cpu_feature {
+  SSE2 = 1 &lt;&lt; 0,
+  SSSE3 = 1 &lt;&lt; 1,
+  SSE41 = 1 &lt;&lt; 2,
+  AVX = 1 &lt;&lt; 3,
+  AVX2 = 1 &lt;&lt; 4,
+  AVX512F = 1 &lt;&lt; 5,
+  AVX512VL = 1 &lt;&lt; 6,
+  <span class="comment">/* ... **</span>/
+  UNDEFINED = 1 &lt;&lt; 30
+};
+
+#<span class="small_keyword">if</span> !defined(BLAKE3_TESTING)
+<span class="qualifier">static</span> <span class="comment">/* Allow the variable to be controlled manually for testing **</span>/
+#<span class="preproc">endif</span>
+    <span class="big_keyword">enum</span> cpu_feature g_cpu_features = UNDEFINED;
+
+#<span class="small_keyword">if</span> !defined(BLAKE3_TESTING)
+<span class="qualifier">static</span>
+#<span class="preproc">endif</span>
+    <span class="big_keyword">enum</span> cpu_feature
+    get_cpu_features(<span class="qualifier">void</span>) {
+
+  <span class="small_keyword">if</span> (g_cpu_features != UNDEFINED) {
+    <span class="small_keyword">return</span> g_cpu_features;
+  } else {
+#<span class="small_keyword">if</span> defined(IS_X86)
+    uint32_t regs[4] = {0};
+    uint32_t *eax = &amp;regs[0], *ebx = &amp;regs[1], *ecx = &amp;regs[2], *edx = &amp;regs[3];
+    (<span class="qualifier">void</span>)edx;
+    <span class="big_keyword">enum</span> cpu_feature features = 0;
+    cpuid(regs, 0);
+    <span class="qualifier">const</span> <span class="qualifier">int</span> max_id = *eax;
+    cpuid(regs, 1);
+#<span class="small_keyword">if</span> defined(__amd64__) || defined(_M_X64)
+    features |= SSE2;
+#<span class="preproc">else</span>
+    <span class="small_keyword">if</span> (*edx &amp; (1UL &lt;&lt; 26))
+      features |= SSE2;
+#<span class="preproc">endif</span>
+    <span class="small_keyword">if</span> (*ecx &amp; (1UL &lt;&lt; 0))
+      features |= SSSE3;
+    <span class="small_keyword">if</span> (*ecx &amp; (1UL &lt;&lt; 19))
+      features |= SSE41;
+
+    <span class="small_keyword">if</span> (*ecx &amp; (1UL &lt;&lt; 27)) { <span class="comment">// OSXSAVE
+</span>      <span class="qualifier">const</span> uint64_t mask = xgetbv();
+      <span class="small_keyword">if</span> ((mask &amp; 6) == 6) { <span class="comment">// SSE and AVX states
+</span>        <span class="small_keyword">if</span> (*ecx &amp; (1UL &lt;&lt; 28))
+          features |= AVX;
+        <span class="small_keyword">if</span> (max_id &gt;= 7) {
+          cpuidex(regs, 7, 0);
+          <span class="small_keyword">if</span> (*ebx &amp; (1UL &lt;&lt; 5))
+            features |= AVX2;
+          <span class="small_keyword">if</span> ((mask &amp; 224) == 224) { <span class="comment">// Opmask, ZMM_Hi256, Hi16_Zmm
+</span>            <span class="small_keyword">if</span> (*ebx &amp; (1UL &lt;&lt; 31))
+              features |= AVX512VL;
+            <span class="small_keyword">if</span> (*ebx &amp; (1UL &lt;&lt; 16))
+              features |= AVX512F;
+          }
+        }
+      }
+    }
+    g_cpu_features = features;
+    <span class="small_keyword">return</span> features;
+#<span class="preproc">else</span>
+    <span class="comment">/* How to detect NEON? **</span>/
+    <span class="small_keyword">return</span> 0;
+#<span class="preproc">endif</span>
+  }
+}
+
+<span class="qualifier">void</span> blake3_compress_in_place(uint32_t cv[8],
+                              <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                              uint8_t block_len, uint64_t counter,
+                              uint8_t flags) {
+#<span class="small_keyword">if</span> defined(IS_X86)
+  <span class="qualifier">const</span> <span class="big_keyword">enum</span> cpu_feature features = get_cpu_features();
+  MAYBE_UNUSED(features);
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX512)
+  <span class="small_keyword">if</span> (features &amp; AVX512VL) {
+    blake3_compress_in_place_avx512(cv, block, block_len, counter, flags);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE41)
+  <span class="small_keyword">if</span> (features &amp; SSE41) {
+    blake3_compress_in_place_sse41(cv, block, block_len, counter, flags);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE2)
+  <span class="small_keyword">if</span> (features &amp; SSE2) {
+    blake3_compress_in_place_sse2(cv, block, block_len, counter, flags);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+  blake3_compress_in_place_portable(cv, block, block_len, counter, flags);
+}
+
+<span class="qualifier">void</span> blake3_compress_xof(<span class="qualifier">const</span> uint32_t cv[8],
+                         <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                         uint8_t block_len, uint64_t counter, uint8_t flags,
+                         uint8_t out[64]) {
+#<span class="small_keyword">if</span> defined(IS_X86)
+  <span class="qualifier">const</span> <span class="big_keyword">enum</span> cpu_feature features = get_cpu_features();
+  MAYBE_UNUSED(features);
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX512)
+  <span class="small_keyword">if</span> (features &amp; AVX512VL) {
+    blake3_compress_xof_avx512(cv, block, block_len, counter, flags, out);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE41)
+  <span class="small_keyword">if</span> (features &amp; SSE41) {
+    blake3_compress_xof_sse41(cv, block, block_len, counter, flags, out);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE2)
+  <span class="small_keyword">if</span> (features &amp; SSE2) {
+    blake3_compress_xof_sse2(cv, block, block_len, counter, flags, out);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+  blake3_compress_xof_portable(cv, block, block_len, counter, flags, out);
+}
+
+<span class="qualifier">void</span> blake3_hash_many(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                      size_t blocks, <span class="qualifier">const</span> uint32_t key[8], uint64_t counter,
+                      bool increment_counter, uint8_t flags,
+                      uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
+#<span class="small_keyword">if</span> defined(IS_X86)
+  <span class="qualifier">const</span> <span class="big_keyword">enum</span> cpu_feature features = get_cpu_features();
+  MAYBE_UNUSED(features);
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX512)
+  <span class="small_keyword">if</span> ((features &amp; (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    blake3_hash_many_avx512(inputs, num_inputs, blocks, key, counter,
+                            increment_counter, flags, flags_start, flags_end,
+                            out);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX2)
+  <span class="small_keyword">if</span> (features &amp; AVX2) {
+    blake3_hash_many_avx2(inputs, num_inputs, blocks, key, counter,
+                          increment_counter, flags, flags_start, flags_end,
+                          out);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE41)
+  <span class="small_keyword">if</span> (features &amp; SSE41) {
+    blake3_hash_many_sse41(inputs, num_inputs, blocks, key, counter,
+                           increment_counter, flags, flags_start, flags_end,
+                           out);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE2)
+  <span class="small_keyword">if</span> (features &amp; SSE2) {
+    blake3_hash_many_sse2(inputs, num_inputs, blocks, key, counter,
+                          increment_counter, flags, flags_start, flags_end,
+                          out);
+    <span class="small_keyword">return</span>;
+  }
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+
+#<span class="small_keyword">if</span> BLAKE3_USE_NEON == 1
+  blake3_hash_many_neon(inputs, num_inputs, blocks, key, counter,
+                        increment_counter, flags, flags_start, flags_end, out);
+  <span class="small_keyword">return</span>;
+#<span class="preproc">endif</span>
+
+  blake3_hash_many_portable(inputs, num_inputs, blocks, key, counter,
+                            increment_counter, flags, flags_start, flags_end,
+                            out);
+}
+
+<span class="comment">// The dynamically detected SIMD degree of the current platform.
+</span>size_t blake3_simd_degree(<span class="qualifier">void</span>) {
+#<span class="small_keyword">if</span> defined(IS_X86)
+  <span class="qualifier">const</span> <span class="big_keyword">enum</span> cpu_feature features = get_cpu_features();
+  MAYBE_UNUSED(features);
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX512)
+  <span class="small_keyword">if</span> ((features &amp; (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    <span class="small_keyword">return</span> 16;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_AVX2)
+  <span class="small_keyword">if</span> (features &amp; AVX2) {
+    <span class="small_keyword">return</span> 8;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE41)
+  <span class="small_keyword">if</span> (features &amp; SSE41) {
+    <span class="small_keyword">return</span> 4;
+  }
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> !defined(BLAKE3_NO_SSE2)
+  <span class="small_keyword">if</span> (features &amp; SSE2) {
+    <span class="small_keyword">return</span> 4;
+  }
+#<span class="preproc">endif</span>
+#<span class="preproc">endif</span>
+#<span class="small_keyword">if</span> BLAKE3_USE_NEON == 1
+  <span class="small_keyword">return</span> 4;
+#<span class="preproc">endif</span>
+  <span class="small_keyword">return</span> 1;
+}
+</pre></p><pre class='inclusion'>
+share/src/blake3/black3_portable.c</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">"blake3_impl.h"</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;string.h&gt;</span>
+
+INLINE uint32_t rotr32(uint32_t w, uint32_t c) {
+  <span class="small_keyword">return</span> (w &gt;&gt; c) | (w &lt;&lt; (32 - c));
+}
+
+INLINE <span class="qualifier">void</span> g(uint32_t *state, size_t a, size_t b, size_t c, size_t d,
+              uint32_t x, uint32_t y) {
+  state[a] = state[a] + state[b] + x;
+  state[d] = rotr32(state[d] ^ state[a], 16);
+  state[c] = state[c] + state[d];
+  state[b] = rotr32(state[b] ^ state[c], 12);
+  state[a] = state[a] + state[b] + y;
+  state[d] = rotr32(state[d] ^ state[a], 8);
+  state[c] = state[c] + state[d];
+  state[b] = rotr32(state[b] ^ state[c], 7);
+}
+
+INLINE <span class="qualifier">void</span> round_fn(uint32_t state[16], <span class="qualifier">const</span> uint32_t *msg, size_t round) {
+  <span class="comment">// Select the message schedule based on the round.
+</span>  <span class="qualifier">const</span> uint8_t *schedule = MSG_SCHEDULE[round];
+
+  <span class="comment">// Mix the columns.
+</span>  g(state, 0, 4, 8, 12, msg[schedule[0]], msg[schedule[1]]);
+  g(state, 1, 5, 9, 13, msg[schedule[2]], msg[schedule[3]]);
+  g(state, 2, 6, 10, 14, msg[schedule[4]], msg[schedule[5]]);
+  g(state, 3, 7, 11, 15, msg[schedule[6]], msg[schedule[7]]);
+
+  <span class="comment">// Mix the rows.
+</span>  g(state, 0, 5, 10, 15, msg[schedule[8]], msg[schedule[9]]);
+  g(state, 1, 6, 11, 12, msg[schedule[10]], msg[schedule[11]]);
+  g(state, 2, 7, 8, 13, msg[schedule[12]], msg[schedule[13]]);
+  g(state, 3, 4, 9, 14, msg[schedule[14]], msg[schedule[15]]);
+}
+
+INLINE <span class="qualifier">void</span> compress_pre(uint32_t state[16], <span class="qualifier">const</span> uint32_t cv[8],
+                         <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                         uint8_t block_len, uint64_t counter, uint8_t flags) {
+  uint32_t block_words[16];
+  block_words[0] = load32(block + 4 * 0);
+  block_words[1] = load32(block + 4 * 1);
+  block_words[2] = load32(block + 4 * 2);
+  block_words[3] = load32(block + 4 * 3);
+  block_words[4] = load32(block + 4 * 4);
+  block_words[5] = load32(block + 4 * 5);
+  block_words[6] = load32(block + 4 * 6);
+  block_words[7] = load32(block + 4 * 7);
+  block_words[8] = load32(block + 4 * 8);
+  block_words[9] = load32(block + 4 * 9);
+  block_words[10] = load32(block + 4 * 10);
+  block_words[11] = load32(block + 4 * 11);
+  block_words[12] = load32(block + 4 * 12);
+  block_words[13] = load32(block + 4 * 13);
+  block_words[14] = load32(block + 4 * 14);
+  block_words[15] = load32(block + 4 * 15);
+
+  state[0] = cv[0];
+  state[1] = cv[1];
+  state[2] = cv[2];
+  state[3] = cv[3];
+  state[4] = cv[4];
+  state[5] = cv[5];
+  state[6] = cv[6];
+  state[7] = cv[7];
+  state[8] = IV[0];
+  state[9] = IV[1];
+  state[10] = IV[2];
+  state[11] = IV[3];
+  state[12] = counter_low(counter);
+  state[13] = counter_high(counter);
+  state[14] = (uint32_t)block_len;
+  state[15] = (uint32_t)flags;
+
+  round_fn(state, &amp;block_words[0], 0);
+  round_fn(state, &amp;block_words[0], 1);
+  round_fn(state, &amp;block_words[0], 2);
+  round_fn(state, &amp;block_words[0], 3);
+  round_fn(state, &amp;block_words[0], 4);
+  round_fn(state, &amp;block_words[0], 5);
+  round_fn(state, &amp;block_words[0], 6);
+}
+
+<span class="qualifier">void</span> blake3_compress_in_place_portable(uint32_t cv[8],
+                                       <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                       uint8_t block_len, uint64_t counter,
+                                       uint8_t flags) {
+  uint32_t state[16];
+  compress_pre(state, cv, block, block_len, counter, flags);
+  cv[0] = state[0] ^ state[8];
+  cv[1] = state[1] ^ state[9];
+  cv[2] = state[2] ^ state[10];
+  cv[3] = state[3] ^ state[11];
+  cv[4] = state[4] ^ state[12];
+  cv[5] = state[5] ^ state[13];
+  cv[6] = state[6] ^ state[14];
+  cv[7] = state[7] ^ state[15];
+}
+
+<span class="qualifier">void</span> blake3_compress_xof_portable(<span class="qualifier">const</span> uint32_t cv[8],
+                                  <span class="qualifier">const</span> uint8_t block[BLAKE3_BLOCK_LEN],
+                                  uint8_t block_len, uint64_t counter,
+                                  uint8_t flags, uint8_t out[64]) {
+  uint32_t state[16];
+  compress_pre(state, cv, block, block_len, counter, flags);
+
+  store32(&amp;out[0 * 4], state[0] ^ state[8]);
+  store32(&amp;out[1 * 4], state[1] ^ state[9]);
+  store32(&amp;out[2 * 4], state[2] ^ state[10]);
+  store32(&amp;out[3 * 4], state[3] ^ state[11]);
+  store32(&amp;out[4 * 4], state[4] ^ state[12]);
+  store32(&amp;out[5 * 4], state[5] ^ state[13]);
+  store32(&amp;out[6 * 4], state[6] ^ state[14]);
+  store32(&amp;out[7 * 4], state[7] ^ state[15]);
+  store32(&amp;out[8 * 4], state[8] ^ cv[0]);
+  store32(&amp;out[9 * 4], state[9] ^ cv[1]);
+  store32(&amp;out[10 * 4], state[10] ^ cv[2]);
+  store32(&amp;out[11 * 4], state[11] ^ cv[3]);
+  store32(&amp;out[12 * 4], state[12] ^ cv[4]);
+  store32(&amp;out[13 * 4], state[13] ^ cv[5]);
+  store32(&amp;out[14 * 4], state[14] ^ cv[6]);
+  store32(&amp;out[15 * 4], state[15] ^ cv[7]);
+}
+
+INLINE <span class="qualifier">void</span> hash_one_portable(<span class="qualifier">const</span> uint8_t *input, size_t blocks,
+                              <span class="qualifier">const</span> uint32_t key[8], uint64_t counter,
+                              uint8_t flags, uint8_t flags_start,
+                              uint8_t flags_end, uint8_t out[BLAKE3_OUT_LEN]) {
+  uint32_t cv[8];
+  memcpy(cv, key, BLAKE3_KEY_LEN);
+  uint8_t block_flags = flags | flags_start;
+  <span class="small_keyword">while</span> (blocks &gt; 0) {
+    <span class="small_keyword">if</span> (blocks == 1) {
+      block_flags |= flags_end;
+    }
+    blake3_compress_in_place_portable(cv, input, BLAKE3_BLOCK_LEN, counter,
+                                      block_flags);
+    input = &amp;input[BLAKE3_BLOCK_LEN];
+    blocks -= 1;
+    block_flags = flags;
+  }
+  store_cv_words(out, cv);
+}
+
+<span class="qualifier">void</span> blake3_hash_many_portable(<span class="qualifier">const</span> uint8_t *<span class="qualifier">const</span> *inputs, size_t num_inputs,
+                               size_t blocks, <span class="qualifier">const</span> uint32_t key[8],
+                               uint64_t counter, bool increment_counter,
+                               uint8_t flags, uint8_t flags_start,
+                               uint8_t flags_end, uint8_t *out) {
+  <span class="small_keyword">while</span> (num_inputs &gt; 0) {
+    hash_one_portable(inputs[0], blocks, key, counter, flags, flags_start,
+                      flags_end, out);
+    <span class="small_keyword">if</span> (increment_counter) {
+      counter += 1;
+    }
+    inputs += 1;
+    num_inputs -= 1;
+    out = &amp;out[BLAKE3_OUT_LEN];
+  }
+}
+</pre></p></div><h1 id='Config_h'><img src='/share/src/web/images/minus.gif' id='Config' onclick='toggle(this,"Config_d")' alt='+'/> 3.2 Config</h1><div id='Config_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/src/config/blake3.fpc</pre>
+<p><pre class="prefmtbg">Name: Blake3
+Description: Blake3, C version 
+provides_dlib: -lflx_blake3_dynamic
+provides_slib: -lflx_blake3_static
+includes: '"blake3/blake3.h"'
+library: flx_blake3
+macros: BUILD_BLAKE3
+srcdir: src/blake3
+headers: blake3/blake3\.h  
+src: [^/]*\.c
+build_includes: src/blake3
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+

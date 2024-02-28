@@ -1,0 +1,818 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Library structure</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Library structure",
+"Std.flx",
+"Default includes for Standard library.",
+"C stuff",
+"Data types",
+"Posix",
+"Win32",
+"Platform independent Computation enforcement",
+"C hackery",
+"C stdlib Rand",
+"OSX platform tag",
+"Linux specifics",
+"Linux smap"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Library structure_h')"> <a href="#Library_structure_h">Library structure</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Std.flx_h')"> <a href="#Std.flx_h">Std.flx</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Default includes for Standard library._h')"> <a href="#Default_includes_for_Standard_library._h">Default includes for Standard library.</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#C stuff_h')"> <a href="#C_stuff_h">C stuff</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Data types_h')"> <a href="#Data_types_h">Data types</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Posix_h')"> <a href="#Posix_h">Posix</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Win32_h')"> <a href="#Win32_h">Win32</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#Platform independent Computation enforcement_h')"> <a href="#Platform_independent_Computation_enforcement_h">Platform independent Computation enforcement</a></div>
+      <div class=sm id=menu8>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#C hackery_h')"> <a href="#C_hackery_h">C hackery</a></div>
+      <div class=sm id=menu9>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#C stdlib Rand_h')"> <a href="#C_stdlib_Rand_h">C stdlib Rand</a></div>
+      <div class=sm id=menu10>
+      </div>
+      <div class=m1 onclick="mshow('menu11','#OSX platform tag_h')"> <a href="#OSX_platform_tag_h">OSX platform tag</a></div>
+      <div class=sm id=menu11>
+      </div>
+      <div class=m1 onclick="mshow('menu12','#Linux specifics_h')"> <a href="#Linux_specifics_h">Linux specifics</a></div>
+      <div class=sm id=menu12>
+      </div>
+      <div class=m1 onclick="mshow('menu13','#Linux smap_h')"> <a href="#Linux_smap_h">Linux smap</a></div>
+      <div class=sm id=menu13>
+      </div>
+    <script>counter_max=13;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Library_structure_h'><img src='/share/src/web/images/minus.gif' id='Library structure' onclick='toggle(this,"Library_structure_d")' alt='+'/> 1 Library structure</h1><div id='Library_structure_d' style='display:block'>
+<p>Specifies some of the automatic inclusion files.
+Others are located in other packages. 
+</p><p>Also throw in some "don't know where to put them" files.
+</p></div><h1 id='Std.flx_h'><img src='/share/src/web/images/minus.gif' id='Std.flx' onclick='toggle(this,"Std.flx_d")' alt='+'/> 2 Std.flx</h1><div id='Std.flx_d' style='display:block'>
+<p>The top level library module.
+</p><pre class='inclusion'>
+share/lib/std.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"flx_rtl_config.hpp"</span></span>';
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/__init__"</span>;
+</pre></p></div><h1 id='Default_includes_for_Standard_library._h'><img src='/share/src/web/images/minus.gif' id='Default includes for Standard library.' onclick='toggle(this,"Default_includes_for_Standard_library._d")' alt='+'/> 3 Default includes for Standard library.</h1><div id='Default_includes_for_Standard_library._d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> String;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// ISO C++99 standard header tags</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/__init__"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="comment">// core type classes</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/algebra/__init__"</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>  <span class="comment">// base scalar types </span>
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/scalar/__init__"</span>;
+<span class="lineno" id=line12></span>  
+<span class="lineno" id=line13></span>  <span class="comment">// utility</span>
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/debug"</span>;
+<span class="lineno" id=line15></span>  
+<span class="lineno" id=line16></span>  <span class="comment">// control</span>
+<span class="lineno" id=line17></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/__init__"</span>;
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/pthread/__init__"</span>;
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/program/__init__"</span>;
+<span class="lineno" id=line20></span>  
+<span class="lineno" id=line21></span>  <span class="comment">//memory management</span>
+<span class="lineno" id=line22></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/gc"</span>;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>  <span class="comment">// I/O</span>
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/io/__init__"</span>;
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/time"</span>;
+<span class="lineno" id=line27></span>  
+<span class="lineno" id=line28></span>  <span class="comment">// codecs</span>
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/codec/__init__"</span>;
+<span class="lineno" id=line30></span>  
+<span class="lineno" id=line31></span>  <span class="comment">// base data types</span>
+<span class="lineno" id=line32></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/__init__"</span>;
+<span class="lineno" id=line33></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/strings/__init__"</span>;
+<span class="lineno" id=line34></span>  
+<span class="lineno" id=line35></span>  <span class="comment">// regexes</span>
+<span class="lineno" id=line36></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/regex/__init__"</span>;
+<span class="lineno" id=line37></span>  
+<span class="lineno" id=line38></span>  <span class="comment">// database REMOVED</span>
+<span class="lineno" id=line39></span>  <span class="comment">//include "std/db/__init__";</span>
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>  <span class="comment">// Version</span>
+<span class="lineno" id=line42></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/version"</span>;
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>  <span class="comment">// Platform support (implementation exposure)</span>
+<span class="lineno" id=line45></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/osx/__init__"</span>;
+<span class="lineno" id=line46></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/__init__"</span>;
+<span class="lineno" id=line47></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/__init__"</span>;
+<span class="lineno" id=line48></span>  
+<span class="lineno" id=line49></span>  <span class="comment">// Felix (implementation exposure)</span>
+<span class="lineno" id=line50></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/__init__"</span>;
+<span class="lineno" id=line51></span>  
+</pre></p></div><h1 id='C_stuff_h'><img src='/share/src/web/images/minus.gif' id='C stuff' onclick='toggle(this,"C_stuff_d")' alt='+'/> 4 C stuff</h1><div id='C_stuff_d' style='display:block'>
+<p>Structure of C sublibrary.
+</p><pre class='inclusion'>
+share/lib/std/c/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/c_headers"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/cxx_headers"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/cptr"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/cstdlib"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/carray"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/c_hack"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/c/shared_ptr"</span>;
+<span class="lineno" id=line9></span>  
+</pre></p></div><h1 id='Data_types_h'><img src='/share/src/web/images/minus.gif' id='Data types' onclick='toggle(this,"Data_types_d")' alt='+'/> 5 Data types</h1><div id='Data_types_d' style='display:block'>
+<p>Structure of datatype library.
+</p><pre class='inclusion'>
+share/lib/std/datatype/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="comment">// special</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/typing"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/functional"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/special"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/unitsum"</span>;
+<span class="lineno" id=line7></span>  
+<span class="lineno" id=line8></span>  <span class="comment">// base data types</span>
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/tuple"</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/option"</span>;
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/slice"</span>;
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/list"</span>;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/assoc_list"</span>;
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/stream"</span>;
+<span class="lineno" id=line15></span>  <span class="comment">//include "std/datatype/sexpr";</span>
+<span class="lineno" id=line16></span>  <span class="comment">//include "std/datatype/lsexpr";</span>
+<span class="lineno" id=line17></span>  <span class="comment">//include "std/datatype/ralist";</span>
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>  <span class="comment">// arrays</span>
+<span class="lineno" id=line20></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/array_class"</span>;
+<span class="lineno" id=line21></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/array"</span>;
+<span class="lineno" id=line22></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/varray"</span>;
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/darray"</span>;
+<span class="lineno" id=line24></span>  <span class="comment">//include "std/datatype/sarray";</span>
+<span class="lineno" id=line25></span>  <span class="comment">//include "std/datatype/bsarray";</span>
+<span class="lineno" id=line26></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/judy"</span>;
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/sort"</span>;
+<span class="lineno" id=line28></span>  
+<span class="lineno" id=line29></span>  <span class="comment">// dictionaries</span>
+<span class="lineno" id=line30></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/datatype/strdict"</span>;
+<span class="lineno" id=line31></span>  
+<span class="lineno" id=line32></span>  <span class="comment">// tree</span>
+<span class="lineno" id=line33></span>  <span class="comment">//include "std/datatype/avl";</span>
+</pre></p></div><h1 id='Posix_h'><img src='/share/src/web/images/minus.gif' id='Posix' onclick='toggle(this,"Posix_d")' alt='+'/> 6 Posix</h1><div id='Posix_d' style='display:block'>
+<p>Structure of Posix support library.
+</p><pre class='inclusion'>
+share/lib/std/posix/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a structure">struct</span> Posix {};
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/posix_headers"</span>;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/errno"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/signal"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/time"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/filestat"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/directory"</span>;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/filesystem"</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/process"</span>;
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/shell"</span>;
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/faio_posix"</span>;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/mmap"</span>;
+</pre></p></div><h1 id='Win32_h'><img src='/share/src/web/images/minus.gif' id='Win32' onclick='toggle(this,"Win32_d")' alt='+'/> 7 Win32</h1><div id='Win32_d' style='display:block'>
+<p>Structure of Win32 library.
+</p><pre class='inclusion'>
+share/lib/std/win32/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a structure">struct</span> Win32 {};
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// windows services</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/shell"</span>;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/filestat"</span>;
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/directory"</span>;
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/process"</span>;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/filesystem"</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/time"</span>;
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/signal"</span>;
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/faio_win32"</span>;
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/win32/win32_headers"</span>;
+</pre></p></div><h1 id='Platform_independent_Computation_enforcement_h'><img src='/share/src/web/images/minus.gif' id='Platform independent Computation enforcement' onclick='toggle(this,"Platform_independent_Computation_enforcement_d")' alt='+'/> 8 Platform independent Computation enforcement</h1><div id='Platform_independent_Computation_enforcement_d' style='display:block'>
+<p>Using --import=std/plat/platindep.flxh on flxg command
+fails to set any of the usual platform macros like
+FLX_LINUX, FLX_POSIX, FLX_WIN32. Instead it sets
+the macro <code>PLAT_INDEP</code>. This should bug out any
+compilations requiring platform specific macros.
+</p><pre class='inclusion'>
+share/lib/std/plat/platindep.flxh</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// Platform independent compilation enforced by</span>
+<span class="lineno" id=line2></span>  <span class="comment">// failing to set any platform macros.</span>
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="prefix for macro definitions">macro</span> <span class="big_keyword" title="Define an immutable value">val</span> PLAT_INDEP = 1;
+</pre></p></div><h1 id='C_hackery_h'><img src='/share/src/web/images/minus.gif' id='C hackery' onclick='toggle(this,"C_hackery_d")' alt='+'/> 9 C hackery</h1><div id='C_hackery_d' style='display:block'>
+<p>Hackery for mapping between Felix and C/C++.
+</p><pre class='inclusion'>
+share/lib/std/c/c_hack.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="doccomment">This class provides access to raw C/C++ encodings.</span>
+<span class="lineno" id=line3></span>  <span class="doccomment">Incorrect typing is likely to pass by Felix and</span>
+<span class="lineno" id=line4></span>  <span class="doccomment">be trapped by the C/C++ compiler. Incorrect management</span>
+<span class="lineno" id=line5></span>  <span class="doccomment">of storage can lead to corruption. The use of the</span>
+<span class="lineno" id=line6></span>  <span class="doccomment">C_hack class is necessary for interfacing.</span>
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="Define a type class">class</span> <span class="hack">C_hack</span>
+<span class="lineno" id=line8></span>  {
+<span class="lineno" id=line9></span>    <span class="doccomment">C void type. Incomplete, can't be instantiated.</span>
+<span class="lineno" id=line10></span>    <span class="qualifier" title="A type which must not be instantiated">incomplete</span> <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> void_t = <span class="fstring">"void"</span>;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>    <span class="doccomment">Standard variable argument list pointer type.</span>
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> va_list = <span class="fstring">"va_list"</span>;
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>    <span class="doccomment">GCC specific valist thingo: it will</span>
+<span class="lineno" id=line16></span>    <span class="doccomment">be optimised away if not used (eg on MSVC).</span>
+<span class="lineno" id=line17></span>    <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> __builtin_va_list = <span class="fstring">'__builtin_va_list'</span>;
+<span class="lineno" id=line18></span>  
+<span class="lineno" id=line19></span>    <span class="doccomment">Throw away result of a function call:</span>
+<span class="lineno" id=line20></span>    <span class="doccomment">only useful for C functions that are mainly</span>
+<span class="lineno" id=line21></span>    <span class="doccomment">called for side effects.</span>
+<span class="lineno" id=line22></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ignore[t:BORROWED]:t = <span class="fstring">"(void)$t;"</span>;
+<span class="lineno" id=line23></span>  
+<span class="lineno" id=line24></span>    <span class="doccomment">C style cast.</span>
+<span class="lineno" id=line25></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> cast[dst:BORROWED,src:BORROWED]: src-&gt;dst = <span class="fstring">'(?1)($t/*cast*/)'</span> is cast;
+<span class="lineno" id=line26></span>  
+<span class="lineno" id=line27></span>    <span class="doccomment">C++ static cast.</span>
+<span class="lineno" id=line28></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> static_cast[dst:BORROWED,src:BORROWED]: src-&gt;dst = <span class="fstring">'static_cast&lt;?1&gt;($t)'</span> is postfix;
+<span class="lineno" id=line29></span>  
+<span class="lineno" id=line30></span>    <span class="doccomment">C++ dynamic cast.</span>
+<span class="lineno" id=line31></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> dynamic_cast[dst:BORROWED,src:BORROWED]: src-&gt;dst = <span class="fstring">'dynamic_cast&lt;?1&gt;($t)'</span> is postfix;
+<span class="lineno" id=line32></span>  
+<span class="lineno" id=line33></span>    <span class="doccomment">C++ const cast.</span>
+<span class="lineno" id=line34></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> const_cast[dst:BORROWED,src:BORROWED]: src-&gt;dst = <span class="fstring">'const_cast&lt;?1&gt;($t)'</span> is postfix;
+<span class="lineno" id=line35></span>  
+<span class="lineno" id=line36></span>    <span class="doccomment">C++ reinterpret cast.</span>
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> reinterpret_cast[dst:BORROWED,src:BORROWED]: src-&gt;dst = <span class="fstring">'reinterpret_cast&lt;?1&gt;($t)'</span> is postfix;
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="doccomment">Felix reinterpret cast.</span>
+<span class="lineno" id=line40></span>    <span class="doccomment">More powerful than C++ reinterpret cast.</span>
+<span class="lineno" id=line41></span>    <span class="doccomment">Allows casting an rvalue to an lvalue.</span>
+<span class="lineno" id=line42></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> reinterpret[dst:BORROWED,src:BORROWED]: src-&gt;dst = <span class="fstring">'reinterpret&lt;?1&gt;($t)'</span> is postfix;
+<span class="lineno" id=line43></span>  
+<span class="lineno" id=line44></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> sizeof[t:BORROWED]:<span class="library" title="binding of C size_t type">size</span> = <span class="fstring">'sizeof(?1)'</span>;
+<span class="lineno" id=line45></span>  
+<span class="lineno" id=line46></span>    <span class="doccomment">Special NULL check for Felix pointers.</span>
+<span class="lineno" id=line47></span>    <span class="doccomment">Should never succeed.</span>
+<span class="lineno" id=line48></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> isNULL[t:TYPE]: &amp;t -&gt; bool = <span class="fstring">"(0==$1)"</span>;
+<span class="lineno" id=line49></span>  
+<span class="lineno" id=line50></span>    <span class="doccomment">Special NULL check for carray.</span>
+<span class="lineno" id=line51></span>    <span class="doccomment">Should never succeed.</span>
+<span class="lineno" id=line52></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> isNULL[t:TYPE]: +t -&gt; bool = <span class="fstring">"(0==$1)"</span>;
+<span class="lineno" id=line53></span>  
+<span class="lineno" id=line54></span>    <span class="doccomment">Polymorphic null pointer constant</span>
+<span class="lineno" id=line55></span>    <span class="doccomment">Values of this type should not exist.</span>
+<span class="lineno" id=line56></span>    <span class="doccomment">This value is provided for checking.</span>
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> null[t:BORROWED]:&amp;t = <span class="fstring">"(?1*)NULL"</span>;
+<span class="lineno" id=line58></span>  
+<span class="lineno" id=line59></span>    <span class="doccomment">C++ default value for a type T.</span>
+<span class="lineno" id=line60></span>    <span class="doccomment">Workaround for g++ 3.2.2 parsing bug,</span>
+<span class="lineno" id=line61></span>    <span class="doccomment">it can parse T() as a default ctor call,</span>
+<span class="lineno" id=line62></span>    <span class="doccomment">but screws up on (T())</span>
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> dflt[t:BORROWED]:1-&gt;t = <span class="fstring">"dflt&lt;?1&gt;()"</span> <span class="big_keyword" title="specify requirements">requires</span> <span class="big_keyword" title="Specify C code to be inserted into header file">header</span>
+<span class="lineno" id=line64></span>      "<span class="embedded_c"><span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt; T dflt() { <span class="small_keyword">return</span> T(); }</span>";
+<span class="lineno" id=line65></span>  
+<span class="lineno" id=line66></span>    <span class="doccomment">Invoke C++ destructor</span>
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> destroy[T:BORROWED] : &amp;T = <span class="fstring">"::destroy($1);/*C_hack*/"</span>; <span class="comment">// from flx_compiler_support_bodies</span>
+<span class="lineno" id=line68></span>  }
+<span class="lineno" id=line69></span>  
+<span class="lineno" id=line70></span>  
+</pre></p></div><h1 id='C_stdlib_Rand_h'><img src='/share/src/web/images/minus.gif' id='C stdlib Rand' onclick='toggle(this,"C_stdlib_Rand_d")' alt='+'/> 10 C stdlib Rand</h1><div id='C_stdlib_Rand_d' style='display:block'>
+<p>Just to get random functions.
+</p><pre class='inclusion'>
+share/lib/std/c/cstdlib.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> <span class="big_keyword" title="Define a type class">class</span> Cstdlib
+<span class="lineno" id=line3></span>  {
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="specify requirements">requires</span> Cxx_headers::cstdlib;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Bind a Felix symbol to a C expression">const</span> RAND_MAX:<span class="library" title="binding of C long type">long</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>    <span class="doccomment">C89 Standard C library seed random number generator.</span>
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> srand: <span class="library" title="binding of C unsigned int type">uint</span> = <span class="fstring">'::std::srand($1);'</span>;
+<span class="lineno" id=line9></span>  
+<span class="lineno" id=line10></span>    <span class="doccomment">C89 Standard C library random number generator.</span>
+<span class="lineno" id=line11></span>    <span class="doccomment">Known to be not very good. Try not to use it!</span>
+<span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> rand: <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; <span class="library" title="binding of C int type">int</span> = <span class="fstring">'::std::rand()'</span>;
+<span class="lineno" id=line13></span>  }
+<span class="lineno" id=line14></span>  
+<span class="lineno" id=line15></span>  
+</pre></p></div><h1 id='OSX_platform_tag_h'><img src='/share/src/web/images/minus.gif' id='OSX platform tag' onclick='toggle(this,"OSX_platform_tag_d")' alt='+'/> 11 OSX platform tag</h1><div id='OSX_platform_tag_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/osx/__init__.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a structure">struct</span> Osx{};
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/posix/__init__"</span>;
+</pre></p></div><h1 id='Linux_specifics_h'><img src='/share/src/web/images/minus.gif' id='Linux specifics' onclick='toggle(this,"Linux_specifics_d")' alt='+'/> 12 Linux specifics</h1><div id='Linux_specifics_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/std/linux/linux.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a module namespace">module</span> Linux {
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Specify C code to be inserted into header file">header</span> '<span class="embedded_c">#<span class="preproc">include</span> <span class="fstring">"plat_linux.hpp"</span></span>';
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="specify requirements">requires</span> <span class="small_keyword" title="specifies an abstract package name">package</span> <span class="fstring">"plat_linux"</span>;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_cpu_nr: 1 -&gt; <span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line6></span>  }
+</pre></p></div><h1 id='Linux_smap_h'><img src='/share/src/web/images/minus.gif' id='Linux smap' onclick='toggle(this,"Linux_smap_d")' alt='+'/> 13 Linux smap</h1><div id='Linux_smap_d' style='display:block'>
+<p>Parses and totals proc/PID/smaps memory stats. 
+</p><pre class='inclusion'>
+share/lib/std/linux/smaps.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  
+<span class="lineno" id=line2></span>  publish <span class="fstring">"""
+<span class="lineno" id=line3></span>  Parses and totals proc/PID/smaps memory stats. 
+<span class="lineno" id=line4></span>  See smaps_total
+<span class="lineno" id=line5></span>  
+<span class="lineno" id=line6></span>  ** don't do [stack] as is last map in smaps and feof appear to be broken or 
+<span class="lineno" id=line7></span>  ** doesnt work with /proc files
+<span class="lineno" id=line8></span>  
+<span class="lineno" id=line9></span>  Example: (gets total smaps values for heap
+<span class="lineno" id=line10></span>   open Smaps;
+<span class="lineno" id=line11></span>    val my_smaps = smaps_total(getpid(),"[heap]");
+<span class="lineno" id=line12></span>    println("Heap Size=&gt;"+str(my_smaps.size)+" kB");
+<span class="lineno" id=line13></span>    //Smaps for other processes
+<span class="lineno" id=line14></span>    val m = smaps_total(uint_topid(23264ui),"/usr/lib/libsqlite3.so.0.8.6");
+<span class="lineno" id=line15></span>    println("SQLite Size:RSS=&gt;"+str((m.size))+" kB:"+ str((m.rss))+" kB");
+<span class="lineno" id=line16></span>  """</span>
+<span class="lineno" id=line17></span>  
+<span class="lineno" id=line18></span>  <span class="big_keyword" title="Define a type class">class</span> Smaps {
+<span class="lineno" id=line19></span>    <span class="big_keyword" title="Open a module or class">open</span> Smaps;
+<span class="lineno" id=line20></span>    <span class="big_keyword" title="Define a structure">struct</span> smaps_metric {
+<span class="lineno" id=line21></span>       <span class="library" title="binding of C size_t type">size</span>:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line22></span>       rss:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line23></span>       pss:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line24></span>       shared_clean:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line25></span>       shared_dirty:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line26></span>       private_clean:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line27></span>       private_dirty:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line28></span>       referenced:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line29></span>       anonymous:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line30></span>       anonhugepages:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line31></span>       swap:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line32></span>       kernelpagesize:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line33></span>       mmupagesize:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line34></span>       locked:<span class="library" title="binding of C unsigned int type">uint</span>;
+<span class="lineno" id=line35></span>    }
+<span class="lineno" id=line36></span>  
+<span class="lineno" id=line37></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> getpid: ()-&gt;Process::pid_t = <span class="fstring">"getpid()"</span>;
+<span class="lineno" id=line38></span>  
+<span class="lineno" id=line39></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> pid_touint: Process::pid_t-&gt;<span class="library" title="binding of C unsigned int type">uint</span> = <span class="fstring">"((unsigned int)$1)"</span>;
+<span class="lineno" id=line40></span>  
+<span class="lineno" id=line41></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> uint_topid: uint-&gt;Process::pid_t = <span class="fstring">"((pid_t)$1)"</span>;
+<span class="lineno" id=line42></span>  
+<span class="lineno" id=line43></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> min_whitespace(s:<span class="library" title="binding of C++ string type">string</span>) = {
+<span class="lineno" id=line44></span>      <span class="big_keyword" title="Define a mutable variable">var</span> fw = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line45></span>      <span class="big_keyword" title="Define a mutable variable">var</span> m = <span class="fstring">""</span>;
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0ui <span class="small_keyword" title="upwards counting for loop">upto</span> (<span class="library" title="number of elements in data structure">len</span> s) - 1ui <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line47></span>        <span class="big_keyword" title="Define an immutable value">val</span> c = s.[<span class="library" title="binding of C int type">int</span>(i)];
+<span class="lineno" id=line48></span>        <span class="small_keyword" title="conditional">if</span>  (c == <span class="library" title="binding of C char type">char</span> <span class="fstring">' '</span> <span class="small_keyword" title="logical conjunction">and</span> <span class="small_keyword" title="logical negation">not</span> fw) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line49></span>          fw = <span class="library" title="truth value">true</span>; m = m + c;
+<span class="lineno" id=line50></span>        <span class="small_keyword" title="conditional">elif</span> <span class="small_keyword" title="logical negation">not</span> c == <span class="library" title="binding of C char type">char</span> <span class="fstring">' '</span> <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line51></span>          fw = <span class="library" title="false value">false</span>; m = m + c;
+<span class="lineno" id=line52></span>        <span class="small_keyword" title="end of body">done</span>  
+<span class="lineno" id=line53></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line54></span>      <span class="small_keyword" title="return">return</span> m;
+<span class="lineno" id=line55></span>    }
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>  publish <span class="fstring">"""
+<span class="lineno" id=line58></span>    Returns summation of blocks for each path specified for a given pid. 
+<span class="lineno" id=line59></span>    Path is one of [heap] | [vdso] | [stack] | path dynamic lib (e.g /lib/libbz2.so.1.0.6)
+<span class="lineno" id=line60></span>  """</span>
+<span class="lineno" id=line61></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> smaps_total(p:Process::pid_t,path:<span class="library" title="binding of C++ string type">string</span>):smaps_metric ={
+<span class="lineno" id=line62></span>    <span class="big_keyword" title="Define a mutable variable">var</span> y = pid_touint p;
+<span class="lineno" id=line63></span>    <span class="big_keyword" title="Define an immutable value">val</span> file = fopen_input (<span class="fstring">"/proc/"</span>+<span class="library" title="Convert a value to a string">str</span>(pid_touint p)+<span class="fstring">"/smaps"</span>);
+<span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a mutable variable">var</span> at_map = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line65></span>    <span class="big_keyword" title="Define a mutable variable">var</span> end_of_map = <span class="library" title="false value">false</span>;
+<span class="lineno" id=line66></span>    <span class="big_keyword" title="Define a mutable variable">var</span> nums = smaps_metric(0ui,0ui,0ui,0ui,0ui,0ui,0ui,0ui,0ui,0ui,0ui,0ui,0ui,0ui);
+<span class="lineno" id=line67></span>    <span class="big_keyword" title="Define a mutable variable">var</span> <span class="library" title="binding of C size_t type">size</span> = 0ui;
+<span class="lineno" id=line68></span>    <span class="small_keyword" title="while loop">while</span> <span class="small_keyword" title="logical negation">not</span> (feof file) <span class="small_keyword" title="logical conjunction">and</span> <span class="small_keyword" title="logical negation">not</span> end_of_map <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line69></span>      <span class="big_keyword" title="Define an immutable value">val</span> ln = min_whitespace(strip(<span class="library" title="Read a string from a stream including trailing newline">readln</span> file));
+<span class="lineno" id=line70></span>      <span class="big_keyword" title="Define an immutable value">val</span> cols = split(ln,<span class="fstring">' '</span>);
+<span class="lineno" id=line71></span>      <span class="big_keyword" title="Define a mutable variable">var</span> spath = <span class="small_keyword" title="let binder">let</span> Cons (h,_) = <span class="library" title="return data structure with elements reversed">rev</span> cols <span class="small_keyword" title="membership operator, function mem">in</span> h;
+<span class="lineno" id=line72></span>      <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> at_map  <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line73></span>        at_map = <span class="small_keyword" title="match statement or expression">match</span> find (ln,path) <span class="small_keyword" title="type-class constraint">with</span> |Some _ =&gt; <span class="library" title="truth value">true</span> |_ =&gt; <span class="library" title="false value">false</span> <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line74></span>      <span class="small_keyword" title="conditional">elif</span> (at_map  <span class="small_keyword" title="logical conjunction">and</span> (<span class="library" title="number of elements in data structure">len</span> cols) &gt; 5ui) <span class="small_keyword" title="logical conjunction">and</span> <span class="small_keyword" title="logical negation">not</span> spath == path <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line75></span>        end_of_map=<span class="library" title="truth value">true</span>;
+<span class="lineno" id=line76></span>      <span class="small_keyword" title="conditional">else</span> 
+<span class="lineno" id=line77></span>        <span class="big_keyword" title="Define a mutable variable">var</span> kv = <span class="small_keyword" title="let binder">let</span> Cons (k,Cons (s,_)) = cols <span class="small_keyword" title="membership operator, function mem">in</span> (k,<span class="library" title="binding of C unsigned int type">uint</span>(s));
+<span class="lineno" id=line78></span>        <span class="small_keyword" title="match statement or expression">match</span> kv <span class="small_keyword" title="type-class constraint">with</span> 
+<span class="lineno" id=line79></span>          |(<span class="fstring">"Size:"</span>,e) =&gt; nums.<span class="library" title="binding of C size_t type">size</span> = nums.<span class="library" title="binding of C size_t type">size</span> + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line80></span>  	|(<span class="fstring">"Rss:"</span>,e) =&gt; nums.rss = nums.rss + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line81></span>  	|(<span class="fstring">"Pss:"</span>,e) =&gt; nums.pss = nums.pss + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line82></span>  	|(<span class="fstring">"Shared_Clean:"</span>,e) =&gt; nums.shared_clean = nums.shared_clean + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line83></span>  	|(<span class="fstring">"Shared_Dirty:"</span>,e) =&gt; nums.shared_dirty = nums.shared_dirty + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line84></span>  	|(<span class="fstring">"Private_Clean:"</span>,e) =&gt; nums.private_clean = nums.private_clean + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line85></span>  	|(<span class="fstring">"Private_Dirty:"</span>,e) =&gt; nums.private_dirty = nums.private_dirty + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line86></span>  	|(<span class="fstring">"Referenced:"</span>,e) =&gt; nums.referenced = nums.referenced + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line87></span>  	|(<span class="fstring">"Anonymous:"</span>,e) =&gt; nums.anonymous = nums.anonymous + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line88></span>  	|(<span class="fstring">"AnonHugePages:"</span>,e) =&gt; nums.anonhugepages = nums.anonhugepages +  <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line89></span>  	|(<span class="fstring">"Swap:"</span>,e) =&gt; nums.swap = nums.swap +  <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line90></span>  	|(<span class="fstring">"KernelPageSize:"</span>,e) =&gt; nums.kernelpagesize = nums.kernelpagesize + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line91></span>  	|(<span class="fstring">"MMUPageSize:"</span>,e) =&gt; nums.mmupagesize = nums.mmupagesize + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line92></span>  	|(<span class="fstring">"Locked:"</span>,e) =&gt; nums.locked = nums.locked + <span class="library" title="binding of C unsigned int type">uint</span>(e);
+<span class="lineno" id=line93></span>          |(k,v) =&gt; {}();
+<span class="lineno" id=line94></span>        <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+<span class="lineno" id=line95></span>      <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line96></span>    <span class="small_keyword" title="end of body">done</span>;
+<span class="lineno" id=line97></span>    fclose file;
+<span class="lineno" id=line98></span>    <span class="small_keyword" title="return">return</span> nums;
+<span class="lineno" id=line99></span>    }
+<span class="lineno" id=line100></span>  }
+<span class="lineno" id=line101></span>  
+<span class="lineno" id=line102></span>   
+<span class="lineno" id=line103></span>  
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+
