@@ -1071,7 +1071,7 @@ $PWD/src/tools/flx_build_prep.flx</pre>
 <span class="lineno" id=line37></span>        <span class="small_keyword" title="conditional">if</span> cmd.repo != cmd.target_dir/<span class="fstring">'share'</span> <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line38></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Copy repository "</span>+cmd.repo/<span class="fstring">'src -&gt; '</span> + cmd.target_dir/<span class="fstring">'share'</span>/<span class="fstring">'src'</span>;
 <span class="lineno" id=line39></span>          CopyFiles::copyfiles(cmd.repo/<span class="fstring">'src'</span>, 
-<span class="lineno" id=line40></span>           <span class="fstring">'(.*\.(h|hpp|ml|mli|c|cpp|cxx|cc|flx|flxh|fdoc|fsyn|js|html|css|svg|png|gif|jpg|files|include|ttf))'</span>, 
+<span class="lineno" id=line40></span>           <span class="fstring">'(.*\.(h|hpp|ml|mli|c|cpp|cxx|cc|flx|flxh|html|fsyn|js|html|css|svg|png|gif|jpg|files|include|ttf))'</span>, 
 <span class="lineno" id=line41></span>           cmd.target_dir/<span class="fstring">'share'</span>/<span class="fstring">'src'</span>/<span class="fstring">'${1}'</span>,<span class="library" title="truth value">true</span>,cmd.debug);
 <span class="lineno" id=line42></span>        <span class="small_keyword" title="conditional">else</span>
 <span class="lineno" id=line43></span>          <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Cannot copy repo because source = target"</span>;
@@ -1080,7 +1080,7 @@ $PWD/src/tools/flx_build_prep.flx</pre>
 <span class="lineno" id=line46></span>  
 <span class="lineno" id=line47></span>      <span class="small_keyword" title="conditional">if</span> cmd.copy_library <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line48></span>        <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Copy Felix library"</span>;
-<span class="lineno" id=line49></span>        CopyFiles::copyfiles (cmd.target_dir/<span class="fstring">'share'</span>/<span class="fstring">'src'</span>/<span class="fstring">'lib'</span>, r<span class="fstring">"(.*\.(flx|flxh|fsyn|fdoc|files))"</span>, 
+<span class="lineno" id=line49></span>        CopyFiles::copyfiles (cmd.target_dir/<span class="fstring">'share'</span>/<span class="fstring">'src'</span>/<span class="fstring">'lib'</span>, r<span class="fstring">"(.*\.(flx|flxh|fsyn|html|files))"</span>, 
 <span class="lineno" id=line50></span>          cmd.target_dir/<span class="fstring">'share'</span>/<span class="fstring">'lib/${1}'</span>,<span class="library" title="truth value">true</span>,cmd.debug);
 <span class="lineno" id=line51></span>      <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line52></span>  
@@ -1813,16 +1813,16 @@ directory.
 </p><pre class='inclusion'>
 $PWD/src/config/build_boot.fpc</pre>
 <p><pre class="prefmtbg">web_plugin:      cpp2html
-web_plugin:      fdoc2html
-web_plugin:      fdoc_edit
-web_plugin:      fdoc_button
-web_plugin:      fdoc_fileseq
-web_plugin:      fdoc_heading
-web_plugin:      fdoc_paragraph
-web_plugin:      fdoc_scanner
-web_plugin:      fdoc_slideshow
+web_plugin:      html2html
+web_plugin:      html_edit
+web_plugin:      html_button
+web_plugin:      html_fileseq
+web_plugin:      html_heading
+web_plugin:      html_paragraph
+web_plugin:      html_scanner
+web_plugin:      html_slideshow
 web_plugin:      toc_menu
-web_plugin:      fdoc_frame
+web_plugin:      html_frame
 web_plugin:      flx2html
 web_plugin:      fpc2html
 web_plugin:      ocaml2html

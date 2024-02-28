@@ -729,7 +729,7 @@ to make space in the sequence or fill a gap in it.
 </p><p>It was designed for document renumbering, especially Felix
 tutorial documents, since the Felix webserver automatically
 calculates Next and Prev links when it asked to display
-an <code>fdoc</code> file with a numerical suffix of two digits.
+an <code>html</code> file with a numerical suffix of two digits.
 However it can be used on any sequenced file set.
 </p><pre class='inclusion'>
 $PWD/src/tools/flx_renumber.flx</pre>
@@ -739,7 +739,7 @@ $PWD/src/tools/flx_renumber.flx</pre>
 <span class="lineno" id=line4></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Usage: rentut dir regexp first dst"</span>;
 <span class="lineno" id=line5></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"For tutorial try:"</span>;
 <span class="lineno" id=line6></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> r<span class="fstring">"  dir = 'src/web'"</span>;
-<span class="lineno" id=line7></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> r<span class="fstring">"  re = 'tut_(\d*)\\.fdoc'"</span>;
+<span class="lineno" id=line7></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> r<span class="fstring">"  re = 'tut_(\d*)\\.html'"</span>;
 <span class="lineno" id=line8></span>    System::exit(1);
 <span class="lineno" id=line9></span>  <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line10></span>  

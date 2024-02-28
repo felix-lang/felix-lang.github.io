@@ -684,7 +684,7 @@ $PWD/src/tools/scancython.flx</pre>
 <span class="lineno" id=line201></span>      <span class="small_keyword" title="conditional">if</span> base <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="membership operator, function mem">in</span> exclude_file <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line202></span>        <span class="big_keyword" title="Define a mutable variable">var</span> iname = Filename::join (dirname, base);
 <span class="lineno" id=line203></span>        <span class="big_keyword" title="Define a mutable variable">var</span> bbase = Filename::strip_extension base;
-<span class="lineno" id=line204></span>        <span class="big_keyword" title="Define a mutable variable">var</span> oname = <span class="fstring">"src/packages/py_"</span> +bbase+<span class="fstring">".fdoc"</span>;
+<span class="lineno" id=line204></span>        <span class="big_keyword" title="Define a mutable variable">var</span> oname = <span class="fstring">"src/packages/py_"</span> +bbase+<span class="fstring">".html"</span>;
 <span class="lineno" id=line205></span>        <span class="big_keyword" title="Define a mutable variable">var</span> inp = load iname;
 <span class="lineno" id=line206></span>        <span class="big_keyword" title="Define a mutable variable">var</span> out = <span class="fstring">""</span>;
 <span class="lineno" id=line207></span>        out += <span class="fstring">"@title Python C API "</span> + bbase + <span class="fstring">"\n"</span>;

@@ -492,13 +492,13 @@ $PWD/src/tools/flx_libcontents.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> ishtml = System::argv 1 == <span class="fstring">"--html"</span>;
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> dir =  Filename::join (<span class="fstring">"src"</span>, <span class="fstring">"lib"</span>, <span class="fstring">"std"</span>);
 <span class="lineno" id=line3></span>  
-<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"plugins/fdoc-interface"</span>;
-<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  xlat_fdoc = Dynlink::load-plugin-func2 [fdoc_t, <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>] (
-<span class="lineno" id=line6></span>      dll-name=<span class="fstring">"fdoc2html"</span>, setup-str=<span class="fstring">""</span>, entry-point=<span class="fstring">"fdoc2html"</span>
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"plugins/html-interface"</span>;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  xlat_html = Dynlink::load-plugin-func2 [html_t, <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>] (
+<span class="lineno" id=line6></span>      dll-name=<span class="fstring">"html2html"</span>, setup-str=<span class="fstring">""</span>, entry-point=<span class="fstring">"html2html"</span>
 <span class="lineno" id=line7></span>    );
 <span class="lineno" id=line8></span>  
 <span class="lineno" id=line9></span>  
-<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fregex = <span class="fstring">".*\\.(flx|fdoc)"</span>;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fregex = <span class="fstring">".*\\.(flx|html)"</span>;
 <span class="lineno" id=line11></span>  <span class="big_keyword" title="Open a module or class">open</span> Regdef;
 <span class="lineno" id=line12></span>  <span class="big_keyword" title="define named regular expression">regdef</span> anychar = perl (<span class="fstring">"."</span>);
 <span class="lineno" id=line13></span>  
@@ -586,7 +586,7 @@ $PWD/src/tools/flx_libcontents.flx</pre>
 <span class="lineno" id=line95></span>              <span class="comment">//for cline in rev comments do println$ "           "+cline; done</span>
 <span class="lineno" id=line96></span>              <span class="big_keyword" title="Define a mutable variable">var</span> txt = <span class="fstring">""</span>;
 <span class="lineno" id=line97></span>              <span class="small_keyword" title="for loop">for</span> cline <span class="small_keyword" title="membership operator, function mem">in</span> <span class="library" title="return data structure with elements reversed">rev</span> comments <span class="small_keyword" title="imperative code begins">do</span> txt += cline+<span class="fstring">"\n"</span>; <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line98></span>              <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_fdoc (txt, <span class="fstring">"dummy"</span>);
+<span class="lineno" id=line98></span>              <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_html (txt, <span class="fstring">"dummy"</span>);
 <span class="lineno" id=line99></span>              <span class="big_keyword" title="Define a mutable variable">var</span> html = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_raw);
 <span class="lineno" id=line100></span>              <span class="small_keyword" title="conditional">if</span> txt != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line101></span>                <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"&lt;div style='font-family:sans-serif; font-size:12pt; "</span>+
@@ -598,7 +598,7 @@ $PWD/src/tools/flx_libcontents.flx</pre>
 <span class="lineno" id=line107></span>              <span class="comment">//for cline in rev comments do println$ "           "+ cline; done</span>
 <span class="lineno" id=line108></span>              txt = <span class="fstring">""</span>;
 <span class="lineno" id=line109></span>              <span class="small_keyword" title="for loop">for</span> cline <span class="small_keyword" title="membership operator, function mem">in</span> <span class="library" title="return data structure with elements reversed">rev</span> comments <span class="small_keyword" title="imperative code begins">do</span> txt += cline+<span class="fstring">"\n"</span>; <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line110></span>              <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_fdoc (txt, <span class="fstring">"dummy"</span>);
+<span class="lineno" id=line110></span>              <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_html (txt, <span class="fstring">"dummy"</span>);
 <span class="lineno" id=line111></span>              html = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_raw);
 <span class="lineno" id=line112></span>              <span class="small_keyword" title="conditional">if</span> txt != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line113></span>                <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"&lt;div style='font-family:sans-serif; font-size:10pt; "</span> + 
@@ -634,7 +634,7 @@ $PWD/src/tools/flx_libcontents.flx</pre>
 $PWD/src/tools/flx_libindex.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> ishtml = System::argv 1 == <span class="fstring">"--html"</span>;
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> dir =  Filename::join (<span class="fstring">"src"</span>, <span class="fstring">"lib"</span>, <span class="fstring">"std"</span>);
-<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fregex = <span class="fstring">".*\\.(flx|fdoc)"</span>;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fregex = <span class="fstring">".*\\.(flx|html)"</span>;
 <span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a mutable variable">var</span> lregex = <span class="fstring">"^ *(virtual|noinline)* *(proc|fun|class|ctor|gen) *(([A-Z]|[a-z])([A-Z]|[a-z]|[0-9]|-|_)*[?]?).*"</span>;
 <span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a mutable variable">var</span> lgrep = RE2 lregex;
 <span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a mutable variable">var</span> n = NumberOfCapturingGroups(lgrep)+1;
@@ -725,17 +725,17 @@ $PWD/src/tools/flx_mktutindex.flx</pre>
 <span class="lineno" id=line3></span>  
 <span class="lineno" id=line4></span>  <span class="small_keyword" title="conditional">if</span> dirname == <span class="fstring">"--help"</span> <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line5></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Usage flx_mktutindex directory homepage"</span>;
-<span class="lineno" id=line6></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"  Makes src/web/tutname_index.fdoc for files in src/web/tutname_\\d*\\.fdoc"</span>;
+<span class="lineno" id=line6></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"  Makes src/web/tutname_index.html for files in src/web/tutname_\\d*\\.html"</span>;
 <span class="lineno" id=line7></span>    System::exit 0;
 <span class="lineno" id=line8></span>  <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line9></span>  
 <span class="lineno" id=line10></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> make_index (prefix:<span class="library" title="binding of C++ string type">string</span>)
 <span class="lineno" id=line11></span>  {
-<span class="lineno" id=line12></span>    re := RE2(prefix+<span class="fstring">"_\\d*\\.fdoc"</span>);
+<span class="lineno" id=line12></span>    re := RE2(prefix+<span class="fstring">"_\\d*\\.html"</span>);
 <span class="lineno" id=line13></span>    <span class="big_keyword" title="Define a mutable variable">var</span> docs = FileSystem::regfilesin(dirname, re);
 <span class="lineno" id=line14></span>    docs = sort docs;
 <span class="lineno" id=line15></span>    <span class="library" title="call procedure on each element of data structure">iter</span> <span class="library" title="Print a string to standard output with newline appended">println</span> of (<span class="library" title="binding of C++ string type">string</span>) docs;
-<span class="lineno" id=line16></span>    f := fopen_output(Filename::join (dirname,prefix+<span class="fstring">"_index.fdoc"</span>));
+<span class="lineno" id=line16></span>    f := fopen_output(Filename::join (dirname,prefix+<span class="fstring">"_index.html"</span>));
 <span class="lineno" id=line17></span>    <span class="small_keyword" title="conditional">if</span> homepage != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line18></span>      writeln$ f,
 <span class="lineno" id=line19></span>       <span class="fstring">"&lt;p&gt;&lt;a href='"</span>+homepage+<span class="fstring">"'&gt;Up&lt;/a&gt;&lt;/p&gt;"</span>
@@ -771,7 +771,7 @@ $PWD/src/tools/flx_mktutindex.flx</pre>
 <span class="lineno" id=line49></span>    }
 <span class="lineno" id=line50></span>  }
 <span class="lineno" id=line51></span>  
-<span class="lineno" id=line52></span>  <span class="big_keyword" title="Define a mutable variable">var</span> re = RE2(<span class="fstring">".*_01.fdoc"</span>);
+<span class="lineno" id=line52></span>  <span class="big_keyword" title="Define a mutable variable">var</span> re = RE2(<span class="fstring">".*_01.html"</span>);
 <span class="lineno" id=line53></span>  <span class="big_keyword" title="Define a mutable variable">var</span> samples = FileSystem::regfilesin(dirname, re);
 <span class="lineno" id=line54></span>  <span class="small_keyword" title="for loop">for</span> name <span class="small_keyword" title="membership operator, function mem">in</span> samples <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line55></span>    <span class="big_keyword" title="Define a mutable variable">var</span> prefix = name.[0 <span class="small_keyword" title="substring range separator">to</span> -8];
@@ -779,7 +779,7 @@ $PWD/src/tools/flx_mktutindex.flx</pre>
 <span class="lineno" id=line57></span>  <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line58></span>  
 </pre></p><pre class='inclusion'>
-$PWD/src/tools/flx_fdoc2sphinx.flx</pre>
+$PWD/src/tools/flx_html2sphinx.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Open a module or class">open</span> Regdef;
 <span class="lineno" id=line2></span>  
 <span class="lineno" id=line3></span>  <span class="comment">// command translation</span>
@@ -882,7 +882,7 @@ $PWD/src/tools/flx_fdoc2sphinx.flx</pre>
 <span class="lineno" id=line100></span>    <span class="big_keyword" title="Define a mutable variable">var</span> lexer = 
 <span class="lineno" id=line101></span>      <span class="small_keyword" title="match statement or expression">match</span> s.Filename::get_extension <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line102></span>      | (<span class="fstring">".cpp"</span> | <span class="fstring">".cxx"</span> | <span class="fstring">".hpp"</span>)  =&gt;  <span class="fstring">"cpp"</span>
-<span class="lineno" id=line103></span>      | (<span class="fstring">".flx"</span> | <span class="fstring">".fdoc"</span> | <span class="fstring">".fsyn"</span>)  =&gt;  <span class="fstring">"felix"</span>
+<span class="lineno" id=line103></span>      | (<span class="fstring">".flx"</span> | <span class="fstring">".html"</span> | <span class="fstring">".fsyn"</span>)  =&gt;  <span class="fstring">"felix"</span>
 <span class="lineno" id=line104></span>      | (<span class="fstring">".fpc"</span>) =&gt; <span class="fstring">"fpc"</span>
 <span class="lineno" id=line105></span>      | (<span class="fstring">".c"</span> | <span class="fstring">".h"</span>) =&gt; <span class="fstring">"c"</span>
 <span class="lineno" id=line106></span>      | (<span class="fstring">".py"</span>) =&gt; <span class="fstring">"python"</span>
@@ -1050,7 +1050,7 @@ $PWD/src/tools/flx_fdoc2sphinx.flx</pre>
 <span class="lineno" id=line268></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/felix/flx_cp"</span>;
 <span class="lineno" id=line269></span>  
 <span class="lineno" id=line270></span>  <span class="big_keyword" title="Define a mutable variable">var</span> dir = <span class="fstring">"src/packages"</span>;
-<span class="lineno" id=line271></span>  <span class="big_keyword" title="Define a mutable variable">var</span> regex = <span class="fstring">"(.*).fdoc"</span>;
+<span class="lineno" id=line271></span>  <span class="big_keyword" title="Define a mutable variable">var</span> regex = <span class="fstring">"(.*).html"</span>;
 <span class="lineno" id=line272></span>  <span class="big_keyword" title="Define a mutable variable">var</span> target = <span class="fstring">"doc/packages/${1}.rst"</span>;
 <span class="lineno" id=line273></span>  <span class="big_keyword" title="Define a mutable variable">var</span> live = <span class="library" title="truth value">true</span>;
 <span class="lineno" id=line274></span>  <span class="big_keyword" title="Define a mutable variable">var</span> verbose = <span class="library" title="truth value">true</span>;

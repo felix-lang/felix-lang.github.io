@@ -377,7 +377,7 @@ function mouseout(id)
 <pre class='inclusion'>
 $PWD/src/tools/flx_tangle.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">flx_tangle --inoutdir --indir=indir --outdir=outdir pattern ...</span>
-<span class="lineno" id=line2></span>  <span class="doccomment">processes the file indir/basename.fdoc and generates</span>
+<span class="lineno" id=line2></span>  <span class="doccomment">processes the file indir/basename.html and generates</span>
 <span class="lineno" id=line3></span>  <span class="doccomment">the files:</span>
 <span class="lineno" id=line4></span>  <span class="doccomment">//$   outdir/basename.flx by collating everything</span>
 <span class="lineno" id=line5></span>  <span class="doccomment">     between @felix and subsequent @ command.</span>
@@ -389,7 +389,7 @@ $PWD/src/tools/flx_tangle.flx</pre>
 <span class="lineno" id=line11></span>  <span class="doccomment">remains the default current directory.</span>
 <span class="lineno" id=line12></span>  <span class="doccomment">//$ If inoutdir is specified, indir and outdir are set</span>
 <span class="lineno" id=line13></span>  <span class="doccomment">to it, and indir and outdir should not be specified.</span>
-<span class="lineno" id=line14></span>  <span class="doccomment">//$ If no patterns are specified '.*' is used, i.e. all fdoc files</span>
+<span class="lineno" id=line14></span>  <span class="doccomment">//$ If no patterns are specified '.*' is used, i.e. all html files</span>
 <span class="lineno" id=line15></span>  <span class="doccomment">in the input directory (recursively).</span>
 <span class="lineno" id=line16></span>  <span class="doccomment"></span>
 <span class="lineno" id=line17></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"std/control/schannels"</span>;
@@ -451,7 +451,7 @@ $PWD/src/tools/flx_tangle.flx</pre>
 <span class="lineno" id=line73></span>  
 <span class="lineno" id=line74></span>  <span class="comment">// --- FILE SCAN --------------------------------</span>
 <span class="lineno" id=line75></span>  <span class="small_keyword" title="for loop">for</span> base <span class="small_keyword" title="membership operator, function mem">in</span> patterns <span class="small_keyword" title="imperative code begins">do</span>
-<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a mutable variable">var</span> files = FileSystem::regfilesin(indir, base+<span class="fstring">"\\.fdoc"</span>);
+<span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a mutable variable">var</span> files = FileSystem::regfilesin(indir, base+<span class="fstring">"\\.html"</span>);
 <span class="lineno" id=line77></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Base = "</span> + base + <span class="fstring">" : "</span> files.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">" files"</span>;
 <span class="lineno" id=line78></span>    <span class="small_keyword" title="for loop">for</span> file <span class="small_keyword" title="membership operator, function mem">in</span> files <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line79></span>      <span class="big_keyword" title="Define a mutable variable">var</span> infile = Filename::join (indir, file);

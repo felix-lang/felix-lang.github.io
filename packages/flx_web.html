@@ -325,7 +325,7 @@ var allbuttons = [
 "Python",
 "Felix <code>flx</code> format.",
 "C and C++ code.",
-"Top level Felix <code>fdoc</code> format.",
+"Top level Felix <code>html</code> format.",
 "Decorator Interfaces.",
 "Decorator Implementations."
 ];
@@ -398,7 +398,7 @@ function mouseout(id)
       <div class=m2><a href="#Python_h">Python</a></div>
       <div class=m2><a href="#Felix_<code>flx</code>_format._h">Felix <code>flx</code> format.</a></div>
       <div class=m2><a href="#C_and_C++_code._h">C and C++ code.</a></div>
-      <div class=m2><a href="#Top_level_Felix_<code>fdoc</code>_format._h">Top level Felix <code>fdoc</code> format.</a></div>
+      <div class=m2><a href="#Top_level_Felix_<code>html</code>_format._h">Top level Felix <code>html</code> format.</a></div>
       </div>
       <div class=m1 onclick="mshow('menu3','#Decorator Interfaces._h')"> <a href="#Decorator_Interfaces._h">Decorator Interfaces.</a></div>
       <div class=sm id=menu3>
@@ -484,7 +484,7 @@ $PWD/src/tools/flx_pretty.flx</pre>
 <span class="lineno" id=line62></span>    dll-name=<span class="fstring">"flx2html"</span>, setup-str=<span class="fstring">""</span>, entry-point=<span class="fstring">"flx2html"</span>
 <span class="lineno" id=line63></span>  );
 <span class="lineno" id=line64></span>  
-<span class="lineno" id=line65></span>  <span class="big_keyword" title="define an object interface">interface</span> fdoc_t {
+<span class="lineno" id=line65></span>  <span class="big_keyword" title="define an object interface">interface</span> html_t {
 <span class="lineno" id=line66></span>    whatami : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line67></span>    html_raw : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line68></span>    html_page : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
@@ -493,8 +493,8 @@ $PWD/src/tools/flx_pretty.flx</pre>
 <span class="lineno" id=line71></span>  }
 <span class="lineno" id=line72></span>  
 <span class="lineno" id=line73></span>  
-<span class="lineno" id=line74></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  xlat_fdoc = Dynlink::load-plugin-func2 [fdoc_t, <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>] (
-<span class="lineno" id=line75></span>      dll-name=<span class="fstring">"fdoc2html"</span>, setup-str=<span class="fstring">""</span>, entry-point=<span class="fstring">"fdoc2html"</span>
+<span class="lineno" id=line74></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  xlat_html = Dynlink::load-plugin-func2 [html_t, <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>] (
+<span class="lineno" id=line75></span>      dll-name=<span class="fstring">"html2html"</span>, setup-str=<span class="fstring">""</span>, entry-point=<span class="fstring">"html2html"</span>
 <span class="lineno" id=line76></span>    );
 <span class="lineno" id=line77></span>  
 <span class="lineno" id=line78></span>  
@@ -526,8 +526,8 @@ $PWD/src/tools/flx_pretty.flx</pre>
 <span class="lineno" id=line104></span>      def <span class="big_keyword" title="Define a mutable variable">var</span> needs_mathjax', <span class="big_keyword" title="Define a mutable variable">var</span> txt = xlat_felix (b,<span class="fstring">""</span>);
 <span class="lineno" id=line105></span>      save (outfile, <span class="fstring">"&lt;pre class='flxbg'&gt;\n"</span>+txt+<span class="fstring">"\n&lt;/pre&gt;"</span>)
 <span class="lineno" id=line106></span>  ;
-<span class="lineno" id=line107></span>    | <span class="fstring">".fdoc"</span> =&gt;
-<span class="lineno" id=line108></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_fdoc (b, filename);
+<span class="lineno" id=line107></span>    | <span class="fstring">".html"</span> =&gt;
+<span class="lineno" id=line108></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_html (b, filename);
 <span class="lineno" id=line109></span>      <span class="big_keyword" title="Define a mutable variable">var</span> needs_mathjax = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.mathjax_required);
 <span class="lineno" id=line110></span>      <span class="big_keyword" title="Define a mutable variable">var</span> html = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_page);
 <span class="lineno" id=line111></span>      <span class="big_keyword" title="Define a mutable variable">var</span> title = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_title);
@@ -625,7 +625,7 @@ $PWD/src/tools/dflx_web.flx</pre>
 <span class="lineno" id=line75></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"web/mime_type"</span>;
 <span class="lineno" id=line76></span>  
 <span class="lineno" id=line77></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"plugins/plugin_common"</span>;
-<span class="lineno" id=line78></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"plugins/fdoc-interface"</span>;
+<span class="lineno" id=line78></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"plugins/html-interface"</span>;
 <span class="lineno" id=line79></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"plugins/edit-interface"</span>;
 <span class="lineno" id=line80></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"plugins/toc_menu-interface"</span>;
 <span class="lineno" id=line81></span>  
@@ -816,8 +816,8 @@ $PWD/src/tools/dflx_web.flx</pre>
 <span class="lineno" id=line266></span>      dll-name=<span class="fstring">"flx2html"</span>, setup-str=config, entry-point=<span class="fstring">"flx2html"</span>
 <span class="lineno" id=line267></span>    );
 <span class="lineno" id=line268></span>  
-<span class="lineno" id=line269></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  xlat_fdoc = Dynlink::load-plugin-func2 [fdoc_t, <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>] (
-<span class="lineno" id=line270></span>      dll-name=<span class="fstring">"fdoc2html"</span>, setup-str=config, entry-point=<span class="fstring">"fdoc2html"</span>
+<span class="lineno" id=line269></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  xlat_html = Dynlink::load-plugin-func2 [html_t, <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>] (
+<span class="lineno" id=line270></span>      dll-name=<span class="fstring">"html2html"</span>, setup-str=config, entry-point=<span class="fstring">"html2html"</span>
 <span class="lineno" id=line271></span>    );
 <span class="lineno" id=line272></span>  
 <span class="lineno" id=line273></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  xlat_fpc = Dynlink::load-plugin-func2 [bool * <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>, <span class="library" title="binding of C++ string type">string</span>] (
@@ -837,11 +837,11 @@ $PWD/src/tools/dflx_web.flx</pre>
 <span class="lineno" id=line287></span>    );
 <span class="lineno" id=line288></span>  
 <span class="lineno" id=line289></span>  <span class="big_keyword" title="Define a mutable variable">var</span> editor_maker = Dynlink::load-plugin-func1 [edit-interface_t, 1] (
-<span class="lineno" id=line290></span>    dll-name=<span class="fstring">"fdoc_edit"</span>, setup-str=config, entry-point=<span class="fstring">"fdoc_edit"</span>
+<span class="lineno" id=line290></span>    dll-name=<span class="fstring">"html_edit"</span>, setup-str=config, entry-point=<span class="fstring">"html_edit"</span>
 <span class="lineno" id=line291></span>    );
 <span class="lineno" id=line292></span>  
 <span class="lineno" id=line293></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  toc_menu = Dynlink::load-plugin-func1 [toc_menu_interface, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>]] (
-<span class="lineno" id=line294></span>      dll-name=<span class="fstring">"toc_menu"</span>, setup-str=<span class="fstring">"loaded-from-fdoc_frame"</span>, entry-point=<span class="fstring">"toc_menu"</span>
+<span class="lineno" id=line294></span>      dll-name=<span class="fstring">"toc_menu"</span>, setup-str=<span class="fstring">"loaded-from-html_frame"</span>, entry-point=<span class="fstring">"toc_menu"</span>
 <span class="lineno" id=line295></span>    );
 <span class="lineno" id=line296></span>  
 <span class="lineno" id=line297></span>  
@@ -967,7 +967,7 @@ $PWD/src/tools/dflx_web.flx</pre>
 <span class="lineno" id=line417></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> find_defs (lines:<span class="library" title="binding of C++ string type">string</span>) : <span class="library" title="array with unbounded dynamically variable limit">darray</span>[<span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span>] =
 <span class="lineno" id=line418></span>  {
 <span class="lineno" id=line419></span>  
-<span class="lineno" id=line420></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fregex = <span class="fstring">".*\\.(flx|fdoc)"</span>;
+<span class="lineno" id=line420></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fregex = <span class="fstring">".*\\.(flx|html)"</span>;
 <span class="lineno" id=line421></span>    <span class="big_keyword" title="Open a module or class">open</span> Regdef;
 <span class="lineno" id=line422></span>    <span class="big_keyword" title="define named regular expression">regdef</span> anychar = perl (<span class="fstring">"."</span>);
 <span class="lineno" id=line423></span>  
@@ -1380,13 +1380,13 @@ $PWD/src/tools/dflx_web.flx</pre>
 <span class="lineno" id=line830></span>  }
 <span class="lineno" id=line831></span>  
 <span class="lineno" id=line832></span>  
-<span class="lineno" id=line833></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> serve_fdoc (k:socket_t, fname:<span class="library" title="binding of C++ string type">string</span>, get:bool) {
+<span class="lineno" id=line833></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> serve_html (k:socket_t, fname:<span class="library" title="binding of C++ string type">string</span>, get:bool) {
 <span class="lineno" id=line834></span>    <span class="big_keyword" title="Define a mutable variable">var</span> eof_flag = <span class="library" title="false value">false</span>;
 <span class="lineno" id=line835></span>    <span class="small_keyword" title="match statement or expression">match</span> get_file(fname,INSTALL_ROOT,FDOC_PATH) <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line836></span>    | Some path=&gt; 
 <span class="lineno" id=line837></span>      <span class="big_keyword" title="Define a mutable variable">var</span> txt = load(path);
 <span class="lineno" id=line838></span>      <span class="comment">//println$ "Contents=" + flx;</span>
-<span class="lineno" id=line839></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_fdoc (txt, fname);
+<span class="lineno" id=line839></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_html (txt, fname);
 <span class="lineno" id=line840></span>      <span class="big_keyword" title="Define a mutable variable">var</span> needs_mathjax = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.mathjax_required);
 <span class="lineno" id=line841></span>      <span class="big_keyword" title="Define a mutable variable">var</span> html = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_page);
 <span class="lineno" id=line842></span>      <span class="big_keyword" title="Define a mutable variable">var</span> title = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_title);
@@ -1404,14 +1404,14 @@ $PWD/src/tools/dflx_web.flx</pre>
 <span class="lineno" id=line854></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
 <span class="lineno" id=line855></span>  }
 <span class="lineno" id=line856></span>  
-<span class="lineno" id=line857></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> serve_xfdoc (k:socket_t, fname:<span class="library" title="binding of C++ string type">string</span>, get:bool) {
+<span class="lineno" id=line857></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> serve_xhtml (k:socket_t, fname:<span class="library" title="binding of C++ string type">string</span>, get:bool) {
 <span class="lineno" id=line858></span>    <span class="big_keyword" title="Define a mutable variable">var</span> eof_flag = <span class="library" title="false value">false</span>;
 <span class="lineno" id=line859></span>    <span class="small_keyword" title="match statement or expression">match</span> get_file(fname,INSTALL_ROOT,FDOC_PATH) <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line860></span>    | Some path=&gt; 
 <span class="lineno" id=line861></span>      <span class="big_keyword" title="Define a mutable variable">var</span> txt = load(path);
-<span class="lineno" id=line862></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Serve fdoc "</span>+fname+<span class="fstring">" as xhtml"</span>;
+<span class="lineno" id=line862></span>      <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Serve html "</span>+fname+<span class="fstring">" as xhtml"</span>;
 <span class="lineno" id=line863></span>      <span class="comment">//println$ "Contents=" + flx;</span>
-<span class="lineno" id=line864></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_fdoc (txt, fname);
+<span class="lineno" id=line864></span>      <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = xlat_html (txt, fname);
 <span class="lineno" id=line865></span>      <span class="big_keyword" title="Define a mutable variable">var</span> needs_mathjax = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.mathjax_required);
 <span class="lineno" id=line866></span>      <span class="big_keyword" title="Define a mutable variable">var</span> html = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_page);
 <span class="lineno" id=line867></span>      <span class="big_keyword" title="Define a mutable variable">var</span> title = #(<span class="small_keyword" title="value of function return used in post condition">result</span>.html_title);
@@ -1634,8 +1634,8 @@ $PWD/src/tools/dflx_web.flx</pre>
 <span class="lineno" id=line1084></span>      serve_cpp(s, fname, get);
 <span class="lineno" id=line1085></span>    <span class="small_keyword" title="conditional">elif</span> suffix == <span class="fstring">"fpc"</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line1086></span>      serve_fpc(s, fname, get);
-<span class="lineno" id=line1087></span>    <span class="small_keyword" title="conditional">elif</span> suffix == <span class="fstring">"fdoc"</span> <span class="small_keyword" title="imperative code begins">do</span> 
-<span class="lineno" id=line1088></span>      serve_xfdoc(s, fname, get);
+<span class="lineno" id=line1087></span>    <span class="small_keyword" title="conditional">elif</span> suffix == <span class="fstring">"html"</span> <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line1088></span>      serve_xhtml(s, fname, get);
 <span class="lineno" id=line1089></span>    <span class="small_keyword" title="conditional">elif</span> suffix <span class="tex_symbol" title="\in">\(\in\)</span> (<span class="fstring">"html"</span>,<span class="fstring">"htm"</span>) <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line1090></span>      fname = <span class="small_keyword" title="conditional">if</span> fname.[0] == <span class="library" title="binding of C char type">char</span> <span class="fstring">"/"</span> <span class="small_keyword" title="conditional">then</span> fname <span class="small_keyword" title="conditional">else</span> INSTALL_ROOT+<span class="fstring">"/"</span>+fname <span class="small_keyword" title="conditional">endif</span>;
 <span class="lineno" id=line1091></span>      serve_html(s,fname, get);
@@ -1804,20 +1804,20 @@ $PWD/src/tools/flx_web.flx</pre>
 <span class="lineno" id=line15></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> addsymbols ()
 <span class="lineno" id=line16></span>    {
 <span class="lineno" id=line17></span>      static-link-plugin 
-<span class="lineno" id=line18></span>        fdoc2html,
+<span class="lineno" id=line18></span>        html2html,
 <span class="lineno" id=line19></span>        flx2html,
 <span class="lineno" id=line20></span>        fpc2html,
 <span class="lineno" id=line21></span>        py2html,
 <span class="lineno" id=line22></span>        ocaml2html,
 <span class="lineno" id=line23></span>        cpp2html,
-<span class="lineno" id=line24></span>        fdoc_scanner,
-<span class="lineno" id=line25></span>        fdoc_slideshow,
-<span class="lineno" id=line26></span>        fdoc_heading,
-<span class="lineno" id=line27></span>        fdoc_fileseq,
-<span class="lineno" id=line28></span>        fdoc_paragraph,
-<span class="lineno" id=line29></span>        fdoc_button,
-<span class="lineno" id=line30></span>        fdoc_frame,
-<span class="lineno" id=line31></span>        fdoc_edit,
+<span class="lineno" id=line24></span>        html_scanner,
+<span class="lineno" id=line25></span>        html_slideshow,
+<span class="lineno" id=line26></span>        html_heading,
+<span class="lineno" id=line27></span>        html_fileseq,
+<span class="lineno" id=line28></span>        html_paragraph,
+<span class="lineno" id=line29></span>        html_button,
+<span class="lineno" id=line30></span>        html_frame,
+<span class="lineno" id=line31></span>        html_edit,
 <span class="lineno" id=line32></span>        toc_menu
 <span class="lineno" id=line33></span>      ;
 <span class="lineno" id=line34></span>      <span class="comment">// webserver</span>
@@ -2595,7 +2595,7 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line275></span>      | dq3 <span class="comment">// processing double quote string</span>
 <span class="lineno" id=line276></span>      | ccomment of <span class="library" title="binding of C int type">int</span> <span class="comment">// a C style comment</span>
 <span class="lineno" id=line277></span>      | cppcomment <span class="comment">// a C++ style comment</span>
-<span class="lineno" id=line278></span>      | cppfdoc <span class="comment">// a documentation comment  //$</span>
+<span class="lineno" id=line278></span>      | cpphtml <span class="comment">// a documentation comment  //$</span>
 <span class="lineno" id=line279></span>      | mathmode <span class="comment">// TeX math mode</span>
 <span class="lineno" id=line280></span>      | mathid <span class="comment">// TeX math mode, Felix id</span>
 <span class="lineno" id=line281></span>      | mathtexid <span class="comment">// TeX math mode, TeX id</span>
@@ -2611,7 +2611,7 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line291></span>    | #dq3 =&gt; <span class="fstring">"dq3"</span>
 <span class="lineno" id=line292></span>    | ccomment n =&gt; <span class="fstring">"ccomment_"</span>+ <span class="library" title="Convert a value to a string">str</span> n
 <span class="lineno" id=line293></span>    | #cppcomment =&gt; <span class="fstring">"cppcomment"</span>
-<span class="lineno" id=line294></span>    | #cppfdoc =&gt; <span class="fstring">"doccomment"</span>
+<span class="lineno" id=line294></span>    | #cpphtml =&gt; <span class="fstring">"doccomment"</span>
 <span class="lineno" id=line295></span>    | #mathmode =&gt; <span class="fstring">"mathmode"</span>
 <span class="lineno" id=line296></span>    | #mathid =&gt; <span class="fstring">"mathid"</span>
 <span class="lineno" id=line297></span>    | #mathtexid =&gt; <span class="fstring">"mathid"</span>
@@ -2633,14 +2633,14 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line313></span>    ;
 <span class="lineno" id=line314></span>  
 <span class="lineno" id=line315></span>    <span class="big_keyword" title="Define a mutable variable">var</span> b = <span class="fstring">""</span>;
-<span class="lineno" id=line316></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fdocb = <span class="fstring">""</span>;
+<span class="lineno" id=line316></span>    <span class="big_keyword" title="Define a mutable variable">var</span> htmlb = <span class="fstring">""</span>;
 <span class="lineno" id=line317></span>    <span class="big_keyword" title="Define a mutable variable">var</span> last_id = <span class="fstring">""</span>;
 <span class="lineno" id=line318></span>    <span class="big_keyword" title="Define a mutable variable">var</span> last_texop = <span class="fstring">""</span>;
 <span class="lineno" id=line319></span>    <span class="big_keyword" title="Define a mutable variable">var</span> last_op = <span class="fstring">""</span>;
 <span class="lineno" id=line320></span>    <span class="big_keyword" title="Define a mutable variable">var</span> last_key = <span class="fstring">""</span>;
 <span class="lineno" id=line321></span>  
 <span class="lineno" id=line322></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> cp() { b += ch; }
-<span class="lineno" id=line323></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> cpfdoc() { fdocb += ch; }
+<span class="lineno" id=line323></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> cphtml() { htmlb += ch; }
 <span class="lineno" id=line324></span>  
 <span class="lineno" id=line325></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> ws() {
 <span class="lineno" id=line326></span>      <span class="small_keyword" title="conditional">if</span> last_id == <span class="fstring">"include"</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="comment">// hackery</span>
@@ -2657,14 +2657,14 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line337></span>        <span class="small_keyword" title="conditional">else</span>
 <span class="lineno" id=line338></span>          <span class="big_keyword" title="Define a mutable variable">var</span> try_flx = n+ <span class="fstring">".flx"</span>; 
 <span class="lineno" id=line339></span>          <span class="big_keyword" title="Define a mutable variable">var</span> resolve_flx = get_file (try_flx, INSTALL_ROOT,FLX_PATH);
-<span class="lineno" id=line340></span>          <span class="big_keyword" title="Define a mutable variable">var</span> try_fdoc = n+ <span class="fstring">".fdoc"</span>; 
-<span class="lineno" id=line341></span>          <span class="big_keyword" title="Define a mutable variable">var</span> resolve_fdoc= get_file (try_fdoc, INSTALL_ROOT,FLX_PATH);
+<span class="lineno" id=line340></span>          <span class="big_keyword" title="Define a mutable variable">var</span> try_html = n+ <span class="fstring">".html"</span>; 
+<span class="lineno" id=line341></span>          <span class="big_keyword" title="Define a mutable variable">var</span> resolve_html= get_file (try_html, INSTALL_ROOT,FLX_PATH);
 <span class="lineno" id=line342></span>          <span class="big_keyword" title="Define a mutable variable">var</span> flx_time,flx_file = <span class="small_keyword" title="match statement or expression">match</span> resolve_flx <span class="small_keyword" title="type-class constraint">with</span> | Some f =&gt; FileStat::filetime f,f | #None =&gt; 0.0,<span class="fstring">""</span>;
-<span class="lineno" id=line343></span>          <span class="big_keyword" title="Define a mutable variable">var</span> fdoc_time,fdoc_file = <span class="small_keyword" title="match statement or expression">match</span> resolve_fdoc <span class="small_keyword" title="type-class constraint">with</span> | Some f =&gt; FileStat::filetime f,f | #None =&gt; 0.0,<span class="fstring">""</span>;
-<span class="lineno" id=line344></span>          <span class="small_keyword" title="conditional">if</span> flx_time &gt; fdoc_time <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line343></span>          <span class="big_keyword" title="Define a mutable variable">var</span> html_time,html_file = <span class="small_keyword" title="match statement or expression">match</span> resolve_html <span class="small_keyword" title="type-class constraint">with</span> | Some f =&gt; FileStat::filetime f,f | #None =&gt; 0.0,<span class="fstring">""</span>;
+<span class="lineno" id=line344></span>          <span class="small_keyword" title="conditional">if</span> flx_time &gt; html_time <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line345></span>            write_string(<span class="fstring">'&lt;a href="/$'</span>+flx_file+<span class="fstring">'" &gt;'</span> + b + <span class="fstring">'&lt;/a&gt;'</span>) ;
-<span class="lineno" id=line346></span>          <span class="small_keyword" title="conditional">elif</span> fdoc_time &gt; flx_time <span class="small_keyword" title="imperative code begins">do</span>
-<span class="lineno" id=line347></span>            write_string(<span class="fstring">'&lt;a href="/$'</span>+fdoc_file+<span class="fstring">'" &gt;'</span> + b + <span class="fstring">'&lt;/a&gt;'</span>) ;
+<span class="lineno" id=line346></span>          <span class="small_keyword" title="conditional">elif</span> html_time &gt; flx_time <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line347></span>            write_string(<span class="fstring">'&lt;a href="/$'</span>+html_file+<span class="fstring">'" &gt;'</span> + b + <span class="fstring">'&lt;/a&gt;'</span>) ;
 <span class="lineno" id=line348></span>          <span class="small_keyword" title="conditional">else</span> 
 <span class="lineno" id=line349></span>            write_string(<span class="fstring">'&lt;span class="fstring"&gt;'</span>+txt2html b+<span class="fstring">"&lt;/span&gt;"</span>);
 <span class="lineno" id=line350></span>          <span class="small_keyword" title="end of body">done</span> 
@@ -2701,9 +2701,9 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line381></span>       write_string(<span class="fstring">'&lt;span class="fstring"&gt;'</span>+txt2html b+<span class="fstring">"&lt;/span&gt;"</span>); 
 <span class="lineno" id=line382></span>      <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line383></span>    }
-<span class="lineno" id=line384></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> wfdoc() {
-<span class="lineno" id=line385></span>      write_string (<span class="fstring">'&lt;span class="doccomment"&gt;'</span> + txt2html fdocb + <span class="fstring">"&lt;/span&gt;\n"</span>);
-<span class="lineno" id=line386></span>      fdocb = <span class="fstring">""</span>; b=<span class="fstring">""</span>;
+<span class="lineno" id=line384></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> whtml() {
+<span class="lineno" id=line385></span>      write_string (<span class="fstring">'&lt;span class="doccomment"&gt;'</span> + txt2html htmlb + <span class="fstring">"&lt;/span&gt;\n"</span>);
+<span class="lineno" id=line386></span>      htmlb = <span class="fstring">""</span>; b=<span class="fstring">""</span>;
 <span class="lineno" id=line387></span>    }
 <span class="lineno" id=line388></span>    <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> w() { 
 <span class="lineno" id=line389></span>      last_texop = <span class="fstring">""</span>; 
@@ -2755,8 +2755,8 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line435></span>  
 <span class="lineno" id=line436></span>    <span class="small_keyword" title="jump to label">goto</span> nextt;
 <span class="lineno" id=line437></span>  
-<span class="lineno" id=line438></span>  continfdoc:&gt;
-<span class="lineno" id=line439></span>    cpfdoc;
+<span class="lineno" id=line438></span>  continhtml:&gt;
+<span class="lineno" id=line439></span>    cphtml;
 <span class="lineno" id=line440></span>    <span class="small_keyword" title="jump to label">goto</span> nextch;
 <span class="lineno" id=line441></span>  
 <span class="lineno" id=line442></span>  contin:&gt; <span class="comment">// copy char and continue</span>
@@ -2768,8 +2768,8 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line448></span>    s = sot;
 <span class="lineno" id=line449></span>    <span class="small_keyword" title="jump to label">goto</span> thisch;
 <span class="lineno" id=line450></span>  
-<span class="lineno" id=line451></span>  lastfdoc:&gt;
-<span class="lineno" id=line452></span>    wfdoc;
+<span class="lineno" id=line451></span>  lasthtml:&gt;
+<span class="lineno" id=line452></span>    whtml;
 <span class="lineno" id=line453></span>    <span class="small_keyword" title="jump to label">goto</span> nextt;
 <span class="lineno" id=line454></span>  
 <span class="lineno" id=line455></span>  lastch:&gt; <span class="comment">// last char of token</span>
@@ -2800,7 +2800,7 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line480></span>          <span class="small_keyword" title="conditional">if</span> ahead(1) == <span class="library" title="binding of C char type">char</span> <span class="fstring">"/"</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line481></span>            <span class="small_keyword" title="conditional">if</span> ahead(2) == <span class="library" title="binding of C char type">char</span> <span class="fstring">"$"</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line482></span>              next; next; next;
-<span class="lineno" id=line483></span>              s = cppfdoc; 
+<span class="lineno" id=line483></span>              s = cpphtml; 
 <span class="lineno" id=line484></span>            <span class="small_keyword" title="conditional">else</span> cp; next; s = cppcomment;
 <span class="lineno" id=line485></span>            <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line486></span>            <span class="small_keyword" title="jump to label">goto</span> contin;
@@ -2918,9 +2918,9 @@ share/lib/plugins/flx2html.flx</pre>
 <span class="lineno" id=line598></span>        <span class="small_keyword" title="conditional">if</span> isdq3() <span class="small_keyword" title="imperative code begins">do</span> cp; next; cp; next; cp; w; <span class="small_keyword" title="jump to label">goto</span> nextt; <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line599></span>        <span class="small_keyword" title="jump to label">goto</span> contin;
 <span class="lineno" id=line600></span>     <span class="comment">// comments</span>
-<span class="lineno" id=line601></span>    | #cppfdoc =&gt;
-<span class="lineno" id=line602></span>       <span class="small_keyword" title="conditional">if</span> iseol ch <span class="small_keyword" title="imperative code begins">do</span> <span class="small_keyword" title="jump to label">goto</span> lastfdoc;
-<span class="lineno" id=line603></span>       <span class="small_keyword" title="conditional">else</span> <span class="small_keyword" title="jump to label">goto</span> continfdoc;
+<span class="lineno" id=line601></span>    | #cpphtml =&gt;
+<span class="lineno" id=line602></span>       <span class="small_keyword" title="conditional">if</span> iseol ch <span class="small_keyword" title="imperative code begins">do</span> <span class="small_keyword" title="jump to label">goto</span> lasthtml;
+<span class="lineno" id=line603></span>       <span class="small_keyword" title="conditional">else</span> <span class="small_keyword" title="jump to label">goto</span> continhtml;
 <span class="lineno" id=line604></span>       <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line605></span>  
 <span class="lineno" id=line606></span>    | #cppcomment =&gt;
@@ -3247,12 +3247,12 @@ share/lib/plugins/cpp2html.flx</pre>
 <span class="lineno" id=line245></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> Cpp2Html::xlat_cpp of (<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"cpp2html"</span>;
 <span class="lineno" id=line246></span>  
 <span class="lineno" id=line247></span>  
-</pre></p></div><h2 id='Top_level_Felix_<code>fdoc</code>_format._h'><img src='/share/src/web/images/minus.gif' id='Top level Felix <code>fdoc</code> format.' onclick='toggle(this,"Top_level_Felix_<code>fdoc</code>_format._d")' alt='+'/> 2.6 Top level Felix <code>fdoc</code> format.</h2><div id='Top_level_Felix_<code>fdoc</code>_format._d' style='display:block'>
-<p>Handles both original <code>fdoc</code> format Felix programs
-and also <code>fdoc</code> format <code>flx_iscr.py</code> package format.
+</pre></p></div><h2 id='Top_level_Felix_<code>html</code>_format._h'><img src='/share/src/web/images/minus.gif' id='Top level Felix <code>html</code> format.' onclick='toggle(this,"Top_level_Felix_<code>html</code>_format._d")' alt='+'/> 2.6 Top level Felix <code>html</code> format.</h2><div id='Top_level_Felix_<code>html</code>_format._d' style='display:block'>
+<p>Handles both original <code>html</code> format Felix programs
+and also <code>html</code> format <code>flx_iscr.py</code> package format.
 Note the former are real Felix programs.
 </p><pre class='inclusion'>
-share/lib/plugins/fdoc2html.flx</pre>
+share/lib/plugins/html2html.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Open a module or class">open</span> Regdef; <span class="comment">// required</span>
 <span class="lineno" id=line3></span>  
@@ -3271,15 +3271,15 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fileseq-maker : <span class="library" title="binding of C++ string type">string</span> -&gt; fileseq-control_t;
 <span class="lineno" id=line17></span>  
 <span class="lineno" id=line18></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./scanner-interface"</span>;
-<span class="lineno" id=line19></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fdocscanner-maker : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; fdocscanner-control_t;
+<span class="lineno" id=line19></span>  <span class="big_keyword" title="Define a mutable variable">var</span> htmlscanner-maker : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; htmlscanner-control_t;
 <span class="lineno" id=line20></span>  
 <span class="lineno" id=line21></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./button-interface"</span>;
 <span class="lineno" id=line22></span>  <span class="big_keyword" title="Define a mutable variable">var</span> button-factory-maker : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; button-factory_t;
 <span class="lineno" id=line23></span>  
-<span class="lineno" id=line24></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./fdoc-frame-interface"</span>;
-<span class="lineno" id=line25></span>  <span class="big_keyword" title="Define a mutable variable">var</span> fdoc_frame_maker : fdoc_frame_data_t -&gt; fdoc_frame_t;
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./html-frame-interface"</span>;
+<span class="lineno" id=line25></span>  <span class="big_keyword" title="Define a mutable variable">var</span> html_frame_maker : html_frame_data_t -&gt; html_frame_t;
 <span class="lineno" id=line26></span>  
-<span class="lineno" id=line27></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./fdoc-interface"</span>;
+<span class="lineno" id=line27></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./html-interface"</span>;
 <span class="lineno" id=line28></span>  
 <span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a mutable variable">var</span> xlat_cpp: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; bool * <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line30></span>  <span class="big_keyword" title="Define a mutable variable">var</span> xlat_felix: <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; bool * <span class="library" title="binding of C++ string type">string</span>;
@@ -3330,7 +3330,7 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line75></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> markdown (s:<span class="library" title="binding of C++ string type">string</span>):<span class="library" title="binding of C++ string type">string</span>= {
 <span class="lineno" id=line76></span>    <span class="big_keyword" title="Define a mutable variable">var</span> x = s;
 <span class="lineno" id=line77></span>    <span class="hack">C_hack</span>::ignore(GlobalReplace(&amp;x, markdown_code1, StringPiece (<span class="fstring">"&lt;code&gt;\\2&lt;/code&gt;"</span>)));
-<span class="lineno" id=line78></span>    <span class="hack">C_hack</span>::ignore(GlobalReplace(&amp;x, markdown_code2, StringPiece (<span class="fstring">"&lt;a href='/share/src/web/ref/glossary.fdoc#\\2'&gt;\\2&lt;/a&gt;"</span>)));
+<span class="lineno" id=line78></span>    <span class="hack">C_hack</span>::ignore(GlobalReplace(&amp;x, markdown_code2, StringPiece (<span class="fstring">"&lt;a href='/share/src/web/ref/glossary.html#\\2'&gt;\\2&lt;/a&gt;"</span>)));
 <span class="lineno" id=line79></span>    <span class="small_keyword" title="return">return</span> x;
 <span class="lineno" id=line80></span>  }
 <span class="lineno" id=line81></span>  
@@ -3361,7 +3361,7 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line106></span>  <span class="big_keyword" title="Define a mutable variable">var</span> tangler_def_re2 = RE2 (Regdef::render tangler_def_regdef);
 <span class="lineno" id=line107></span>  <span class="big_keyword" title="Define a mutable variable">var</span> tangler_use_re2 = RE2 (Regdef::render tangler_use_regdef);
 <span class="lineno" id=line108></span>  
-<span class="lineno" id=line109></span>  <span class="big_keyword" title="define an object factory">object</span> xlat_fdoc (t:<span class="library" title="binding of C++ string type">string</span>, filename:<span class="library" title="binding of C++ string type">string</span>) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> fdoc_t = {
+<span class="lineno" id=line109></span>  <span class="big_keyword" title="define an object factory">object</span> xlat_html (t:<span class="library" title="binding of C++ string type">string</span>, filename:<span class="library" title="binding of C++ string type">string</span>) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> html_t = {
 <span class="lineno" id=line110></span>  
 <span class="lineno" id=line111></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"Translator for "</span> + filename;
 <span class="lineno" id=line112></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> mathjax_required () =&gt; needs_mathjax;
@@ -3381,11 +3381,11 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line126></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fileseq = fileseq-maker (filename);
 <span class="lineno" id=line127></span>    <span class="comment">//eprintln$ "FDOC make fileseq .. " + #(fileseq.whatami);</span>
 <span class="lineno" id=line128></span>  
-<span class="lineno" id=line129></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fdocscanner = fdocscanner-maker ();
-<span class="lineno" id=line130></span>    <span class="comment">//eprintln$ "FDOC make scanner .. " + #(fdocscanner.whatami);</span>
+<span class="lineno" id=line129></span>    <span class="big_keyword" title="Define a mutable variable">var</span> htmlscanner = htmlscanner-maker ();
+<span class="lineno" id=line130></span>    <span class="comment">//eprintln$ "FDOC make scanner .. " + #(htmlscanner.whatami);</span>
 <span class="lineno" id=line131></span>  
-<span class="lineno" id=line132></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fdoc_frame_data :fdoc_frame_data_t = (heading=heading, button-factory=#button-factory-maker,fileseq=fileseq);
-<span class="lineno" id=line133></span>    <span class="big_keyword" title="Define a mutable variable">var</span> fdoc_frame = fdoc_frame_maker fdoc_frame_data;
+<span class="lineno" id=line132></span>    <span class="big_keyword" title="Define a mutable variable">var</span> html_frame_data :html_frame_data_t = (heading=heading, button-factory=#button-factory-maker,fileseq=fileseq);
+<span class="lineno" id=line133></span>    <span class="big_keyword" title="Define a mutable variable">var</span> html_frame = html_frame_maker html_frame_data;
 <span class="lineno" id=line134></span>  
 <span class="lineno" id=line135></span>  
 <span class="lineno" id=line136></span>    <span class="big_keyword" title="Define a mutable variable">var</span> needs_mathjax = <span class="library" title="false value">false</span>;
@@ -3428,7 +3428,7 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line173></span>  
 <span class="lineno" id=line174></span>  <span class="comment">//---------------------------------------------------</span>
 <span class="lineno" id=line175></span>    <span class="comment">// main loop</span>
-<span class="lineno" id=line176></span>    <span class="big_keyword" title="Define a mutable variable">var</span> inp = fdocscanner.fdoc_scan t;
+<span class="lineno" id=line176></span>    <span class="big_keyword" title="Define a mutable variable">var</span> inp = htmlscanner.html_scan t;
 <span class="lineno" id=line177></span>    <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> get_text () =&gt;
 <span class="lineno" id=line178></span>      <span class="small_keyword" title="match statement or expression">match</span> #inp <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line179></span>      | Some (Text x) =&gt; x
@@ -3440,7 +3440,7 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line185></span>    <span class="small_keyword" title="match statement or expression">match</span> entry <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line186></span>    | Some (Cmd cmdline) =&gt; handle_cmd cmdline; <span class="small_keyword" title="jump to label">goto</span> next;
 <span class="lineno" id=line187></span>    | Some (Text x) =&gt;
-<span class="lineno" id=line188></span>      <span class="small_keyword" title="for loop">for</span> para <span class="small_keyword" title="membership operator, function mem">in</span> fdocscanner.psplit x <span class="small_keyword" title="imperative code begins">do</span> 
+<span class="lineno" id=line188></span>      <span class="small_keyword" title="for loop">for</span> para <span class="small_keyword" title="membership operator, function mem">in</span> htmlscanner.psplit x <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line189></span>        bp; 
 <span class="lineno" id=line190></span>        write_string(markdown para); 
 <span class="lineno" id=line191></span>      <span class="small_keyword" title="end of body">done</span>
@@ -3461,7 +3461,7 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line206></span>  
 <span class="lineno" id=line207></span>    <span class="big_keyword" title="Define a mutable variable">var</span> page = 
 <span class="lineno" id=line208></span>     <span class="small_keyword" title="conditional">if</span> #(slideshow.active)  <span class="small_keyword" title="conditional">then</span> out 
-<span class="lineno" id=line209></span>     <span class="small_keyword" title="conditional">else</span> fdoc_frame.make_frame out
+<span class="lineno" id=line209></span>     <span class="small_keyword" title="conditional">else</span> html_frame.make_frame out
 <span class="lineno" id=line210></span>     <span class="small_keyword" title="conditional">endif</span>
 <span class="lineno" id=line211></span>    ;
 <span class="lineno" id=line212></span>  
@@ -3743,7 +3743,7 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line488></span>    }
 <span class="lineno" id=line489></span>  }
 <span class="lineno" id=line490></span>  
-<span class="lineno" id=line491></span>  eprintln$ Version::felix_version +  <span class="fstring">" fdoc2html initialisation"</span>;
+<span class="lineno" id=line491></span>  eprintln$ Version::felix_version +  <span class="fstring">" html2html initialisation"</span>;
 <span class="lineno" id=line492></span>  
 <span class="lineno" id=line493></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
 <span class="lineno" id=line494></span>    <span class="big_keyword" title="Define a mutable variable">var</span> config_lines = split(config_data, <span class="fstring">"\n"</span>);
@@ -3801,25 +3801,25 @@ share/lib/plugins/fdoc2html.flx</pre>
 <span class="lineno" id=line546></span>    );
 <span class="lineno" id=line547></span>  
 <span class="lineno" id=line548></span>  
-<span class="lineno" id=line549></span>    slideshow-maker  = Dynlink::load-plugin-func1 [slideshow_t, (string-&gt;0)] (dll-name=<span class="fstring">"fdoc_slideshow"</span>);
+<span class="lineno" id=line549></span>    slideshow-maker  = Dynlink::load-plugin-func1 [slideshow_t, (string-&gt;0)] (dll-name=<span class="fstring">"html_slideshow"</span>);
 <span class="lineno" id=line550></span>  
-<span class="lineno" id=line551></span>    paragraph-maker = Dynlink::load-plugin-func1 [paragraph-control_t, (string-&gt;0)] (dll-name=<span class="fstring">"fdoc_paragraph"</span>);
+<span class="lineno" id=line551></span>    paragraph-maker = Dynlink::load-plugin-func1 [paragraph-control_t, (string-&gt;0)] (dll-name=<span class="fstring">"html_paragraph"</span>);
 <span class="lineno" id=line552></span>  
-<span class="lineno" id=line553></span>    heading-maker = Dynlink::load-plugin-func2 [heading-control_t, paragraph-control_t , (string-&gt;0)] (dll-name=<span class="fstring">"fdoc_heading"</span>);
+<span class="lineno" id=line553></span>    heading-maker = Dynlink::load-plugin-func2 [heading-control_t, paragraph-control_t , (string-&gt;0)] (dll-name=<span class="fstring">"html_heading"</span>);
 <span class="lineno" id=line554></span>  
-<span class="lineno" id=line555></span>    fileseq-maker = Dynlink::load-plugin-func1 [fileseq-control_t,<span class="library" title="binding of C++ string type">string</span>] (dll-name=<span class="fstring">"fdoc_fileseq"</span>);
+<span class="lineno" id=line555></span>    fileseq-maker = Dynlink::load-plugin-func1 [fileseq-control_t,<span class="library" title="binding of C++ string type">string</span>] (dll-name=<span class="fstring">"html_fileseq"</span>);
 <span class="lineno" id=line556></span>  
-<span class="lineno" id=line557></span>    fdocscanner-maker = Dynlink::load-plugin-func0 [fdocscanner-control_t] (dll-name=<span class="fstring">"fdoc_scanner"</span>);
+<span class="lineno" id=line557></span>    htmlscanner-maker = Dynlink::load-plugin-func0 [htmlscanner-control_t] (dll-name=<span class="fstring">"html_scanner"</span>);
 <span class="lineno" id=line558></span>  
-<span class="lineno" id=line559></span>    button-factory-maker = Dynlink::load-plugin-func0 [button-factory_t] (dll-name=<span class="fstring">"fdoc_button"</span>);
+<span class="lineno" id=line559></span>    button-factory-maker = Dynlink::load-plugin-func0 [button-factory_t] (dll-name=<span class="fstring">"html_button"</span>);
 <span class="lineno" id=line560></span>  
-<span class="lineno" id=line561></span>    fdoc_frame_maker = Dynlink::load-plugin-func1 [fdoc_frame_t,fdoc_frame_data_t] (dll-name=<span class="fstring">"fdoc_frame"</span>);
+<span class="lineno" id=line561></span>    html_frame_maker = Dynlink::load-plugin-func1 [html_frame_t,html_frame_data_t] (dll-name=<span class="fstring">"html_frame"</span>);
 <span class="lineno" id=line562></span>  
 <span class="lineno" id=line563></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line564></span>  }
 <span class="lineno" id=line565></span>  
-<span class="lineno" id=line566></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc2html_setup"</span>;
-<span class="lineno" id=line567></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> xlat_fdoc of (<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc2html"</span>;
+<span class="lineno" id=line566></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html2html_setup"</span>;
+<span class="lineno" id=line567></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> xlat_html of (<span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html2html"</span>;
 </pre></p></div></div><h1 id='Decorator_Interfaces._h'><img src='/share/src/web/images/minus.gif' id='Decorator Interfaces.' onclick='toggle(this,"Decorator_Interfaces._d")' alt='+'/> 3 Decorator Interfaces.</h1><div id='Decorator_Interfaces._d' style='display:block'>
 <p>Web page architecture layout and decorators.
 </p><pre class='inclusion'>
@@ -3855,25 +3855,25 @@ share/lib/plugins/edit-interface.flx</pre>
 <span class="lineno" id=line5></span>    get_body : <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line6></span>  }
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc-frame-interface.flx</pre>
+share/lib/plugins/html-frame-interface.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./heading-interface"</span>;
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./button-interface"</span>;
 <span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./fileseq-interface"</span>;
 <span class="lineno" id=line4></span>  
-<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> fdoc_frame_data_t = (
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> html_frame_data_t = (
 <span class="lineno" id=line6></span>    heading: heading-control_t,
 <span class="lineno" id=line7></span>    button-factory: button-factory_t,
 <span class="lineno" id=line8></span>    fileseq: fileseq-control_t
 <span class="lineno" id=line9></span>  );
 <span class="lineno" id=line10></span>  
-<span class="lineno" id=line11></span>  <span class="big_keyword" title="define an object interface">interface</span> fdoc_frame_t {
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="define an object interface">interface</span> html_frame_t {
 <span class="lineno" id=line12></span>    whatami : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line13></span>    make_frame: <span class="library" title="binding of C++ string type">string</span> -&gt; <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line14></span>  }
 <span class="lineno" id=line15></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc-interface.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define an object interface">interface</span> fdoc_t {
+share/lib/plugins/html-interface.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define an object interface">interface</span> html_t {
 <span class="lineno" id=line2></span>    whatami : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line3></span>    html_raw : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
 <span class="lineno" id=line4></span>    html_page : 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
@@ -3912,15 +3912,15 @@ share/lib/plugins/paragraph-interface.flx</pre>
 <span class="lineno" id=line7></span>  }
 </pre></p><pre class='inclusion'>
 share/lib/plugins/scanner-interface.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// split up an fdoc into a stream of commands and text </span>
-<span class="lineno" id=line2></span>  variant fdoc-data_t = 
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// split up an html into a stream of commands and text </span>
+<span class="lineno" id=line2></span>  variant html-data_t = 
 <span class="lineno" id=line3></span>    | Cmd of <span class="library" title="binding of C++ string type">string</span>
 <span class="lineno" id=line4></span>    | Text of <span class="library" title="binding of C++ string type">string</span>
 <span class="lineno" id=line5></span>  ;
 <span class="lineno" id=line6></span>  
-<span class="lineno" id=line7></span>  <span class="big_keyword" title="define an object interface">interface</span> fdocscanner-control_t {
+<span class="lineno" id=line7></span>  <span class="big_keyword" title="define an object interface">interface</span> htmlscanner-control_t {
 <span class="lineno" id=line8></span>    whatami: 1 -&gt; <span class="library" title="binding of C++ string type">string</span>;
-<span class="lineno" id=line9></span>    fdoc_scan : <span class="library" title="binding of C++ string type">string</span> -&gt; 1 -&gt;  <span class="library" title="option type: Some x or None">opt</span>[fdoc-data_t];
+<span class="lineno" id=line9></span>    html_scan : <span class="library" title="binding of C++ string type">string</span> -&gt; 1 -&gt;  <span class="library" title="option type: Some x or None">opt</span>[html-data_t];
 <span class="lineno" id=line10></span>    psplit : <span class="library" title="binding of C++ string type">string</span> -&gt; 1 -&gt; <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="binding of C++ string type">string</span>];
 <span class="lineno" id=line11></span>  }
 <span class="lineno" id=line12></span>  
@@ -3935,12 +3935,12 @@ share/lib/plugins/slideshow-interface.flx</pre>
 <span class="lineno" id=line7></span>  
 </pre></p></div><h1 id='Decorator_Implementations._h'><img src='/share/src/web/images/minus.gif' id='Decorator Implementations.' onclick='toggle(this,"Decorator_Implementations._d")' alt='+'/> 4 Decorator Implementations.</h1><div id='Decorator_Implementations._d' style='display:block'>
 <pre class='inclusion'>
-share/lib/plugins/fdoc_button.flx</pre>
+share/lib/plugins/html_button.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="doccomment">Make buttons in a consistent style</span>
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./button-interface"</span>;
 <span class="lineno" id=line3></span>  
 <span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line5></span>    eprintln$ <span class="fstring">"Setup fdoc_button "</span> + config_data;
+<span class="lineno" id=line5></span>    eprintln$ <span class="fstring">"Setup html_button "</span> + config_data;
 <span class="lineno" id=line6></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line7></span>  }
 <span class="lineno" id=line8></span>  
@@ -3965,7 +3965,7 @@ share/lib/plugins/fdoc_button.flx</pre>
 <span class="lineno" id=line27></span>  &lt;/script&gt;
 <span class="lineno" id=line28></span>  """</span>;
 <span class="lineno" id=line29></span>  
-<span class="lineno" id=line30></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_button () <span class="small_keyword" title="specify what interfaces an object implements">implements</span> button-factory_t = {
+<span class="lineno" id=line30></span>  <span class="big_keyword" title="define an object factory">object</span> html_button () <span class="small_keyword" title="specify what interfaces an object implements">implements</span> button-factory_t = {
 <span class="lineno" id=line31></span>  
 <span class="lineno" id=line32></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"button factory"</span>;
 <span class="lineno" id=line33></span>  
@@ -4028,16 +4028,16 @@ share/lib/plugins/fdoc_button.flx</pre>
 <span class="lineno" id=line90></span>    ;
 <span class="lineno" id=line91></span>  }
 <span class="lineno" id=line92></span>  
-<span class="lineno" id=line93></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_button_setup"</span>;
-<span class="lineno" id=line94></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_button of (<span class="library" title="Type with one values (), the empty tuple">unit</span>) as <span class="fstring">"fdoc_button"</span>;
+<span class="lineno" id=line93></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_button_setup"</span>;
+<span class="lineno" id=line94></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_button of (<span class="library" title="Type with one values (), the empty tuple">unit</span>) as <span class="fstring">"html_button"</span>;
 <span class="lineno" id=line95></span>  
 <span class="lineno" id=line96></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc_edit.flx</pre>
+share/lib/plugins/html_edit.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./edit-interface"</span>;
 <span class="lineno" id=line2></span>  
 <span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line4></span>    eprintln$ <span class="fstring">"Setup fdoc_edit "</span> + config_data;
+<span class="lineno" id=line4></span>    eprintln$ <span class="fstring">"Setup html_edit "</span> + config_data;
 <span class="lineno" id=line5></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line6></span>  }
 <span class="lineno" id=line7></span>  
@@ -4055,8 +4055,8 @@ share/lib/plugins/fdoc_edit.flx</pre>
 <span class="lineno" id=line19></span>    )
 <span class="lineno" id=line20></span>  ;
 <span class="lineno" id=line21></span>  
-<span class="lineno" id=line22></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_edit () <span class="small_keyword" title="specify what interfaces an object implements">implements</span> edit-interface_t = {
-<span class="lineno" id=line23></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"fdoc edit"</span>;
+<span class="lineno" id=line22></span>  <span class="big_keyword" title="define an object factory">object</span> html_edit () <span class="small_keyword" title="specify what interfaces an object implements">implements</span> edit-interface_t = {
+<span class="lineno" id=line23></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"html edit"</span>;
 <span class="lineno" id=line24></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> get_header (filename:<span class="library" title="binding of C++ string type">string</span>, mimetype:<span class="library" title="binding of C++ string type">string</span>) =&gt;
 <span class="lineno" id=line25></span>      <span class="small_keyword" title="let binder">let</span> modefile = 
 <span class="lineno" id=line26></span>         <span class="small_keyword" title="match statement or expression">match</span> Assoc_list::find mime-to-file mimetype <span class="small_keyword" title="type-class constraint">with</span>
@@ -4105,24 +4105,24 @@ share/lib/plugins/fdoc_edit.flx</pre>
 <span class="lineno" id=line69></span>  
 <span class="lineno" id=line70></span>  }
 <span class="lineno" id=line71></span>  
-<span class="lineno" id=line72></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_edit_setup"</span>;
-<span class="lineno" id=line73></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_edit of (<span class="library" title="Type with one values (), the empty tuple">unit</span>) as <span class="fstring">"fdoc_edit"</span>;
+<span class="lineno" id=line72></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_edit_setup"</span>;
+<span class="lineno" id=line73></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_edit of (<span class="library" title="Type with one values (), the empty tuple">unit</span>) as <span class="fstring">"html_edit"</span>;
 <span class="lineno" id=line74></span>  
 <span class="lineno" id=line75></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc_fileseq.flx</pre>
+share/lib/plugins/html_fileseq.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./fileseq-interface"</span>;
 <span class="lineno" id=line2></span>  
 <span class="lineno" id=line3></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./button-interface"</span>;
 <span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a mutable variable">var</span> button-factory : <span class="library" title="Type with one values (), the empty tuple">unit</span> -&gt; button-factory_t;
 <span class="lineno" id=line5></span>  
 <span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line7></span>    eprintln$ <span class="fstring">"Setup fdoc_fileseq "</span> + config_data;
-<span class="lineno" id=line8></span>    button-factory = Dynlink::load-plugin-func0 [button-factory_t] (dll-name=<span class="fstring">"fdoc_button"</span>);
+<span class="lineno" id=line7></span>    eprintln$ <span class="fstring">"Setup html_fileseq "</span> + config_data;
+<span class="lineno" id=line8></span>    button-factory = Dynlink::load-plugin-func0 [button-factory_t] (dll-name=<span class="fstring">"html_button"</span>);
 <span class="lineno" id=line9></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line10></span>  }
 <span class="lineno" id=line11></span>  
-<span class="lineno" id=line12></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_fileseq (filename: <span class="library" title="binding of C++ string type">string</span>) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> fileseq-control_t = 
+<span class="lineno" id=line12></span>  <span class="big_keyword" title="define an object factory">object</span> html_fileseq (filename: <span class="library" title="binding of C++ string type">string</span>) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> fileseq-control_t = 
 <span class="lineno" id=line13></span>  {
 <span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a mutable variable">var</span> button = #button-factory;
 <span class="lineno" id=line15></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami()=&gt; <span class="fstring">"Filename sequence navigation object"</span>;
@@ -4187,16 +4187,16 @@ share/lib/plugins/fdoc_fileseq.flx</pre>
 <span class="lineno" id=line74></span>  
 <span class="lineno" id=line75></span>  }
 <span class="lineno" id=line76></span>  
-<span class="lineno" id=line77></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_fileseq_setup"</span>;
-<span class="lineno" id=line78></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_fileseq of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_fileseq"</span>;
+<span class="lineno" id=line77></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_fileseq_setup"</span>;
+<span class="lineno" id=line78></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_fileseq of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_fileseq"</span>;
 <span class="lineno" id=line79></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc_frame.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./fdoc-frame-interface"</span>;
+share/lib/plugins/html_frame.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./html-frame-interface"</span>;
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./toc_menu-interface"</span>;
 <span class="lineno" id=line3></span>  
 <span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup (config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line5></span>    eprintln$ <span class="fstring">"Setup fdoc_frame v1.4 "</span> + config_data;
+<span class="lineno" id=line5></span>    eprintln$ <span class="fstring">"Setup html_frame v1.4 "</span> + config_data;
 <span class="lineno" id=line6></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line7></span>  }
 <span class="lineno" id=line8></span>  
@@ -4375,13 +4375,13 @@ share/lib/plugins/fdoc_frame.flx</pre>
 <span class="lineno" id=line181></span>  """</span>;
 <span class="lineno" id=line182></span>  
 <span class="lineno" id=line183></span>  <span class="big_keyword" title="Define a mutable variable">var</span>  toc_menu = Dynlink::load-plugin-func1 [toc_menu_interface, <span class="library" title="functional, singly linked list">list</span>[<span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C++ string type">string</span> * <span class="library" title="binding of C++ string type">string</span>]] (
-<span class="lineno" id=line184></span>      dll-name=<span class="fstring">"toc_menu"</span>, setup-str=<span class="fstring">"loaded-from-fdoc_frame"</span>, entry-point=<span class="fstring">"toc_menu"</span>
+<span class="lineno" id=line184></span>      dll-name=<span class="fstring">"toc_menu"</span>, setup-str=<span class="fstring">"loaded-from-html_frame"</span>, entry-point=<span class="fstring">"toc_menu"</span>
 <span class="lineno" id=line185></span>    );
 <span class="lineno" id=line186></span>  
 <span class="lineno" id=line187></span>  
-<span class="lineno" id=line188></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_frame (d:fdoc_frame_data_t) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> fdoc_frame_t = 
+<span class="lineno" id=line188></span>  <span class="big_keyword" title="define an object factory">object</span> html_frame (d:html_frame_data_t) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> html_frame_t = 
 <span class="lineno" id=line189></span>  {
-<span class="lineno" id=line190></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"fdoc_frame maker"</span>;
+<span class="lineno" id=line190></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"html_frame maker"</span>;
 <span class="lineno" id=line191></span>  
 <span class="lineno" id=line192></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> make_frame (out:<span class="library" title="binding of C++ string type">string</span>) :<span class="library" title="binding of C++ string type">string</span> = {
 <span class="lineno" id=line193></span>      <span class="big_keyword" title="Define a mutable variable">var</span> o = <span class="fstring">""</span>;
@@ -4451,11 +4451,11 @@ share/lib/plugins/fdoc_frame.flx</pre>
 <span class="lineno" id=line257></span>    }
 <span class="lineno" id=line258></span>  
 <span class="lineno" id=line259></span>  }
-<span class="lineno" id=line260></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_frame_setup"</span>;
-<span class="lineno" id=line261></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_frame of (fdoc_frame_data_t) as <span class="fstring">"fdoc_frame"</span>;
+<span class="lineno" id=line260></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_frame_setup"</span>;
+<span class="lineno" id=line261></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_frame of (html_frame_data_t) as <span class="fstring">"html_frame"</span>;
 <span class="lineno" id=line262></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc_heading.flx</pre>
+share/lib/plugins/html_heading.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./paragraph-interface"</span>;
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./heading-interface"</span>;
 <span class="lineno" id=line3></span>  
@@ -4524,13 +4524,13 @@ share/lib/plugins/fdoc_heading.flx</pre>
 <span class="lineno" id=line66></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> escape_sp(h: <span class="library" title="binding of C++ string type">string</span>) =&gt; <span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (c: <span class="library" title="binding of C char type">char</span>) =&gt; <span class="small_keyword" title="conditional">if</span> c == <span class="fstring">' '</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">'_'</span>.<span class="library" title="binding of C char type">char</span> <span class="small_keyword" title="conditional">else</span> c) h;
 <span class="lineno" id=line67></span>  
 <span class="lineno" id=line68></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line69></span>    button-factory = Dynlink::load-plugin-func0 [button-factory_t] (dll-name=<span class="fstring">"fdoc_button"</span>);
-<span class="lineno" id=line70></span>    eprintln$ <span class="fstring">"Setup fdoc_heading "</span> + config_data;
+<span class="lineno" id=line69></span>    button-factory = Dynlink::load-plugin-func0 [button-factory_t] (dll-name=<span class="fstring">"html_button"</span>);
+<span class="lineno" id=line70></span>    eprintln$ <span class="fstring">"Setup html_heading "</span> + config_data;
 <span class="lineno" id=line71></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line72></span>  }
 <span class="lineno" id=line73></span>  
 <span class="lineno" id=line74></span>  
-<span class="lineno" id=line75></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_heading (paragraph: paragraph-control_t, write_string: <span class="library" title="binding of C++ string type">string</span> -&gt; 0) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> heading-control_t =
+<span class="lineno" id=line75></span>  <span class="big_keyword" title="define an object factory">object</span> html_heading (paragraph: paragraph-control_t, write_string: <span class="library" title="binding of C++ string type">string</span> -&gt; 0) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> heading-control_t =
 <span class="lineno" id=line76></span>  {
 <span class="lineno" id=line77></span>    <span class="big_keyword" title="Define a mutable variable">var</span> button = #button-factory;
 <span class="lineno" id=line78></span>  
@@ -4595,20 +4595,20 @@ share/lib/plugins/fdoc_heading.flx</pre>
 <span class="lineno" id=line137></span>    }
 <span class="lineno" id=line138></span>  }
 <span class="lineno" id=line139></span>  
-<span class="lineno" id=line140></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_heading_setup"</span>;
-<span class="lineno" id=line141></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_heading of (paragraph-control_t * (string-&gt;0)) as <span class="fstring">"fdoc_heading"</span>;
+<span class="lineno" id=line140></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_heading_setup"</span>;
+<span class="lineno" id=line141></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_heading of (paragraph-control_t * (string-&gt;0)) as <span class="fstring">"html_heading"</span>;
 <span class="lineno" id=line142></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc_paragraph.flx</pre>
+share/lib/plugins/html_paragraph.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./paragraph-interface"</span>;
 <span class="lineno" id=line2></span>  
 <span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line4></span>    eprintln$ <span class="fstring">"Setup fdoc_paragraph"</span> + config_data;
+<span class="lineno" id=line4></span>    eprintln$ <span class="fstring">"Setup html_paragraph"</span> + config_data;
 <span class="lineno" id=line5></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line6></span>  }
 <span class="lineno" id=line7></span>  
 <span class="lineno" id=line8></span>  
-<span class="lineno" id=line9></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_paragraph (write_string: <span class="library" title="binding of C++ string type">string</span> -&gt; 0) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> paragraph-control_t = 
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="define an object factory">object</span> html_paragraph (write_string: <span class="library" title="binding of C++ string type">string</span> -&gt; 0) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> paragraph-control_t = 
 <span class="lineno" id=line10></span>  {
 <span class="lineno" id=line11></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"Paragraph object"</span>;
 <span class="lineno" id=line12></span>    <span class="big_keyword" title="Define a mutable variable">var</span> pstate = <span class="library" title="false value">false</span>;
@@ -4622,23 +4622,23 @@ share/lib/plugins/fdoc_paragraph.flx</pre>
 <span class="lineno" id=line20></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> bp() { <span class="small_keyword" title="conditional">if</span> pstate <span class="small_keyword" title="imperative code begins">do</span> end_p; <span class="small_keyword" title="end of body">done</span> start_p; }
 <span class="lineno" id=line21></span>  }
 <span class="lineno" id=line22></span>  
-<span class="lineno" id=line23></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_paragraph_setup"</span>;
-<span class="lineno" id=line24></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_paragraph of (string-&gt;0) as <span class="fstring">"fdoc_paragraph"</span>;
+<span class="lineno" id=line23></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_paragraph_setup"</span>;
+<span class="lineno" id=line24></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_paragraph of (string-&gt;0) as <span class="fstring">"html_paragraph"</span>;
 <span class="lineno" id=line25></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc_scanner.flx</pre>
+share/lib/plugins/html_scanner.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./scanner-interface"</span>;
 <span class="lineno" id=line2></span>  
 <span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line4></span>    eprintln$ <span class="fstring">"Setup fdoc_scanner "</span> + config_data;
+<span class="lineno" id=line4></span>    eprintln$ <span class="fstring">"Setup html_scanner "</span> + config_data;
 <span class="lineno" id=line5></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line6></span>  }
 <span class="lineno" id=line7></span>  
 <span class="lineno" id=line8></span>  
-<span class="lineno" id=line9></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_scanner () <span class="small_keyword" title="specify what interfaces an object implements">implements</span> fdocscanner-control_t = {
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="define an object factory">object</span> html_scanner () <span class="small_keyword" title="specify what interfaces an object implements">implements</span> htmlscanner-control_t = {
 <span class="lineno" id=line10></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"Scanner object"</span>;
 <span class="lineno" id=line11></span>  
-<span class="lineno" id=line12></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> fdoc_scan (<span class="big_keyword" title="Define a mutable variable">var</span> inp:<span class="library" title="binding of C++ string type">string</span>) () : <span class="library" title="option type: Some x or None">opt</span>[fdoc-data_t] = {
+<span class="lineno" id=line12></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> html_scan (<span class="big_keyword" title="Define a mutable variable">var</span> inp:<span class="library" title="binding of C++ string type">string</span>) () : <span class="library" title="option type: Some x or None">opt</span>[html-data_t] = {
 <span class="lineno" id=line13></span>      <span class="big_keyword" title="Define a mutable variable">var</span> lines = split (inp,<span class="fstring">"\n"</span>);
 <span class="lineno" id=line14></span>      <span class="big_keyword" title="Define a mutable variable">var</span> out = <span class="fstring">""</span>;
 <span class="lineno" id=line15></span>      String::reserve (&amp;out,inp.<span class="library" title="number of elements in data structure">len</span>);
@@ -4657,7 +4657,7 @@ share/lib/plugins/fdoc_scanner.flx</pre>
 <span class="lineno" id=line28></span>      <span class="small_keyword" title="conditional">if</span> out != <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line29></span>        <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some (Text out);
 <span class="lineno" id=line30></span>      <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line31></span>      <span class="small_keyword" title="return">return</span> None[fdoc-data_t];
+<span class="lineno" id=line31></span>      <span class="small_keyword" title="return">return</span> None[html-data_t];
 <span class="lineno" id=line32></span>    }
 <span class="lineno" id=line33></span>  
 <span class="lineno" id=line34></span>    <span class="comment">// split up doc text into a stream of paragraphs</span>
@@ -4687,11 +4687,11 @@ share/lib/plugins/fdoc_scanner.flx</pre>
 <span class="lineno" id=line58></span>  }
 <span class="lineno" id=line59></span>  
 <span class="lineno" id=line60></span>   
-<span class="lineno" id=line61></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_scanner_setup"</span>;
-<span class="lineno" id=line62></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_scanner of (<span class="library" title="Type with one values (), the empty tuple">unit</span>) as <span class="fstring">"fdoc_scanner"</span>;
+<span class="lineno" id=line61></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_scanner_setup"</span>;
+<span class="lineno" id=line62></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_scanner of (<span class="library" title="Type with one values (), the empty tuple">unit</span>) as <span class="fstring">"html_scanner"</span>;
 <span class="lineno" id=line63></span>  
 </pre></p><pre class='inclusion'>
-share/lib/plugins/fdoc_slideshow.flx</pre>
+share/lib/plugins/html_slideshow.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  
 <span class="lineno" id=line2></span>  
 <span class="lineno" id=line3></span>  <span class="big_keyword" title="Define an immutable value">val</span> slideshow_js = <span class="fstring">"""
@@ -4795,12 +4795,12 @@ share/lib/plugins/fdoc_slideshow.flx</pre>
 <span class="lineno" id=line101></span>  <span class="big_keyword" title="Include a Felix file">include</span> <span class="fstring">"./slideshow-interface"</span>;
 <span class="lineno" id=line102></span>  
 <span class="lineno" id=line103></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup(config_data:<span class="library" title="binding of C++ string type">string</span>) = {
-<span class="lineno" id=line104></span>    eprintln$ <span class="fstring">"Setup fdoc_slideshow "</span> + config_data;
+<span class="lineno" id=line104></span>    eprintln$ <span class="fstring">"Setup html_slideshow "</span> + config_data;
 <span class="lineno" id=line105></span>    <span class="small_keyword" title="return">return</span> 0;
 <span class="lineno" id=line106></span>  }
 <span class="lineno" id=line107></span>  
 <span class="lineno" id=line108></span>  
-<span class="lineno" id=line109></span>  <span class="big_keyword" title="define an object factory">object</span> fdoc_slideshow (<span class="big_keyword" title="Define a mutable variable">var</span> write_string: <span class="library" title="binding of C++ string type">string</span> -&gt; 0) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> slideshow_t = 
+<span class="lineno" id=line109></span>  <span class="big_keyword" title="define an object factory">object</span> html_slideshow (<span class="big_keyword" title="Define a mutable variable">var</span> write_string: <span class="library" title="binding of C++ string type">string</span> -&gt; 0) <span class="small_keyword" title="specify what interfaces an object implements">implements</span> slideshow_t = 
 <span class="lineno" id=line110></span>  {
 <span class="lineno" id=line111></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> whatami () =&gt; <span class="fstring">"Slideshow object"</span>;
 <span class="lineno" id=line112></span>    <span class="big_keyword" title="Define a mutable variable">var</span> slideshow-used = <span class="library" title="false value">false</span>;
@@ -4862,8 +4862,8 @@ share/lib/plugins/fdoc_slideshow.flx</pre>
 <span class="lineno" id=line168></span>    <span class="qualifier" title="A function depending only on its parameters">method</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> active () =&gt; slideshow-used;
 <span class="lineno" id=line169></span>  };
 <span class="lineno" id=line170></span>  
-<span class="lineno" id=line171></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"fdoc_slideshow_setup"</span>;
-<span class="lineno" id=line172></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> fdoc_slideshow of (string-&gt;0) as <span class="fstring">"fdoc_slideshow"</span>;
+<span class="lineno" id=line171></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> setup of (<span class="library" title="binding of C++ string type">string</span>) as <span class="fstring">"html_slideshow_setup"</span>;
+<span class="lineno" id=line172></span>  <span class="big_keyword" title="generate extern "C" wrapper">export</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> html_slideshow of (string-&gt;0) as <span class="fstring">"html_slideshow"</span>;
 <span class="lineno" id=line173></span>  
 </pre></p><pre class='inclusion'>
 share/lib/plugins/plugin_common.flx</pre>

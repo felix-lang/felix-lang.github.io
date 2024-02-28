@@ -731,7 +731,7 @@ share/lib/std/felix/flx/flx_cmdopt.flx</pre>
 <span class="lineno" id=line95></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"                     : add files to C++ compilation (and linker) steps"</span>;
 <span class="lineno" id=line96></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"*.o *.obj *.lib *.dll *.a *.so"</span>;
 <span class="lineno" id=line97></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"                     : add files to linker steps"</span>;
-<span class="lineno" id=line98></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"* *.flx *.fdoc       : Felix program name, terminates options and starts runtime arguments"</span>;
+<span class="lineno" id=line98></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"* *.flx *.html       : Felix program name, terminates options and starts runtime arguments"</span>;
 <span class="lineno" id=line99></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">""</span>;
 <span class="lineno" id=line100></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"Environment variables"</span>;
 <span class="lineno" id=line101></span>    <span class="library" title="Print a string to standard output with newline appended">println</span> <span class="fstring">"---------------------"</span>;
@@ -1287,7 +1287,7 @@ share/lib/std/felix/flx/flx_cmdopt.flx</pre>
 <span class="lineno" id=line651></span>    <span class="big_keyword" title="Define a mutable variable">var</span> swift = <span class="library" title="functional, singly linked list">list</span> (<span class="fstring">'.swift'</span>);
 <span class="lineno" id=line652></span>  
 <span class="lineno" id=line653></span>    <span class="big_keyword" title="Define a mutable variable">var</span> link_exts =  <span class="library" title="functional, singly linked list">list</span> (<span class="fstring">'.o'</span>,<span class="fstring">'.obj'</span>,<span class="fstring">'.lib'</span>,<span class="fstring">'.dll'</span>,<span class="fstring">'.a'</span>,<span class="fstring">'.so'</span>,<span class="fstring">'.dylib'</span>,<span class="fstring">'.os'</span>);
-<span class="lineno" id=line654></span>    <span class="big_keyword" title="Define a mutable variable">var</span> felix_exts = <span class="library" title="functional, singly linked list">list</span> (<span class="fstring">".flx"</span>,<span class="fstring">".fdoc"</span>);
+<span class="lineno" id=line654></span>    <span class="big_keyword" title="Define a mutable variable">var</span> felix_exts = <span class="library" title="functional, singly linked list">list</span> (<span class="fstring">".flx"</span>,<span class="fstring">".html"</span>);
 <span class="lineno" id=line655></span>    <span class="big_keyword" title="Define a mutable variable">var</span> exts =
 <span class="lineno" id=line656></span>      <span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; s,<span class="fstring">"ocaml"</span>) ocaml+
 <span class="lineno" id=line657></span>      <span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (s:<span class="library" title="binding of C++ string type">string</span>) =&gt; s,<span class="fstring">"swift"</span>) swift+
@@ -1659,10 +1659,10 @@ share/lib/std/felix/flx/flx_depvars.flx</pre>
 <span class="lineno" id=line64></span>    <span class="big_keyword" title="Define a mutable variable">var</span> use_ext = <span class="small_keyword" title="conditional">if</span> loopctl.ext != <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> loopctl.ext <span class="small_keyword" title="conditional">else</span>
 <span class="lineno" id=line65></span>      #{ 
 <span class="lineno" id=line66></span>         <span class="big_keyword" title="Define a mutable variable">var</span> flxt = FileStat::dfiletime (rel_filebase+<span class="fstring">".flx"</span>,#FileStat::past_time);
-<span class="lineno" id=line67></span>         <span class="big_keyword" title="Define a mutable variable">var</span> fdoct = FileStat::dfiletime (rel_filebase+<span class="fstring">".fdoc"</span>,#FileStat::past_time);
+<span class="lineno" id=line67></span>         <span class="big_keyword" title="Define a mutable variable">var</span> htmlt = FileStat::dfiletime (rel_filebase+<span class="fstring">".html"</span>,#FileStat::past_time);
 <span class="lineno" id=line68></span>         <span class="small_keyword" title="return">return</span> 
-<span class="lineno" id=line69></span>           <span class="small_keyword" title="conditional">if</span> flxt &gt; fdoct <span class="small_keyword" title="conditional">then</span> <span class="fstring">".flx"</span>
-<span class="lineno" id=line70></span>           <span class="small_keyword" title="conditional">elif</span> fdoct &gt; flxt <span class="small_keyword" title="conditional">then</span> <span class="fstring">".fdoc"</span>
+<span class="lineno" id=line69></span>           <span class="small_keyword" title="conditional">if</span> flxt &gt; htmlt <span class="small_keyword" title="conditional">then</span> <span class="fstring">".flx"</span>
+<span class="lineno" id=line70></span>           <span class="small_keyword" title="conditional">elif</span> htmlt &gt; flxt <span class="small_keyword" title="conditional">then</span> <span class="fstring">".html"</span>
 <span class="lineno" id=line71></span>           <span class="small_keyword" title="conditional">else</span> <span class="fstring">""</span>
 <span class="lineno" id=line72></span>         ;
 <span class="lineno" id=line73></span>      }
@@ -2055,7 +2055,7 @@ share/lib/std/felix/flx/flx_run.flx</pre>
 <span class="lineno" id=line184></span>        <span class="small_keyword" title="conditional">if</span> f == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span> <span class="small_keyword" title="return">return</span> x; <span class="small_keyword" title="end of body">done</span>
 <span class="lineno" id=line185></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ext = Filename::get_extension f;
 <span class="lineno" id=line186></span>        <span class="big_keyword" title="Define a mutable variable">var</span> ft = <span class="small_keyword" title="conditional">if</span> ext != <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> FileStat::dfiletime (f,#FileStat::past_time) <span class="small_keyword" title="conditional">else</span>
-<span class="lineno" id=line187></span>          max (FileStat::dfiletime (f+<span class="fstring">".fdoc"</span>, #FileStat::past_time), FileStat::dfiletime (f+<span class="fstring">".flx"</span>,#FileStat::past_time))
+<span class="lineno" id=line187></span>          max (FileStat::dfiletime (f+<span class="fstring">".html"</span>, #FileStat::past_time), FileStat::dfiletime (f+<span class="fstring">".flx"</span>,#FileStat::past_time))
 <span class="lineno" id=line188></span>        ;
 <span class="lineno" id=line189></span>        debugln$ (<span class="fstring">"Time "</span>+f+<span class="fstring">" = "</span>+ FileStat::strfiletime ft);
 <span class="lineno" id=line190></span>        ft = <span class="small_keyword" title="conditional">if</span> ft == #FileStat::past_time <span class="small_keyword" title="conditional">then</span> #FileStat::future_time <span class="small_keyword" title="conditional">else</span> ft; <span class="comment">// missing dependency</span>
@@ -3490,7 +3490,7 @@ share/lib/std/felix/flx/flx.flx</pre>
 <span class="lineno" id=line206></span>        <span class="small_keyword" title="end of extension">begin</span>
 <span class="lineno" id=line207></span>          <span class="small_keyword" title="conditional">if</span> control*.SHOWCODE == 1 <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line208></span>              <span class="big_keyword" title="Define a mutable variable">var</span> prg = 
-<span class="lineno" id=line209></span>                (<span class="small_keyword" title="conditional">if</span> dvars.use_ext == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">"// No file "</span>+dvars.filebase+<span class="fstring">".(flx|fdoc) found"</span>
+<span class="lineno" id=line209></span>                (<span class="small_keyword" title="conditional">if</span> dvars.use_ext == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">"// No file "</span>+dvars.filebase+<span class="fstring">".(flx|html) found"</span>
 <span class="lineno" id=line210></span>                <span class="small_keyword" title="conditional">else</span> load(dvars.filebase+<span class="fstring">"."</span>+dvars.use_ext)
 <span class="lineno" id=line211></span>              );
 <span class="lineno" id=line212></span>              <span class="library" title="Print a string to standard output">print</span> prg;
@@ -3665,7 +3665,7 @@ share/lib/std/felix/flx/bootflx.flx</pre>
 <span class="lineno" id=line144></span>        <span class="small_keyword" title="end of extension">begin</span>
 <span class="lineno" id=line145></span>          <span class="small_keyword" title="conditional">if</span> control*.SHOWCODE == 1 <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line146></span>              <span class="big_keyword" title="Define a mutable variable">var</span> prg = 
-<span class="lineno" id=line147></span>                (<span class="small_keyword" title="conditional">if</span> dvars.use_ext == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">"// No file "</span>+dvars.filebase+<span class="fstring">".(flx|fdoc) found"</span>
+<span class="lineno" id=line147></span>                (<span class="small_keyword" title="conditional">if</span> dvars.use_ext == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">"// No file "</span>+dvars.filebase+<span class="fstring">".(flx|html) found"</span>
 <span class="lineno" id=line148></span>                <span class="small_keyword" title="conditional">else</span> load(dvars.filebase+<span class="fstring">"."</span>+dvars.use_ext)
 <span class="lineno" id=line149></span>              );
 <span class="lineno" id=line150></span>              <span class="library" title="Print a string to standard output">print</span> prg;
