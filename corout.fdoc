@@ -1,8 +1,9 @@
-@tangler ex1 = examples/ex1.flx
-@tangler ex2 = examples/ex2.flx
-@tangler ex3 = examples/ex3.flx
-@tangler ex4 = examples/ex4.flx
-@tangler ex5 = examples/ex5.flx
+@tangler ex1 = examples/corout/ex1.flx
+@tangler ex2 = examples/corout/ex2.flx
+@tangler ex3 = examples/corout/ex3.flx
+@tangler ex4 = examples/corout/ex4.flx
+@tangler ex5 = examples/corout/ex5.flx
+@tangler ex6 = examples/corout/ex6.fx
 @title coroutines
 @h1 A low level example.
 I will show a simple low level example of coroutines, it will be a 

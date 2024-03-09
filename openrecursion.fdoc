@@ -1,0 +1,249 @@
+@tangler openrec.flx = examples/openrecursion/openrec.flx
+
+@title Open Recursion
+@H1 Designing with Open Recursion
+Open recursion is s technique where recursion in both a data type
+and the functions that access it are provided in two stages.
+For the data:
+
+<ol>
+<li>The recursion is replaced by a type variable to produce a flat non-recursive type</li>
+<li>Ihe type variable is bound to the type, introducing recursion.</li>
+</ol>
+
+For the functions:
+<ol>
+<li>The recursive application is replaced by a call to a paramater</li>
+<li>The function is closed by calling it with itself as the parameter</li>
+</ol>
+
+For these techniques to work, an extensible polymorphic data type
+is required, higher order functions must be supported, and the fixpoint
+operator for both types and functions must be representable. C++ for example
+cannot support this technique because the fixpoint operations cannot
+be encoded.
+
+The principle reason for using this technique is that that it supports
+the open/closed priniple. That is, it allow a closed system to be defined
+and operational, which can be extended covariantly to a more featured system
+without modifying the original code or disrupting old working programs.
+
+@h1 A simple example.
+Here is a simple example. We are going to start with a simple expression
+representation that supports addition of integers and extend it to
+also support subtraction. Then we will provide a separate extension
+to support multiplication. Finally we will extend both of these
+extensions together to throw in division. 
+@pre
+      add
+     /  \
+    sub mul
+     \  /
+      div
+@
+This is a typical OO mixing subtyping diagram, but we will be using
+functional techniques. There is no way to do this with object orientation
+because of the covariance problem.
+
+@h2 The base case: addition.
+Our target data type is this:
+@felix
+typedef adde = (
+  `Int of int
+  `Add of adde * adde
+);
+@
+Notice, it is a recursive data type. The function we want is
+@felix
+fun eval (term: adde) =>
+  match term with
+  | `Int j => j
+  | `Add (a,b) => eval a + eval b
+  endmatch
+;
+@
+Again notice it is a recursive function. We are going to recode
+our system using open recursion now. Here's the open version of the
+data type:
+@tangle openrec.flx
+typedef o_adde[T] = (
+  | `Int of int
+  | `Add of T * T
+);
+@
+Notice this data type is now polymorphic, but no longer recursive.
+The type variable has eliminated the recursion.
+
+And here's the open version of the function:
+@tangle openrec.flx
+fun o_eval[T] (eval: T -> int) (term: o_adde[T]) =>
+  match term with
+  | `Int j => j
+  | `Add (a,b) => eval a + eval b
+  endmatch
+;
+@
+Again, the function has become polymorphic, and has also acquired
+an extra parameter which is used to eliminate the recursive calls.
+
+Now we are going to recover the original data type and function:
+@tangle openrec.flx
+typedef adde = o_adde[adde];
+fun eval (term:adde):int => o_eval[adde] eval term;
+@
+What we have done is close the open data type by 
+replacing the type variable with a self-reference.
+Similarly, we have closed the function, by replacing
+the parameter with a self reference, so that the closed
+function now calls itself. Notice that in Felix, the return type
+of the recursion must be specified.
+
+Here is a test case:
+@tangle openrec.flx
+var x : adde = `Add (`Add (`Int 39, `Int 2), `Int 1);
+var y = eval x;
+println$ y; 
+@
+
+@h2 Extension to subtraction
+Now we're going to add a new feature: subtraction.
+
+Here is the open version of the type and evaluator:
+@tangle openrec.flx
+typedef o_sube[T] = (
+  | o_adde[T]
+  | `Sub of T * T
+);
+fun o_eval2[T] (eval: T -> int) (term: o_sube[T]):int =>
+  match term with
+  | `Sub (a,b) => eval a - eval b
+  | o_adde[T] :>> k => o_eval eval k
+  endmatch
+;
+@
+Notice both the type and function delegate to the existing code for addition
+and only add support for our new operation, subtraction.
+
+@h2 Fixpoint operator.
+The closure of the the open type and function ic called <em>fixating</em> them.
+What we have done is to manually introduce the self-reference.
+For the data type, we used a self-refering type alias; for the function
+we used eta-expansion.
+
+It is possible to automate both these operations so they work on any suitably
+structured open types and functions using combinators called <em>fixpoint operators</em>.
+
+Here's how we do it:
+
+@tangle openrec.flx
+typefun o_sube_f (T:TYPE) : TYPE => o_sube[T];
+typedef sube = tfix<TYPE> o_sube_f;
+fun eval2 (term:sube):int => (fix[sube,int] o_eval2[sube]) term;
+@
+
+Here are the definitions from the standard library:
+@felix
+  fun fix[D,C] (f:(D->C)->D->C) (x:D) : C => f (fix f) x;
+  typefun tfix<K> (f: K ->K):K => f x as x:K;
+@
+the type fixpoint cheats: it uses thefixpoint operator @{as}
+which is builtin to the type system in the compiler.
+
+The function fixpoint operator is interesting because its 
+rather nasty type is what is required for an eager language.
+Lasy languages like Haskell have a simpler type for their
+function fixpoint operator.
+
+Finally a test case:
+
+@tangle openrec.flx
+var x2 : sube = `Add (`Sub (`Int 39, `Int 2), `Int 1);
+var y2 = eval2 x2;
+var y3 = eval2 x;  // ORGINAL DATA
+println$ y2; 
+println$ y3; 
+@
+
+It's very important to notice that the original data also works with
+the new function! Of course it's obvious why: the function @{sube}
+delegates to @{adde} in that case.
+
+Well .. actually it's <em>not at all obvious</em> when you think about it.
+What happens if you're adding two terms, one of which is a subtraction?
+How can the @{adde} routine which appears to know nothing about subtraction
+do this?
+
+The answer of course is we passed @{sube} to it as a parameter!
+What's critical is this: the extenion is <em>covariant</em> and in particular
+the type @{adde} is a <em>subtype</em> of @{sube}.
+
+@h2 Extension to multiplication
+Now we're going to make a second extension to the addition system to support
+multiplication. It follows a similar pattern to subtraction of course:
+
+
+
+@tangle openrec.flx
+typedef o_mule[T] = (
+  | o_adde[T]
+  | `Mul of T * T
+);
+fun o_eval3[T] (eval: T -> int) (term: o_mule[T]):int =>
+  match term with
+  | `Mul(a,b) => eval a * eval b
+  | o_adde[T] :>> k => o_eval eval k
+  endmatch
+;
+typefun o_mule_f (T:TYPE) : TYPE => o_mule[T];
+typedef mule = tfix<TYPE> o_mule_f;
+fun eval3 (term:mule):int => (fix[mule,int] o_eval3[mule]) term;
+var x3 : mule = `Add (`Mul(`Int 39, `Int 2), `Int 1);
+var y4 = eval3 x3;
+var y5 = eval3 x;  // ORGINAL DATA
+println$ y4; 
+println$ y5; 
+@
+
+@h2 Mixing it all together
+We're no going to mix it all together and also add division.
+
+@tangle openrec.flx
+typedef o_dive[T] = (
+  | o_sube[T]
+  | o_mule[T]
+  | `Div of T * T
+);
+fun o_eval4[T] (eval: T -> int) (term: o_dive[T]):int =>
+  match term with
+  | `Div(a,b) => eval a / eval b
+  | o_sube[T] :>> k => o_eval2 eval k
+  | o_mule[T] :>> k => o_eval3 eval k
+  endmatch
+;
+typefun o_dive_f (T:TYPE) : TYPE => o_dive[T];
+typedef dive = tfix<TYPE> o_dive_f;
+fun eval4 (term:dive):int => (fix[dive,int] o_eval4[dive]) term;
+var x4 : dive = 
+  `Add (
+    `Mul (
+      `Int 39, 
+      `Sub (
+        `Int 3, 
+        `Div (`Int 2, `Int 2)
+      )
+    )
+    , 
+    `Int 66 
+  )
+;
+var y6 = eval4 x4;
+var y7 = eval4 x;  // ORGINAL DATA
+var y8 = eval4 x2;  // ORGINAL DATA
+var y9 = eval4 x3;  // ORGINAL DATA
+println$ y6; 
+println$ y7; 
+println$ y8; 
+println$ y9; 
+@
+
+
