@@ -4,7 +4,7 @@ typedef o_adde[T] = (
   | `Add of T * T
 );
 #line 79 "openrecursion.fdoc"
-fun o_eval[T] (eval: T -> int) (term: o_adde[T]) =>
+fun o_evala[T] (eval: T -> int) (term: o_adde[T]) =>
   match term with
   | `Int j => j
   | `Add (a,b) => eval a + eval b
@@ -12,68 +12,68 @@ fun o_eval[T] (eval: T -> int) (term: o_adde[T]) =>
 ;
 #line 91 "openrecursion.fdoc"
 typedef adde = o_adde[adde];
-fun eval (term:adde):int => o_eval[adde] eval term;
+fun evala (term:adde):int => o_evala[adde] evala term;
 #line 103 "openrecursion.fdoc"
-var x : adde = `Add (`Add (`Int 39, `Int 2), `Int 1);
-var y = eval x;
-println$ y;
+var xa : adde = `Add (`Add (`Int 39, `Int 2), `Int 1);
+var yaa = evala xa;
+println$ "ya="+yaa.str;
 #line 113 "openrecursion.fdoc"
 typedef o_sube[T] = (
   | o_adde[T]
   | `Sub of T * T
 );
-fun o_eval2[T] (eval: T -> int) (term: o_sube[T]):int =>
+fun o_evals[T] (eval: T -> int) (term: o_sube[T]):int =>
   match term with
   | `Sub (a,b) => eval a - eval b
-  | o_adde[T] :>> k => o_eval eval k
+  | o_adde[T] :>> k => o_evala eval k
   endmatch
 ;
 #line 139 "openrecursion.fdoc"
 typefun o_sube_f (T:TYPE) : TYPE => o_sube[T];
 typedef sube = tfix<TYPE> o_sube_f;
-fun eval2 (term:sube):int => (fix[sube,int] o_eval2[sube]) term;
+fun evals (term:sube):int => (fix[sube,int] o_evals[sube]) term;
 #line 160 "openrecursion.fdoc"
-var x2 : sube = `Add (`Sub (`Int 39, `Int 2), `Int 1);
-var y2 = eval2 x2;
-var y3 = eval2 x;  // ORGINAL DATA
-println$ y2;
-println$ y3;
+var xs : sube = `Add (`Sub (`Int 39, `Int 2), `Int 1);
+var yss = evals xs;
+var ysa = evals xa;  // ORGINAL DATA
+println$ "ys="+yss.str;
+println$ "ya="+ysa.str;
 #line 187 "openrecursion.fdoc"
 typedef o_mule[T] = (
   | o_adde[T]
   | `Mul of T * T
 );
-fun o_eval3[T] (eval: T -> int) (term: o_mule[T]):int =>
+fun o_evalm[T] (eval: T -> int) (term: o_mule[T]):int =>
   match term with
   | `Mul(a,b) => eval a * eval b
-  | o_adde[T] :>> k => o_eval eval k
+  | o_adde[T] :>> k => o_evala eval k
   endmatch
 ;
 typefun o_mule_f (T:TYPE) : TYPE => o_mule[T];
 typedef mule = tfix<TYPE> o_mule_f;
-fun eval3 (term:mule):int => (fix[mule,int] o_eval3[mule]) term;
-var x3 : mule = `Add (`Mul(`Int 39, `Int 2), `Int 1);
-var y4 = eval3 x3;
-var y5 = eval3 x;  // ORGINAL DATA
-println$ y4;
-println$ y5;
+fun evalm (term:mule):int => (fix[mule,int] o_evalm[mule]) term;
+var xm : mule = `Add (`Mul(`Int 39, `Int 2), `Int 1);
+var ymm = evalm xm;
+var yma = evalm xa;  // ORGINAL DATA
+println$ "ym="+ymm.str;
+println$ "ya="+yma.str;
 #line 211 "openrecursion.fdoc"
 typedef o_dive[T] = (
   | o_sube[T]
   | o_mule[T]
   | `Div of T * T
 );
-fun o_eval4[T] (eval: T -> int) (term: o_dive[T]):int =>
+fun o_evald[T] (eval: T -> int) (term: o_dive[T]):int =>
   match term with
   | `Div(a,b) => eval a / eval b
-  | o_sube[T] :>> k => o_eval2 eval k
-  | o_mule[T] :>> k => o_eval3 eval k
+  | o_sube[T] :>> k => o_evals eval k
+  | o_mule[T] :>> k => o_evalm eval k
   endmatch
 ;
 typefun o_dive_f (T:TYPE) : TYPE => o_dive[T];
 typedef dive = tfix<TYPE> o_dive_f;
-fun eval4 (term:dive):int => (fix[dive,int] o_eval4[dive]) term;
-var x4 : dive =
+fun evald (term:dive):int => (fix[dive,int] o_evald[dive]) term;
+var xd : dive =
   `Add (
     `Mul (
       `Int 39,
@@ -86,11 +86,11 @@ var x4 : dive =
     `Int 66
   )
 ;
-var y6 = eval4 x4;
-var y7 = eval4 x;  // ORGINAL DATA
-var y8 = eval4 x2;  // ORGINAL DATA
-var y9 = eval4 x3;  // ORGINAL DATA
-println$ y6;
-println$ y7;
-println$ y8;
-println$ y9;
+var ydd = evald xd;
+var yda = evald xa;  // ORGINAL DATA
+var yds = evald xs;  // ORGINAL DATA
+var ydm = evald xm;  // ORGINAL DATA
+println$ "yd="+ydd.str;
+println$ "ya="+yda.str;
+println$ "ys="+yds.str;
+println$ "yn="+ydm.str;

@@ -55,10 +55,10 @@ typedef adde = (
 @
 Notice, it is a recursive data type. The function we want is
 @felix
-fun eval (term: adde) =>
+fun evala (term: adde) =>
   match term with
   | `Int j => j
-  | `Add (a,b) => eval a + eval b
+  | `Add (a,b) => evala a + evala b
   endmatch
 ;
 @
@@ -76,7 +76,7 @@ The type variable has eliminated the recursion.
 
 And here's the open version of the function:
 @tangle openrec.flx
-fun o_eval[T] (eval: T -> int) (term: o_adde[T]) =>
+fun o_evala[T] (eval: T -> int) (term: o_adde[T]) =>
   match term with
   | `Int j => j
   | `Add (a,b) => eval a + eval b
@@ -89,7 +89,7 @@ an extra parameter which is used to eliminate the recursive calls.
 Now we are going to recover the original data type and function:
 @tangle openrec.flx
 typedef adde = o_adde[adde];
-fun eval (term:adde):int => o_eval[adde] eval term;
+fun evala (term:adde):int => o_evala[adde] evala term;
 @
 What we have done is close the open data type by 
 replacing the type variable with a self-reference.
@@ -100,9 +100,9 @@ of the recursion must be specified.
 
 Here is a test case:
 @tangle openrec.flx
-var x : adde = `Add (`Add (`Int 39, `Int 2), `Int 1);
-var y = eval x;
-println$ y; 
+var xa : adde = `Add (`Add (`Int 39, `Int 2), `Int 1);
+var yaa = evala xa;
+println$ "ya="+yaa.str; 
 @
 
 @h2 Extension to subtraction
@@ -114,10 +114,10 @@ typedef o_sube[T] = (
   | o_adde[T]
   | `Sub of T * T
 );
-fun o_eval2[T] (eval: T -> int) (term: o_sube[T]):int =>
+fun o_evals[T] (eval: T -> int) (term: o_sube[T]):int =>
   match term with
   | `Sub (a,b) => eval a - eval b
-  | o_adde[T] :>> k => o_eval eval k
+  | o_adde[T] :>> k => o_evala eval k
   endmatch
 ;
 @
@@ -125,7 +125,7 @@ Notice both the type and function delegate to the existing code for addition
 and only add support for our new operation, subtraction.
 
 @h2 Fixpoint operator.
-The closure of the the open type and function ic called <em>fixating</em> them.
+The closure of the the open type and function is called <em>fixating</em> them.
 What we have done is to manually introduce the self-reference.
 For the data type, we used a self-refering type alias; for the function
 we used eta-expansion.
@@ -138,7 +138,7 @@ Here's how we do it:
 @tangle openrec.flx
 typefun o_sube_f (T:TYPE) : TYPE => o_sube[T];
 typedef sube = tfix<TYPE> o_sube_f;
-fun eval2 (term:sube):int => (fix[sube,int] o_eval2[sube]) term;
+fun evals (term:sube):int => (fix[sube,int] o_evals[sube]) term;
 @
 
 Here are the definitions from the standard library:
@@ -157,11 +157,11 @@ function fixpoint operator.
 Finally a test case:
 
 @tangle openrec.flx
-var x2 : sube = `Add (`Sub (`Int 39, `Int 2), `Int 1);
-var y2 = eval2 x2;
-var y3 = eval2 x;  // ORGINAL DATA
-println$ y2; 
-println$ y3; 
+var xs : sube = `Add (`Sub (`Int 39, `Int 2), `Int 1);
+var yss = evals xs;
+var ysa = evals xa;  // ORGINAL DATA
+println$ "ys="+yss.str; 
+println$ "ya="+ysa.str; 
 @
 
 It's very important to notice that the original data also works with
@@ -188,20 +188,20 @@ typedef o_mule[T] = (
   | o_adde[T]
   | `Mul of T * T
 );
-fun o_eval3[T] (eval: T -> int) (term: o_mule[T]):int =>
+fun o_evalm[T] (eval: T -> int) (term: o_mule[T]):int =>
   match term with
   | `Mul(a,b) => eval a * eval b
-  | o_adde[T] :>> k => o_eval eval k
+  | o_adde[T] :>> k => o_evala eval k
   endmatch
 ;
 typefun o_mule_f (T:TYPE) : TYPE => o_mule[T];
 typedef mule = tfix<TYPE> o_mule_f;
-fun eval3 (term:mule):int => (fix[mule,int] o_eval3[mule]) term;
-var x3 : mule = `Add (`Mul(`Int 39, `Int 2), `Int 1);
-var y4 = eval3 x3;
-var y5 = eval3 x;  // ORGINAL DATA
-println$ y4; 
-println$ y5; 
+fun evalm (term:mule):int => (fix[mule,int] o_evalm[mule]) term;
+var xm : mule = `Add (`Mul(`Int 39, `Int 2), `Int 1);
+var ymm = evalm xm;
+var yma = evalm xa;  // ORGINAL DATA
+println$ "ym="+ymm.str; 
+println$ "ya="+yma.str; 
 @
 
 @h2 Mixing it all together
@@ -213,17 +213,17 @@ typedef o_dive[T] = (
   | o_mule[T]
   | `Div of T * T
 );
-fun o_eval4[T] (eval: T -> int) (term: o_dive[T]):int =>
+fun o_evald[T] (eval: T -> int) (term: o_dive[T]):int =>
   match term with
   | `Div(a,b) => eval a / eval b
-  | o_sube[T] :>> k => o_eval2 eval k
-  | o_mule[T] :>> k => o_eval3 eval k
+  | o_sube[T] :>> k => o_evals eval k
+  | o_mule[T] :>> k => o_evalm eval k
   endmatch
 ;
 typefun o_dive_f (T:TYPE) : TYPE => o_dive[T];
 typedef dive = tfix<TYPE> o_dive_f;
-fun eval4 (term:dive):int => (fix[dive,int] o_eval4[dive]) term;
-var x4 : dive = 
+fun evald (term:dive):int => (fix[dive,int] o_evald[dive]) term;
+var xd : dive = 
   `Add (
     `Mul (
       `Int 39, 
@@ -236,14 +236,79 @@ var x4 : dive =
     `Int 66 
   )
 ;
-var y6 = eval4 x4;
-var y7 = eval4 x;  // ORGINAL DATA
-var y8 = eval4 x2;  // ORGINAL DATA
-var y9 = eval4 x3;  // ORGINAL DATA
-println$ y6; 
-println$ y7; 
-println$ y8; 
-println$ y9; 
+var ydd = evald xd;
+var yda = evald xa;  // ORGINAL DATA
+var yds = evald xs;  // ORGINAL DATA
+var ydm = evald xm;  // ORGINAL DATA
+println$ "yd="+ydd.str; 
+println$ "ya="+yda.str; 
+println$ "ys="+yds.str; 
+println$ "ym="+ydm.str; 
 @
 
+@h1 Open/Closed Principle
+In "Object Oriented Software Construction" Bertran Meyer named a crucial
+system design principe the "Open/Closed Principle". It states that a system
+should have a unit of modularity which is simultaneously closed so it can
+be used and also open so it can be extended. This gave rise to the idea
+of classes which are closed object factories, but can be extended by
+inheritance.
+
+The object oriented version of classes is a catastrophic failure bccause
+of severe restrictions imposed by type systems on the type of arguments of methods,
+which must be contravariant (or invariant), whereas usually we require covariance.
+
+Open recursion solves this problem by providing types and function which are
+open to extension, and do not suffer fron the covariance problem because 
+type variables are invariant.
+
+The system then provides a closure operator, namely the fixpoint operator,
+which locks in covariant behaviour of a particular extension of the base type.
+The types as coproducts, which are covariant, and so base types are subtypes
+of extensions. This impplies the methods of an extension will continue to work
+with data of the base type.
+
+@h2 Issues with polymorphic variants
+Polymorphic variants (as in Felix or Ocaml) are essential for open recursion
+to work. However as is the case with all structural types with user supplied
+componenmts, including records, compiler error diagnostics are very hard to
+understand due at least in part the fact that all the components must be listed
+to identify the type. By contrast, nominal types are easy to refer to, since
+they have a single unique and simple name.
+
+Ocaml has made significant progress in this area by the diagnostics ability
+to search the symbol to table to see if a compnent set happens to have a named
+alias.
+
+@h2 Multivariant Open Recursion
+In our simple example, the open version of a type has a single type variable,
+and the open version of a function has a functional parameter: the type variable
+and the paramater are eliminated by self-reference by using the fixpoint operators.
+
+However in complex systems such as a compiler, we usually have main types,
+and auxilliay types they depend on; sometimes, we have two of more major
+types which are convoluted and inseparable: in these cases two or more
+type variables and function parameters may be required
+
+This leads to a very difficult combinatorial explosion because now we
+can fixate one type variable whilst leaving the other open. Multiple extensions
+of one type can be used with multiple extensions of another.
+
+In Felix, the type system terms in the compiler have at least 6 auxilliary types
+for which multiple flat extensions cold be provided leading to an unmanagably
+large potential set of closed terms. of course this is <em>not</em> a problem
+with open recursion at all: it is a simple fact, and a blessing that open recursion
+provides the machine to represent these choices. The existence of fixpoint combinators
+are then crucial because fixation closures are anonymous and can be provided as required
+"on the fly".
+
+Nevertheless, using this technology in complex applications whilst the very environment
+where the modularity provided is of most benefit, is also the environment where
+it is hardest to get right. In the Felix compiler I found it so difficult,
+dynamic typing was prefered; that is, handling terms that should have been
+erased by throwing an exception was a lot easier than constructing a type
+for every use case so as to obtain a compile time error.
+
+I think it remains to develop language constructions that can leverage
+this technology in a more manageable way.
 

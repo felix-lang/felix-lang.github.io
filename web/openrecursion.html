@@ -310,7 +310,10 @@ var allbuttons = [
 "Extension to subtraction",
 "Fixpoint operator.",
 "Extension to multiplication",
-"Mixing it all together"
+"Mixing it all together",
+"Open/Closed Principle",
+"Issues with polymorphic variants",
+"Multivariant Open Recursion"
 ];
 function expand_all(dummy)
 {
@@ -377,7 +380,12 @@ function mouseout(id)
       <div class=m2><a href="#Extension_to_multiplication_h">Extension to multiplication</a></div>
       <div class=m2><a href="#Mixing_it_all_together_h">Mixing it all together</a></div>
       </div>
-    <script>counter_max=1;</script>
+      <div class=m1 onclick="mshow('menu2','#Open/Closed Principle_h')"> <a href="#Open/Closed_Principle_h">Open/Closed Principle</a></div>
+      <div class=sm id=menu2>
+      <div class=m2><a href="#Issues_with_polymorphic_variants_h">Issues with polymorphic variants</a></div>
+      <div class=m2><a href="#Multivariant_Open_Recursion_h">Multivariant Open Recursion</a></div>
+      </div>
+    <script>counter_max=2;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -429,10 +437,10 @@ because of the covariance problem.
 <span class="lineno" id=line3></span>    `Add of adde * adde
 <span class="lineno" id=line4></span>  );
 </pre></p><p>Notice, it is a recursive data type. The function we want is
-</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> eval (term: adde) =&gt;
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> evala (term: adde) =&gt;
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="match statement or expression">match</span> term <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line3></span>    | `Int j =&gt; j
-<span class="lineno" id=line4></span>    | `Add (a,b) =&gt; eval a + eval b
+<span class="lineno" id=line4></span>    | `Add (a,b) =&gt; evala a + evala b
 <span class="lineno" id=line5></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
 <span class="lineno" id=line6></span>  ;
 </pre></p><p>Again notice it is a recursive function. We are going to recode
@@ -449,7 +457,7 @@ The type variable has eliminated the recursion.
 </p><p>And here's the open version of the function:
 </p><pre class='inclusion'>
 examples/openrecursion/openrec.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_eval[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_adde[T]) =&gt;
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_evala[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_adde[T]) =&gt;
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="match statement or expression">match</span> term <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line3></span>    | `Int j =&gt; j
 <span class="lineno" id=line4></span>    | `Add (a,b) =&gt; eval a + eval b
@@ -461,7 +469,7 @@ an extra parameter which is used to eliminate the recursive calls.
 </p><pre class='inclusion'>
 examples/openrecursion/openrec.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> adde = o_adde[adde];
-<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> eval (term:adde):<span class="library" title="binding of C int type">int</span> =&gt; o_eval[adde] eval term;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> evala (term:adde):<span class="library" title="binding of C int type">int</span> =&gt; o_evala[adde] evala term;
 </pre></p><p>What we have done is close the open data type by 
 replacing the type variable with a self-reference.
 Similarly, we have closed the function, by replacing
@@ -471,9 +479,9 @@ of the recursion must be specified.
 </p><p>Here is a test case:
 </p><pre class='inclusion'>
 examples/openrecursion/openrec.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> x : adde = `Add (`Add (`Int 39, `Int 2), `Int 1);
-<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y = eval x;
-<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y; 
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> xa : adde = `Add (`Add (`Int 39, `Int 2), `Int 1);
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> yaa = evala xa;
+<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ya="</span>+yaa.<span class="library" title="Convert a value to a string">str</span>; 
 </pre></p></div><h2 id='Extension_to_subtraction_h'><img src='/share/src/web/images/minus.gif' id='Extension to subtraction' onclick='toggle(this,"Extension_to_subtraction_d")' alt='+'/> 1.2 Extension to subtraction</h2><div id='Extension_to_subtraction_d' style='display:block'>
 <p>Now we're going to add a new feature: subtraction.
 </p><p>Here is the open version of the type and evaluator:
@@ -483,16 +491,16 @@ examples/openrecursion/openrec.flx</pre>
 <span class="lineno" id=line2></span>    | o_adde[T]
 <span class="lineno" id=line3></span>    | `Sub of T * T
 <span class="lineno" id=line4></span>  );
-<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_eval2[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_sube[T]):<span class="library" title="binding of C int type">int</span> =&gt;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_evals[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_sube[T]):<span class="library" title="binding of C int type">int</span> =&gt;
 <span class="lineno" id=line6></span>    <span class="small_keyword" title="match statement or expression">match</span> term <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line7></span>    | `Sub (a,b) =&gt; eval a - eval b
-<span class="lineno" id=line8></span>    | o_adde[T] :&gt;&gt; k =&gt; o_eval eval k
+<span class="lineno" id=line8></span>    | o_adde[T] :&gt;&gt; k =&gt; o_evala eval k
 <span class="lineno" id=line9></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
 <span class="lineno" id=line10></span>  ;
 </pre></p><p>Notice both the type and function delegate to the existing code for addition
 and only add support for our new operation, subtraction.
 </p></div><h2 id='Fixpoint_operator._h'><img src='/share/src/web/images/minus.gif' id='Fixpoint operator.' onclick='toggle(this,"Fixpoint_operator._d")' alt='+'/> 1.3 Fixpoint operator.</h2><div id='Fixpoint_operator._d' style='display:block'>
-<p>The closure of the the open type and function ic called <em>fixating</em> them.
+<p>The closure of the the open type and function is called <em>fixating</em> them.
 What we have done is to manually introduce the self-reference.
 For the data type, we used a self-refering type alias; for the function
 we used eta-expansion.
@@ -503,7 +511,7 @@ structured open types and functions using combinators called <em>fixpoint operat
 examples/openrecursion/openrec.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  typefun o_sube_f (T:TYPE) : TYPE =&gt; o_sube[T];
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> sube = tfix&lt;TYPE&gt; o_sube_f;
-<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> eval2 (term:sube):<span class="library" title="binding of C int type">int</span> =&gt; (fix[sube,<span class="library" title="binding of C int type">int</span>] o_eval2[sube]) term;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> evals (term:sube):<span class="library" title="binding of C int type">int</span> =&gt; (fix[sube,<span class="library" title="binding of C int type">int</span>] o_evals[sube]) term;
 </pre></p><p>Here are the definitions from the standard library:
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> fix[D,C] (f:(D-&gt;C)-&gt;D-&gt;C) (x:D) : C =&gt; f (fix f) x;
 <span class="lineno" id=line2></span>    typefun tfix&lt;K&gt; (f: K -&gt;K):K =&gt; f x as x:K;
@@ -516,11 +524,11 @@ function fixpoint operator.
 </p><p>Finally a test case:
 </p><pre class='inclusion'>
 examples/openrecursion/openrec.flx</pre>
-<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> x2 : sube = `Add (`Sub (`Int 39, `Int 2), `Int 1);
-<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y2 = eval2 x2;
-<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y3 = eval2 x;  <span class="comment">// ORGINAL DATA</span>
-<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y2; 
-<span class="lineno" id=line5></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y3; 
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> xs : sube = `Add (`Sub (`Int 39, `Int 2), `Int 1);
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> yss = evals xs;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> ysa = evals xa;  <span class="comment">// ORGINAL DATA</span>
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ys="</span>+yss.<span class="library" title="Convert a value to a string">str</span>; 
+<span class="lineno" id=line5></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ya="</span>+ysa.<span class="library" title="Convert a value to a string">str</span>; 
 </pre></p><p>It's very important to notice that the original data also works with
 the new function! Of course it's obvious why: the function <code>sube</code>
 delegates to <code>adde</code> in that case.
@@ -540,20 +548,20 @@ examples/openrecursion/openrec.flx</pre>
 <span class="lineno" id=line2></span>    | o_adde[T]
 <span class="lineno" id=line3></span>    | `Mul of T * T
 <span class="lineno" id=line4></span>  );
-<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_eval3[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_mule[T]):<span class="library" title="binding of C int type">int</span> =&gt;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_evalm[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_mule[T]):<span class="library" title="binding of C int type">int</span> =&gt;
 <span class="lineno" id=line6></span>    <span class="small_keyword" title="match statement or expression">match</span> term <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line7></span>    | `Mul(a,b) =&gt; eval a * eval b
-<span class="lineno" id=line8></span>    | o_adde[T] :&gt;&gt; k =&gt; o_eval eval k
+<span class="lineno" id=line8></span>    | o_adde[T] :&gt;&gt; k =&gt; o_evala eval k
 <span class="lineno" id=line9></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
 <span class="lineno" id=line10></span>  ;
 <span class="lineno" id=line11></span>  typefun o_mule_f (T:TYPE) : TYPE =&gt; o_mule[T];
 <span class="lineno" id=line12></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> mule = tfix&lt;TYPE&gt; o_mule_f;
-<span class="lineno" id=line13></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> eval3 (term:mule):<span class="library" title="binding of C int type">int</span> =&gt; (fix[mule,<span class="library" title="binding of C int type">int</span>] o_eval3[mule]) term;
-<span class="lineno" id=line14></span>  <span class="big_keyword" title="Define a mutable variable">var</span> x3 : mule = `Add (`Mul(`Int 39, `Int 2), `Int 1);
-<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y4 = eval3 x3;
-<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y5 = eval3 x;  <span class="comment">// ORGINAL DATA</span>
-<span class="lineno" id=line17></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y4; 
-<span class="lineno" id=line18></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y5; 
+<span class="lineno" id=line13></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> evalm (term:mule):<span class="library" title="binding of C int type">int</span> =&gt; (fix[mule,<span class="library" title="binding of C int type">int</span>] o_evalm[mule]) term;
+<span class="lineno" id=line14></span>  <span class="big_keyword" title="Define a mutable variable">var</span> xm : mule = `Add (`Mul(`Int 39, `Int 2), `Int 1);
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a mutable variable">var</span> ymm = evalm xm;
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a mutable variable">var</span> yma = evalm xa;  <span class="comment">// ORGINAL DATA</span>
+<span class="lineno" id=line17></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ym="</span>+ymm.<span class="library" title="Convert a value to a string">str</span>; 
+<span class="lineno" id=line18></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ya="</span>+yma.<span class="library" title="Convert a value to a string">str</span>; 
 </pre></p></div><h2 id='Mixing_it_all_together_h'><img src='/share/src/web/images/minus.gif' id='Mixing it all together' onclick='toggle(this,"Mixing_it_all_together_d")' alt='+'/> 1.5 Mixing it all together</h2><div id='Mixing_it_all_together_d' style='display:block'>
 <p>We're no going to mix it all together and also add division.
 </p><pre class='inclusion'>
@@ -563,17 +571,17 @@ examples/openrecursion/openrec.flx</pre>
 <span class="lineno" id=line3></span>    | o_mule[T]
 <span class="lineno" id=line4></span>    | `Div of T * T
 <span class="lineno" id=line5></span>  );
-<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_eval4[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_dive[T]):<span class="library" title="binding of C int type">int</span> =&gt;
+<span class="lineno" id=line6></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> o_evald[T] (eval: T -&gt; <span class="library" title="binding of C int type">int</span>) (term: o_dive[T]):<span class="library" title="binding of C int type">int</span> =&gt;
 <span class="lineno" id=line7></span>    <span class="small_keyword" title="match statement or expression">match</span> term <span class="small_keyword" title="type-class constraint">with</span>
 <span class="lineno" id=line8></span>    | `Div(a,b) =&gt; eval a / eval b
-<span class="lineno" id=line9></span>    | o_sube[T] :&gt;&gt; k =&gt; o_eval2 eval k
-<span class="lineno" id=line10></span>    | o_mule[T] :&gt;&gt; k =&gt; o_eval3 eval k
+<span class="lineno" id=line9></span>    | o_sube[T] :&gt;&gt; k =&gt; o_evals eval k
+<span class="lineno" id=line10></span>    | o_mule[T] :&gt;&gt; k =&gt; o_evalm eval k
 <span class="lineno" id=line11></span>    <span class="small_keyword" title="end a match statement or expression">endmatch</span>
 <span class="lineno" id=line12></span>  ;
 <span class="lineno" id=line13></span>  typefun o_dive_f (T:TYPE) : TYPE =&gt; o_dive[T];
 <span class="lineno" id=line14></span>  <span class="big_keyword" title="Define an alias for a type expression">typedef</span> dive = tfix&lt;TYPE&gt; o_dive_f;
-<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> eval4 (term:dive):<span class="library" title="binding of C int type">int</span> =&gt; (fix[dive,<span class="library" title="binding of C int type">int</span>] o_eval4[dive]) term;
-<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a mutable variable">var</span> x4 : dive = 
+<span class="lineno" id=line15></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> evald (term:dive):<span class="library" title="binding of C int type">int</span> =&gt; (fix[dive,<span class="library" title="binding of C int type">int</span>] o_evald[dive]) term;
+<span class="lineno" id=line16></span>  <span class="big_keyword" title="Define a mutable variable">var</span> xd : dive = 
 <span class="lineno" id=line17></span>    `Add (
 <span class="lineno" id=line18></span>      `Mul (
 <span class="lineno" id=line19></span>        `Int 39, 
@@ -586,15 +594,69 @@ examples/openrecursion/openrec.flx</pre>
 <span class="lineno" id=line26></span>      `Int 66 
 <span class="lineno" id=line27></span>    )
 <span class="lineno" id=line28></span>  ;
-<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y6 = eval4 x4;
-<span class="lineno" id=line30></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y7 = eval4 x;  <span class="comment">// ORGINAL DATA</span>
-<span class="lineno" id=line31></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y8 = eval4 x2;  <span class="comment">// ORGINAL DATA</span>
-<span class="lineno" id=line32></span>  <span class="big_keyword" title="Define a mutable variable">var</span> y9 = eval4 x3;  <span class="comment">// ORGINAL DATA</span>
-<span class="lineno" id=line33></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y6; 
-<span class="lineno" id=line34></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y7; 
-<span class="lineno" id=line35></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y8; 
-<span class="lineno" id=line36></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y9; 
-</pre></p></div></div><!--Main Content Body End-->
+<span class="lineno" id=line29></span>  <span class="big_keyword" title="Define a mutable variable">var</span> ydd = evald xd;
+<span class="lineno" id=line30></span>  <span class="big_keyword" title="Define a mutable variable">var</span> yda = evald xa;  <span class="comment">// ORGINAL DATA</span>
+<span class="lineno" id=line31></span>  <span class="big_keyword" title="Define a mutable variable">var</span> yds = evald xs;  <span class="comment">// ORGINAL DATA</span>
+<span class="lineno" id=line32></span>  <span class="big_keyword" title="Define a mutable variable">var</span> ydm = evald xm;  <span class="comment">// ORGINAL DATA</span>
+<span class="lineno" id=line33></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"yd="</span>+ydd.<span class="library" title="Convert a value to a string">str</span>; 
+<span class="lineno" id=line34></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ya="</span>+yda.<span class="library" title="Convert a value to a string">str</span>; 
+<span class="lineno" id=line35></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ys="</span>+yds.<span class="library" title="Convert a value to a string">str</span>; 
+<span class="lineno" id=line36></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"ym="</span>+ydm.<span class="library" title="Convert a value to a string">str</span>; 
+</pre></p></div></div><h1 id='Open/Closed_Principle_h'><img src='/share/src/web/images/minus.gif' id='Open/Closed Principle' onclick='toggle(this,"Open/Closed_Principle_d")' alt='+'/> 2 Open/Closed Principle</h1><div id='Open/Closed_Principle_d' style='display:block'>
+<p>In "Object Oriented Software Construction" Bertran Meyer named a crucial
+system design principe the "Open/Closed Principle". It states that a system
+should have a unit of modularity which is simultaneously closed so it can
+be used and also open so it can be extended. This gave rise to the idea
+of classes which are closed object factories, but can be extended by
+inheritance.
+</p><p>The object oriented version of classes is a catastrophic failure bccause
+of severe restrictions imposed by type systems on the type of arguments of methods,
+which must be contravariant (or invariant), whereas usually we require covariance.
+</p><p>Open recursion solves this problem by providing types and function which are
+open to extension, and do not suffer fron the covariance problem because 
+type variables are invariant.
+</p><p>The system then provides a closure operator, namely the fixpoint operator,
+which locks in covariant behaviour of a particular extension of the base type.
+The types as coproducts, which are covariant, and so base types are subtypes
+of extensions. This impplies the methods of an extension will continue to work
+with data of the base type.
+</p><h2 id='Issues_with_polymorphic_variants_h'><img src='/share/src/web/images/minus.gif' id='Issues with polymorphic variants' onclick='toggle(this,"Issues_with_polymorphic_variants_d")' alt='+'/> 2.1 Issues with polymorphic variants</h2><div id='Issues_with_polymorphic_variants_d' style='display:block'>
+<p>Polymorphic variants (as in Felix or Ocaml) are essential for open recursion
+to work. However as is the case with all structural types with user supplied
+componenmts, including records, compiler error diagnostics are very hard to
+understand due at least in part the fact that all the components must be listed
+to identify the type. By contrast, nominal types are easy to refer to, since
+they have a single unique and simple name.
+</p><p>Ocaml has made significant progress in this area by the diagnostics ability
+to search the symbol to table to see if a compnent set happens to have a named
+alias.
+</p></div><h2 id='Multivariant_Open_Recursion_h'><img src='/share/src/web/images/minus.gif' id='Multivariant Open Recursion' onclick='toggle(this,"Multivariant_Open_Recursion_d")' alt='+'/> 2.2 Multivariant Open Recursion</h2><div id='Multivariant_Open_Recursion_d' style='display:block'>
+<p>In our simple example, the open version of a type has a single type variable,
+and the open version of a function has a functional parameter: the type variable
+and the paramater are eliminated by self-reference by using the fixpoint operators.
+</p><p>However in complex systems such as a compiler, we usually have main types,
+and auxilliay types they depend on; sometimes, we have two of more major
+types which are convoluted and inseparable: in these cases two or more
+type variables and function parameters may be required
+</p><p>This leads to a very difficult combinatorial explosion because now we
+can fixate one type variable whilst leaving the other open. Multiple extensions
+of one type can be used with multiple extensions of another.
+</p><p>In Felix, the type system terms in the compiler have at least 6 auxilliary types
+for which multiple flat extensions cold be provided leading to an unmanagably
+large potential set of closed terms. of course this is <em>not</em> a problem
+with open recursion at all: it is a simple fact, and a blessing that open recursion
+provides the machine to represent these choices. The existence of fixpoint combinators
+are then crucial because fixation closures are anonymous and can be provided as required
+"on the fly".
+</p><p>Nevertheless, using this technology in complex applications whilst the very environment
+where the modularity provided is of most benefit, is also the environment where
+it is hardest to get right. In the Felix compiler I found it so difficult,
+dynamic typing was prefered; that is, handling terms that should have been
+erased by throwing an exception was a lot easier than constructing a type
+for every use case so as to obtain a compile time error.
+</p><p>I think it remains to develop language constructions that can leverage
+this technology in a more manageable way.
+</p></div></div><!--Main Content Body End-->
 
           </div> <!-- rightpanel contents end -->
           <hr>
