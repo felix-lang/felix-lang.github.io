@@ -543,8 +543,8 @@ defining string can be used. The situation is further complicated by the
 <span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> g(y:<span class="library" title="binding of C long type">long</span>)=&gt; x.<span class="library" title="binding of C long type">long</span> + y;
 <span class="lineno" id=line3></span>     <span class="small_keyword" title="return">return</span> g;
 <span class="lineno" id=line4></span>  }
-</pre></p><p>The function <code>f</code> here has type {int -> (long -> long)}. This type is 
-the same as {int -> long -> long} since the arrow operator is right
+</pre></p><p>The function <code>f</code> here has type <code>int -> (long -> long)</code>. This type is 
+the same as <code>int -> long -> long</code> since the arrow operator is right
 associative. There's a simpler way to write the function <code>f</code>:
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> f(x:<span class="library" title="binding of C int type">int</span>) (y:<span class="library" title="binding of C long type">long</span>) =&gt; x.<span class="library" title="binding of C long type">long</span> + y;
 </pre></p><p>Here one says <code>f</code> has arity 2. Note it still has only

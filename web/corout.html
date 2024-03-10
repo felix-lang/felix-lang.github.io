@@ -426,7 +426,7 @@ simple pipeline consisting of a source, a transducer, a limiter, and a sink.
 down the channel <code>out</code>. The type <code>%>int</code> is an output channel endpoint
 for <code>int</code>.
 </p><pre class='inclusion'>
-examples/ex1.flx</pre>
+examples/corout/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> source (out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i = 0;
 <span class="lineno" id=line3></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
@@ -437,7 +437,7 @@ examples/ex1.flx</pre>
 </pre></p></div><h2 id='The_sink_h'><img src='/share/src/web/images/minus.gif' id='The sink' onclick='toggle(this,"The_sink_d")' alt='+'/> 1.2 The sink</h2><div id='The_sink_d' style='display:block'>
 <p>Now we have a simple sink, which just prints everything it reads:
 </p><pre class='inclusion'>
-examples/ex1.flx</pre>
+examples/corout/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> sink (inp: %&lt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
@@ -451,7 +451,7 @@ procedure will have type
 </p></div><h2 id='The_transducer_h'><img src='/share/src/web/images/minus.gif' id='The transducer' onclick='toggle(this,"The_transducer_d")' alt='+'/> 1.3 The transducer</h2><div id='The_transducer_d' style='display:block'>
 <p>Now we have a transducer which writes the square of every integer it reads.
 </p><pre class='inclusion'>
-examples/ex1.flx</pre>
+examples/corout/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> squarer (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span> 
 <span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
@@ -462,7 +462,7 @@ examples/ex1.flx</pre>
 <p>You should notice the previous three components were all infinite loops.
 Since we don't want our demo to run forever we will throw in a limiter chip:
 </p><pre class='inclusion'>
-examples/ex1.flx</pre>
+examples/corout/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> limiter (<span class="big_keyword" title="Define a mutable variable">var</span> limit: <span class="library" title="binding of C int type">int</span>) (inp: %&lt;<span class="library" title="binding of C int type">int</span>, out: %&gt;<span class="library" title="binding of C int type">int</span>) () {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="while loop">while</span> limit &gt; 0 <span class="small_keyword" title="imperative code begins">do</span>
 <span class="lineno" id=line3></span>      <span class="big_keyword" title="Define a mutable variable">var</span> i = read inp;
@@ -476,7 +476,7 @@ suicide implicitly.
 </p></div><h2 id='The_runner_h'><img src='/share/src/web/images/minus.gif' id='The runner' onclick='toggle(this,"The_runner_d")' alt='+'/> 1.5 The runner</h2><div id='The_runner_d' style='display:block'>
 <p>Now we need have four components so we need three channels to connect them:
 </p><pre class='inclusion'>
-examples/ex1.flx</pre>
+examples/corout/ex1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline() {
 <span class="lineno" id=line2></span>    <span class="comment">// make channels</span>
 <span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a mutable variable">var</span> i1,o1 = mk_ioschannel_pair[<span class="library" title="binding of C int type">int</span>](); 
@@ -507,7 +507,7 @@ in a specific domain. Unlike DSLs or domain specific languages, Felix has DSSLs 
 specific <em>sub-</em>languages.
 </p><p>Let me show you: first our source:
 </p><pre class='inclusion'>
-examples/ex2.flx</pre>
+examples/corout/ex2.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> source
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
 <span class="lineno" id=line3></span>     <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;<span class="library" title="binding of C int type">int</span>
@@ -524,7 +524,7 @@ is the name of the parameter, and the pin names are fields of a record, so the p
 actually has a record type.
 </p><p>Now here is the sink:
 </p><pre class='inclusion'>
-examples/ex2.flx</pre>
+examples/corout/ex2.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> sink 
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
 <span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;<span class="library" title="binding of C int type">int</span>
@@ -536,7 +536,7 @@ examples/ex2.flx</pre>
 <span class="lineno" id=line9></span>  }
 </pre></p><p>Now here is the transducer and limiter
 </p><pre class='inclusion'>
-examples/ex2.flx</pre>
+examples/corout/ex2.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> squarer 
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="the parameter of a chip">connector</span> io
 <span class="lineno" id=line3></span>      <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;<span class="library" title="binding of C int type">int</span>
@@ -560,7 +560,7 @@ examples/ex2.flx</pre>
 <span class="lineno" id=line21></span>  };
 </pre></p><p>Now to connect these things we say this:
 </p><pre class='inclusion'>
-examples/ex2.flx</pre>
+examples/corout/ex2.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline1() {
 <span class="lineno" id=line2></span>    <span class="small_keyword" title="a synonym for var to suit the chip idiom">device</span> limit8  = limiter 8;
 <span class="lineno" id=line3></span>    <span class="small_keyword" title="defines the topology of chip connections">circuit</span>
@@ -579,7 +579,7 @@ You cannot leave any pin disconnected.
 </p><p>The <code>circuit</code> feature is very general. For pipelines there is an even easer
 syntax:
 </p><pre class='inclusion'>
-examples/ex2.flx</pre>
+examples/corout/ex2.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> run_pipeline2() { 
 <span class="lineno" id=line2></span>    (source |-&gt; squarer |-&gt; limiter 8 |-&gt; sink)();
 <span class="lineno" id=line3></span>  }
@@ -618,7 +618,7 @@ as <code>kqueue</code> on MacOS and <code>epoll</code> on Linux.
 </p><p>However we will demonstrate a simpler service, namely the system alarm closk
 because it has a really simply API.
 </p><pre class='inclusion'>
-examples/ex3.flx</pre>
+examples/corout/ex3.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"Begin Spawning"</span>;
 <span class="lineno" id=line2></span>  
 <span class="lineno" id=line3></span>  <span class="big_keyword" title="Spawn a cooperative fibre">spawn_fthread</span> {
@@ -739,7 +739,7 @@ might modify it.
 </p></div></div><h1 id='No_Deadlocks_h'><img src='/share/src/web/images/minus.gif' id='No Deadlocks' onclick='toggle(this,"No_Deadlocks_d")' alt='+'/> 5 No Deadlocks</h1><div id='No_Deadlocks_d' style='display:block'>
 <p>Most threading systems can deadlock. Here is the classical situation:
 </p><pre class='inclusion'>
-examples/ex5.flx</pre>
+examples/corout/ex5.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="defines a coroutine using chip idiom">chip</span> D <span class="small_keyword" title="the parameter of a chip">connector</span> io <span class="small_keyword" title="a field of the chip parameter">pin</span> inp: %&lt;<span class="library" title="binding of C int type">int</span> <span class="small_keyword" title="a field of the chip parameter">pin</span> out: %&gt;<span class="library" title="binding of C int type">int</span> 
 <span class="lineno" id=line2></span>  {
 <span class="lineno" id=line3></span>     <span class="small_keyword" title="while loop">while</span> <span class="library" title="truth value">true</span> <span class="small_keyword" title="imperative code begins">do</span>
@@ -762,7 +762,9 @@ and the scheduler terminates the program because there is no work to do.
 </p><p><bf style="color:red">FELIX COROUTINES CANNOT DEADLOCK</bf>
 </p><p>However they can <em>livelock</em>, but only if you mismanage
 manual circuit construction. Here's an example:
-</p><p><pre class="prefmtbg">var inp,out = mk_ioschannel_pair[int]();
+</p><pre class='inclusion'>
+examples/corout/ex6.fx</pre>
+<p><pre class="prefmtbg">var inp,out = mk_ioschannel_pair[int]();
 spawn_fthread { write (out, 42); };
 </pre></p><p>This is a livelock because the mainline <em>could</em> read
 the written data on the channel endpoint <code>inp</code> but doesn't.

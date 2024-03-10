@@ -406,7 +406,7 @@ parametrised by a list of types. Here is a simple example:
 </pre></p><p>C bindings can be polymorphic too:
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a primitive type by binding to a C type">type</span> vector[T] = <span class="fstring">"::std::vector&lt;?1&gt;"</span>;
 <span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a procedure, a function with side-effects not returning a value">proc</span> push_back[T]: vector[T] * T = <span class="fstring">"$1.push_back($2)"</span>;
-</pre></p><p>In the C code {?1}, {?2} represent the
+</pre></p><p>In the C code <code>?1</code>, <code>?2</code> represent the
 first and second type variables.
 </p><h2 id='Overloading_h'><img src='/share/src/web/images/minus.gif' id='Overloading' onclick='toggle(this,"Overloading_d")' alt='+'/> 1.1.1 Overloading</h2><div id='Overloading_d' style='display:block'>
 <p>Polymorphic functions and non-polymorphic function can be overloaded.
