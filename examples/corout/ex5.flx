@@ -1,0 +1,15 @@
+#line 375 "corout.fdoc"
+chip D connector io pin inp: %<int pin out: %>int
+{
+   while true do
+     var x = read io.inp;
+     write (io.out, x);
+   done
+}
+device A = D;
+device B = D;
+circuit
+  connect A.out, B.inp
+  connect B.out, A.inp
+endcircuit
+println$ "Done";

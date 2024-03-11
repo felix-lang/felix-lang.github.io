@@ -93,4 +93,4 @@ var ydm = evald xm;  // ORGINAL DATA
 println$ "yd="+ydd.str;
 println$ "ya="+yda.str;
 println$ "ys="+yds.str;
-println$ "yn="+ydm.str;
+println$ "ym="+ydm.str;

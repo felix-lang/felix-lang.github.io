@@ -1,0 +1,48 @@
+#line 11 "regex.fdoc"
+regdef digit = charset "01234356789";
+regdef lower = charset "abcdefghijklmnopqrstuvwxyz";
+regdef upper = charset "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+regdef letter = lower | upper;
+regdef underscore = "-";
+
+// C identifier
+regdef cidlead = underscore | letter;
+regdef cidtrail = underscore | letter | digit;
+regdef cid = cidlead cidtrail*;
+#line 37 "regex.fdoc"
+// C int
+regdef cint = digit+;
+
+// C decimal fixed point float
+regdef ffixed = digit* "." digit+ | digit+ "." digit*;
+
+// Scifloat
+regdef expon = ("E" | "e") ("+"|"-")? digit+;
+regdef sci = (cint | ffixed) expon;
+
+regdef ffloat = ffixed | sci;
+#line 64 "regex.fdoc"
+var float_s : string = ffloat.Regdef::render; // convert regex to string
+var float_r : RE2 = float_s.RE2; // compile string to RE2 regex
+println$ "123.4e-7" in float_r;  // if it is a float?
+println$ float_r;
+#line 94 "regex.fdoc"
+regdef assignment = " "* group(cid) " "* "=" " "* (group(cint) | group(ffloat)) " "* ";";
+var a_s = assignment.Regdef::render;
+var a_r = a_s.RE2;
+var result = Match (a_r, "x = 123.45;");
+match result with
+  | None => println$ "No match";
+  | Some v =>
+     print$ "Variable is " + v.1;                // group 1
+     if v.2 == "" do                             // if group 2 didn't match
+       println$ " Initialiser is float " + v.3;  // group 3 matched
+     else
+       println$ " Initialiser is int " + v.2;    // group 2 matched
+    done
+endmatch;
+#line 128 "regex.fdoc"
+var anys = ".*";
+regdef anystring = perl(anys);
+#line 133 "regex.fdoc"
+var prefix_assignment = a_s + anys;

@@ -1,0 +1,52 @@
+#line 18 "corout.fdoc"
+proc source (out: %>int) () {
+  var i = 0;
+  while true do
+    write (out,i);
+    ++i;
+  done
+}
+#line 30 "corout.fdoc"
+proc sink (inp: %<int) () {
+  while true do
+    var i = read inp;
+    println$ i;
+  done
+}
+#line 47 "corout.fdoc"
+proc squarer (inp: %<int, out: %>int) () {
+  while true do
+    var i = read inp;
+    write (out, i * i);
+  done
+}
+#line 59 "corout.fdoc"
+proc limiter (var limit: int) (inp: %<int, out: %>int) () {
+  while limit > 0 do
+    var i = read inp;
+    write (out, i);
+    --limit;
+  done
+}
+#line 74 "corout.fdoc"
+proc run_pipeline() {
+  // make channels
+  var i1,o1 = mk_ioschannel_pair[int]();
+  var i2,o2 = mk_ioschannel_pair[int]();
+  var i3,o3 = mk_ioschannel_pair[int]();
+
+  // make coroutines by binding the channels
+  var d1 = source(o1);
+  var d2 = squarer(i1,o2);
+  var d3 = limiter 8 (i2,o3);
+  var d4 = sink (i3);
+
+  // spawn coroutines as fibres
+  spawn_fthread d1;
+  spawn_fthread d2;
+  spawn_fthread d3;
+  spawn_fthread d4;
+
+  // exit
+}
+run_pipeline();

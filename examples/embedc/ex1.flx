@@ -1,0 +1,35 @@
+#line 14 "embedc.fdoc"
+type cplx = "::std::complex<double>"
+  requires header '#include <complex>'
+;
+ctor cplx : double * double =
+  "::std::complex<double>($1,$2)"
+;
+fun + : cplx * cplx -> cplx = "$1+$2";
+fun - : cplx * cplx -> cplx = "$1-$2";
+fun * : cplx * cplx -> cplx = "$1*$2";
+fun / : cplx * cplx -> cplx = "$1/$2";
+fun == : cplx * cplx -> bool = "$1==$2";
+fun real: cplx -> double = "$1.real()";
+fun imag: cplx -> double = "$1.imag()";
+fun abs: cplx -> double = "$1.abs()";
+fun arg: cplx -> double = "$1.arg()";
+fun norm: cplx -> double = "$1.norm()";
+fun conj: cplx -> double = "$1.conj()";
+
+typedef polarbear = cplx;
+ctor polarbear: double * double = "::std::polar<double>($1,$2)";
+
+fun str (x: cplx) => x.real.str + "+" + x.imag.str + "i";
+
+// test
+var x = cplx (1.0,2.0);
+var y = polarbear (1.0,0.5);
+println$ (x+y).str;
+println$ (x == y).str;
+#line 46 "embedc.fdoc"
+println$ (x,y);
+#line 61 "embedc.fdoc"
+instance Str[cplx] {
+  fun str (x: cplx) => x.real.str + "+" + x.imag.str + "i";
+}

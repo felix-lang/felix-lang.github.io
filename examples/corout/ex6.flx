@@ -1,0 +1,3 @@
+#line 403 "corout.fdoc"
+var inp,out = mk_ioschannel_pair[int]();
+spawn_fthread { write (out, 42); };

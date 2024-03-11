@@ -1,0 +1,13 @@
+#line 231 "corout.fdoc"
+println$ "Begin Spawning";
+
+spawn_fthread {
+  println "Start1"; sleep (2.0); println$ "End1";
+};
+
+spawn_fthread {
+  println "Start2"; sleep (1.0); println$ "End2";
+};
+
+sleep (0.25);
+println$ "Mainline terminates";

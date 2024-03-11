@@ -3,6 +3,7 @@ pretty:
 	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web embedc.fdoc
 	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web corout.fdoc
 	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web views.fdoc
+	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web regex.fdoc
 	env DYLD_LIBRARY_PATH=${LD_LIBRARY_PATH} flx_pretty --outdir=web ../felix/src/packages/lists.fdoc
 
 tut:
@@ -24,6 +25,7 @@ extract:
 	flx_iscr embedc.fdoc
 	flx_iscr corout.fdoc
 	flx_iscr openrecursion.fdoc
+	flx_iscr regex.fdoc
 
  
 test:
