@@ -1,0 +1,573 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Regular Expression DSSL</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Regular Definitions",
+"Example Definitions",
+"imple Usage",
+"Captures",
+"The Sub bit of the Domain Specific Sub Language",
+"The term tree"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Regular Definitions_h')"> <a href="#Regular_Definitions_h">Regular Definitions</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#Example_Definitions_h">Example Definitions</a></div>
+      <div class=m2><a href="#imple_Usage_h">imple Usage</a></div>
+      <div class=m2><a href="#Captures_h">Captures</a></div>
+      <div class=m2><a href="#The_Sub_bit_of_the_Domain_Specific_Sub_Language_h">The Sub bit of the Domain Specific Sub Language</a></div>
+      <div class=m2><a href="#The_term_tree_h">The term tree</a></div>
+      </div>
+    <script>counter_max=1;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Regular_Definitions_h'><img src='/share/src/web/images/minus.gif' id='Regular Definitions' onclick='toggle(this,"Regular_Definitions_d")' alt='+'/> 1 Regular Definitions</h1><div id='Regular_Definitions_d' style='display:block'>
+<p>Felix has a DSSL (Domain Specific SubLanguage) for regular expressions, or more
+precisely, <em>regular definitions</em>. We'll first show example of using it,
+and then show how he DSSL is constructed.
+</p><h2 id='Example_Definitions_h'><img src='/share/src/web/images/minus.gif' id='Example Definitions' onclick='toggle(this,"Example_Definitions_d")' alt='+'/> 1.1 Example Definitions</h2><div id='Example_Definitions_d' style='display:block'>
+<p>Here is a simple example defining C identifiers:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define named regular expression">regdef</span> digit = charset <span class="fstring">"01234356789"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="define named regular expression">regdef</span> lower = charset <span class="fstring">"abcdefghijklmnopqrstuvwxyz"</span>; 
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="define named regular expression">regdef</span> upper = charset <span class="fstring">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</span>; 
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="define named regular expression">regdef</span> letter = lower | upper;
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="define named regular expression">regdef</span> underscore = <span class="fstring">"-"</span>;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="comment">// C identifier</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="define named regular expression">regdef</span> cidlead = underscore | letter;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="define named regular expression">regdef</span> cidtrail = underscore | letter | digit;
+<span class="lineno" id=line10></span>  <span class="big_keyword" title="define named regular expression">regdef</span> cid = cidlead cidtrail*;
+</pre></p><p>The <code>regdef</code> binder defines an ordinary <code>var</code> containing a representation
+of the specified regular expression. But it does a lot more than that:
+it enables a <em>regular definition grammar</em> based on EBNF.
+</p><p>Regular definitions are <em>vastly superior</em> to regular expressions
+because they allow the expression to be factored into components;
+in other words, they provide <em>modularity</em>.
+</p><p>In addition, the use of program language syntax is a killer advantage
+over the usual regular expression string forms because the distinction
+between operators and data is not only clear .. the syntax is checked
+by the parser at compile time.
+</p><p>We'll now define something a bit more complicated:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// C int</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="define named regular expression">regdef</span> cint = digit+;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// C decimal fixed point float</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="define named regular expression">regdef</span> ffixed = digit* <span class="fstring">"."</span> digit+ | digit+ <span class="fstring">"."</span> digit*;
+<span class="lineno" id=line6></span>  
+<span class="lineno" id=line7></span>  <span class="comment">// Scifloat</span>
+<span class="lineno" id=line8></span>  <span class="big_keyword" title="define named regular expression">regdef</span> expon = (<span class="fstring">"E"</span> | <span class="fstring">"e"</span>) (<span class="fstring">"+"</span>|<span class="fstring">"-"</span>)? digit+;
+<span class="lineno" id=line9></span>  <span class="big_keyword" title="define named regular expression">regdef</span> sci = (cint | ffixed) expon;
+<span class="lineno" id=line10></span>  
+<span class="lineno" id=line11></span>  <span class="big_keyword" title="define named regular expression">regdef</span> ffloat = ffixed | sci;
+</pre></p><p>These definitions should be quite clear as written: for fixed point float,
+a sole dot is not a floating point number, but leading or trailing digists can be left out
+provcided there is a dot, but not both.
+</p><p>For a escientific float, we need either a plain integer of fixed point
+float, followed by an exponent, which allows but does not require a sign.
+</p></div><h2 id='imple_Usage_h'><img src='/share/src/web/images/minus.gif' id='imple Usage' onclick='toggle(this,"imple_Usage_d")' alt='+'/> 1.2 imple Usage</h2><div id='imple_Usage_d' style='display:block'>
+<p>A variable defined by a <code>regdef</code> has type <code>regex</code>. However we are using Google RE2
+as our regular expression engine, and that requires a compiled regular expression or type <code>RE2</code> 
+to work. The RE2 compiler compiles the usual kinds of strings, so we need first to convert
+a <code>regex</code> to a string.
+</p><p>So here is our first test case:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> float_s : <span class="library" title="binding of C++ string type">string</span> = ffloat.Regdef::render; <span class="comment">// convert regex to string</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> float_r : RE2 = float_s.RE2; <span class="comment">// compile string to RE2 regex</span>
+<span class="lineno" id=line3></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"123.4e-7"</span> <span class="small_keyword" title="membership operator, function mem">in</span> float_r;  <span class="comment">// if it is a float? </span>
+<span class="lineno" id=line4></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ float_r;
+</pre></p><p>Now we printed out the actually rendered regular expression encoded as a string
+and here it is, with some newlines added so it fits on our page:
+</p><p><pre class="prefmtbg">(?:[01234356789])*\x2E(?:[01234356789])+|(?:[01234356789])+
+\x2E(?:[01234356789])*|(?:(?:[01234356789])+|(?:[01234356789])*
+\x2E(?:[01234356789])+|(?:[01234356789])+\x2E(?:[01234356789])*)
+(?:E|e)(?:\x2B|\x2D)?(?:[01234356789])+
+</pre></p><p>The chance of getting this very simple regex correct as a string
+does not seem very high. 
+</p><p>An anecdote: there was once a site that performance tested various languages,
+and one of the tests was a simple phone number regex. I think everyone copied
+the regex used by the first contribution, except Felix which used regular
+definitions. <em>Every single language except Felix got it wrong.</em>
+</p></div><h2 id='Captures_h'><img src='/share/src/web/images/minus.gif' id='Captures' onclick='toggle(this,"Captures_d")' alt='+'/> 1.3 Captures</h2><div id='Captures_d' style='display:block'>
+<p>Ofen we want to capture data from a regex. Although it made a mess and
+got the maths wrong, Perl had the ability to perform captures.
+In light of some mathematical analysis new techniques were developed,
+but in the end Google RE used a simple capture engine and threw out
+balancing captures to ensure it worked.
+</p><p>Here's s simple example
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define named regular expression">regdef</span> assignment = <span class="fstring">" "</span>* group(cid) <span class="fstring">" "</span>* <span class="fstring">"="</span> <span class="fstring">" "</span>* (group(cint) | group(ffloat)) <span class="fstring">" "</span>* <span class="fstring">";"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> a_s = assignment.Regdef::render;
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> a_r = a_s.RE2;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Match (a_r, <span class="fstring">"x = 123.45;"</span>);
+<span class="lineno" id=line5></span>  <span class="small_keyword" title="match statement or expression">match</span> <span class="small_keyword" title="value of function return used in post condition">result</span> <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line6></span>    | None =&gt; <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">"No match"</span>;
+<span class="lineno" id=line7></span>    | Some v =&gt;
+<span class="lineno" id=line8></span>       <span class="library" title="Print a string to standard output">print</span>$ <span class="fstring">"Variable is "</span> + v.1;                <span class="comment">// group 1</span>
+<span class="lineno" id=line9></span>       <span class="small_keyword" title="conditional">if</span> v.2 == <span class="fstring">""</span> <span class="small_keyword" title="imperative code begins">do</span>                             <span class="comment">// if group 2 didn't match</span>
+<span class="lineno" id=line10></span>         <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">" Initialiser is float "</span> + v.3;  <span class="comment">// group 3 matched</span>
+<span class="lineno" id=line11></span>       <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line12></span>         <span class="library" title="Print a string to standard output with newline appended">println</span>$ <span class="fstring">" Initialiser is int "</span> + v.2;    <span class="comment">// group 2 matched</span>
+<span class="lineno" id=line13></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line14></span>  <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+</pre></p><p>The <code>Match</code> function returns an option type which is <code>None</code> is there is no match,
+otherwise <code>Some v</code> if there is. The <code>v</code> is a Felix <code>varray[string]</code> with slot 0
+containing the whole matchingh pattern (which is always the whole input)
+and then one slot for each catpture group. The capture groups are numbered by a left
+to right depth first recursive descent of the implicit tree structure.
+</p><p>If a group doesn't match anything it is set to the empty string.
+</p><p>If a group is inside a repetition only the last matching substring is retained.
+</p></div><h2 id='The_Sub_bit_of_the_Domain_Specific_Sub_Language_h'><img src='/share/src/web/images/minus.gif' id='The Sub bit of the Domain Specific Sub Language' onclick='toggle(this,"The_Sub_bit_of_the_Domain_Specific_Sub_Language_d")' alt='+'/> 1.4 The Sub bit of the Domain Specific Sub Language</h2><div id='The_Sub_bit_of_the_Domain_Specific_Sub_Language_d' style='display:block'>
+<p>So far, we have shown what is effectively a Domain Specific Language
+or DSL. Yes, it is nested in Felix and interacts with it, but to truly
+be a <em>sub</em> language we need to more completely integrate it
+with Felix code.
+</p><p>The <code>Match</code> function always matches the whole string. To work around this
+we can define do this:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> anys = <span class="fstring">".*"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="define named regular expression">regdef</span> anystring = perl(anys);
+</pre></p><p>and stick it at the end. Alternatively we can do this:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> prefix_assignment = a_s + anys;
+</pre></p><p>The important point here is that we can <em>lift a Felix string</em>
+which is a traditional Perl regex string into the computation,
+and the string can be denoted by <em>any</em> Felix expression of
+type <code>string</code>. You can write any kind of functional rendering of
+repex string generating code you like.
+</p></div><h2 id='The_term_tree_h'><img src='/share/src/web/images/minus.gif' id='The term tree' onclick='toggle(this,"The_term_tree_d")' alt='+'/> 1.5 The term tree</h2><div id='The_term_tree_d' style='display:block'>
+<p>There is a second way to generate a regex by using a combinator tree 
+or type @[regex} directly. In fact, the Regdef DSSL grammar just provides a convenient
+syntax for generating these trees. Here is the important part of the 
+definition from the library:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Regdef {
+<span class="lineno" id=line2></span>    variant regex =
+<span class="lineno" id=line3></span>    | Alts of <span class="library" title="functional, singly linked list">list</span>[regex]
+<span class="lineno" id=line4></span>    | Seqs of <span class="library" title="functional, singly linked list">list</span>[regex]
+<span class="lineno" id=line5></span>    | Rpt of regex * <span class="library" title="binding of C int type">int</span> * <span class="library" title="binding of C int type">int</span>
+<span class="lineno" id=line6></span>    | Charset of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line7></span>    | String of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line8></span>    | Group of regex
+<span class="lineno" id=line9></span>    | Perl of <span class="library" title="binding of C++ string type">string</span>
+<span class="lineno" id=line10></span>    ;
+<span class="lineno" id=line11></span>  ...
+</pre></p><p>Although the grammar provides a convenient way to construct some of these
+trees, it cannot construct all of them. For example suppose you want to
+syntax colour a programming language by highlighting keywords. 
+</p><p>You would of course like to do this:
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define named regular expression">regdef</span> kw = <span class="fstring">"proc"</span> | <span class="fstring">"fun"</span> | <span class="fstring">"variant"</span>;
+</pre></p><p>but alas, this grammar only works with a fixed list of known keywords
+which have to be cited literally as shown. What if you wanted to load
+the keyword list from a file?
+</p><p>You mean, like this?
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> kws : Regdef::regex = Regdef::Alts(load(<span class="fstring">"keywords.txt"</span>).split(<span class="fstring">"\n"</span>));
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="define named regular expression">regdef</span> appl = <span class="fstring">" "</span>* felix (kws) <span class="fstring">" "</span>+ ffloat;
+</pre></p><p>Here we constructed the alternatives term directly from a list of strings
+loaded from a file, and then lifted it into the grammar. As you can guess
+since the parser is building a <code>regex</code> tree anyhow, the <code>felix</code> term is
+a kind of escape of quotation which has no semantics, it just avoid
+translating the quoted term.
+</p><p>And as you can see you can put Perl strings directly in there too
+using the <code>Perl</code> constructor of the variant. Which of course
+is exactly what the <code>perl</code> syntax element of the grammar does!
+</p><p>SO you basically have a three level language system: a simple
+DSSL, the combinatorial form which is properly type checked,
+and a super lame <em>do not use except in emergency</em> form
+using strings with Perl encoded regexps.
+</p><p>The primary point to be demonsrated here is the <em>sub</em> part
+of the DSSL concept. We have a domain specific language, yes, but
+it integrates completely with Felix. This ensure all the power
+of the base language is available in the sub language, whilst
+the sub language grammar eliminates error prone and hard to read boilerplate
+although it might not fully cover all capabilities.
+</p><p> 
+</p></div></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+
