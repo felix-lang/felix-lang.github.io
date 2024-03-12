@@ -46,3 +46,32 @@ var anys = ".*";
 regdef anystring = perl(anys);
 #line 133 "regex.fdoc"
 var prefix_assignment = a_s + anys;
+#line 173 "regex.fdoc"
+var data = "proc fun variant";
+var lines = split(data," ");
+var kws = unbox$ map (fun (x:string) => Regdef::String x) lines;
+var kws_r = kws.Regdef::Alts;
+println$ kws_r.str;
+#line 183 "regex.fdoc"
+var cid2 = regexp ( cidlead cidtrail*);
+#line 210 "regex.fdoc"
+// the match checker
+fun _match_ctor_re (r:RE2) (x:string) => x in r;
+
+// the extractor
+fun _ctor_arg_re (r:RE2) (x:string) =>
+   match Match (r,x) with
+   | Some y => y
+   // None case shouldn't happen!
+   endmatch
+;
+
+// test case
+match "Hello" with
+| re "H(ell)o".RE2 y =>  println$ y.1;
+endmatch;
+#line 252 "regex.fdoc"
+var kw = kws_r.Regdef::render.RE2;
+for xxv in iterator (kw, "proc blah fun proc") do
+  println$ xxv.0;
+done

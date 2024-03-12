@@ -310,7 +310,10 @@ var allbuttons = [
 "imple Usage",
 "Captures",
 "The Sub bit of the Domain Specific Sub Language",
-"The term tree"
+"The term tree",
+"Inline regex",
+"Pattern matching",
+" Iteration"
 ];
 function expand_all(dummy)
 {
@@ -376,8 +379,15 @@ function mouseout(id)
       <div class=m2><a href="#Captures_h">Captures</a></div>
       <div class=m2><a href="#The_Sub_bit_of_the_Domain_Specific_Sub_Language_h">The Sub bit of the Domain Specific Sub Language</a></div>
       <div class=m2><a href="#The_term_tree_h">The term tree</a></div>
+      <div class=m2><a href="#Inline_regex_h">Inline regex</a></div>
       </div>
-    <script>counter_max=1;</script>
+      <div class=m1 onclick="mshow('menu2','#Pattern matching_h')"> <a href="#Pattern_matching_h">Pattern matching</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','# Iteration_h')"> <a href="#_Iteration_h"> Iteration</a></div>
+      <div class=sm id=menu3>
+      </div>
+    <script>counter_max=3;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -494,7 +504,7 @@ or DSL. Yes, it is nested in Felix and interacts with it, but to truly
 be a <em>sub</em> language we need to more completely integrate it
 with Felix code.
 </p><p>The <code>Match</code> function always matches the whole string. To work around this
-we can define do this:
+we can define this:
 </p><pre class='inclusion'>
 examples/regex/re1.flx</pre>
 <p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> anys = <span class="fstring">".*"</span>;
@@ -510,7 +520,7 @@ type <code>string</code>. You can write any kind of functional rendering of
 repex string generating code you like.
 </p></div><h2 id='The_term_tree_h'><img src='/share/src/web/images/minus.gif' id='The term tree' onclick='toggle(this,"The_term_tree_d")' alt='+'/> 1.5 The term tree</h2><div id='The_term_tree_d' style='display:block'>
 <p>There is a second way to generate a regex by using a combinator tree 
-or type @[regex} directly. In fact, the Regdef DSSL grammar just provides a convenient
+or type <code>regex</code> directly. In fact, the Regdef DSSL grammar just provides a convenient
 syntax for generating these trees. Here is the important part of the 
 definition from the library:
 </p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a type class">class</span> Regdef {
@@ -533,28 +543,119 @@ syntax colour a programming language by highlighting keywords.
 which have to be cited literally as shown. What if you wanted to load
 the keyword list from a file?
 </p><p>You mean, like this?
-</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> kws : Regdef::regex = Regdef::Alts(load(<span class="fstring">"keywords.txt"</span>).split(<span class="fstring">"\n"</span>));
-<span class="lineno" id=line2></span>  <span class="big_keyword" title="define named regular expression">regdef</span> appl = <span class="fstring">" "</span>* felix (kws) <span class="fstring">" "</span>+ ffloat;
-</pre></p><p>Here we constructed the alternatives term directly from a list of strings
-loaded from a file, and then lifted it into the grammar. As you can guess
-since the parser is building a <code>regex</code> tree anyhow, the <code>felix</code> term is
-a kind of escape of quotation which has no semantics, it just avoid
-translating the quoted term.
-</p><p>And as you can see you can put Perl strings directly in there too
-using the <code>Perl</code> constructor of the variant. Which of course
-is exactly what the <code>perl</code> syntax element of the grammar does!
-</p><p>SO you basically have a three level language system: a simple
-DSSL, the combinatorial form which is properly type checked,
-and a super lame <em>do not use except in emergency</em> form
-using strings with Perl encoded regexps.
-</p><p>The primary point to be demonsrated here is the <em>sub</em> part
-of the DSSL concept. We have a domain specific language, yes, but
-it integrates completely with Felix. This ensure all the power
-of the base language is available in the sub language, whilst
-the sub language grammar eliminates error prone and hard to read boilerplate
-although it might not fully cover all capabilities.
-</p><p> 
-</p></div></div><!--Main Content Body End-->
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> data = <span class="fstring">"proc fun variant"</span>;
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a mutable variable">var</span> lines = split(data,<span class="fstring">" "</span>);
+<span class="lineno" id=line3></span>  <span class="big_keyword" title="Define a mutable variable">var</span> kws = unbox$ <span class="library" title="return data structure with function applied to each value">map</span> (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (x:<span class="library" title="binding of C++ string type">string</span>) =&gt; Regdef::String x) lines;
+<span class="lineno" id=line4></span>  <span class="big_keyword" title="Define a mutable variable">var</span> kws_r = kws.Regdef::Alts;
+<span class="lineno" id=line5></span>  <span class="library" title="Print a string to standard output with newline appended">println</span>$ kws_r.<span class="library" title="Convert a value to a string">str</span>;
+</pre></p></div><h2 id='Inline_regex_h'><img src='/share/src/web/images/minus.gif' id='Inline regex' onclick='toggle(this,"Inline_regex_d")' alt='+'/> 1.6 Inline regex</h2><div id='Inline_regex_d' style='display:block'>
+<p>It is possible to build regex inline like this:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> cid2 = regexp ( cidlead cidtrail*);
+</pre></p><p>which in this case is precisely equivalent to saying
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="define named regular expression">regdef</span> cide = cidlead | cidtrail*;
+</pre></p><p>The parser switched to the regex syntax inside the parens.
+Remember, a <code>regex</code> is just a simple variant that builds a term tree.
+The grammar that does all this is defined in the library; that is,
+in user space.
+</p></div></div><h1 id='Pattern_matching_h'><img src='/share/src/web/images/minus.gif' id='Pattern matching' onclick='toggle(this,"Pattern_matching_d")' alt='+'/> 2 Pattern matching</h1><div id='Pattern_matching_d' style='display:block'>
+<p>It is possible to pattern match with regexps. The ability to do
+this is quite general built in to the way the compiler works,
+rather than a feature of the regex DSSL: we enable user defined
+pattern matches using a feature of Felix pattern matching
+known as <em>higher order pattern matching</em>.
+</p><p>The way pattern matches work in Felix requires two functions:
+<ol>
+<li>The <em>match checker</em> tests to see if a pattern matches the match argument</li>
+<li>The <em>extractor</em> fetches the argument of the variant constructor matched</li>
+</ol>
+</p><p>The way this works with Felix data types is built in to the compiler,
+but there is a way to write your own checker and extractor functions:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="comment">// the match checker</span>
+<span class="lineno" id=line2></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> _match_ctor_re (r:RE2) (x:<span class="library" title="binding of C++ string type">string</span>) =&gt; x <span class="small_keyword" title="membership operator, function mem">in</span> r;
+<span class="lineno" id=line3></span>  
+<span class="lineno" id=line4></span>  <span class="comment">// the extractor</span>
+<span class="lineno" id=line5></span>  <span class="big_keyword" title="Define a function with no side-effects">fun</span> _ctor_arg_re (r:RE2) (x:<span class="library" title="binding of C++ string type">string</span>) =&gt;
+<span class="lineno" id=line6></span>     <span class="small_keyword" title="match statement or expression">match</span> Match (r,x) <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line7></span>     | Some y =&gt; y
+<span class="lineno" id=line8></span>     <span class="comment">// None case shouldn't happen!</span>
+<span class="lineno" id=line9></span>     <span class="small_keyword" title="end a match statement or expression">endmatch</span>
+<span class="lineno" id=line10></span>  ;
+<span class="lineno" id=line11></span>  
+<span class="lineno" id=line12></span>  <span class="comment">// test case</span>
+<span class="lineno" id=line13></span>  <span class="small_keyword" title="match statement or expression">match</span> <span class="fstring">"Hello"</span> <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line14></span>  | re <span class="fstring">"H(ell)o"</span>.RE2 y =&gt;  <span class="library" title="Print a string to standard output with newline appended">println</span>$ y.1;
+<span class="lineno" id=line15></span>  <span class="small_keyword" title="end a match statement or expression">endmatch</span>;
+</pre></p><p>In this code we invent a new pretend constructor <code>re</code> which takes two arguments.
+The first is the pattern we want to consider, and the second is the data we're
+checking against. In our case the pattern is an <code>RE2</code> and the data is a string;
+but the technique is fully general.
+</p><p>The first function has a magic name used for checking is the string is in
+the regexp, the second provides the way to get data out of it. Notice the
+extractor is called <em>if, and only if</em> the match checker returns true.
+</p><p>Therefore the word <code>re</code> followed by a term of type <code>RE2</code> will be treated
+as a pattern with one argument.
+</p><p>Although the higher order pattern matching feature is not specific to
+regular expressions .. it was in fact added to the compiler specifically
+to support that use case. 
+</p></div><h1 id='_Iteration_h'><img src='/share/src/web/images/minus.gif' id=' Iteration' onclick='toggle(this,"_Iteration_d")' alt='+'/> 3  Iteration</h1><div id='_Iteration_d' style='display:block'>
+<p>In Felix we have a concept of an iterator: it corresponds with
+the C++ notation of an input iterator. The library contains
+an iterator allowing regexps to find matching substrings of a string.
+Unlike <code>Match</code> our iterator scans for the first match, and returns.
+If the iterator is called again, it finds the next match.
+</p><p>Here's how to use it:
+</p><pre class='inclusion'>
+examples/regex/re1.flx</pre>
+<p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a mutable variable">var</span> kw = kws_r.Regdef::render.RE2;
+<span class="lineno" id=line2></span>  <span class="small_keyword" title="for loop">for</span> xxv <span class="small_keyword" title="membership operator, function mem">in</span> iterator (kw, <span class="fstring">"proc blah fun proc"</span>) <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line3></span>    <span class="library" title="Print a string to standard output with newline appended">println</span>$ xxv.0;
+<span class="lineno" id=line4></span>  <span class="small_keyword" title="end of body">done</span>
+</pre></p><p>Here's the implementation
+</p><p><pre class='flxbg'><span class="lineno" id=line1></span>  <span class="big_keyword" title="Define a generator, a function with side-effects returning a value">gen</span> iterator (r:RE2, <span class="big_keyword" title="Define a mutable variable">var</span> target:<span class="library" title="binding of C++ string type">string</span>) () : <span class="library" title="option type: Some x or None">opt</span>[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]] = {
+<span class="lineno" id=line2></span>    <span class="big_keyword" title="Define a mutable variable">var</span> emptystring = <span class="fstring">""</span>;
+<span class="lineno" id=line3></span>    <span class="big_keyword" title="Define a mutable variable">var</span> l = <span class="library" title="number of elements in data structure">len</span> target;
+<span class="lineno" id=line4></span>    <span class="big_keyword" title="Define a mutable variable">var</span> s = StringPiece target;
+<span class="lineno" id=line5></span>    <span class="big_keyword" title="Define a mutable variable">var</span> p1 = s.data;
+<span class="lineno" id=line6></span>    <span class="big_keyword" title="Define a mutable variable">var</span> p = 0;
+<span class="lineno" id=line7></span>    <span class="big_keyword" title="Define a mutable variable">var</span> n = NumberOfCapturingGroups(r)+1;
+<span class="lineno" id=line8></span>    <span class="big_keyword" title="Define a mutable variable">var</span> v1 = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[StringPiece] (n.<span class="library" title="binding of C size_t type">size</span>,StringPiece emptystring);
+<span class="lineno" id=line9></span>    <span class="big_keyword" title="Define a mutable variable">var</span> v2 = <span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>] (n.<span class="library" title="binding of C size_t type">size</span>,<span class="fstring">""</span>);
+<span class="lineno" id=line10></span>  again:&gt;
+<span class="lineno" id=line11></span>    <span class="big_keyword" title="Define a mutable variable">var</span> <span class="small_keyword" title="value of function return used in post condition">result</span> = Match(r, s, p, UNANCHORED,v1.stl_begin, n);
+<span class="lineno" id=line12></span>    <span class="small_keyword" title="conditional">if</span> <span class="small_keyword" title="logical negation">not</span> <span class="small_keyword" title="value of function return used in post condition">result</span> <span class="small_keyword" title="jump to label">goto</span> endoff;
+<span class="lineno" id=line13></span>    <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0 <span class="small_keyword" title="upwards counting for loop">upto</span> n - 1 <span class="small_keyword" title="imperative code begins">do</span> set(v2, i.<span class="library" title="binding of C size_t type">size</span>, <span class="library" title="binding of C++ string type">string</span>(v1.i)); <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line14></span>    <span class="big_keyword" title="Define a mutable variable">var</span> p2 = v1.0.data;
+<span class="lineno" id=line15></span>    <span class="big_keyword" title="Run time assertion">assert</span>(v1.0.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span> &gt; 0); <span class="comment">// prevent infinite loop</span>
+<span class="lineno" id=line16></span>    p = (p2 - p1).<span class="library" title="binding of C int type">int</span>+v1.0.<span class="library" title="number of elements in data structure">len</span>.<span class="library" title="binding of C int type">int</span>;
+<span class="lineno" id=line17></span>    <span class="small_keyword" title="return a value saving the current location for future resumption">yield</span> Some v2;
+<span class="lineno" id=line18></span>    <span class="small_keyword" title="jump to label">goto</span> again;
+<span class="lineno" id=line19></span>  endoff:&gt;
+<span class="lineno" id=line20></span>    <span class="small_keyword" title="return">return</span> None[<span class="library" title="array with dynamically variable limit up to a fixed bound">varray</span>[<span class="library" title="binding of C++ string type">string</span>]];
+<span class="lineno" id=line21></span>  }
+</pre></p><p>This uses a whole lot of features of the Google RE2 system
+which are lifted into Felix, such as the data type <code>StringPiece</code>
+which is roughly a view of a string, and which I am not going
+to explain. 
+</p><p>Rather the take away is that we can implement high level DSSL
+features based on a C/C++ library, by lifting the library API
+into Felix, more or less secretly, and then use them to implement
+the operations we actually want, with the syntax we actually want.
+</p><p>In many case the core system deliberately has features to support
+this kind of modelling technology. In the code above, the key
+piece of magic is the <code>yield</code> operation, which returns a value,
+but also saves the current location in the code, so that re-invoking
+the generator will restart the code with the same context and at the
+same point it previously left off.
+</p><p><em>Yielding Generators</em> are a common feature of many 
+languages in including Python and Rust. They are in fact a weak
+form of coroutine.
+</p></div><!--Main Content Body End-->
 
           </div> <!-- rightpanel contents end -->
           <hr>

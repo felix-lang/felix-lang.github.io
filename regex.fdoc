@@ -123,7 +123,7 @@ be a <em>sub</em> language we need to more completely integrate it
 with Felix code.
 
 The @{Match} function always matches the whole string. To work around this
-we can define do this:
+we can define this:
 @tangle re1.flx
 var anys = ".*";
 regdef anystring = perl(anys);
@@ -140,7 +140,7 @@ repex string generating code you like.
 
 @h2 The term tree
 There is a second way to generate a regex by using a combinator tree 
-or type @[regex} directly. In fact, the Regdef DSSL grammar just provides a convenient
+or type @{regex} directly. In fact, the Regdef DSSL grammar just provides a convenient
 syntax for generating these trees. Here is the important part of the 
 definition from the library:
 @felix
@@ -169,39 +169,135 @@ which have to be cited literally as shown. What if you wanted to load
 the keyword list from a file?
 
 You mean, like this?
-@felix
-var kws : Regdef::regex = Regdef::Alts(load("keywords.txt").split("\n"));
-regdef appl = " "* felix (kws) " "+ ffloat;
+@tangle re1.flx
+var data = "proc fun variant";
+var lines = split(data," ");
+var kws = unbox$ map (fun (x:string) => Regdef::String x) lines;
+var kws_r = kws.Regdef::Alts;
+println$ kws_r.str;
 @
-Here we constructed the alternatives term directly from a list of strings
-loaded from a file, and then lifted it into the grammar. As you can guess
-since the parser is building a @{regex} tree anyhow, the @{felix} term is
-a kind of escape of quotation which has no semantics, it just avoid
-translating the quoted term.
 
-And as you can see you can put Perl strings directly in there too
-using the @{Perl} constructor of the variant. Which of course
-is exactly what the @{perl} syntax element of the grammar does!
+@h2 Inline regex
+It is possible to build regex inline like this:
+@tangle re1.flx
+var cid2 = regexp ( cidlead cidtrail*);
+@
+which in this case is precisely equivalent to saying
+@felix
+regdef cide = cidlead | cidtrail*;
+@
+The parser switched to the regex syntax inside the parens.
+Remember, a @{regex} is just a simple variant that builds a term tree.
+The grammar that does all this is defined in the library; that is,
+in user space.
 
-SO you basically have a three level language system: a simple
-DSSL, the combinatorial form which is properly type checked,
-and a super lame <em>do not use except in emergency</em> form
-using strings with Perl encoded regexps.
+@h1 Pattern matching
+It is possible to pattern match with regexps. The ability to do
+this is quite general built in to the way the compiler works,
+rather than a feature of the regex DSSL: we enable user defined
+pattern matches using a feature of Felix pattern matching
+known as <em>higher order pattern matching</em>.
 
-The primary point to be demonsrated here is the <em>sub</em> part
-of the DSSL concept. We have a domain specific language, yes, but
-it integrates completely with Felix. This ensure all the power
-of the base language is available in the sub language, whilst
-the sub language grammar eliminates error prone and hard to read boilerplate
-although it might not fully cover all capabilities.
+The way pattern matches work in Felix requires two functions:
+<ol>
+<li>The <em>match checker</em> tests to see if a pattern matches the match argument</li>
+<li>The <em>extractor</em> fetches the argument of the variant constructor matched</li>
+</ol>
 
+The way this works with Felix data types is built in to the compiler,
+but there is a way to write your own checker and extractor functions:
+@tangle re1.flx
+// the match checker
+fun _match_ctor_re (r:RE2) (x:string) => x in r;
 
+// the extractor
+fun _ctor_arg_re (r:RE2) (x:string) =>
+   match Match (r,x) with
+   | Some y => y
+   // None case shouldn't happen!
+   endmatch
+;
 
+// test case
+match "Hello" with
+| re "H(ell)o".RE2 y =>  println$ y.1;
+endmatch;
+@
 
+In this code we invent a new pretend constructor @{re} which takes two arguments.
+The first is the pattern we want to consider, and the second is the data we're
+checking against. In our case the pattern is an @{RE2} and the data is a string;
+but the technique is fully general.
 
+The first function has a magic name used for checking is the string is in
+the regexp, the second provides the way to get data out of it. Notice the
+extractor is called <em>if, and only if</em> the match checker returns true.
 
+Therefore the word @{re} followed by a term of type @{RE2} will be treated
+as a pattern with one argument.
 
+Although the higher order pattern matching feature is not specific to
+regular expressions .. it was in fact added to the compiler specifically
+to support that use case. 
 
- 
+@h1  Iteration
+In Felix we have a concept of an iterator: it corresponds with
+the C++ notation of an input iterator. The library contains
+an iterator allowing regexps to find matching substrings of a string.
+Unlike @{Match} our iterator scans for the first match, and returns.
+If the iterator is called again, it finds the next match.
 
+Here's how to use it:
+@tangle re1.flx
+var kw = kws_r.Regdef::render.RE2;
+for xxv in iterator (kw, "proc blah fun proc") do
+  println$ xxv.0;
+done
+@
+
+Here's the implementation
+@felix
+gen iterator (r:RE2, var target:string) () : opt[varray[string]] = {
+  var emptystring = "";
+  var l = len target;
+  var s = StringPiece target;
+  var p1 = s.data;
+  var p = 0;
+  var n = NumberOfCapturingGroups(r)+1;
+  var v1 = varray[StringPiece] (n.size,StringPiece emptystring);
+  var v2 = varray[string] (n.size,"");
+again:>
+  var result = Match(r, s, p, UNANCHORED,v1.stl_begin, n);
+  if not result goto endoff;
+  for var i in 0 upto n - 1 do set(v2, i.size, string(v1.i)); done
+  var p2 = v1.0.data;
+  assert(v1.0.len.int > 0); // prevent infinite loop
+  p = (p2 - p1).int+v1.0.len.int;
+  yield Some v2;
+  goto again;
+endoff:>
+  return None[varray[string]];
+}
+@
+
+This uses a whole lot of features of the Google RE2 system
+which are lifted into Felix, such as the data type @{StringPiece}
+which is roughly a view of a string, and which I am not going
+to explain. 
+
+Rather the take away is that we can implement high level DSSL
+features based on a C/C++ library, by lifting the library API
+into Felix, more or less secretly, and then use them to implement
+the operations we actually want, with the syntax we actually want.
+
+In many case the core system deliberately has features to support
+this kind of modelling technology. In the code above, the key
+piece of magic is the @{yield} operation, which returns a value,
+but also saves the current location in the code, so that re-invoking
+the generator will restart the code with the same context and at the
+same point it previously left off.
+
+<em>Yielding Generators</em> are a common feature of many 
+languages in including Python and Rust. They are in fact a weak
+form of coroutine.
 
