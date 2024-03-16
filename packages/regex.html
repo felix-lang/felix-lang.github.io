@@ -765,64 +765,75 @@ share/lib/std/regex/regdef.flx</pre>
 <span class="lineno" id=line10></span>    | Perl of <span class="library" title="binding of C++ string type">string</span>
 <span class="lineno" id=line11></span>    ;
 <span class="lineno" id=line12></span>  
-<span class="lineno" id=line13></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> prec: regex -&gt; <span class="library" title="binding of C int type">int</span> =
-<span class="lineno" id=line14></span>    | Perl _ =&gt; 3
-<span class="lineno" id=line15></span>    | Alts _ =&gt; 3
-<span class="lineno" id=line16></span>    | Seqs _ =&gt; 2
-<span class="lineno" id=line17></span>    | String _ =&gt; 2
-<span class="lineno" id=line18></span>    | Rpt _ =&gt; 1
-<span class="lineno" id=line19></span>    | Charset _ =&gt; 0
-<span class="lineno" id=line20></span>    | Group _ =&gt; 0
-<span class="lineno" id=line21></span>    ;
-<span class="lineno" id=line22></span>  
-<span class="lineno" id=line23></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex_digit (i:<span class="library" title="binding of C int type">int</span>)=&gt;
-<span class="lineno" id=line24></span>      <span class="small_keyword" title="conditional">if</span> i&lt;10 <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C++ string type">string</span> (<span class="library" title="binding of C char type">char</span> (ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">"0"</span>) + i)) 
-<span class="lineno" id=line25></span>      <span class="small_keyword" title="conditional">else</span> <span class="library" title="binding of C++ string type">string</span> (<span class="library" title="binding of C char type">char</span> (ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">"A"</span>) + i - 10))
-<span class="lineno" id=line26></span>      <span class="small_keyword" title="conditional">endif</span>
-<span class="lineno" id=line27></span>    ;
-<span class="lineno" id=line28></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex2(c:<span class="library" title="binding of C char type">char</span>)=&gt;
-<span class="lineno" id=line29></span>      <span class="small_keyword" title="let binder">let</span> i = ord c <span class="small_keyword" title="membership operator, function mem">in</span>
-<span class="lineno" id=line30></span>      <span class="fstring">"\\x"</span> + hex_digit ( i / 16 ) + hex_digit ( i % 16 )
-<span class="lineno" id=line31></span>    ;
-<span class="lineno" id=line32></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> charset_quote(c:<span class="library" title="binding of C char type">char</span>)=&gt;
-<span class="lineno" id=line33></span>      <span class="small_keyword" title="conditional">if</span> c <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstvuwxyz"</span> <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C++ string type">string</span> c
-<span class="lineno" id=line34></span>      <span class="small_keyword" title="conditional">else</span> hex2 c
-<span class="lineno" id=line35></span>      <span class="small_keyword" title="conditional">endif</span>
-<span class="lineno" id=line36></span>    ;
-<span class="lineno" id=line37></span>  
-<span class="lineno" id=line38></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex(s:<span class="library" title="binding of C++ string type">string</span> <span class="small_keyword" title="predicative type constraint or precondition">when</span> <span class="library" title="number of elements in data structure">len</span> s &gt; 0uz)= {
-<span class="lineno" id=line39></span>      <span class="big_keyword" title="Define a mutable variable">var</span> r = <span class="fstring">""</span>; 
-<span class="lineno" id=line40></span>      <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> <span class="library" title="number of elements in data structure">len</span> s - 1uz <span class="small_keyword" title="imperative code begins">do</span>
-<span class="lineno" id=line41></span>        r += charset_quote s.[i];
-<span class="lineno" id=line42></span>      <span class="small_keyword" title="end of body">done</span>
-<span class="lineno" id=line43></span>      <span class="small_keyword" title="return">return</span> r; 
-<span class="lineno" id=line44></span>    }
-<span class="lineno" id=line45></span>  
-<span class="lineno" id=line46></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ngrp (s:<span class="library" title="binding of C++ string type">string</span>)=&gt; <span class="fstring">"(?:"</span>+s+<span class="fstring">")"</span>;
-<span class="lineno" id=line47></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cngrp (s:<span class="library" title="binding of C++ string type">string</span>, op: <span class="library" title="binding of C int type">int</span>, ip: <span class="library" title="binding of C int type">int</span>) =&gt; <span class="small_keyword" title="conditional">if</span> ip &gt; op <span class="small_keyword" title="conditional">then</span> ngrp (s) <span class="small_keyword" title="conditional">else</span> s <span class="small_keyword" title="conditional">endif</span>; 
+<span class="lineno" id=line13></span>    <span class="big_keyword" title="Provide an instance of a typeclass">instance</span> Str[regex] {
+<span class="lineno" id=line14></span>      <span class="big_keyword" title="Define a function with no side-effects">fun</span> <span class="library" title="Convert a value to a string">str</span> (x: regex) =&gt; <span class="small_keyword" title="match statement or expression">match</span> x <span class="small_keyword" title="type-class constraint">with</span>
+<span class="lineno" id=line15></span>      | Alts ls =&gt; <span class="fstring">"("</span> + cat <span class="fstring">" | "</span> (<span class="library" title="return data structure with function applied to each value">map</span> <span class="library" title="Convert a value to a string">str</span> of regex ls)  + <span class="fstring">")"</span>
+<span class="lineno" id=line16></span>      | Seqs ls =&gt; <span class="fstring">"("</span> + cat <span class="fstring">" "</span> (<span class="library" title="return data structure with function applied to each value">map</span> <span class="library" title="Convert a value to a string">str</span> of regex ls) + <span class="fstring">")"</span>
+<span class="lineno" id=line17></span>      | Rpt (r,min,max) =&gt; <span class="fstring">"Rpt("</span> + r.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">","</span>  + min.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">","</span> + max.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">")"</span> 
+<span class="lineno" id=line18></span>      | Group r =&gt; <span class="fstring">"Group("</span> + r.<span class="library" title="Convert a value to a string">str</span> + <span class="fstring">")"</span>
+<span class="lineno" id=line19></span>      | String r =&gt; <span class="fstring">"String("</span> + r.repr + <span class="fstring">")"</span>
+<span class="lineno" id=line20></span>      | Perl r =&gt; <span class="fstring">"Perl("</span> + r.repr + <span class="fstring">")"</span>
+<span class="lineno" id=line21></span>      | Charset r =&gt; <span class="fstring">"Charset("</span> + r.repr + <span class="fstring">")"</span>
+<span class="lineno" id=line22></span>      ;
+<span class="lineno" id=line23></span>    }
+<span class="lineno" id=line24></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> prec: regex -&gt; <span class="library" title="binding of C int type">int</span> =
+<span class="lineno" id=line25></span>    | Perl _ =&gt; 3
+<span class="lineno" id=line26></span>    | Alts _ =&gt; 3
+<span class="lineno" id=line27></span>    | Seqs _ =&gt; 2
+<span class="lineno" id=line28></span>    | String _ =&gt; 2
+<span class="lineno" id=line29></span>    | Rpt _ =&gt; 1
+<span class="lineno" id=line30></span>    | Charset _ =&gt; 0
+<span class="lineno" id=line31></span>    | Group _ =&gt; 0
+<span class="lineno" id=line32></span>    ;
+<span class="lineno" id=line33></span>  
+<span class="lineno" id=line34></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex_digit (i:<span class="library" title="binding of C int type">int</span>)=&gt;
+<span class="lineno" id=line35></span>      <span class="small_keyword" title="conditional">if</span> i&lt;10 <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C++ string type">string</span> (<span class="library" title="binding of C char type">char</span> (ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">"0"</span>) + i)) 
+<span class="lineno" id=line36></span>      <span class="small_keyword" title="conditional">else</span> <span class="library" title="binding of C++ string type">string</span> (<span class="library" title="binding of C char type">char</span> (ord (<span class="library" title="binding of C char type">char</span> <span class="fstring">"A"</span>) + i - 10))
+<span class="lineno" id=line37></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line38></span>    ;
+<span class="lineno" id=line39></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex2(c:<span class="library" title="binding of C char type">char</span>)=&gt;
+<span class="lineno" id=line40></span>      <span class="small_keyword" title="let binder">let</span> i = ord c <span class="small_keyword" title="membership operator, function mem">in</span>
+<span class="lineno" id=line41></span>      <span class="fstring">"\\x"</span> + hex_digit ( i / 16 ) + hex_digit ( i % 16 )
+<span class="lineno" id=line42></span>    ;
+<span class="lineno" id=line43></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> charset_quote(c:<span class="library" title="binding of C char type">char</span>)=&gt;
+<span class="lineno" id=line44></span>      <span class="small_keyword" title="conditional">if</span> c <span class="small_keyword" title="membership operator, function mem">in</span> <span class="fstring">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstvuwxyz"</span> <span class="small_keyword" title="conditional">then</span> <span class="library" title="binding of C++ string type">string</span> c
+<span class="lineno" id=line45></span>      <span class="small_keyword" title="conditional">else</span> hex2 c
+<span class="lineno" id=line46></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line47></span>    ;
 <span class="lineno" id=line48></span>  
-<span class="lineno" id=line49></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> render: regex -&gt; <span class="library" title="binding of C++ string type">string</span> =
-<span class="lineno" id=line50></span>    | Alts rs =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> 
-<span class="lineno" id=line51></span>     (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="binding of C++ string type">string</span>) (elt:regex)=&gt; 
-<span class="lineno" id=line52></span>       (<span class="small_keyword" title="conditional">if</span> acc == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> acc + <span class="fstring">"|"</span> <span class="small_keyword" title="conditional">endif</span>) + (render elt)) 
-<span class="lineno" id=line53></span>      <span class="fstring">""</span> rs
-<span class="lineno" id=line54></span>    | Seqs rs =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> 
-<span class="lineno" id=line55></span>      (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="binding of C++ string type">string</span>) (elt:regex)=&gt; acc + cngrp(render elt,2,prec elt))
-<span class="lineno" id=line56></span>      <span class="fstring">""</span> rs
-<span class="lineno" id=line57></span>    | Rpt (r,i,x) =&gt;
-<span class="lineno" id=line58></span>      <span class="small_keyword" title="conditional">if</span> i == 0 <span class="small_keyword" title="logical conjunction">and</span> x == -1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"*"</span>
-<span class="lineno" id=line59></span>      <span class="small_keyword" title="conditional">elif</span> i == 1 <span class="small_keyword" title="logical conjunction">and</span> x == -1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"+"</span>
-<span class="lineno" id=line60></span>      <span class="small_keyword" title="conditional">elif</span> i == 0 <span class="small_keyword" title="logical conjunction">and</span> x == 1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"?"</span>
-<span class="lineno" id=line61></span>      <span class="small_keyword" title="conditional">else</span>
-<span class="lineno" id=line62></span>        cngrp(render r,1,prec r) + <span class="fstring">"{"</span> + <span class="library" title="Convert a value to a string">str</span> i + <span class="fstring">","</span> + <span class="small_keyword" title="conditional">if</span> x &lt; 0 <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> <span class="library" title="Convert a value to a string">str</span> x <span class="small_keyword" title="conditional">endif</span> + <span class="fstring">"}"</span>
-<span class="lineno" id=line63></span>      <span class="small_keyword" title="conditional">endif</span>
-<span class="lineno" id=line64></span>  
-<span class="lineno" id=line65></span>    | String s =&gt; hex(s)
-<span class="lineno" id=line66></span>    | Charset s =&gt; <span class="fstring">"["</span> + hex s + <span class="fstring">"]"</span>
-<span class="lineno" id=line67></span>    | Group r =&gt; <span class="fstring">"("</span> + render r + <span class="fstring">")"</span>
-<span class="lineno" id=line68></span>    | Perl s =&gt; s
-<span class="lineno" id=line69></span>    ;
-<span class="lineno" id=line70></span>  }
+<span class="lineno" id=line49></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> hex(s:<span class="library" title="binding of C++ string type">string</span> <span class="small_keyword" title="predicative type constraint or precondition">when</span> <span class="library" title="number of elements in data structure">len</span> s &gt; 0uz)= {
+<span class="lineno" id=line50></span>      <span class="big_keyword" title="Define a mutable variable">var</span> r = <span class="fstring">""</span>; 
+<span class="lineno" id=line51></span>      <span class="small_keyword" title="for loop">for</span> <span class="big_keyword" title="Define a mutable variable">var</span> i <span class="small_keyword" title="membership operator, function mem">in</span> 0uz <span class="small_keyword" title="upwards counting for loop">upto</span> <span class="library" title="number of elements in data structure">len</span> s - 1uz <span class="small_keyword" title="imperative code begins">do</span>
+<span class="lineno" id=line52></span>        r += charset_quote s.[i];
+<span class="lineno" id=line53></span>      <span class="small_keyword" title="end of body">done</span>
+<span class="lineno" id=line54></span>      <span class="small_keyword" title="return">return</span> r; 
+<span class="lineno" id=line55></span>    }
+<span class="lineno" id=line56></span>  
+<span class="lineno" id=line57></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> ngrp (s:<span class="library" title="binding of C++ string type">string</span>)=&gt; <span class="fstring">"(?:"</span>+s+<span class="fstring">")"</span>;
+<span class="lineno" id=line58></span>    <span class="qualifier" title="Symbol visible only in enclosing module or typeclass namespace">private</span> <span class="big_keyword" title="Define a function with no side-effects">fun</span> cngrp (s:<span class="library" title="binding of C++ string type">string</span>, op: <span class="library" title="binding of C int type">int</span>, ip: <span class="library" title="binding of C int type">int</span>) =&gt; <span class="small_keyword" title="conditional">if</span> ip &gt; op <span class="small_keyword" title="conditional">then</span> ngrp (s) <span class="small_keyword" title="conditional">else</span> s <span class="small_keyword" title="conditional">endif</span>; 
+<span class="lineno" id=line59></span>  
+<span class="lineno" id=line60></span>    <span class="big_keyword" title="Define a function with no side-effects">fun</span> render: regex -&gt; <span class="library" title="binding of C++ string type">string</span> =
+<span class="lineno" id=line61></span>    | Alts rs =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> 
+<span class="lineno" id=line62></span>     (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="binding of C++ string type">string</span>) (elt:regex)=&gt; 
+<span class="lineno" id=line63></span>       (<span class="small_keyword" title="conditional">if</span> acc == <span class="fstring">""</span> <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> acc + <span class="fstring">"|"</span> <span class="small_keyword" title="conditional">endif</span>) + (render elt)) 
+<span class="lineno" id=line64></span>      <span class="fstring">""</span> rs
+<span class="lineno" id=line65></span>    | Seqs rs =&gt; <span class="library" title="accumulated values of data structure from left into initial value using function">fold_left</span> 
+<span class="lineno" id=line66></span>      (<span class="big_keyword" title="Define a function with no side-effects">fun</span> (acc:<span class="library" title="binding of C++ string type">string</span>) (elt:regex)=&gt; acc + cngrp(render elt,2,prec elt))
+<span class="lineno" id=line67></span>      <span class="fstring">""</span> rs
+<span class="lineno" id=line68></span>    | Rpt (r,i,x) =&gt;
+<span class="lineno" id=line69></span>      <span class="small_keyword" title="conditional">if</span> i == 0 <span class="small_keyword" title="logical conjunction">and</span> x == -1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"*"</span>
+<span class="lineno" id=line70></span>      <span class="small_keyword" title="conditional">elif</span> i == 1 <span class="small_keyword" title="logical conjunction">and</span> x == -1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"+"</span>
+<span class="lineno" id=line71></span>      <span class="small_keyword" title="conditional">elif</span> i == 0 <span class="small_keyword" title="logical conjunction">and</span> x == 1 <span class="small_keyword" title="conditional">then</span> ngrp (render r) + <span class="fstring">"?"</span>
+<span class="lineno" id=line72></span>      <span class="small_keyword" title="conditional">else</span>
+<span class="lineno" id=line73></span>        cngrp(render r,1,prec r) + <span class="fstring">"{"</span> + <span class="library" title="Convert a value to a string">str</span> i + <span class="fstring">","</span> + <span class="small_keyword" title="conditional">if</span> x &lt; 0 <span class="small_keyword" title="conditional">then</span> <span class="fstring">""</span> <span class="small_keyword" title="conditional">else</span> <span class="library" title="Convert a value to a string">str</span> x <span class="small_keyword" title="conditional">endif</span> + <span class="fstring">"}"</span>
+<span class="lineno" id=line74></span>      <span class="small_keyword" title="conditional">endif</span>
+<span class="lineno" id=line75></span>  
+<span class="lineno" id=line76></span>    | String s =&gt; hex(s)
+<span class="lineno" id=line77></span>    | Charset s =&gt; <span class="fstring">"["</span> + hex s + <span class="fstring">"]"</span>
+<span class="lineno" id=line78></span>    | Group r =&gt; <span class="fstring">"("</span> + render r + <span class="fstring">")"</span>
+<span class="lineno" id=line79></span>    | Perl s =&gt; s
+<span class="lineno" id=line80></span>    ;
+<span class="lineno" id=line81></span>  }
 </pre></p></div><h1 id='Lexer_h'><img src='/share/src/web/images/minus.gif' id='Lexer' onclick='toggle(this,"Lexer_d")' alt='+'/> 5 Lexer</h1><div id='Lexer_d' style='display:block'>
 <pre class='inclusion'>
 share/lib/std/regex/lexer.flx</pre>

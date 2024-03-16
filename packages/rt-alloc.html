@@ -1,0 +1,916 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Real Time Allocators</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Real Time Allocators",
+"What does an allocator look like?",
+"What does suballocation imply?",
+"Who allocates the allocator?",
+"A smart pointer to allocators, part 1.",
+"The allocator abstraction",
+"The smart pointer, part 2.",
+"Concrete objects",
+"Object Constructors",
+"The malloc free allocators",
+"Bump allocators",
+"Static bump allocator",
+"Dynamic bump allocator",
+"Block allocators",
+"Thread Safe allocator",
+"Ring Buffers"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Real Time Allocators_h')"> <a href="#Real_Time_Allocators_h">Real Time Allocators</a></div>
+      <div class=sm id=menu1>
+      <div class=m2><a href="#What_does_an_allocator_look_like?_h">What does an allocator look like?</a></div>
+      <div class=m2><a href="#What_does_suballocation_imply?_h">What does suballocation imply?</a></div>
+      <div class=m2><a href="#Who_allocates_the_allocator?_h">Who allocates the allocator?</a></div>
+      <div class=m2><a href="#A_smart_pointer_to_allocators,_part_1._h">A smart pointer to allocators, part 1.</a></div>
+      <div class=m2><a href="#The_allocator_abstraction_h">The allocator abstraction</a></div>
+      <div class=m2><a href="#The_smart_pointer,_part_2._h">The smart pointer, part 2.</a></div>
+      <div class=m2><a href="#Concrete_objects_h">Concrete objects</a></div>
+      <div class=m2><a href="#Object_Constructors_h">Object Constructors</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#The malloc free allocators_h')"> <a href="#The_malloc_free_allocators_h">The malloc free allocators</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Bump allocators_h')"> <a href="#Bump_allocators_h">Bump allocators</a></div>
+      <div class=sm id=menu3>
+      <div class=m2><a href="#Static_bump_allocator_h">Static bump allocator</a></div>
+      <div class=m2><a href="#Dynamic_bump_allocator_h">Dynamic bump allocator</a></div>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Block allocators_h')"> <a href="#Block_allocators_h">Block allocators</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Thread Safe allocator_h')"> <a href="#Thread_Safe_allocator_h">Thread Safe allocator</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Ring Buffers_h')"> <a href="#Ring_Buffers_h">Ring Buffers</a></div>
+      <div class=sm id=menu6>
+      </div>
+    <script>counter_max=6;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Real_Time_Allocators_h'><img src='/share/src/web/images/minus.gif' id='Real Time Allocators' onclick='toggle(this,"Real_Time_Allocators_d")' alt='+'/> 1 Real Time Allocators</h1><div id='Real_Time_Allocators_d' style='display:block'>
+<p>In programming systems including C and C++, user space allocation is usually handled
+by a universal allocator such as <code>malloc()</code>. The operation time and memory consumption
+of these systems may be very good but it is rarely subject to bounds required
+for real time performance assurances. In addition, such systems not only may but
+generally must occasionally request more memory from the operating system,
+and at unpredictable times.
+</p><p>Our objective here is to produce a more manifestly performance bound allocation
+system by observing that all programs are finite state machines, and by
+calculating the memory required by a program we can allocate that memory
+once and for all at start up.
+</p><p>We then provide a collection of sub-allocators which can dispense and
+retrieve some of this memory, which have predictable performance
+characteristics, and which can be chosen by the application developer
+to meet their needs in various circumstances.
+</p><p>Before we start I will provide a single motivating use case where
+complex real time processing is required: real time audio signal processing.
+These systems can be required to do various tasks from the fairly simple,
+such as mixing, to very difficult, such as frequency shifting. 
+Irrespective of the task, blocks of data are delivered as inputs and
+synthesised blocks of data must be delivered as outputs with a bounded
+maximum lag; ideally less than 0.1 seconds. Otherwise a disc jockey, for
+example, would lose control of the sound.
+</p><p>In such a system a lag due to, for example, memory allocation delays,
+would be catastrophic: first it would lead to a total loss of sound
+for a brief period, and then it would require discarding some input
+in order to catch up. Together this would cause a very signiciant
+glitch in the sound continuity which could actually damage not only
+equipment but human ears as well.
+</p><p>There are of course numerous applications requiring real time signal
+processing including target acquisition and tracking in aviation,
+and safety monitoring in a nuclear power plant.
+</p><h2 id='What_does_an_allocator_look_like?_h'><img src='/share/src/web/images/minus.gif' id='What does an allocator look like?' onclick='toggle(this,"What_does_an_allocator_look_like?_d")' alt='+'/> 1.1 What does an allocator look like?</h2><div id='What_does_an_allocator_look_like?_d' style='display:block'>
+<p>An allocator object in a C++ environment requires four core operations.
+<ol>
+<li> Construction</li>
+<li> Allocation method</li>
+<li> Deallocation method</li>
+<li> Destructor</li>
+</ol>
+</p><p>As is usual in such systems the constructor chosen will determine the
+performance characteristics, whilst the other methods will be virtual
+functions so that the programmer can try different allocators 
+in different circumstances. In particular during development a developer
+might use a generic alloctor with no interest in performance,
+since it seems important to get the semantics of their application right first.
+</p><p>Later, a generic allocator with profiling might be used to help decide
+which kinds of allocators to use where and with what bounds, 
+and then delegating allocators that monitor correctness at some
+expense, until the final performance allocators are used.
+</p></div><h2 id='What_does_suballocation_imply?_h'><img src='/share/src/web/images/minus.gif' id='What does suballocation imply?' onclick='toggle(this,"What_does_suballocation_imply?_d")' alt='+'/> 1.2 What does suballocation imply?</h2><div id='What_does_suballocation_imply?_d' style='display:block'>
+<p>In our system, we have to get memory from somewhere and there are two case:
+<ol>
+<li> From outside our system</li>
+<li> From another allocator</li>
+</ol>
+</p><p>An allocator of the first kind is known as a <em>root allocator</em>.
+We will later provide a root allocator called <code>malloc_free</code> which use
+the <code>malloc</code> and <code>free</code> functions from the C standard library
+to obtain and release memory. Obviously in different application domains
+other roots may be provided.
+</p><p>An allocator of the second kind is known as a <code>suballocator</code>.
+</p><p>There are two kinds of allocators.
+<ol> 
+<li>An <em>static</em> allocator is given a fixed amount of storage
+on construction and never requests any more.</li>
+<li>A <em>delegating</em> suballocator may request more memory
+during its lifetime.</em>
+</ol>
+</p><p>In order to request more memory, a delegating allocator requires a set least
+of references to other allocators, its delegates.  Usually there will only
+be one delegate, however we will present a fairly generally allocator later
+which uses an array of delegates.
+</p></div><h2 id='Who_allocates_the_allocator?_h'><img src='/share/src/web/images/minus.gif' id='Who allocates the allocator?' onclick='toggle(this,"Who_allocates_the_allocator?_d")' alt='+'/> 1.3 Who allocates the allocator?</h2><div id='Who_allocates_the_allocator?_d' style='display:block'>
+<p>Since an allocator is an object, its store was allocated by another allocator.
+There are three special case we need to think about: 
+<ol>
+<li>it was allocated in static storage,</li>
+<li>it was allocated on the machine stack, or, </li>
+<li>it was allocated by a foreign allocator.</li>
+</ol>
+Other than that, another of our allocators, possibly a root, allocated it,
+called the <em>parent</em>.
+</p><p>Now whoever allocated it may chose to share it with other components,
+and may indeed disappear, in which case there is a danger that the parent allocator
+is forgotten, in which case the child cannot be deallocated.
+</p><p>However if we're using a reference counting system to manage it,
+the allocator requires two things: 
+<ol>
+<li>a reference count</li>
+<li>a reference to the parent</li>
+</ol>
+</p><p>In this case, the smart pointers managing it will do their usual thing,
+but when the last reference to it is about to be destroyed, it can
+delete the object using the parent allocator refered to in the object itself.
+Of course we could put that informating into the smart pointers instead
+but that seems wasteful.
+</p></div><h2 id='A_smart_pointer_to_allocators,_part_1._h'><img src='/share/src/web/images/minus.gif' id='A smart pointer to allocators, part 1.' onclick='toggle(this,"A_smart_pointer_to_allocators,_part_1._d")' alt='+'/> 1.4 A smart pointer to allocators, part 1.</h2><div id='A_smart_pointer_to_allocators,_part_1._d' style='display:block'>
+<p>We're now going to provide a reference counting smart pointer
+specialised to allocators. We have to split the code into two parts
+because there is a circular relation between the allocator reference
+type and the allocator it refers to.
+</p><p>A note on design here: there is deliberately no privacy.
+The components here are for experts designing high performance libraries.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/allocator.hpp</pre>
+<p><pre class='cppbg'><span class="comment">// forward decl
+</span><span class="big_keyword">struct</span> allocator_t; 
+
+<span class="comment">// smart pointer to allocators
+</span><span class="big_keyword">struct</span> alloc_ref_t {
+  allocator_t *allocator;
+
+  <span class="comment">// an reference is constructed from a pointer to an allocator
+</span>  <span class="comment">// the constructor of which is required to set the reference
+</span>  <span class="comment">// count to 1
+</span>  explicit alloc_ref_t(allocator_t *p) : allocator(p) {} 
+
+  <span class="comment">// Uninitialised references refer to nothing 
+</span>  alloc_ref_t() : allocator(nullptr) {}    
+
+  <span class="comment">// the usual ways of gaining access to the allocator
+</span>  allocator_t *operator-&gt;()<span class="qualifier">const</span> { <span class="small_keyword">return</span> allocator; }
+  bool non_null() <span class="qualifier">const</span> { <span class="small_keyword">return</span> allocator != nulptr; }
+
+  <span class="comment">// rvalue move, does not change reference counts
+</span>  <span class="comment">// ensures the source is nullified
+</span>  alloc_ref_t(alloc_ref_t &amp;&amp;p) {
+    <span class="small_keyword">if</span>(p.allocator) { 
+      allocator = p.allocator; 
+      p.allocator = nullptr; 
+    }
+    else allocator = nullptr;
+  } 
+
+  <span class="comment">// lvalue copy has to be defered
+</span>  <span class="comment">// because it adds 1 to the reference count
+</span>  alloc_ref_t(alloc_ref_t &amp;p);
+
+  <span class="comment">// rvalue assign
+</span>  <span class="comment">// PROOF of correctness:
+</span>  <span class="comment">//   If the source allocator and target allocator are the same
+</span>  <span class="comment">//   then the reference count must be at least 2
+</span>  <span class="comment">//   so destroying the target (reducing the ref count by 1) will not
+</span>  <span class="comment">//   destroy the allocator.
+</span>  <span class="qualifier">void</span> operator= (alloc_ref_t &amp;&amp;p) {
+    <span class="small_keyword">if</span> (&amp;p!=this) { <span class="comment">// ignore self assign
+</span>      this-&gt;~alloc_ref_t(); <span class="comment">// destroy target
+</span>      new(this) alloc_ref_t(::<span class="small_keyword">std</span>::move(p)); <span class="comment">// move source to target
+</span>    }
+  } <span class="comment">// rass
+</span>
+  <span class="comment">// lvalue assign
+</span>  <span class="qualifier">void</span> operator= (alloc_ref_t &amp;p) { 
+    <span class="small_keyword">if</span>(&amp;p!=this) { <span class="comment">// ignore self assign
+</span>      this-&gt;~alloc_ref_t(); <span class="comment">// destroy target
+</span>      new(this) alloc_ref_t(p); <span class="comment">// copy source to target
+</span>    }
+  } <span class="comment">// lass
+</span> 
+  <span class="comment">// destructor has to be defered
+</span>  <span class="comment">// uses parent allocator passed to allocator on construction to delete it
+</span>  ~alloc_ref_t();
+};
+</pre></p></div><h2 id='The_allocator_abstraction_h'><img src='/share/src/web/images/minus.gif' id='The allocator abstraction' onclick='toggle(this,"The_allocator_abstraction_d")' alt='+'/> 1.5 The allocator abstraction</h2><div id='The_allocator_abstraction_d' style='display:block'>
+<p>Now we will present the allocator abstraction. 
+There are two concrete data types required for all allocator in our
+design: a reference count, and a reference to the parent allocator.
+</p><p>The parent may not exist, if the allocator had a foreign parent,
+or it was not heap allocated, in which case the parent variable
+will just be null.
+</p><p>There is an onerous requirement here: when some code uses
+a parent allocator to allocate the store for this allocator,
+the parent must be passed to the allocator explicitly, so that the
+same parent can be used to dispose of the store on deletion.
+The pointer used for that has to be our reference counting
+smart pointer, and that will increment the reference count
+of the parent allocator to ensure it remains live whilst 
+its child does.
+</p><p>In other words parents must always outlive their children.
+</p><p>As a final note, there is an important method <code>size()</code>
+which reports the size in bytes of the object. In our
+system this will be a universal requirement for all 
+polymorphic objects, and it's definition is boilerplate.
+It's very unfortunate that C++ <code>type_info</code> is deficient
+and doesn't provide a way to obtain this information.
+</p><p>Some allocator systems such as <code>malloc_free</code> record
+the size of each allocation internally when <code>malloc()</code> is called, 
+so that the size does not have to be provided when <code>free()</code> is
+called. However most of our allocators do not store the size,
+and it must be provided to the <code>deallocate()</code> method.
+</p><p>As a final note which will alarm the astute 
+reader:  <code>allocate()</code>, <code>deallocate()</code>
+and the destructor do not have any specified semantics!
+</p><p>You may think <code>allocate()</code> should be required to return
+a pointer to some memory, but this is not so. The allocator
+may have run out of resources. It could return garbage
+or a <code>nulptr</code>.
+</p><p>Similarly <code>deallocate</code> does not have to do anything
+in general. For example a <em>bump allocator</em> just
+bumps a pointer to perform an allocation and ignores
+any <code>deallocate()</code> requests. Instead it may return
+a whole block of memory to its parent in the destructor.
+</p><p>So, our objective is to provide a uniform interface,
+but the actual semantics depend on the concrete allocator
+actually constructed, and that includes data passed
+to the allocator, such the size of a block that it
+may be programmed to mahage.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/allocator.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> allocator_t {
+  alloc_ref_t <span class="qualifier">const</span> parent;
+
+  <span class="comment">// parentless construction
+</span>  allocator_t() : refcnt(1) {}
+
+  <span class="comment">// construction by a parent
+</span>  allocator_t(alloc_ref_t p) : parent(p), refcnt(1) {}
+
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> *allocate(size_t)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t)=0;
+  <span class="qualifier">virtual</span> ~allocator_t(){}
+
+  <span class="comment">// must report the size in bytes of the object
+</span>  <span class="qualifier">virtual</span> size_t size()<span class="qualifier">const</span>=0;
+
+<span class="qualifier">private</span>:
+  <span class="comment">// self destruct
+</span>  <span class="qualifier">void</span> suicide();
+  
+  ::<span class="small_keyword">std</span>::atomic&lt;size_t&gt; refcnt;
+  friend <span class="big_keyword">class</span> alloc_ref_t;
+};
+</pre></p><p>The parent of the allocator is publically available so that it can be
+used to create sibling objects; but it is immutable to ensure the correct
+allocator is used to recover the object's store.
+</p></div><h2 id='The_smart_pointer,_part_2._h'><img src='/share/src/web/images/minus.gif' id='The smart pointer, part 2.' onclick='toggle(this,"The_smart_pointer,_part_2._d")' alt='+'/> 1.6 The smart pointer, part 2.</h2><div id='The_smart_pointer,_part_2._d' style='display:block'>
+<p>Now we have declared the reference count we can complete the
+smart pointer definition. The tricky bit is the destructor because
+it will decrement the reference count, and if the result is zero,
+it also has to delete the refered to allocator. We do that by asking
+the allocator to suicide. 
+</p><pre class='inclusion'>
+share/lib/rtl/rt/allocator.hpp</pre>
+<p><pre class='cppbg'><span class="comment">// lvalue copy 
+</span>alloc_ref_t::alloc_ref_t(alloc_ref_t &amp;p) {
+  <span class="small_keyword">if</span>(p.allocator) ++p.allocator-&gt;refcnt;
+  allocator = p.allocator;
+}
+
+<span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+<span class="qualifier">void</span> delete_csp_polymorphic_object (T *object, alloc_ref_t a) {
+  object-&gt;~T(); 
+  <span class="small_keyword">if</span>(a.non_null()) a-&gt;deallocate(object, object-&gt;size()); 
+}
+
+allocator_t::suicide() { 
+  delete_csp_polymorphic_object(this, parent); 
+}
+
+<span class="comment">// destructor
+</span>alloc_ref_t::~alloc_ref_t() {
+  <span class="small_keyword">if</span>(allocator) {
+    <span class="small_keyword">if</span>(allocator-&gt;refcnt == 1) 
+      allocator-&gt;suicide();
+    else 
+      --allocator-&gt;refcnt;
+  }
+}
+</pre></p></div><h2 id='Concrete_objects_h'><img src='/share/src/web/images/minus.gif' id='Concrete objects' onclick='toggle(this,"Concrete_objects_d")' alt='+'/> 1.7 Concrete objects</h2><div id='Concrete_objects_d' style='display:block'>
+<p>The <code>delete_csp_polymorphic_object()</code> function above will work
+for all our kind of polymorphic objects, but we need a method
+for non-polymorphic objects too.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/allocator.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
+<span class="qualifier">void</span> delete_concrete_object (T *object, alloc_ref_t a) { 
+  object-&gt;~T(); 
+  <span class="small_keyword">if</span>(a.get()) a-&gt;deallocate(object, sizeof(T)); 
+};
+</pre></p></div><h2 id='Object_Constructors_h'><img src='/share/src/web/images/minus.gif' id='Object Constructors' onclick='toggle(this,"Object_Constructors_d")' alt='+'/> 1.8 Object Constructors</h2><div id='Object_Constructors_d' style='display:block'>
+<p>Now we need the usual wrapper method for an allocator.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/allocator.hpp</pre>
+<p><pre class='cppbg'><span class="qualifier">void</span> *operator new(size_t amt, alloc_ref_t&amp; a) { <span class="small_keyword">return</span> a-&gt;allocate (amt); } 
+</pre></p></div></div><h1 id='The_malloc_free_allocators_h'><img src='/share/src/web/images/minus.gif' id='The malloc free allocators' onclick='toggle(this,"The_malloc_free_allocators_d")' alt='+'/> 2 The malloc free allocators</h1><div id='The_malloc_free_allocators_d' style='display:block'>
+<p>So here is our basic root alloctor:
+</p><pre class='inclusion'>
+share/lib/rtl/rt/malloc_free.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> malloc_free_allocator_t : <span class="qualifier">public</span> allocator_t {
+  malloc_free_allocator_t () : allocator_t() {} <span class="comment">// no parent
+</span>  size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+  <span class="qualifier">void</span> *allocate(size_t n) override { 
+    auto p = malloc(n); 
+    <span class="small_keyword">return</span> p; 
+  }
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t n) override { free(p); }
+  ~malloc_free_allocator_t() override {}
+};
+
+</pre></p></div><h1 id='Bump_allocators_h'><img src='/share/src/web/images/minus.gif' id='Bump allocators' onclick='toggle(this,"Bump_allocators_d")' alt='+'/> 3 Bump allocators</h1><div id='Bump_allocators_d' style='display:block'>
+<p>A bump allocator just bumps a pointer to some store on an allocation
+request. It ignores deallocations.
+</p><p>There are several kinds of bump alloctor.
+</p><h2 id='Static_bump_allocator_h'><img src='/share/src/web/images/minus.gif' id='Static bump allocator' onclick='toggle(this,"Static_bump_allocator_d")' alt='+'/> 3.1 Static bump allocator</h2><div id='Static_bump_allocator_d' style='display:block'>
+<p>The static bump allocator is just passed a pointer to bump.
+There is no overrun check, deallocation requests are ignored,
+there is no parent, and the store is not freed
+</p><pre class='inclusion'>
+share/lib/rtl/rt/bump.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> <span class="qualifier">static</span>_bump_allocator_t : <span class="qualifier">public</span> allocator_t {
+  <span class="qualifier">char</span> *p;
+  <span class="qualifier">static</span>_bump_allocator_t (<span class="qualifier">void</span> *q) : allocator_t(), p((<span class="qualifier">char</span> *)q) {}
+  <span class="qualifier">void</span> *allocate(size_t n) override { <span class="qualifier">void</span> *q = p; p += n; <span class="small_keyword">return</span> q; }
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t) override {}
+  size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+};
+</pre></p></div><h2 id='Dynamic_bump_allocator_h'><img src='/share/src/web/images/minus.gif' id='Dynamic bump allocator' onclick='toggle(this,"Dynamic_bump_allocator_d")' alt='+'/> 3.2 Dynamic bump allocator</h2><div id='Dynamic_bump_allocator_d' style='display:block'>
+<p>The dynamic bump allocator has a parent from which it requests a single
+store on construction, and never again.
+</p><p>There is no overrun check, deallocation requests are ignored,
+but the destructor returns the store to the parent.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/bump.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> dynamic_bump_allocator_t : <span class="qualifier">public</span> allocator_t {
+  <span class="qualifier">void</span> *base;
+  <span class="qualifier">char</span> *p;
+  size_t amt;
+  dynamic_bump_allocator_t (alloc_ref_t parent, size_t n) : 
+    allocator_t(parent), amt(n) {
+      base=parent-&gt;allocate(amt);
+      p = base
+   }
+
+  <span class="qualifier">void</span> *allocate(size_t n) override { <span class="qualifier">void</span> *q = p; p += n; <span class="small_keyword">return</span> q; }
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t) override {}
+  size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); } 
+  ~dynamic_bump_allocator { parent-&gt;deallocate(base, amt); }
+};
+</pre></p></div></div><h1 id='Block_allocators_h'><img src='/share/src/web/images/minus.gif' id='Block allocators' onclick='toggle(this,"Block_allocators_d")' alt='+'/> 4 Block allocators</h1><div id='Block_allocators_d' style='display:block'>
+<p>A block allocator is one which can only supply a single block size,
+and so ignores the size parameter of an allocation requrest.
+However, deallocations put the argument block into a freelist
+which can be used to service a subsequent allocation request.
+</p><p>The simplest variant is a bump allocator with an added freelist.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/block.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> <span class="qualifier">static</span>_block_allocator_t : <span class="qualifier">public</span> allocator_t {
+  <span class="qualifier">char</span> *p;
+  <span class="qualifier">void</span> *freelist;
+  size_t block_size;
+
+  <span class="qualifier">static</span>_block_allocator_t (<span class="qualifier">void</span> *q, size_t n) : 
+    allocator_t(), p((<span class="qualifier">char</span> *)q), freelist(nulptr), block_size(n)
+  {}
+  <span class="qualifier">void</span> *allocate(size_t n) override { 
+    <span class="small_keyword">if</span>(freelist) {
+      auto p = freelist;
+      freelist = *(<span class="qualifier">void</span>**)freelist;
+      <span class="small_keyword">return</span> p;
+    }
+    else {
+      <span class="qualifier">void</span> *q = p;
+      p += block_size;
+      <span class="small_keyword">return</span> q;
+    } 
+  }
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *q, size_t) override {
+    *(<span class="qualifier">void</span>**)q = freelist;
+    freelist = q;
+  }
+  size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+};
+</pre></p></div><h1 id='Thread_Safe_allocator_h'><img src='/share/src/web/images/minus.gif' id='Thread Safe allocator' onclick='toggle(this,"Thread_Safe_allocator_d")' alt='+'/> 5 Thread Safe allocator</h1><div id='Thread_Safe_allocator_d' style='display:block'>
+<p>When we design allocators they're usually single thread only
+for performance reasons. Even in many multi-threaded applications 
+only a single thread can access a given allocator. But if we want
+to share an allocator, we can use a thread safety adaptor:
+</p><pre class='inclusion'>
+share/lib/rtl/rt/ts_allocator.hpp</pre>
+<p><pre class='cppbg'><span class="big_keyword">struct</span> ts_allocator_t : <span class="qualifier">public</span> allocator_t {
+  alloc_ref_t delegate;
+  ::<span class="small_keyword">std</span>::atomic_flag lk;
+
+  ts_allocator_t (alloc_ref_t parent, alloc_ref_t d) : 
+     allocator_t(parent), delegate(d), lk(false) 
+  {}
+
+  <span class="qualifier">void</span> lock() { <span class="small_keyword">while</span>(lk.test_and_set(::<span class="small_keyword">std</span>::memory_order_acquire)); }
+  <span class="qualifier">void</span> unlock() { lk.clear(::<span class="small_keyword">std</span>::memory_order_release); }
+
+  <span class="qualifier">void</span> *allocate(size_t n) { 
+    lock(); 
+    <span class="qualifier">void</span> *result =  delegate-&gt;allocate(n); 
+    unlock(); 
+    <span class="small_keyword">return</span> result; 
+  }
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t n) { 
+    lock(); 
+    delegate-&gt;deallocate(p,n); 
+    unlock(); 
+  }
+};
+</pre></p><p>This allocator simply delegates to a specified allocator, but does so inside
+the scope of a spinlock. Note that reference counts are already atomic.
+</p><p>the destruction process is not protected because an allocator can only be
+destroyed when there is only a single reference left. Similarly,
+only a single thread can construct the allocator.
+</p></div><h1 id='Ring_Buffers_h'><img src='/share/src/web/images/minus.gif' id='Ring Buffers' onclick='toggle(this,"Ring_Buffers_d")' alt='+'/> 6 Ring Buffers</h1><div id='Ring_Buffers_d' style='display:block'>
+<p>A ring buffer is an array with sequential indexing modulo the array size.
+An allocator can use an array of pointers to fixed sized blocks.
+The principal advantage of a ring buffer is that the allocation by 
+popping the tail and deallocation by pushing at the head can both
+be done without locks, by using the <code>CAS</code> or <code>compare_and_swap</code>
+operation.
+</p><p>We have an array <code>a</code> of size <code>n</code> and
+two indices <code>tail</code> and <code>head</code>. The single threaded operation
+to allocate a block is
+</p><p><pre class="prefmtbg">  void *pop() {
+    void *p = a[tail];
+    tail = (tail + 1) % n;
+    return p;
+  }
+</pre></p><p>and to deallocate
+</p><p><pre class="prefmtbg">  void push(void *p) {
+    a[head] = p;
+    head = (head + 1) % n;  
+  }
+</pre></p><p>In general there is a danger the pop operation will advance past
+the head and fetch garbage, or that the push operation will advance
+past the tail, and overwrite a value leading to a leak.
+</p><p>The first worry is dismissed by requiring the limit to the number
+of blocks that can be allocated at once be the array size n:
+the developer has to find a suitable bound for the code and ensure
+that n is big enough.
+</p><p>The second worry can be dismissed by requiring only blocks
+allocated from this ring buffer can be deallocated.
+</p><p>At worst, the head and tail can then be equal. If the buffer
+is full, the next operation must be an allocation, whereas
+if the buffer is empty, it must be a deallocation. Therefore
+we do not need to know if the buffer is full or empty.
+</p><p>Now the operations we exhibited are not thread safe. So here is how
+we fix that. Consider <code>pop</code> first. We first fetch the <code>tail</code> variable
+to a local variable. Next, we fetch the array value at this location.
+Next, we create a new local variable, <code>new_tail</code> which is the local
+copy of tail plus 1 modulo n.
+</p><p>Now we do a compare and swap operation on tail, with the local copy
+of tail as the comparator, and the new tail as the value to be stored.
+The operation will store the new tail value into tail if and only if
+the current value is equal to the comparator and return true if it 
+succeeded or false otherwise.
+</p><p>In the true case we're done and can return the fetched pointer,
+otherwise another thread got in there ahead of us, and we loop around
+and retry the whole operation.
+</p><p>Although this is a spin loop, the critical difference is that the compare
+and store are uninterruptable, whereas a thread holding a lock can be
+pre-empted leaving the lock held, and preventing any progress until
+the lock holding thread is resumed.
+</p><p>The <code>push</code> operation is similar. We can observe that these operations
+are independent and could occur simultaneously.
+</p><p>In general, ring buffer operations as described can fail, and obviously
+cannot be lock free: extra code is needed to prevent over or underflow.
+However by specification neither of these things can happen in our application.
+</p><p>It should be noted that whilst our operations are lock free, this only means
+at least one thread is always making progress. A particular thread my spin 
+forever if it loses the race every time it tries. Therefore, the operations
+are not in fact real time, since all real time operations must be bounded.
+</p><p>There is, however, a way to obtain real time behaviour, by introducing
+a delay in a thread after every success of sufficient length. In this
+case eventually all contenders but the last will be delayed and the last
+contender will then succeed. The delay can be simple counted spinloop.
+</p><p>However in most applications, for most operations,
+there is no need for an artificial delay to be introduced,
+because most threads will have sufficient work to do before the
+next request anyhow. Care needs to be taken if threads are running
+very tight loops requiring lots of allocations and deallocations;
+in particular a loop which simply allocates a block and then 
+immediately deallocates it would cause a problem.
+</p><p>Such cases probably won't occur in real programs, but almost
+certainly <em>will</em> occur in test cases!
+</p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+
