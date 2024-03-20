@@ -320,7 +320,9 @@ var allbuttons = [
 "Dynamic bump allocator",
 "Block allocators",
 "Thread Safe allocator",
-"Ring Buffers"
+"Ring Buffers",
+"SYSTEM ALLOCATOR",
+"test"
 ];
 function expand_all(dummy)
 {
@@ -407,7 +409,13 @@ function mouseout(id)
       <div class=m1 onclick="mshow('menu6','#Ring Buffers_h')"> <a href="#Ring_Buffers_h">Ring Buffers</a></div>
       <div class=sm id=menu6>
       </div>
-    <script>counter_max=6;</script>
+      <div class=m1 onclick="mshow('menu7','#SYSTEM ALLOCATOR_h')"> <a href="#SYSTEM_ALLOCATOR_h">SYSTEM ALLOCATOR</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#test_h')"> <a href="#test_h">test</a></div>
+      <div class=sm id=menu8>
+      </div>
+    <script>counter_max=8;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -519,28 +527,19 @@ but that seems wasteful.
 specialised to allocators. We have to split the code into two parts
 because there is a circular relation between the allocator reference
 type and the allocator it refers to.
-</p><p>A note on design here: there is deliberately no privacy.
-The components here are for experts designing high performance libraries.
 </p><pre class='inclusion'>
 share/lib/rtl/rt/allocator.hpp</pre>
-<p><pre class='cppbg'><span class="comment">// forward decl
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> ALLOCATOR
+#<span class="preproc">define</span> ALLOCATOR
+#<span class="preproc">include</span> <span class="fstring">&lt;memory&gt;</span>
+
+<span class="comment">// forward decl
 </span><span class="big_keyword">struct</span> allocator_t; 
 
 <span class="comment">// smart pointer to allocators
 </span><span class="big_keyword">struct</span> alloc_ref_t {
-  allocator_t *allocator;
-
-  <span class="comment">// an reference is constructed from a pointer to an allocator
-</span>  <span class="comment">// the constructor of which is required to set the reference
-</span>  <span class="comment">// count to 1
-</span>  explicit alloc_ref_t(allocator_t *p) : allocator(p) {} 
-
   <span class="comment">// Uninitialised references refer to nothing 
 </span>  alloc_ref_t() : allocator(nullptr) {}    
-
-  <span class="comment">// the usual ways of gaining access to the allocator
-</span>  allocator_t *operator-&gt;()<span class="qualifier">const</span> { <span class="small_keyword">return</span> allocator; }
-  bool non_null() <span class="qualifier">const</span> { <span class="small_keyword">return</span> allocator != nulptr; }
 
   <span class="comment">// rvalue move, does not change reference counts
 </span>  <span class="comment">// ensures the source is nullified
@@ -576,10 +575,23 @@ share/lib/rtl/rt/allocator.hpp</pre>
 </span>      new(this) alloc_ref_t(p); <span class="comment">// copy source to target
 </span>    }
   } <span class="comment">// lass
-</span> 
+</span>  <span class="qualifier">void</span> *allocate(size_t);
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t);
+ 
   <span class="comment">// destructor has to be defered
 </span>  <span class="comment">// uses parent allocator passed to allocator on construction to delete it
 </span>  ~alloc_ref_t();
+
+<span class="qualifier">private</span>:
+  allocator_t *allocator;
+
+  <span class="comment">// an reference is constructed from a pointer to an allocator
+</span>  <span class="comment">// the constructor of which is required to set the reference
+</span>  <span class="comment">// count to 1
+</span>  alloc_ref_t(allocator_t *p) : allocator(p) {} 
+
+  <span class="comment">// only an allocator_t can construct a populated reference
+</span>  friend <span class="big_keyword">class</span> allocator_t;
 };
 </pre></p></div><h2 id='The_allocator_abstraction_h'><img src='/share/src/web/images/minus.gif' id='The allocator abstraction' onclick='toggle(this,"The_allocator_abstraction_d")' alt='+'/> 1.5 The allocator abstraction</h2><div id='The_allocator_abstraction_d' style='display:block'>
 <p>Now we will present the allocator abstraction. 
@@ -614,7 +626,7 @@ and the destructor do not have any specified semantics!
 </p><p>You may think <code>allocate()</code> should be required to return
 a pointer to some memory, but this is not so. The allocator
 may have run out of resources. It could return garbage
-or a <code>nulptr</code>.
+or a <code>nullptr.g</code>.
 </p><p>Similarly <code>deallocate</code> does not have to do anything
 in general. For example a <em>bump allocator</em> just
 bumps a pointer to perform an allocation and ignores
@@ -628,27 +640,46 @@ may be programmed to mahage.
 </p><pre class='inclusion'>
 share/lib/rtl/rt/allocator.hpp</pre>
 <p><pre class='cppbg'><span class="big_keyword">struct</span> allocator_t {
-  alloc_ref_t <span class="qualifier">const</span> parent;
+  alloc_ref_t parent;
 
+  <span class="comment">// these constructors can't be used directly by the public
+</span>  <span class="comment">// even though they're public, because this class is abstract
+</span>
   <span class="comment">// parentless construction
 </span>  allocator_t() : refcnt(1) {}
 
   <span class="comment">// construction by a parent
 </span>  allocator_t(alloc_ref_t p) : parent(p), refcnt(1) {}
 
-  <span class="qualifier">virtual</span> <span class="qualifier">void</span> *allocate(size_t)=0;
-  <span class="qualifier">virtual</span> <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t)=0;
-  <span class="qualifier">virtual</span> ~allocator_t(){}
+  <span class="comment">// destructor does nothing special but the parent will be destroyed
+</span>  <span class="qualifier">virtual</span> ~allocator_t(){}
+
+  <span class="comment">// no copy, move, copy assign or move assign
+</span>  allocator_t(allocator_t <span class="qualifier">const</span>&amp;)= delete;
+  allocator_t(allocator_t &amp;&amp;)= delete;
+  allocator_t&amp; operator=(allocator_t <span class="qualifier">const</span>&amp;)= delete;
+  allocator_t&amp; operator=(allocator_t&amp;&amp;)= delete;
 
   <span class="comment">// must report the size in bytes of the object
 </span>  <span class="qualifier">virtual</span> size_t size()<span class="qualifier">const</span>=0;
 
+<span class="qualifier">protected</span>:
+  <span class="comment">// this is the only way to create a populated alloc_ref_t
+</span>  <span class="comment">// since it's protected, only classes derived from allocator_t can do it
+</span>  <span class="qualifier">static</span> alloc_ref_t create(allocator_t *p) { <span class="small_keyword">return</span> alloc_ref_t(p); }
+
 <span class="qualifier">private</span>:
+  friend <span class="big_keyword">class</span> alloc_ref_t;
+
+  <span class="comment">// these can only be accessed via an alloc_ref_t
+</span>  ::<span class="small_keyword">std</span>::atomic&lt;size_t&gt; refcnt;
+  
   <span class="comment">// self destruct
 </span>  <span class="qualifier">void</span> suicide();
-  
-  ::<span class="small_keyword">std</span>::atomic&lt;size_t&gt; refcnt;
-  friend <span class="big_keyword">class</span> alloc_ref_t;
+
+  <span class="comment">// memory management primitives
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> *allocate(size_t)=0;
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t)=0;
 };
 </pre></p><p>The parent of the allocator is publically available so that it can be
 used to create sibling objects; but it is immutable to ensure the correct
@@ -669,22 +700,32 @@ share/lib/rtl/rt/allocator.hpp</pre>
 
 <span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
 <span class="qualifier">void</span> delete_csp_polymorphic_object (T *object, alloc_ref_t a) {
+  size_t n = object-&gt; size();
   object-&gt;~T(); 
-  <span class="small_keyword">if</span>(a.non_null()) a-&gt;deallocate(object, object-&gt;size()); 
+  a.deallocate(object, n); 
 }
 
-allocator_t::suicide() { 
+<span class="comment">// NOTE: This method has the effect of saving the
+</span><span class="comment">// parent during the allocator destructor execution
+</span><span class="qualifier">void</span> allocator_t::suicide() { 
   delete_csp_polymorphic_object(this, parent); 
 }
 
 <span class="comment">// destructor
 </span>alloc_ref_t::~alloc_ref_t() {
   <span class="small_keyword">if</span>(allocator) {
-    <span class="small_keyword">if</span>(allocator-&gt;refcnt == 1) 
+    <span class="small_keyword">if</span>(allocator-&gt;refcnt.load() == 1) 
       allocator-&gt;suicide();
-    else 
+    else   
       --allocator-&gt;refcnt;
   }
+}
+
+<span class="qualifier">void</span> *alloc_ref_t::allocate(size_t n) { 
+  <span class="small_keyword">return</span> allocator? allocator-&gt;allocate(n) : nullptr; 
+}
+<span class="qualifier">void</span> alloc_ref_t::deallocate(<span class="qualifier">void</span> *p, size_t n) { 
+  <span class="small_keyword">if</span>(allocator) allocator-&gt;deallocate(p,n); 
 }
 </pre></p></div><h2 id='Concrete_objects_h'><img src='/share/src/web/images/minus.gif' id='Concrete objects' onclick='toggle(this,"Concrete_objects_d")' alt='+'/> 1.7 Concrete objects</h2><div id='Concrete_objects_d' style='display:block'>
 <p>The <code>delete_csp_polymorphic_object()</code> function above will work
@@ -695,28 +736,38 @@ share/lib/rtl/rt/allocator.hpp</pre>
 <p><pre class='cppbg'><span class="big_keyword">template</span>&lt;<span class="big_keyword">class</span> T&gt;
 <span class="qualifier">void</span> delete_concrete_object (T *object, alloc_ref_t a) { 
   object-&gt;~T(); 
-  <span class="small_keyword">if</span>(a.get()) a-&gt;deallocate(object, sizeof(T)); 
+  a.deallocate(object, sizeof(T)); 
 };
 </pre></p></div><h2 id='Object_Constructors_h'><img src='/share/src/web/images/minus.gif' id='Object Constructors' onclick='toggle(this,"Object_Constructors_d")' alt='+'/> 1.8 Object Constructors</h2><div id='Object_Constructors_d' style='display:block'>
 <p>Now we need the usual wrapper method for an allocator.
 </p><pre class='inclusion'>
 share/lib/rtl/rt/allocator.hpp</pre>
-<p><pre class='cppbg'><span class="qualifier">void</span> *operator new(size_t amt, alloc_ref_t&amp; a) { <span class="small_keyword">return</span> a-&gt;allocate (amt); } 
+<p><pre class='cppbg'><span class="qualifier">void</span> *operator new(size_t amt, alloc_ref_t&amp; a) { <span class="small_keyword">return</span> a.allocate (amt); } 
+#<span class="preproc">endif</span>
 </pre></p></div></div><h1 id='The_malloc_free_allocators_h'><img src='/share/src/web/images/minus.gif' id='The malloc free allocators' onclick='toggle(this,"The_malloc_free_allocators_d")' alt='+'/> 2 The malloc free allocators</h1><div id='The_malloc_free_allocators_d' style='display:block'>
 <p>So here is our basic root alloctor:
 </p><pre class='inclusion'>
 share/lib/rtl/rt/malloc_free.hpp</pre>
-<p><pre class='cppbg'><span class="big_keyword">struct</span> malloc_free_allocator_t : <span class="qualifier">public</span> allocator_t {
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> MALLOC_FREE
+#<span class="preproc">define</span> MALLOC_FREE
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+<span class="big_keyword">struct</span> malloc_free_allocator_t : <span class="qualifier">public</span> allocator_t {
+  size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+  ~malloc_free_allocator_t() override { }
+
+  <span class="comment">// factory function
+</span>  <span class="qualifier">static</span> alloc_ref_t create() { 
+    <span class="small_keyword">return</span> allocator_t::create( new malloc_free_allocator_t() ); 
+  }
+<span class="qualifier">private</span>:
   malloc_free_allocator_t () : allocator_t() {} <span class="comment">// no parent
-</span>  size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
-  <span class="qualifier">void</span> *allocate(size_t n) override { 
+</span>  <span class="qualifier">void</span> *allocate(size_t n) override { 
     auto p = malloc(n); 
     <span class="small_keyword">return</span> p; 
   }
   <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t n) override { free(p); }
-  ~malloc_free_allocator_t() override {}
 };
-
+#<span class="preproc">endif</span>
 </pre></p></div><h1 id='Bump_allocators_h'><img src='/share/src/web/images/minus.gif' id='Bump allocators' onclick='toggle(this,"Bump_allocators_d")' alt='+'/> 3 Bump allocators</h1><div id='Bump_allocators_d' style='display:block'>
 <p>A bump allocator just bumps a pointer to some store on an allocation
 request. It ignores deallocations.
@@ -727,12 +778,20 @@ There is no overrun check, deallocation requests are ignored,
 there is no parent, and the store is not freed
 </p><pre class='inclusion'>
 share/lib/rtl/rt/bump.hpp</pre>
-<p><pre class='cppbg'><span class="big_keyword">struct</span> <span class="qualifier">static</span>_bump_allocator_t : <span class="qualifier">public</span> allocator_t {
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> BUMP
+#<span class="preproc">define</span> BUMP
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+<span class="big_keyword">struct</span> <span class="qualifier">static</span>_bump_allocator_t : <span class="qualifier">public</span> allocator_t {
   <span class="qualifier">char</span> *p;
   <span class="qualifier">static</span>_bump_allocator_t (<span class="qualifier">void</span> *q) : allocator_t(), p((<span class="qualifier">char</span> *)q) {}
   <span class="qualifier">void</span> *allocate(size_t n) override { <span class="qualifier">void</span> *q = p; p += n; <span class="small_keyword">return</span> q; }
   <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t) override {}
   size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+
+  <span class="comment">// factory function
+</span>  <span class="qualifier">static</span> alloc_ref_t create(<span class="qualifier">void</span> *p) { 
+    <span class="small_keyword">return</span> allocator_t::create (new <span class="qualifier">static</span>_bump_allocator_t (p)); 
+  }
 };
 </pre></p></div><h2 id='Dynamic_bump_allocator_h'><img src='/share/src/web/images/minus.gif' id='Dynamic bump allocator' onclick='toggle(this,"Dynamic_bump_allocator_d")' alt='+'/> 3.2 Dynamic bump allocator</h2><div id='Dynamic_bump_allocator_d' style='display:block'>
 <p>The dynamic bump allocator has a parent from which it requests a single
@@ -747,15 +806,21 @@ share/lib/rtl/rt/bump.hpp</pre>
   size_t amt;
   dynamic_bump_allocator_t (alloc_ref_t parent, size_t n) : 
     allocator_t(parent), amt(n) {
-      base=parent-&gt;allocate(amt);
-      p = base
+      base=parent.allocate(amt);
+      p = (<span class="qualifier">char</span>*)base;
    }
 
   <span class="qualifier">void</span> *allocate(size_t n) override { <span class="qualifier">void</span> *q = p; p += n; <span class="small_keyword">return</span> q; }
   <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *, size_t) override {}
   size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); } 
-  ~dynamic_bump_allocator { parent-&gt;deallocate(base, amt); }
+  ~dynamic_bump_allocator_t() { parent.deallocate(base, amt); }
+
+  <span class="comment">// factory function
+</span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, size_t n) { 
+    <span class="small_keyword">return</span> allocator_t::create( new dynamic_bump_allocator_t(parent, n) ); 
+  }
 };
+#<span class="preproc">endif</span>
 </pre></p></div></div><h1 id='Block_allocators_h'><img src='/share/src/web/images/minus.gif' id='Block allocators' onclick='toggle(this,"Block_allocators_d")' alt='+'/> 4 Block allocators</h1><div id='Block_allocators_d' style='display:block'>
 <p>A block allocator is one which can only supply a single block size,
 and so ignores the size parameter of an allocation requrest.
@@ -764,13 +829,16 @@ which can be used to service a subsequent allocation request.
 </p><p>The simplest variant is a bump allocator with an added freelist.
 </p><pre class='inclusion'>
 share/lib/rtl/rt/block.hpp</pre>
-<p><pre class='cppbg'><span class="big_keyword">struct</span> <span class="qualifier">static</span>_block_allocator_t : <span class="qualifier">public</span> allocator_t {
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> BLOCK
+#<span class="preproc">define</span> BLOCK
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+<span class="big_keyword">struct</span> <span class="qualifier">static</span>_block_allocator_t : <span class="qualifier">public</span> allocator_t {
   <span class="qualifier">char</span> *p;
   <span class="qualifier">void</span> *freelist;
   size_t block_size;
 
   <span class="qualifier">static</span>_block_allocator_t (<span class="qualifier">void</span> *q, size_t n) : 
-    allocator_t(), p((<span class="qualifier">char</span> *)q), freelist(nulptr), block_size(n)
+    allocator_t(), p((<span class="qualifier">char</span> *)q), freelist(nullptr), block_size(n)
   {}
   <span class="qualifier">void</span> *allocate(size_t n) override { 
     <span class="small_keyword">if</span>(freelist) {
@@ -789,7 +857,13 @@ share/lib/rtl/rt/block.hpp</pre>
     freelist = q;
   }
   size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+
+  <span class="comment">// factory function
+</span>  <span class="qualifier">static</span> alloc_ref_t create(<span class="qualifier">void</span> *q, size_t n) { 
+    <span class="small_keyword">return</span> allocator_t::create( new <span class="qualifier">static</span>_block_allocator_t(q, n)); 
+  }
 };
+#<span class="preproc">endif</span>
 </pre></p></div><h1 id='Thread_Safe_allocator_h'><img src='/share/src/web/images/minus.gif' id='Thread Safe allocator' onclick='toggle(this,"Thread_Safe_allocator_d")' alt='+'/> 5 Thread Safe allocator</h1><div id='Thread_Safe_allocator_d' style='display:block'>
 <p>When we design allocators they're usually single thread only
 for performance reasons. Even in many multi-threaded applications 
@@ -797,7 +871,10 @@ only a single thread can access a given allocator. But if we want
 to share an allocator, we can use a thread safety adaptor:
 </p><pre class='inclusion'>
 share/lib/rtl/rt/ts_allocator.hpp</pre>
-<p><pre class='cppbg'><span class="big_keyword">struct</span> ts_allocator_t : <span class="qualifier">public</span> allocator_t {
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> TS_ALLOCATOR
+#<span class="preproc">define</span> TS_ALLOCATOR
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+<span class="big_keyword">struct</span> ts_allocator_t : <span class="qualifier">public</span> allocator_t {
   alloc_ref_t delegate;
   ::<span class="small_keyword">std</span>::atomic_flag lk;
 
@@ -808,18 +885,26 @@ share/lib/rtl/rt/ts_allocator.hpp</pre>
   <span class="qualifier">void</span> lock() { <span class="small_keyword">while</span>(lk.test_and_set(::<span class="small_keyword">std</span>::memory_order_acquire)); }
   <span class="qualifier">void</span> unlock() { lk.clear(::<span class="small_keyword">std</span>::memory_order_release); }
 
-  <span class="qualifier">void</span> *allocate(size_t n) { 
+  <span class="qualifier">void</span> *allocate(size_t n) override { 
     lock(); 
-    <span class="qualifier">void</span> *result =  delegate-&gt;allocate(n); 
+    <span class="qualifier">void</span> *result =  delegate.allocate(n); 
     unlock(); 
     <span class="small_keyword">return</span> result; 
   }
-  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t n) { 
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t n) override { 
     lock(); 
-    delegate-&gt;deallocate(p,n); 
+    delegate.deallocate(p,n); 
     unlock(); 
   }
+  size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+
+  <span class="comment">// factory function
+</span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, alloc_ref_t delegate) { 
+    <span class="small_keyword">return</span> allocator_t::create( new ts_allocator_t(parent, delegate)); 
+  }
+
 };
+#<span class="preproc">endif</span>
 </pre></p><p>This allocator simply delegates to a specified allocator, but does so inside
 the scope of a spinlock. Note that reference counts are already atomic.
 </p><p>the destruction process is not protected because an allocator can only be
@@ -897,7 +982,179 @@ in particular a loop which simply allocates a block and then
 immediately deallocates it would cause a problem.
 </p><p>Such cases probably won't occur in real programs, but almost
 certainly <em>will</em> occur in test cases!
-</p></div><!--Main Content Body End-->
+</p><pre class='inclusion'>
+share/lib/rtl/rt/ring_allocator.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> RING_ALLOCATOR
+#<span class="preproc">define</span> RING_ALLOCATOR
+
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+
+<span class="comment">// client request entry: client needs n_blocks of size block_size
+</span><span class="big_keyword">struct</span> mem_req_t {
+  size_t block_size;
+  size_t n_blocks;
+  size_t array_bytes () <span class="qualifier">const</span> { <span class="small_keyword">return</span> n_blocks * sizeof(<span class="qualifier">void</span>*); }
+  size_t memory_bytes () <span class="qualifier">const</span> { <span class="small_keyword">return</span> n_blocks * block_size; }
+};
+
+<span class="big_keyword">struct</span> ring_buffer_t : <span class="qualifier">public</span> allocator_t {
+  <span class="qualifier">void</span> **buffer; <span class="comment">// the array of pointers
+</span>  ::<span class="small_keyword">std</span>::atomic&lt;size_t&gt; head;
+  ::<span class="small_keyword">std</span>::atomic&lt;size_t&gt; tail;
+  mem_req_t mreq;
+
+  <span class="comment">// the constructor needs a parent to get memory arena from
+</span>  <span class="comment">// and a specification of the number and size of blocks
+</span>  ring_buffer_t (alloc_ref_t parent, mem_req_t req) : mreq(req), head(0), tail(0) {
+    buffer = (<span class="qualifier">void</span>**) parent.allocate (req.array_bytes() + req.memory_bytes() );
+
+    <span class="comment">// initialise buffer array with pointers to memory blocks
+</span>    <span class="qualifier">void</span> *memory = (<span class="qualifier">char</span>*) buffer + req.array_bytes();
+    <span class="small_keyword">for</span>(size_t n =  0; n &lt; req.n_blocks; ++n) {
+      buffer[n] = memory;
+      memory = (<span class="qualifier">char</span>*)memory + req.block_size;
+    }
+  }
+
+  <span class="comment">// the tail points at a populated spot
+</span>  <span class="qualifier">void</span> *allocate(size_t) override {
+      size_t old_tail = tail.load(::<span class="small_keyword">std</span>::memory_order_relaxed);
+      <span class="small_keyword">while</span>(!tail.compare_exchange_weak(old_tail, (old_tail + 1) % mreq.n_blocks));
+      <span class="small_keyword">return</span> buffer[old_tail];
+  }
+
+  <span class="comment">// the head points at a free slot
+</span>  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t) override {
+      size_t old_head = head.load(::<span class="small_keyword">std</span>::memory_order_relaxed);
+      <span class="small_keyword">while</span>(!head.compare_exchange_weak(old_head, (old_head + 1) % mreq.n_blocks));
+      buffer[old_head] = p;
+  }
+
+  <span class="comment">// destructor returns store to parent
+</span>  ~ring_buffer_t() { parent.deallocate(buffer, mreq.array_bytes() + mreq.memory_bytes() ); } 
+
+  <span class="comment">// our size in bytes
+</span>  size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+
+  <span class="comment">// factory function
+</span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, mem_req_t req) { 
+    <span class="small_keyword">return</span> allocator_t::create (new ring_buffer_t (parent, req)); 
+  }
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='SYSTEM_ALLOCATOR_h'><img src='/share/src/web/images/minus.gif' id='SYSTEM ALLOCATOR' onclick='toggle(this,"SYSTEM_ALLOCATOR_d")' alt='+'/> 7 SYSTEM ALLOCATOR</h1><div id='SYSTEM_ALLOCATOR_d' style='display:block'>
+<p>This is the main allocator.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/system_allocator.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> SYSTEM_ALLOCATOR
+#<span class="preproc">define</span> SYSTEM_ALLOCATOR
+#<span class="preproc">include</span> <span class="fstring">&lt;vector&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"ring_allocator.hpp"</span>
+
+<span class="comment">// FIXME: WARNING: the system allocator MUST BE CONSTRUCTED AT STARTUP
+</span><span class="comment">// BECAUSE it uses std::vector, which does dynamic allocation
+</span><span class="comment">// using C++ standard allocator
+</span>
+<span class="comment">// We really should use a C array but this version will suffice
+</span><span class="comment">// for testing
+</span>
+<span class="big_keyword">struct</span> system_allocator_t : <span class="qualifier">public</span> allocator_t {
+  ::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; reqs;
+  ::<span class="small_keyword">std</span>::vector&lt;alloc_ref_t&gt; allocs;
+
+  <span class="comment">// the reqs MUST be sorted from low to high block size
+</span>  system_allocator_t(alloc_ref_t parent, ::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; reqs_) :
+    reqs(reqs_)
+  {
+    <span class="small_keyword">for</span> (auto req : reqs) allocs.push_back(ring_buffer_t::create(parent, req)); 
+  }
+  
+  <span class="comment">// find the index of the lowest value higher than the given one
+</span>  <span class="comment">// the request must be less than or equal to the largest (and last) block size
+</span>  size_t find(size_t n) { 
+    size_t j = 0;
+    <span class="small_keyword">while</span>(n &gt; reqs[j].block_size) ++j; 
+    <span class="small_keyword">return</span> j;
+  }
+
+  <span class="qualifier">void</span> *allocate (size_t n) override { <span class="small_keyword">return</span> allocs[find(n)].allocate(n); }
+  <span class="qualifier">void</span> deallocate (<span class="qualifier">void</span> *p, size_t n) override { <span class="small_keyword">return</span> allocs[find(n)].deallocate(p,n); }
+
+  size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+ 
+  <span class="comment">// factory function
+</span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, ::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; reqs) { 
+    <span class="small_keyword">return</span> allocator_t::create (new system_allocator_t (parent, reqs)); 
+  }
+};
+
+<span class="comment">// Helper function that takes a vector of requests and sorts them
+</span><span class="comment">// low to high, merging the block counts of requests for the same size
+</span>::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; fixup (::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; input) {
+  ::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; output;
+  <span class="small_keyword">for</span> (auto req : input) {
+    <span class="small_keyword">for</span>( <span class="qualifier">int</span> idx = 0; idx &lt;= output.size(); ++idx) {
+      <span class="comment">// past last element
+</span>      <span class="small_keyword">if</span>(idx == output.size()) output.push_back(req);
+
+      <span class="comment">// found equal so add to block count
+</span>      else <span class="small_keyword">if</span>(req.block_size == output[idx].block_size) {
+        output[idx].n_blocks += req.n_blocks;
+        break;
+      } 
+     
+      <span class="comment">// overshot so inset new request
+</span>      else <span class="small_keyword">if</span>(req.block_size &gt; output[idx].block_size) {
+        output.insert(output.begin() + idx, req);
+        break;
+      }
+    }
+  }
+  <span class="small_keyword">return</span> output;
+}
+
+
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='test_h'><img src='/share/src/web/images/minus.gif' id='test' onclick='toggle(this,"test_d")' alt='+'/> 8 test</h1><div id='test_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/test01.cxx</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
+using <span class="big_keyword">namespace</span> <span class="small_keyword">std</span>;
+
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"malloc_free.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"bump.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"block.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"ts_allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"ring_allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"system_allocator.hpp"</span>
+
+<span class="qualifier">int</span> main () {
+  cout &lt;&lt; <span class="fstring">"Hello World"</span> &lt;&lt; endl; 
+  auto a1 = malloc_free_allocator_t::create();
+  auto a2 = dynamic_bump_allocator_t::create(a1, 1000);
+  <span class="qualifier">unsigned</span> <span class="qualifier">char</span> block_buffer[1000];
+  auto a3 = <span class="qualifier">static</span>_block_allocator_t::create(block_buffer, 100);
+  auto a4 = ts_allocator_t::create(a3, a2);
+  auto a5 = ring_buffer_t::create( a1, mem_req_t { 100,100 });  
+  auto config = vector&lt;mem_req_t&gt;{ 
+    mem_req_t{16, 10},
+    mem_req_t{32, 10},
+    mem_req_t{64, 10},
+    mem_req_t{128, 10},
+    mem_req_t{256, 10}
+  };
+  auto a6 = system_allocator_t(a1, config);
+  <span class="small_keyword">for</span> (<span class="qualifier">int</span> z : { 18,  43, 75 }) {
+    cout &lt;&lt; <span class="fstring">"Request size "</span> &lt;&lt; z &lt;&lt; endl;
+    <span class="small_keyword">for</span>(<span class="qualifier">int</span> i = 0; i &lt; 6; ++i) {
+      <span class="qualifier">void</span> *p = a6.allocate (z);
+      cout &lt;&lt; <span class="fstring">"allocation "</span> &lt;&lt; i &lt;&lt; <span class="fstring">" -&gt; "</span> &lt;&lt; p &lt;&lt; endl;
+    }
+  }
+}
+
+</pre></p></div><!--Main Content Body End-->
 
           </div> <!-- rightpanel contents end -->
           <hr>

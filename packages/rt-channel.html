@@ -1,0 +1,1572 @@
+<html><head>
+<style type="text/css">
+body {margin:3%; }
+h1 {color:gray; font-size:120%;}
+h2 {color:gray; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre.flxbg {background-color:#A0FFA0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.uncheckedflxbg {background-color:#D0D0D0; color:black; padding:2px; box-shadow:5px 5px 2px #807080; }
+pre.cppbg {background-color:#80FF80; color:black; }
+pre.prefmtbg {background-color:#D0D0D0; color:black; }
+pre.expected {background-color:#E0FF80; color:black; }
+pre.input {background-color:#E08080; color:black; }
+pre.inclusion {background-color:#D070D0; color:black; }
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:#FF8080; color:black; }
+</style>
+<title>Channel Abstraction</title></head><body>
+<style>
+body {margin:3%; font-family: sans-serif; }
+h1 {color:black; font-size:120%; border-bottom: 2px solid #ddd; padding: 0 0 3px 0;}
+h2 {color:#202020; font-size:105%;}
+h3 {font-size:100%;}
+h4 {font-size:95%;}
+h5 {font-size:95%;}
+span.fstring {color:darkblue; font-style:italic; }
+span.comment {font-family:arial; color:blue; font-style:italic; }
+span.doccomment {font-family:arial; color:green; font-style:italic; }
+span.big_keyword {color:#FF1010; }
+span.small_keyword {color:#802040; }
+span.qualifier {color:#A02020; }
+span.library {color:#A02000; }
+span.ctor {color:#406020; }
+span.hack {color:#66DD00; }
+span.preproc {color:#005500; }
+span.embedded_c{background-color:#DDDDDD; }
+span.fpc_fieldname {color:#DD0000; }
+span.lineno {color:#101010; background-color:#E0E0E0; font-size:80%; font-family:"courier",monospace; font-style:normal; }
+pre { border: 1px solid #ccc; color: black; box-shadow:3px 3px 2px rgba(0,0,0,0.1); padding:2px; }
+pre.flxbg {background-color:#C2FDC2; box-shadow:3px 3px 2px rgba(0,0,0,0.1) }
+pre.uncheckedflxbg {background-color:#eee; box-shadow:3px 3px 2px rgba(0,0,0,0.1); }
+pre.cppbg {background-color:#C2FDC2; }
+pre.prefmtbg {background-color:#F1F1F1; }
+pre.expected {background-color:hsla(74,94%,88%,1); }
+pre.input {background-color:hsla(20,94%,88%,1); }
+pre.inclusion {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+    border: none;
+    box-shadow: none;
+    text-align: right;
+    margin: -7px 11px -12px 0;
+    padding: 0;
+    background-color:#fafafa;
+}
+code.inclusion {background-color:#D070D0; color:black; }
+.obsolete { background-color:#FFEFEF; font-size: small; color:black; }
+.future { background-color:#FF8080; font-size: small; color:black; }
+.implementation_detail { background-color:#E0E0E0; font-size: small; color:black;  }
+.bug { background-color:#FFE0E0; font-size: small; color:black; }
+.fixed{ background-color:#FFE0E0; font-size: small; color:black; }
+.done { background-color:#FFE0E0; font-size: small; color:black; }
+.caveat { background-color:hsla(0,100%,91%,1); color:black; padding: 0.6em; }
+.container {
+  position: fixed;
+  top:0px;
+  left:0px;
+  height : 100%;
+  width: 100%;
+  background-color: grey;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  color: #404040;
+}
+.maincontent {
+  padding:4px;
+  padding-left:8px;
+  line-height:1.3em;
+  color:#404040; background-color:#fafafa;
+}
+.maincontent h1 { margin-left:-8px; position: relative; font-family: georgia, serif; font-size: 1.8em; font-weight: normal; }
+.maincontent h2 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h3 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent h4 { margin-left:-8px; position: relative; margin-bottom:-5px; }
+.maincontent code { color:#902030; }
+.toppanel {
+  position:absolute; left:0px; top:0px; height:20px; right:0px;
+  background-color: #e0e0e0;
+}
+.bottompanel {
+  position:absolute; left:0px; top:22px; bottom:0px; right:0px;
+  background-color: #fafafa;
+  font-size:14px;
+}
+.leftpanel {
+  position:absolute; left:0px; top:0px; bottom:0px; width: 150px;
+  background-color: #eaeaea; overflow: auto;
+}
+.rightpanel {
+  position:absolute; right: 0px; left:160px; top:0px; bottom: 0px;
+  background-color: #fafafa; overflow: auto;
+}
+.divider {
+  position:absolute; left: 150px; top:0px; bottom:0px;
+  background-color: black; width:2px;
+  box-shadow: 0 0 8px #000;
+}
+
+#panemover {
+    position:absolute;
+    left: 150px;
+    width : 10px;
+    top: 0px;
+    bottom: 0px;
+    opacity: 0.3;
+    cursor:col-resize;
+}
+
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+</style>
+
+<style>
+div.m {
+    margin: 0px;
+    padding:0px;
+    border-width:2px;
+    border-color: green;
+}
+
+div.m1 {
+    background-color: #86E870;
+    border-style:outset;
+    border-color:#ccc;
+    border-width:2px 0;
+    font-size:90%;
+    padding: 1px 0 2px 10px;
+}
+
+div.m2 {
+    background-color: #70C070;
+    padding-left:15px;
+    padding-top:2px;
+    border-style:outset;
+    border-color:green;
+    border-width:0 0 1px 0;
+    font-size:80%;
+}
+
+div.m1:hover, div.m2:hover {
+    background-color: white;
+}
+
+#leftmargintoc a {
+    text-decoration: none;
+    color: #404040;
+}
+
+
+</style>
+
+    <script async="true">
+      function dragStart(e, left, right){
+        document.getElementById("panemover").style.width="70%";
+        document.getElementById("panemover").style.left="50px";
+        mousedown = true;
+        x = e.clientX
+        dragOffsetLeft =
+          document.getElementById(left).getBoundingClientRect().right -
+          document.getElementById(left).getBoundingClientRect().left -
+          x
+        ;
+        dragOffsetDivider= document.getElementById("divider").getBoundingClientRect().left - x;
+        dragOffsetRight = document.getElementById(right).getBoundingClientRect().left - x;
+      }
+      function dragRelease(){
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('divider').offsetLeft + 'px';
+        mousedown = false;
+      }
+      function drag(e, left, right){
+        if(!mousedown){return}
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpDivider= dragOffsetDivider + x
+        tmpRight = dragOffsetRight + x
+        document.getElementById(left).style.width= tmpLeft + 'px';
+        document.getElementById("divider").style.left= tmpDivider + 'px';
+        document.getElementById(right).style.left = tmpRight + 'px';
+      };
+    </script>
+
+<script type="text/javascript">
+
+  function mexpand(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "block";
+  }
+
+  function mcollapse(id)
+  {
+    var n = document.getElementById(id).style;
+    n.display = "none";
+  }
+
+  var counter_max = 0;
+  function mshow(id,loc)
+  {
+    var i;
+    for(i=1; i<=counter_max; ++i)
+      mcollapse("menu"+String(i));
+    mexpand(id);
+    window.location.replace(loc);
+  }
+</script>
+
+<script type="text/javascript">
+
+function expand(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/minus.gif";
+  button.alt = "-";
+  n.display = "block";
+}
+function collapse(but,id)
+{
+  var n = document.getElementById(id).style;
+  var button = document.getElementById(but);
+  button.src = "/share/src/web/images/plus.gif";
+  button.alt = "+";
+  n.display = "none";
+}
+function toggle(button,id)
+{
+  var n = document.getElementById(id).style;
+  if (n.display == "none")
+  {
+    button.src = "/share/src/web/images/minus.gif";
+    button.alt = "-";
+    n.display = "block";
+  }
+  else
+  {
+    button.src = "/share/src/web/images/plus.gif";
+    button.alt = "+";
+    n.display = "none";
+  }
+}
+var allbuttons = [
+"Continuations",
+"Fibres",
+"Channel Design",
+"Service Requests",
+"Sequential Channel",
+"Concurrent Channel",
+"Asynchronous channel",
+"CSP Processes",
+"CSP threads",
+"CSP: the lot"
+];
+function expand_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    expand(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+function collapse_all(dummy)
+{
+  for (i in allbuttons)
+  {
+    collapse(allbuttons[i], allbuttons[i]+"_d");
+  }
+}
+</script>
+
+<script>
+function mouseover(id)
+{
+  var elt = document.getElementById(id);
+  elt.style.display="none";
+  var elt2 = document.getElementById(id+"_mo");
+  elt2.style.display="inline";
+}
+
+function mouseout(id)
+{
+  var elt = document.getElementById(id+"_mo");
+  elt.style.display="none";
+  var elt2 = document.getElementById(id);
+  elt2.style.display="inline";
+}
+
+</script>
+<script> function nop(dummy) {} </script>
+    <div class="container">
+      <div class="toppanel">
+    <!--Main Content top navbar-->
+<span style="position:relative; bottom:6px"
+  onmouseover="mouseover('expand')"
+  onmouseout="mouseout('expand')"
+  onclick="expand_all('expand')"
+  ><span id="expand"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span><span id="expand_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Expand</text></svg></span></span><span style="position:relative; bottom:6px"
+  onmouseover="mouseover('collapse')"
+  onmouseout="mouseout('collapse')"
+  onclick="collapse_all('collapse')"
+  ><span id="collapse"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:blue;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span><span id="collapse_mo" style="display:none"><svg height="30px" width="65px"><rect x="4px" y="6px" rx="4px" ry="40px" width="60px" height="20px" style="fill:red;opacity:0.2;stroke:black;stroke-width:2"/><text x="13px" y="21px" fill="black" style="font-size:12px;">Collapse</text></svg></span></span>    <!--Main Content top navbar End-->
+
+      </div> <!-- toppanel end -->
+      <div class="bottompanel">
+        <span id="divider" class="divider"></span>
+
+        <span id="left" class="leftpanel" >
+          <div class="menucontent">
+  <!--Left Margin Toc-->
+  <div id="leftmargintoc">
+    <!--Left Margin Toc Main Contents-->
+      <div class=m1 onclick="mshow('menu1','#Continuations_h')"> <a href="#Continuations_h">Continuations</a></div>
+      <div class=sm id=menu1>
+      </div>
+      <div class=m1 onclick="mshow('menu2','#Fibres_h')"> <a href="#Fibres_h">Fibres</a></div>
+      <div class=sm id=menu2>
+      </div>
+      <div class=m1 onclick="mshow('menu3','#Channel Design_h')"> <a href="#Channel_Design_h">Channel Design</a></div>
+      <div class=sm id=menu3>
+      </div>
+      <div class=m1 onclick="mshow('menu4','#Service Requests_h')"> <a href="#Service_Requests_h">Service Requests</a></div>
+      <div class=sm id=menu4>
+      </div>
+      <div class=m1 onclick="mshow('menu5','#Sequential Channel_h')"> <a href="#Sequential_Channel_h">Sequential Channel</a></div>
+      <div class=sm id=menu5>
+      </div>
+      <div class=m1 onclick="mshow('menu6','#Concurrent Channel_h')"> <a href="#Concurrent_Channel_h">Concurrent Channel</a></div>
+      <div class=sm id=menu6>
+      </div>
+      <div class=m1 onclick="mshow('menu7','#Asynchronous channel_h')"> <a href="#Asynchronous_channel_h">Asynchronous channel</a></div>
+      <div class=sm id=menu7>
+      </div>
+      <div class=m1 onclick="mshow('menu8','#CSP Processes_h')"> <a href="#CSP_Processes_h">CSP Processes</a></div>
+      <div class=sm id=menu8>
+      </div>
+      <div class=m1 onclick="mshow('menu9','#CSP threads_h')"> <a href="#CSP_threads_h">CSP threads</a></div>
+      <div class=sm id=menu9>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#CSP: the lot_h')"> <a href="#CSP:_the_lot_h">CSP: the lot</a></div>
+      <div class=sm id=menu10>
+      </div>
+    <script>counter_max=10;</script>
+  </div>
+  <!--End Left Margin Toc-->
+
+          </div> <!-- leftpanel contents end -->
+        </span> <!-- leftpanel end -->
+
+        <span id="right" class="rightpanel">
+          <div class="maincontent">
+<!--Main Content Body-->
+<h1 id='Continuations_h'><img src='/share/src/web/images/minus.gif' id='Continuations' onclick='toggle(this,"Continuations_d")' alt='+'/> 1 Continuations</h1><div id='Continuations_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/con.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> CON
+#<span class="preproc">define</span> CON
+<span class="comment">// continuation
+</span>#<span class="preproc">include</span> <span class="fstring">&lt;cstddef&gt;</span>
+using size_t = ::<span class="small_keyword">std</span>::size_t;
+
+<span class="big_keyword">struct</span> fibre_t;
+<span class="big_keyword">struct</span> con_t {
+  fibre_t *fibre;
+  <span class="qualifier">int</span> pc;        <span class="comment">// program counter
+</span>  con_t () : pc(0), fibre(nullptr) {}
+  <span class="qualifier">virtual</span> con_t *<span class="small_keyword">return</span>_control()=0;
+  <span class="qualifier">virtual</span> con_t *resume()=0;
+  <span class="qualifier">virtual</span> size_t size()<span class="qualifier">const</span>=0;
+  <span class="qualifier">virtual</span> ~con_t(){}
+};
+
+<span class="comment">// coroutine
+</span><span class="big_keyword">struct</span> coroutine_t : con_t {
+  con_t *<span class="small_keyword">return</span>_control(); <span class="comment">// deletes object and returns nullptr
+</span>};
+ 
+<span class="comment">// top level subroutine
+</span><span class="big_keyword">struct</span> subroutine_t : con_t {
+  subroutine_t(fibre_t *f) { fibre = f; }
+  con_t *caller; <span class="comment">// caller continuation
+</span>  con_t *<span class="small_keyword">return</span>_control(); <span class="comment">// deletes object and returns caller
+</span>};
+
+<span class="comment">// NOTE: a subroutine must not delete itself if it returns
+</span><span class="comment">// a nested procedure which binds to its local variable frame
+</span>
+<span class="big_keyword">struct</span> curry_subroutine_t : con_t {
+  con_t *caller; <span class="comment">// caller continuation
+</span>  curry_subroutine_t (fibre_t *f) { fibre = f; }
+
+  con_t *<span class="small_keyword">return</span>_control() {
+    auto tmp = caller;
+    caller = nullptr;
+    <span class="small_keyword">return</span> tmp;
+  }
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Fibres_h'><img src='/share/src/web/images/minus.gif' id='Fibres' onclick='toggle(this,"Fibres_d")' alt='+'/> 2 Fibres</h1><div id='Fibres_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/fibre.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> FIBRE
+#<span class="preproc">define</span> FIBRE
+<span class="comment">// fibre3.hpp
+</span><span class="comment">// fibre
+</span>#<span class="preproc">include</span> <span class="fstring">"con.hpp"</span>
+<span class="big_keyword">struct</span> csp_process_t;
+<span class="big_keyword">union</span> svc_req_t;
+
+<span class="big_keyword">struct</span> fibre_t {
+  con_t *cc;
+  fibre_t *next;
+  csp_process_t *process;
+  svc_req_t *svc_req; <span class="comment">// request
+</span>
+  <span class="comment">// default DEAD
+</span>  <span class="comment">//fibre_t() : cc(nullptr), next(nullptr), process(nullptr) {}
+</span>
+  <span class="comment">// construct from continuation
+</span>  fibre_t(con_t *ccin, csp_process_t *owned_by) : 
+    cc(ccin), next (nullptr), process(owned_by), svc_req(nullptr)
+  {
+    ccin-&gt;fibre=this; 
+  }
+
+  <span class="comment">// immobile
+</span>  fibre_t(fibre_t <span class="qualifier">const</span>&amp;)=delete;
+  fibre_t&amp; operator=(fibre_t <span class="qualifier">const</span>&amp;)=delete;
+
+  <span class="comment">// destructor deletes any remaining continuations in spaghetti stack
+</span>  ~fibre_t(); <span class="comment">// defined in csp.hpp to resolve circular reference
+</span>  
+  <span class="comment">// run until either fibre issues a service request or dies
+</span>  svc_req_t *run_fibre() { 
+    <span class="small_keyword">while</span>(cc) {
+      cc=cc-&gt;resume(); 
+      <span class="small_keyword">if</span>(cc &amp;&amp; svc_req) <span class="small_keyword">return</span> svc_req;
+    }
+    <span class="small_keyword">return</span> nullptr;
+  }
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Channel_Design_h'><img src='/share/src/web/images/minus.gif' id='Channel Design' onclick='toggle(this,"Channel_Design_d")' alt='+'/> 3 Channel Design</h1><div id='Channel_Design_d' style='display:block'>
+<p>A <em>channel</em> is a lightweight synchronisation device which allows fibres
+to perform two operations: read and write. When a read is performed by a channel owning fibre,
+if there is a writer on the channel, data is transfered, the writer is removed from
+the channel, and both the reader and writer become active.
+</p><p>If there is no writer on the channel, the reader is suspended and added to the
+channel: the channel now owns the fibre.
+</p><p>Write operation is dual.
+</p><p>If no one owns a channel, the channel is deleted along with all the fibres
+it owns. Similarly, if no one owns a fibre, it is deleted, 
+and shared ownership of the any channels the fibre has will be relinquished. 
+Together this can lead to a recursive deletion of many channels and fibres.
+</p><p>For example in a pipeline, if one fibre in the middle decides to quit,
+it is deleted, and now the components on either side of it can no longer
+write or read, so they will be deleted as well, and the effect cascades
+and destroys the whole pipeline.
+</p><p>To make this work, we have to use a double reference counting scheme.
+Objects called channel <em>endpoints</em> reference count the channel
+they're endpoints for. In turn, each endpoint is accessed by a smart pointer
+which reference counts it, and can be passed around the continuations
+of the fibre.  The fibre itself must maintain an array of all the endpoints
+it owns, the <em>registry</em>.
+</p><p>When a fibre suspends on an I/O operation this is what happens:
+first, the fibre is removed from the scheduler, and added to the channel.
+We use a linked list in the channel. The reference count of the fibre
+doesn't change at this point, since we simply moved ownership to the channel.
+</p><p>Next, we have to decrement the reference count of all the registered endpoints,
+since none of them can do any work, since the owning fibre is no longer active.
+When the fibre is resumed all these reference counts must be incremented again.
+</p><p>When the reference count of a channel endpoint would be decremented to zero,
+the endpoint is deleted, which causes the reference count of the channel
+it refers to to be decremented.
+</p><p>And clearly, when the channel reference count goes to zero, it is deleted too.
+When the channel is deleted, all the fibres owned by the channel are also deleted,
+since none of them can become active again, since they're waiting on I/O on
+the channel, which no longer exists.
+</p><p>Deleting a fibre requires deleting all the continuations in its stack.
+As this happens, references to channel endpoints are deleted, decrementing
+the endpoint reference counts, until only the registry of the fibre remains.
+When the references in the registry are deleted all the endpoints will be
+deleted, which will decrement, and possibly delete, the channel referred to.
+</p><p>The implementation is not quite trivial, since it is recursive and
+cycles must be broken to prevent an infinite recursion. This is done
+by marking the channel when deletion is in progress, which stops
+attempts to delete the owned fibres (since they're already being deleted).
+In fact, we use the channel refcount itself as the mark: if the refcount
+is zero, deletion of the channel is in progress.
+</p><p>Note that channels are shared between fibres, but an endpoint
+msut be exclusively owned by a single fibre. The smart pointer
+to the channel endpoints can be copied, assigned, and moved
+around but only within continuations of the fibre.
+</p><p>When a fibre is spawned it must be passed references to channel
+endpoints, which is done by constructing its registry and passing
+that. It is vital the spawner delete all these endpoints it is not
+allowed to own. This should be done as soon as possible because
+whilst it owns these endpoints, the referred to channel is still
+considered reachable. This must be done before the next I/O operation
+because these endpoints are <em>not registered</em> in the
+creators registry. This means if it is suspended, the reference counts
+of the end points will not be decremented as required.
+</p><p>One should note this is not trivial. When a fibre wants to spawn several others
+and connect them with channels, it must hold the appropriate endpoint array
+for each fibre it will spawn until they're done. On the other hand since
+the first spawned fibre might start immediately and immediately do I/O,
+the endpoints the other ends of the channels must be held long enough
+to ensure that fibre does not immediately suicide.
+</p><p>Another point to note is that a channel must have a reference count
+of at least 2 to be useful, one for each of two endpoints in different
+active fibres. 
+</p><p>Finally note, any number of fibres can subscribe to a channel.
+Channels are untyped can can operate in any direction.
+Similarly, endpoints are not intrinsically input or output.
+A channel is, of course, doomed if there is only one subscriber.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/channel.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> CHANNEL
+#<span class="preproc">define</span> CHANNEL
+#<span class="preproc">include</span> <span class="fstring">&lt;memory&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdint&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
+using uintptr_t = ::<span class="small_keyword">std</span>::uintptr_t;
+#<span class="preproc">include</span> <span class="fstring">"fibre.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+
+<span class="big_keyword">struct</span> channel_endpoint_t;
+
+<span class="comment">// CHANNEL ABSTRACTION
+</span>
+<span class="comment">// low bit fiddling routines
+</span><span class="qualifier">inline</span> <span class="qualifier">static</span> bool get_lowbit(<span class="qualifier">void</span> *p) { 
+  <span class="small_keyword">return</span> (uintptr_t)p &amp; (uintptr_t)1u; 
+}
+<span class="qualifier">inline</span> <span class="qualifier">static</span> <span class="qualifier">void</span> *clear_lowbit(<span class="qualifier">void</span> *p) { 
+  <span class="small_keyword">return</span> (<span class="qualifier">void</span>*)((uintptr_t)p &amp; ~(uintptr_t)1u); 
+}
+<span class="qualifier">inline</span> <span class="qualifier">static</span> <span class="qualifier">void</span> *set_lowbit(<span class="qualifier">void</span> *p) { 
+  <span class="small_keyword">return</span> (<span class="qualifier">void</span>*)((uintptr_t)p | (uintptr_t)1u); 
+}
+
+<span class="comment">// channel
+</span><span class="big_keyword">struct</span> channel_t {
+  ::<span class="small_keyword">std</span>::atomic_size_t refcnt;
+  fibre_t *top;
+  
+  channel_t () : top (nullptr), refcnt(1) {}
+  <span class="qualifier">virtual</span> ~channel_t(){ 
+    <span class="comment">//::std::cerr << "channel " << this << " destructor" << ::std::endl; 
+</span>  }
+
+  <span class="comment">// immobile object
+</span>  channel_t(channel_t <span class="qualifier">const</span>&amp;)=delete;
+  channel_t&amp; operator= (channel_t <span class="qualifier">const</span>&amp;)=delete;
+
+  <span class="comment">// required for the polymorphic deleter
+</span>  <span class="qualifier">virtual</span> size_t size() <span class="qualifier">const</span> = 0;
+
+  <span class="comment">// push a fibre as a reader: precondition it must be a reader
+</span>  <span class="comment">// and, if the channel is non-empty it must contain only readers
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> push_reader(fibre_t *r)=0;
+
+  <span class="comment">// push a fibre as a writer: precondition it must be a writer
+</span>  <span class="comment">// and, if the channel is non-empty it must contain only writers
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> push_writer(fibre_t *w)=0;
+
+  <span class="comment">// pop a reader if there is one, otherwise nullptr
+</span>  <span class="qualifier">virtual</span> fibre_t *pop_reader()=0;
+
+  <span class="comment">// pop a writer if there is one, otherwise nullptr
+</span>  <span class="qualifier">virtual</span> fibre_t *pop_writer()=0;
+
+  <span class="qualifier">virtual</span> <span class="qualifier">void</span> signal()=0;
+
+  <span class="comment">// channel read operation
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> read(<span class="qualifier">void</span> **target, fibre_t **pcurrent)=0;
+
+  <span class="comment">// channel write operation
+</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> write(<span class="qualifier">void</span> **source, fibre_t **pcurrent)=0;
+
+<span class="qualifier">protected</span>:
+  <span class="comment">// basic push and pop operations, not thread safe
+</span>
+  <span class="qualifier">void</span> st_push_reader(fibre_t *r) { 
+    r-&gt;next = top; 
+    top = r; 
+  }
+
+  <span class="qualifier">void</span> st_push_writer(fibre_t *w) { 
+    w-&gt;next = top; 
+    top = (fibre_t*)set_lowbit(w);
+  }
+
+  fibre_t *st_pop_reader() { 
+    fibre_t *tmp = top; 
+    <span class="small_keyword">if</span>(!tmp || get_lowbit(tmp))<span class="small_keyword">return</span> nullptr;
+    top = top -&gt; next;
+    <span class="small_keyword">return</span> tmp; <span class="comment">// lowbit is clear, its a reader 
+</span>  }
+
+  fibre_t *st_pop_writer() { 
+    fibre_t *tmp = top; 
+    <span class="small_keyword">if</span>(!tmp || !get_lowbit(tmp)) <span class="small_keyword">return</span> nullptr;
+    tmp = (fibre_t*)clear_lowbit(tmp); <span class="comment">// lowbit is set for writer
+</span>    top = tmp -&gt; next;
+    <span class="small_keyword">return</span> tmp;
+  }
+
+};
+
+<span class="big_keyword">struct</span> chan_epref_t {
+  channel_endpoint_t *endpoint;
+  chan_epref_t(channel_endpoint_t *p) : endpoint(p) {} <span class="comment">// endpoint ctor sets refcnt to 1 initially
+</span>
+  channel_endpoint_t *operator-&gt;()<span class="qualifier">const</span> { <span class="small_keyword">return</span> endpoint; }
+  channel_endpoint_t *get() <span class="qualifier">const</span> { <span class="small_keyword">return</span> endpoint; }
+
+  chan_epref_t() : endpoint(nullptr) {}
+
+  <span class="comment">// rvalue move
+</span>  chan_epref_t(chan_epref_t &amp;&amp;p) {
+    <span class="small_keyword">if</span>(p.endpoint) { 
+      endpoint = p.endpoint; 
+      p.endpoint = nullptr; 
+    }
+    else endpoint = nullptr;
+  } 
+
+  <span class="comment">// lvalue copy
+</span>  chan_epref_t(chan_epref_t &amp;p);
+
+  <span class="comment">// rvalue assign
+</span>  <span class="qualifier">void</span> operator= (chan_epref_t &amp;&amp;p) {
+    <span class="small_keyword">if</span> (&amp;p!=this) { <span class="comment">// ignore self assign
+</span>      this-&gt;~chan_epref_t(); <span class="comment">// destroy target
+</span>      new(this) chan_epref_t(::<span class="small_keyword">std</span>::move(p)); <span class="comment">// move source to target
+</span>    }
+  } <span class="comment">// rass
+</span>
+  <span class="comment">// lvalue assign
+</span>  <span class="qualifier">void</span> operator= (chan_epref_t &amp;p) { 
+    <span class="small_keyword">if</span>(&amp;p!=this) { <span class="comment">// ignore self assign
+</span>      this-&gt;~chan_epref_t(); <span class="comment">// destroy target
+</span>      new(this) chan_epref_t(p); <span class="comment">// copy source to target
+</span>    }
+  } <span class="comment">// lass
+</span> 
+ 
+  <span class="comment">// destructor
+</span>  <span class="comment">// uses allocator passed to endpoint on construction to delete it
+</span>  ~chan_epref_t();
+};
+
+
+<span class="comment">// the allocator used to construct the endpoint
+</span><span class="comment">// must be passed to it so it can be used to delete it
+</span><span class="comment">// it MUST be the same allocator used to construct the channel
+</span><span class="comment">// try to FIXME so it is .. this requires storing the allocator in
+</span><span class="comment">// the channel OR ensuring all channels and endpoints are constructed
+</span><span class="comment">// using the system allocator
+</span><span class="big_keyword">struct</span> channel_endpoint_t {
+  size_t refcnt;
+  channel_t *channel;
+  alloc_ref_t allocator;
+  channel_endpoint_t(channel_t *p, alloc_ref_t a) : allocator(a), channel(p), refcnt(1) { ++channel-&gt;refcnt; }
+
+  <span class="comment">// immobile object
+</span>  channel_endpoint_t(channel_endpoint_t <span class="qualifier">const</span>&amp;)=delete;
+  channel_endpoint_t&amp; operator= (channel_endpoint_t <span class="qualifier">const</span>&amp;)=delete;
+
+  <span class="comment">// create a duplicate of the current endpoint refering
+</span>  <span class="comment">// to the same channel. Returns a chan_epref_t; a shared
+</span>  <span class="comment">// pointer to the new endpoint. Incredrummoyne@corleonemarinas.comments the counter
+</span>  <span class="comment">// of endpoints in the channel.
+</span>  <span class="comment">// note, C++ must construct a single object containing
+</span>  <span class="comment">// both the reference count and the channel endpoint.
+</span>
+  chan_epref_t dup() { 
+    <span class="small_keyword">return</span> chan_epref_t(new(allocator) channel_endpoint_t(channel, allocator));
+  }
+
+  ~channel_endpoint_t () {
+<span class="comment">// ::std::cerr << "Channel endpoint " << this << " destructor, channel " <<  channel << ", refcnt " << channel->refcnt.load() << ::std::endl; 
+</span>    switch (channel-&gt;refcnt.load()) {
+      case 0: break;
+      case 1: delete_channel(); break;
+      default: --channel-&gt;refcnt; break;
+    }
+  }
+
+  <span class="qualifier">void</span> delete_channel() {
+ ::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Delete channel "</span> &lt;&lt; channel &lt;&lt; <span class="fstring">", refcnt "</span> &lt;&lt; channel-&gt;refcnt.load() &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    fibre_t *top = channel-&gt;top;
+    channel-&gt;top = nullptr;
+    channel-&gt;refcnt.store(0);
+    <span class="small_keyword">while</span> (top) {
+      fibre_t *f = (fibre_t*)clear_lowbit(top);
+      fibre_t *tmp = f-&gt;next;
+<span class="comment">// ::std::cerr << "Channel " << channel << " Deletes fibre " << f << ", next=" << tmp << ::std::endl;
+</span>      delete_concrete_object(f, allocator);
+      top = tmp;
+    }
+ <span class="comment">//::std::cerr << "Deleting channel " << channel << " now" << ::std::endl;
+</span>    delete_csp_polymorphic_object(channel, allocator);
+  }
+  
+};
+
+
+<span class="comment">// lvalue copy
+</span>chan_epref_t::chan_epref_t(chan_epref_t &amp;p) { 
+  <span class="small_keyword">if</span>(p.endpoint) { 
+    endpoint = p.endpoint; 
+    p.endpoint-&gt;refcnt++; 
+  }
+  else endpoint = nullptr; 
+} 
+
+<span class="comment">// destructor
+</span><span class="comment">// uses allocator passed to endpoint on construction to delete it
+</span>chan_epref_t::~chan_epref_t() { 
+  <span class="small_keyword">if</span> (endpoint) {
+    <span class="small_keyword">if</span>(endpoint-&gt;refcnt == 1) { 
+<span class="comment">//::std::cerr << "Endpoint ref " << this << " deletes endpoint " << endpoint << ::std::endl;
+</span>      delete_concrete_object(endpoint, endpoint-&gt;allocator); 
+    }
+    else 
+      --endpoint-&gt;refcnt; 
+  }
+} <span class="comment">// dtor
+</span>
+chan_epref_t acquire_channel(alloc_ref_t a, channel_t *p) {
+  <span class="small_keyword">return</span> chan_epref_t(new(a) channel_endpoint_t(p,a));
+}
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Service_Requests_h'><img src='/share/src/web/images/minus.gif' id='Service Requests' onclick='toggle(this,"Service_Requests_d")' alt='+'/> 4 Service Requests</h1><div id='Service_Requests_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/svc.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> SVC_HPP
+#<span class="preproc">define</span> SVC_HPP
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+
+<span class="big_keyword">struct</span> chan_epref_t;
+<span class="big_keyword">struct</span> con_t;
+
+<span class="comment">// service requests
+</span><span class="comment">//
+</span><span class="comment">// Request codes
+</span><span class="big_keyword">enum</span> svc_code_t {
+  read_request_code_e,
+  write_request_code_e,
+  spawn_fibre_request_code_e,
+  spawn_fibre_deferred_request_code_e,
+  spawn_process_request_code_e,
+  spawn_cothread_request_code_e
+};
+
+<span class="comment">// synchronous I/O requests
+</span><span class="big_keyword">struct</span> io_request_t {
+  svc_code_t svc_code;
+  chan_epref_t *chan;
+  <span class="qualifier">void</span> **pdata;
+};
+
+<span class="comment">// fibre and cothread spawn requests
+</span><span class="big_keyword">struct</span> spawn_fibre_request_t {
+  svc_code_t svc_code;
+  con_t *tospawn;
+};
+
+<span class="comment">// fibre and cothread spawn requests
+</span><span class="big_keyword">struct</span> spawn_process_request_t {
+  svc_code_t svc_code;
+  con_t *tospawn;
+  alloc_ref_t process_allocator;
+};
+
+
+<span class="comment">// unified service request type (only used for casts)
+</span><span class="big_keyword">union</span> svc_req_t {
+  io_request_t io_request;
+  spawn_fibre_request_t spawn_fibre_request;
+  spawn_process_request_t spawn_process_request;
+  svc_code_t get_code () <span class="qualifier">const</span> { <span class="small_keyword">return</span> io_request.svc_code; }
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Sequential_Channel_h'><img src='/share/src/web/images/minus.gif' id='Sequential Channel' onclick='toggle(this,"Sequential_Channel_d")' alt='+'/> 5 Sequential Channel</h1><div id='Sequential_Channel_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/sequential_channel.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> SEQUENTIAL_CHANNEL
+#<span class="preproc">define</span> SEQUENTIAL_CHANNEL
+
+#<span class="preproc">include</span> <span class="fstring">"channel.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"svc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"csp_process.hpp"</span>
+
+<span class="comment">// SINGLE THREADED CHANNEL (no locking)
+</span>
+<span class="comment">// channel
+</span><span class="big_keyword">struct</span> sequential_channel_t : channel_t {
+  
+  sequential_channel_t () : channel_t() {}
+
+  size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(sequential_channel_t); }
+  <span class="qualifier">void</span> push_reader(fibre_t *r) override { st_push_reader(r); } 
+  <span class="qualifier">void</span> push_writer(fibre_t *w) override  { st_push_writer(w); }
+  fibre_t *pop_reader() override  { <span class="small_keyword">return</span> st_pop_reader(); }
+  fibre_t *pop_writer() override  { <span class="small_keyword">return</span> st_pop_writer(); }
+
+  <span class="qualifier">void</span> signal() override  {} 
+
+  <span class="qualifier">void</span> read(<span class="qualifier">void</span> **target, fibre_t **pcurrent) override  {
+<span class="comment">//::std::cerr << *pcurrent << " Sequential Channel read begins " << ::std::endl;
+</span>    fibre_t *current = *pcurrent;
+    fibre_t *w = st_pop_writer();
+<span class="comment">//::std::cerr << *pcurrent << " Sequential Channel read finds writer " << w << ::std::endl;
+</span>    <span class="small_keyword">if</span>(w) {
+      ++refcnt;
+      *target =
+        *w-&gt;svc_req-&gt;io_request.pdata; <span class="comment">// transfer data
+</span>      w-&gt;process-&gt;push(w); <span class="comment">// onto active list
+</span>    }
+    else {
+      <span class="small_keyword">if</span>(refcnt == 1) {
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// active list
+</span><span class="comment">//::std::cerr << "channel read " << this << " deletes fibre " << current << ::std::endl;
+</span>        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
+      } else {
+        --refcnt;
+        st_push_reader(current);
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// active list
+</span>      }
+    }
+  }
+
+  <span class="qualifier">void</span> write(<span class="qualifier">void</span> **source, fibre_t **pcurrent) override  {
+<span class="comment">//::std::cerr << *pcurrent << " Sequential Channel write begins " << ::std::endl;
+</span>    fibre_t *current = *pcurrent;
+    fibre_t *r = st_pop_reader();
+<span class="comment">//::std::cerr << *pcurrent << " Sequential Channel write finds reader " << r << ::std::endl;
+</span>    <span class="small_keyword">if</span>(r) {
+      ++refcnt;
+      *r-&gt;svc_req-&gt;io_request.pdata = *source;
+
+      <span class="small_keyword">if</span>(r-&gt;process == current-&gt;process) {
+        current-&gt;process-&gt;push(current); <span class="comment">// current is writer, pushed onto active list
+</span>        *pcurrent = r; <span class="comment">// make reader current
+</span>      }
+      else {
+        r-&gt;process-&gt;push(r);
+      }
+    }
+    else {
+      <span class="small_keyword">if</span>(refcnt == 1) {
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
+</span><span class="comment">//::std::cerr << "channel write " << this << " deletes fibre " << current << ::std::endl;
+</span>        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
+      } else {
+        --refcnt;
+        st_push_writer(current); <span class="comment">// i/o fail: push current onto channel
+</span>        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
+</span>      }
+    }
+  }
+};
+
+chan_epref_t make_sequential_channel(alloc_ref_t a) {
+  <span class="small_keyword">return</span> acquire_channel(a, new(a) sequential_channel_t);
+}
+
+
+<span class="qualifier">void</span> system_t::connect_sequential (chan_epref_t *left, chan_epref_t *right) {
+  auto chleft= make_sequential_channel(system_allocator);
+  auto chright= chleft -&gt;dup(); 
+  *left = chleft;
+  *right= chright;
+}
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Concurrent_Channel_h'><img src='/share/src/web/images/minus.gif' id='Concurrent Channel' onclick='toggle(this,"Concurrent_Channel_d")' alt='+'/> 6 Concurrent Channel</h1><div id='Concurrent_Channel_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/concurrent_channel.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> CONCURRENT_CHANNEL
+#<span class="preproc">define</span> CONCURRENT_CHANNEL
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"system.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"sequential_channel.hpp"</span>
+
+<span class="comment">// CONCURRENT CHANNEL (operations are locked, but no async)
+</span>
+<span class="big_keyword">struct</span> concurrent_channel_t : sequential_channel_t {
+  ::<span class="small_keyword">std</span>::atomic_flag lk;
+  <span class="qualifier">void</span> lock() { <span class="small_keyword">while</span>(lk.test_and_set(::<span class="small_keyword">std</span>::memory_order_acquire)); }
+  <span class="qualifier">void</span> unlock() { lk.clear(::<span class="small_keyword">std</span>::memory_order_release); }
+
+  concurrent_channel_t () : lk(false) {}
+
+  size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(concurrent_channel_t); }
+
+  <span class="qualifier">void</span> push_reader(fibre_t *r) override { 
+    lock();
+    st_push_reader(r); 
+    unlock();
+  } 
+  <span class="qualifier">void</span> push_writer(fibre_t *w) override { 
+    lock();
+    st_push_writer(w); 
+    unlock();
+  }
+  fibre_t *pop_reader() override {
+    lock();
+    auto r = st_pop_reader();
+    unlock(); 
+    <span class="small_keyword">return</span> r;
+  }
+  fibre_t *pop_writer() override {
+    lock();
+    auto w = st_pop_writer();
+    unlock();
+    <span class="small_keyword">return</span> w;
+  }
+
+  <span class="qualifier">void</span> read(<span class="qualifier">void</span> **target, fibre_t **pcurrent) override {
+    fibre_t *current = *pcurrent;
+    lock();
+    fibre_t *w = st_pop_writer();
+    <span class="small_keyword">if</span>(w) {
+      ++refcnt;
+      unlock();
+      *target =
+        *w-&gt;svc_req-&gt;io_request.pdata; <span class="comment">// transfer data
+</span>      w-&gt;process-&gt;push(w); <span class="comment">// onto active list
+</span>    }
+    else {
+      <span class="small_keyword">if</span>(refcnt == 1) {
+        <span class="comment">//::std::cerr << "Concurrent channel read deletes requesting fibre " << current << :: std::endl;
+</span>        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// active list
+</span>        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
+      } else {
+        --refcnt;
+        st_push_reader(current);
+        unlock();
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// active list
+</span>      }
+    }
+  }
+
+  <span class="qualifier">void</span> write(<span class="qualifier">void</span> **source, fibre_t **pcurrent) override {
+    fibre_t *current = *pcurrent;
+    lock();
+    fibre_t *r = st_pop_reader();
+    <span class="small_keyword">if</span>(r) {
+      ++refcnt;
+      unlock();
+      *r-&gt;svc_req-&gt;io_request.pdata = *source;
+
+      <span class="small_keyword">if</span>(r-&gt;process == current-&gt;process) {
+        current-&gt;process-&gt;push(current); <span class="comment">// current is writer, pushed onto active list
+</span>        *pcurrent = r; <span class="comment">// make reader current
+</span>      }
+      else {
+        r-&gt;process-&gt;push(r);
+      }
+    }
+    else {
+      <span class="small_keyword">if</span>(refcnt == 1) {
+        <span class="comment">//::std::cerr << "Concurrent channel write deletes requesting fibre " << current << :: std::endl;
+</span>        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
+</span>        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
+      } else {
+        --refcnt;
+  <span class="comment">// ::std::cout<< "do_write: fibre " << current << ", set channel "<< chan <<" recnt to " << chan->refcnt << ::std::endl;
+</span>        st_push_writer(current); <span class="comment">// i/o fail: push current onto channel
+</span>        unlock();
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
+</span>      }
+    }
+  }
+
+
+};
+
+chan_epref_t make_concurrent_channel(alloc_ref_t a) {
+  <span class="small_keyword">return</span> acquire_channel(a, new(a) concurrent_channel_t);
+}
+
+<span class="qualifier">void</span> system_t::connect_concurrent (chan_epref_t *left, chan_epref_t *right) {
+  auto chleft= make_concurrent_channel(system_allocator);
+  auto chright= chleft-&gt;dup(); 
+  *left = chleft;
+  *right= chright;
+}
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Asynchronous_channel_h'><img src='/share/src/web/images/minus.gif' id='Asynchronous channel' onclick='toggle(this,"Asynchronous_channel_d")' alt='+'/> 7 Asynchronous channel</h1><div id='Asynchronous_channel_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/async_channel.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> ASYNC_CHANNEL
+#<span class="preproc">define</span> ASYNC_CHANNEL
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"concurrent_channel.hpp"</span>
+
+<span class="comment">// ASYNCHRONOUS CHANNEL
+</span><span class="comment">//
+</span><span class="comment">// This is like a concurrent channel, except 
+</span><span class="comment">// (a) it actively notifies possibly sleeping subscribers 
+</span><span class="comment">// to the condition variable // that the channel has changed state.
+</span><span class="comment">// (b) It increments the async count of an active set when a fibre
+</span><span class="comment">// of that set is pushed onto the channel
+</span><span class="comment">// (c) decrements the async count when a fibre previously on the channel
+</span><span class="comment">// is made currect or put onto an active set
+</span><span class="comment">//
+</span><span class="comment">// NOTE: when a fibre tries to do I/O on a channel and is the
+</span><span class="comment">// only holder of an endpoint, the reference count will be 1.
+</span><span class="comment">// In this case, it must be deleted because the I/O request can never be
+</span><span class="comment">// satisfied. In turn this would decrement the reference count to 0,
+</span><span class="comment">// so the channel, and all fibres on it, also need to be deleted.
+</span><span class="comment">// Fibres on the channel may hold endpoints to the channel,
+</span><span class="comment">// so if the reference count goes to zero no action is taken,
+</span><span class="comment">// the channel is going to be deleted anyhow.
+</span><span class="comment">//
+</span><span class="comment">// There is no point signaling subscribers to the condition variable,
+</span><span class="comment">// because the purpose of that is to wake up readers and
+</span><span class="comment">// writers that the channel state has changed, in particular, an
+</span><span class="comment">// unsatisfied I/O request may have been performed, causing a fibre
+</span><span class="comment">// on the channel to now go onto an active set and be available for
+</span><span class="comment">// resumption.
+</span><span class="comment">//
+</span><span class="comment">// It is important to note that external devices such as a clock
+</span><span class="comment">// MUST prevent this by holding an endpoint to the channel.
+</span><span class="comment">// In particular a clock, for example, is considered active even if
+</span><span class="comment">// it is sleeping waiting for an alarm to go off or a request to come in.
+</span><span class="comment">// A clock holds a request channel endpoint, even when there are no
+</span><span class="comment">// clients.
+</span>
+<span class="big_keyword">struct</span> async_channel_t : concurrent_channel_t {
+  ::<span class="small_keyword">std</span>::condition_variable cv;
+  ::<span class="small_keyword">std</span>::mutex cv_lock;
+
+  <span class="qualifier">void</span> signal() override { cv.notify_all(); }
+
+  size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(async_channel_t); }
+
+  async_channel_t () {}
+
+  <span class="qualifier">void</span> read(<span class="qualifier">void</span> **target, fibre_t **pcurrent)  override {
+    fibre_t *current = *pcurrent;
+    ++current-&gt;process-&gt;async_count;
+    lock();
+    fibre_t *w = st_pop_writer();
+    <span class="small_keyword">if</span>(w) {
+      ++refcnt;
+      unlock();
+      *target =
+        *w-&gt;svc_req-&gt;io_request.pdata; <span class="comment">// transfer data
+</span>      w-&gt;process-&gt;push(w); <span class="comment">// onto active list
+</span>    }
+    else {
+      <span class="small_keyword">if</span>(refcnt == 1) {
+::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Async channel "</span> &lt;&lt; this &lt;&lt; <span class="fstring">" read detects refcnt 1"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
+</span>        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
+        <span class="small_keyword">return</span>; <span class="comment">// to prevent signalling a deleted channel
+</span>      } else {
+        --refcnt;
+        st_push_reader(current);
+        unlock();
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// active list
+</span>      }
+    }
+    signal();
+  }
+
+  <span class="qualifier">void</span> write(<span class="qualifier">void</span> **source, fibre_t **pcurrent) override  {
+    fibre_t *current = *pcurrent;
+    ++current-&gt;process-&gt;async_count;
+    lock();
+    fibre_t *r = st_pop_reader();
+    <span class="small_keyword">if</span>(r) {
+      ++refcnt;
+      unlock();
+      *r-&gt;svc_req-&gt;io_request.pdata = *source;
+
+      <span class="small_keyword">if</span>(r-&gt;process == current-&gt;process) {
+        current-&gt;process-&gt;push(current); <span class="comment">// current is writer, pushed onto active list
+</span>        *pcurrent = r; <span class="comment">// make reader current
+</span>      }
+      else {
+        r-&gt;process-&gt;push(r);
+      }
+    }
+    else {
+      <span class="small_keyword">if</span>(refcnt == 1) {
+::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Async channel "</span> &lt;&lt; this &lt;&lt; <span class="fstring">" write detects refcnt 1"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
+</span>        <span class="small_keyword">return</span>; <span class="comment">// to prevent signalling a deleted channel
+</span>      } else {
+        --refcnt;
+        st_push_writer(current); <span class="comment">// i/o fail: push current onto channel
+</span>        unlock();
+        *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
+</span>      }
+    }
+    signal();
+  }
+
+
+};
+
+chan_epref_t make_async_channel(alloc_ref_t a) {
+  <span class="small_keyword">return</span> acquire_channel(a, new async_channel_t);
+}
+#<span class="preproc">endif</span>
+</pre></p><pre class='inclusion'>
+share/lib/rtl/rt/system.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> SYSTEM
+#<span class="preproc">define</span> SYSTEM
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"channel.hpp"</span>
+
+<span class="comment">// For use by the kernel CSP system
+</span><span class="big_keyword">struct</span> system_t {
+  alloc_ref_t system_allocator;
+  system_t (alloc_ref_t a) : system_allocator(a) {}
+
+  <span class="qualifier">void</span> connect_sequential (chan_epref_t *left, chan_epref_t *right);
+  <span class="qualifier">void</span> connect_concurrent (chan_epref_t *left, chan_epref_t *right);
+  <span class="qualifier">void</span> connect_async(chan_epref_t *left, chan_epref_t *right);
+
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='CSP_Processes_h'><img src='/share/src/web/images/minus.gif' id='CSP Processes' onclick='toggle(this,"CSP_Processes_d")' alt='+'/> 8 CSP Processes</h1><div id='CSP_Processes_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/csp_process.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> CSP_PROCESS
+#<span class="preproc">define</span> CSP_PROCESS
+#<span class="preproc">include</span> <span class="fstring">"system.hpp"</span>
+
+<span class="comment">// active set
+</span><span class="big_keyword">struct</span> csp_process_t {
+  ::<span class="small_keyword">std</span>::atomic_size_t refcnt;
+  system_t *system;
+  alloc_ref_t process_allocator;
+
+  fibre_t *active;
+  ::<span class="small_keyword">std</span>::atomic_flag lock; <span class="comment">// this one is a spin lock for sync ops
+</span>
+  <span class="comment">// an async service which pushes a fibre onto the active
+</span>  <span class="comment">// set also decrements the active count and must 
+</span>  <span class="comment">// signal this condition variable to wake up all schedulers
+</span>  <span class="comment">// so they notice the active set is now populated
+</span>
+  ::<span class="small_keyword">std</span>::atomic_size_t async_count;
+  ::<span class="small_keyword">std</span>::mutex async_lock; <span class="comment">// mutex lock for async ops
+</span>  ::<span class="small_keyword">std</span>::condition_variable async_wake;
+
+  <span class="qualifier">void</span> async_complete() { 
+    <span class="comment">//::std::cerr << "Active set: async complete" << ::std::endl;
+</span>    --async_count; async_wake.notify_all(); 
+  }
+
+  ::<span class="small_keyword">std</span>::atomic_size_t running_thread_count;
+
+  csp_process_t(system_t *s, alloc_ref_t a) : 
+    system(s), process_allocator(a),
+    refcnt(1), active(nullptr), async_count(0), lock(false), running_thread_count(0) 
+  { 
+    <span class="comment">// ::std::cerr << "New process" << ::std::endl;
+</span>  }
+
+  csp_process_t *share() { ++refcnt; <span class="small_keyword">return</span> this; }
+  <span class="qualifier">void</span> forget() { 
+    --refcnt; 
+    <span class="small_keyword">if</span>(!atomic_load(&amp;refcnt)) 
+      delete_concrete_object(this,system-&gt;system_allocator); 
+  }
+
+  <span class="comment">// push a new active fibre onto active list
+</span>  <span class="qualifier">void</span> push(fibre_t *fresh) { 
+<span class="comment">// ::std::cerr << "Active set push " << fresh << ::std::endl;
+</span>    <span class="small_keyword">while</span>(lock.test_and_set(::<span class="small_keyword">std</span>::memory_order_acquire)); <span class="comment">// spin
+</span>    fresh-&gt;next = active; 
+    active = fresh; 
+    lock.clear(::<span class="small_keyword">std</span>::memory_order_release); <span class="comment">// release lock
+</span>  }
+  <span class="comment">// pop an active fibre off the active list
+</span>  fibre_t *pop() {
+<span class="comment">// ::std::cerr << "Active set pop .. " << ::std::endl;
+</span>    <span class="small_keyword">while</span>(lock.test_and_set(::<span class="small_keyword">std</span>::memory_order_acquire)); <span class="comment">// spin
+</span>    fibre_t *tmp = active;
+    <span class="small_keyword">if</span>(tmp)active = tmp-&gt;next;
+    lock.clear(::<span class="small_keyword">std</span>::memory_order_release); <span class="comment">// release lock
+</span><span class="comment">// ::std::cerr << "Active set popped .. " << tmp << ::std::endl;
+</span>    <span class="small_keyword">return</span> tmp;
+  }
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='CSP_threads_h'><img src='/share/src/web/images/minus.gif' id='CSP threads' onclick='toggle(this,"CSP_threads_d")' alt='+'/> 9 CSP threads</h1><div id='CSP_threads_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/csp_thread.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> CSP_THREAD
+#<span class="preproc">define</span> CSP_THREAD
+#<span class="preproc">include</span> <span class="fstring">&lt;thread&gt;</span>
+<span class="comment">// csp_thread_t4.hpp
+</span>#<span class="preproc">include</span> <span class="fstring">"system.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"svc.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"csp_process.hpp"</span>
+
+<span class="comment">// scheduler
+</span><span class="big_keyword">struct</span> csp_thread_t {
+  csp_process_t *process;  <span class="comment">// chain of fibres ready to run
+</span>
+  fibre_t *current; <span class="comment">// currently running fibre, nullptr if none
+</span>  ~csp_thread_t() { process-&gt;forget(); }
+
+  csp_thread_t(csp_process_t *a) : current(nullptr), process(a) {}
+
+  <span class="qualifier">void</span> sync_run(con_t *);
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_read(io_request_t *req);
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_write(io_request_t *req);
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_spawn_fibre(spawn_fibre_request_t *req);
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_spawn_fibre_deferred(spawn_fibre_request_t *req);
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_spawn_process(spawn_process_request_t *req);
+  <span class="qualifier">void</span> <span class="small_keyword">do</span>_spawn_cothread(spawn_fibre_request_t *req);
+};
+
+<span class="qualifier">extern</span> <span class="qualifier">void</span> csp_run(system_t *system, alloc_ref_t process_allocator, con_t *init) {
+::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"csp_run start"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+  csp_thread_t (new(system-&gt;system_allocator) csp_process_t(system, process_allocator)).sync_run(init);
+::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"csp_run over "</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+}
+
+<span class="comment">// scheduler subroutine runs until there is no work to do
+</span><span class="qualifier">void</span> csp_thread_t::sync_run(con_t *cc) {
+  current = new(process-&gt;process_allocator) fibre_t(cc, process);
+  cc-&gt;fibre = current;
+  ++process-&gt;running_thread_count;
+retry:
+  <span class="small_keyword">while</span>(current) <span class="comment">// while there's work to do 
+</span>  {
+    current-&gt;svc_req = nullptr; <span class="comment">// null out service request
+</span>    svc_req_t *svc_req = current-&gt;run_fibre();
+    <span class="small_keyword">if</span>(svc_req)  <span class="comment">// fibre issued service request
+</span>      switch (svc_req-&gt;get_code()) 
+      {
+        case read_request_code_e: 
+          <span class="small_keyword">do</span>_read(&amp;(svc_req-&gt;io_request));
+          break;
+        case write_request_code_e:  
+          <span class="small_keyword">do</span>_write(&amp;(svc_req-&gt;io_request));
+          break;
+        case spawn_fibre_request_code_e:  
+          <span class="small_keyword">do</span>_spawn_fibre(&amp;(svc_req-&gt;spawn_fibre_request));
+          break;
+        case spawn_fibre_deferred_request_code_e:  
+          <span class="small_keyword">do</span>_spawn_fibre_deferred(&amp;(svc_req-&gt;spawn_fibre_request));
+          break;
+        case spawn_process_request_code_e:  
+          <span class="small_keyword">do</span>_spawn_process(&amp;(svc_req-&gt;spawn_process_request));
+          break;
+        case spawn_cothread_request_code_e:  
+          <span class="small_keyword">do</span>_spawn_cothread(&amp;(svc_req-&gt;spawn_fibre_request));
+          break;
+        default:
+          assert(false);
+      }
+    else <span class="comment">// the fibre returned without issuing a request so should be dead
+</span>    {
+      assert(!current-&gt;cc); <span class="comment">// check it's adead fibre
+</span>      <span class="comment">//::std::cerr << "csp_thread: null continuation in fibre, deleting fibre " << current << ::std::endl;
+</span>      auto old_current = current;
+      current = nullptr;
+      delete_concrete_object(old_current,old_current-&gt;process-&gt;process_allocator);
+      current = process-&gt;pop();      <span class="comment">// get more work
+</span>      <span class="comment">//::std::cerr << "csp_thread: new current fibre " << current << ::std::endl;
+</span>    }
+  }
+
+  <span class="comment">// decrement running thread count
+</span>  process-&gt;running_thread_count--;
+
+  <span class="comment">// Async events can reload the active set, but they do NOT change current
+</span>rewait:
+  <span class="comment">// if the async count > 0 we're waiting for the async op to complete
+</span>  <span class="comment">// if the running thread count > 0 we're waiting for other threads to stall
+</span><span class="comment">//  //::std::cerr << "Scheduler out of fibres: async count = " << process->async_count.load() << ::std::endl;
+</span>  <span class="small_keyword">if</span>(process-&gt;async_count.load() &gt; 0 || process-&gt;running_thread_count.load() &gt; 0) {
+    <span class="comment">// delay
+</span>    {
+<span class="comment">////::std::cerr << "Scheduler sleeping (inf)" << ::std::endl;
+</span>      ::<span class="small_keyword">std</span>::unique_lock&lt;::<span class="small_keyword">std</span>::mutex&gt; lk(process-&gt;async_lock);
+      process-&gt;async_wake.wait_<span class="small_keyword">for</span>(lk,::<span class="small_keyword">std</span>::chrono::milliseconds(100000));
+    } <span class="comment">// lock released now
+</span>    current = process-&gt;pop();      <span class="comment">// get more work
+</span>    <span class="small_keyword">if</span>(current) {
+      process-&gt;running_thread_count++;
+      <span class="small_keyword">goto</span> retry;
+    }
+    <span class="small_keyword">goto</span> rewait;
+  }
+
+<span class="comment">//  //::std::cerr << "Scheduler out of work, returning" << ::std::endl;
+</span>}
+
+
+<span class="qualifier">void</span> csp_thread_t::<span class="small_keyword">do</span>_read(io_request_t *req) {
+  req-&gt;chan-&gt;get()-&gt;channel-&gt;read(current-&gt;svc_req-&gt;io_request.pdata, &amp;current);
+}
+
+<span class="qualifier">void</span> csp_thread_t::<span class="small_keyword">do</span>_write(io_request_t *req) {
+ req-&gt;chan-&gt;get()-&gt;channel-&gt;write(current-&gt;svc_req-&gt;io_request.pdata, &amp;current);
+}
+
+
+<span class="qualifier">void</span> csp_thread_t::<span class="small_keyword">do</span>_spawn_fibre(spawn_fibre_request_t *req) {
+<span class="comment">// //::std::cerr << "do spawn" << ::std::endl;
+</span>  current-&gt;svc_req=nullptr;
+  process-&gt;push(current);
+  con_t *cc= req-&gt;tospawn;
+  current = new(process-&gt;process_allocator) fibre_t(cc, process);
+  cc-&gt;fibre = current;
+<span class="comment">// //::std::cerr << "spawned " << current << ::std::endl;
+</span>}
+
+<span class="qualifier">void</span> csp_thread_t::<span class="small_keyword">do</span>_spawn_fibre_deferred(spawn_fibre_request_t *req) {
+<span class="comment">// //::std::cerr << "do spawn deferred" << ::std::endl;
+</span>  current-&gt;svc_req=nullptr;
+  con_t *init = req-&gt;tospawn;
+  fibre_t *d = new(process-&gt;process_allocator) fibre_t(init, process);
+  init-&gt;fibre = d;
+  process-&gt;push(d);
+<span class="comment">// //::std::cerr << "spawn deferred " << d << ::std::endl;
+</span>}
+
+<span class="qualifier">static</span> <span class="qualifier">void</span> spawn(csp_process_t *pa, con_t *cc) {
+  csp_thread_t(pa).sync_run(cc);
+}
+<span class="qualifier">void</span> csp_thread_t::<span class="small_keyword">do</span>_spawn_process(spawn_process_request_t *req) {
+  csp_process_t *process = new(process-&gt;system-&gt;system_allocator) csp_process_t(process-&gt;system, req-&gt;process_allocator);
+  ::<span class="small_keyword">std</span>::thread(spawn,process,req-&gt;tospawn).detach();
+}
+
+<span class="qualifier">void</span> csp_thread_t::<span class="small_keyword">do</span>_spawn_cothread(spawn_fibre_request_t *req) {
+  current-&gt;process-&gt;refcnt++;
+  ::<span class="small_keyword">std</span>::thread(spawn,current-&gt;process,req-&gt;tospawn).detach();
+}
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='CSP:_the_lot_h'><img src='/share/src/web/images/minus.gif' id='CSP: the lot' onclick='toggle(this,"CSP:_the_lot_d")' alt='+'/> 10 CSP: the lot</h1><div id='CSP:_the_lot_d' style='display:block'>
+<pre class='inclusion'>
+share/lib/rtl/rt/csp.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> CSP
+#<span class="preproc">define</span> CSP
+#<span class="preproc">include</span> <span class="fstring">&lt;typeinfo&gt;</span>
+
+<span class="comment">// forward decls
+</span><span class="big_keyword">struct</span> csp_clock_t;
+<span class="big_keyword">struct</span> fibre_t;
+<span class="big_keyword">struct</span> channel_t;
+<span class="big_keyword">struct</span> csp_process_t;
+<span class="big_keyword">struct</span> con_t;
+<span class="big_keyword">struct</span> allocator_t;
+<span class="big_keyword">struct</span> alloc_ref_t;
+<span class="big_keyword">struct</span> system_t;
+<span class="big_keyword">struct</span> channel_endpoint_t;
+<span class="big_keyword">struct</span> chan_epref_t;
+
+<span class="comment">// the csp system
+</span>#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"malloc_free.hpp"</span>
+<span class="comment">//#include "utility_allocators.hpp"
+</span><span class="comment">//#include "freelist.hpp"
+</span>#<span class="preproc">include</span> <span class="fstring">"system_allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"system.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">"con.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"fibre.hpp"</span>
+
+#<span class="preproc">include</span> <span class="fstring">"csp_process.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"svc.hpp"</span>
+
+con_t *coroutine_t::<span class="small_keyword">return</span>_control()
+{
+<span class="comment">//::std::cerr << "Coroutine " << this << " returns control" << ::std::endl;
+</span>  delete_csp_polymorphic_object(this,fibre-&gt;process-&gt;process_allocator);
+  <span class="small_keyword">return</span> nullptr;
+}
+
+con_t *subroutine_t::<span class="small_keyword">return</span>_control() {
+  auto tmp = caller;
+  delete_csp_polymorphic_object(this,fibre-&gt;process-&gt;process_allocator);
+  <span class="small_keyword">return</span> tmp;
+}
+
+
+<span class="comment">// resolve circular reference
+</span>fibre_t::~fibre_t()
+{
+  <span class="comment">//::std::cerr << "Fibre destructor " << this << ::std::endl;
+</span>  <span class="small_keyword">while</span>(cc) cc= cc-&gt;<span class="small_keyword">return</span>_control(); 
+}
+
+#<span class="preproc">include</span> <span class="fstring">"channel.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"csp_thread.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"sequential_channel.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"concurrent_channel.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"async_channel.hpp"</span>
+<span class="comment">//#include "clock.hpp"
+</span>
+#<span class="preproc">define</span> CSP_SUBRETURN <span class="small_keyword">return</span> <span class="small_keyword">return</span>_control();
+#<span class="preproc">define</span> CSP_COSUICIDE <span class="small_keyword">return</span> <span class="small_keyword">return</span>_control();
+
+#<span class="preproc">define</span> CSP_CALLDEF_START \
+  con_t *call(con_t *caller_a
+
+#<span class="preproc">define</span> CSP_CALLDEF_MID ){\
+  caller = caller_a;\
+  pc = 0;
+
+#<span class="preproc">define</span> CSP_CALLDEF_END \
+  <span class="small_keyword">return</span> this;\
+}
+
+#<span class="preproc">define</span> CSP_CODEF_START \
+  con_t *setup(
+
+#<span class="preproc">define</span> CSP_CODEF_MID ){\
+  pc = 0;
+
+#<span class="preproc">define</span> CSP_CODEF_END \
+  <span class="small_keyword">return</span> this;\
+}
+#<span class="preproc">define</span> CSP_RESUME_START\
+  con_t *resume() override {\
+  switch(pc++){\
+  case 0:
+
+#<span class="preproc">define</span> CSP_RESUME_END\
+  default: assert(false);\
+  }}
+
+#<span class="preproc">define</span> CSP_SIZE \
+  size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); } 
+
+#<span class="preproc">define</span> SVC_READ_REQ(xpreq,xpchan,xpdata)\
+  (xpreq)-&gt;svc_code = read_request_code_e;\
+  (xpreq)-&gt;pdata = (<span class="qualifier">void</span>**)xpdata;\
+  (xpreq)-&gt;chan = xpchan;
+
+#<span class="preproc">define</span> SVC_WRITE_REQ(xpreq,xpchan,xpdata)\
+  (xpreq)-&gt;svc_code = write_request_code_e;\
+  (xpreq)-&gt;pdata = (<span class="qualifier">void</span>**)xpdata;\
+  (xpreq)-&gt;chan = xpchan;
+
+#<span class="preproc">define</span> SVC_ASYNC_WRITE_REQ(xpreq,xpchan,xpdata)\
+  (xpreq)-&gt;svc_code = async_write_request_code_e;\
+  (xpreq)-&gt;pdata = (<span class="qualifier">void</span>**)xpdata;\
+  (xpreq)-&gt;chan = xpchan;
+
+#<span class="preproc">define</span> SVC_SPAWN_FIBRE_REQ(xpreq,xcont)\
+  (xpreq)-&gt;svc_code = spawn_fibre_request_code_e;\
+  (xpreq)-&gt;tospawn = xcont;
+
+#<span class="preproc">define</span> SVC_SPAWN_FIBRE_DEFERRED_REQ(xpreq,xcont)\
+  (xpreq)-&gt;svc_code = spawn_fibre_deferred_request_code_e;\
+  (xpreq)-&gt;tospawn = xcont;
+
+#<span class="preproc">define</span> SVC_SPAWN_PTHREAD_REQ(xprec,xcont)\
+  (xpreq)-&gt;spawn_pthread_request_code_e;\
+  (xpreq)-&gt;tospawn = xcont;
+
+#<span class="preproc">define</span> SVC(preq)\
+  fibre-&gt;svc_req = (svc_req_t*)(<span class="qualifier">void</span>*)preq;\
+  <span class="small_keyword">return</span> this;
+
+#<span class="preproc">define</span> CSP_GOTO(caseno)\
+  pc = caseno;\
+  <span class="small_keyword">return</span> this;
+
+<span class="comment">/*
+#define CSP_CALL_DIRECT0(procedure)\
+  return (new procedure(global))->call(this);
+
+#define CSP_CALL_DIRECT1(procedure,arg)\
+  return (new procedure(global))->call(this,arg);
+
+#define CSP_CALL_DIRECT2(procedure,arg1,arg2)\
+  return (new procedure(global))->call(this,arg1,arg2);
+
+
+#define CSP_CALL_DIRECT3(procedure,arg1,arg2,arg3)\
+  return (new procedure(global))->call(this,arg1,arg2,arg3);
+**</span>/
+#<span class="preproc">endif</span>
+</pre></p></div><!--Main Content Body End-->
+
+          </div> <!-- rightpanel contents end -->
+          <hr>
+        </span> <!-- rightpanel end -->
+
+        <span id="panemover" style="cursor:col-resize;"
+         onmousedown="dragStart(event, 'left', 'right'); return false;"
+         onmousemove="drag(event, 'left', 'right');"
+         onmouseout="dragRelease();"
+         onmouseup="dragRelease();"
+        >
+        </span> <!-- panemover end -->
+      </div> <!-- bottom panel end -->
+    </div> <!-- container end -->
+</body></html>
+
