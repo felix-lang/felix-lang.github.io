@@ -322,6 +322,8 @@ var allbuttons = [
 "Thread Safe allocator",
 "Ring Buffers",
 "SYSTEM ALLOCATOR",
+"Statictics Allocator",
+"Counting allocator",
 "test"
 ];
 function expand_all(dummy)
@@ -412,10 +414,16 @@ function mouseout(id)
       <div class=m1 onclick="mshow('menu7','#SYSTEM ALLOCATOR_h')"> <a href="#SYSTEM_ALLOCATOR_h">SYSTEM ALLOCATOR</a></div>
       <div class=sm id=menu7>
       </div>
-      <div class=m1 onclick="mshow('menu8','#test_h')"> <a href="#test_h">test</a></div>
+      <div class=m1 onclick="mshow('menu8','#Statictics Allocator_h')"> <a href="#Statictics_Allocator_h">Statictics Allocator</a></div>
       <div class=sm id=menu8>
       </div>
-    <script>counter_max=8;</script>
+      <div class=m1 onclick="mshow('menu9','#Counting allocator_h')"> <a href="#Counting_allocator_h">Counting allocator</a></div>
+      <div class=sm id=menu9>
+      </div>
+      <div class=m1 onclick="mshow('menu10','#test_h')"> <a href="#test_h">test</a></div>
+      <div class=sm id=menu10>
+      </div>
+    <script>counter_max=10;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -789,8 +797,8 @@ share/lib/rtl/rt/bump.hpp</pre>
   size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
 
   <span class="comment">// factory function
-</span>  <span class="qualifier">static</span> alloc_ref_t create(<span class="qualifier">void</span> *p) { 
-    <span class="small_keyword">return</span> allocator_t::create (new <span class="qualifier">static</span>_bump_allocator_t (p)); 
+</span>  <span class="qualifier">static</span> alloc_ref_t create(<span class="qualifier">void</span> *parent) { 
+    <span class="small_keyword">return</span> allocator_t::create (new(parent) <span class="qualifier">static</span>_bump_allocator_t (parent)); 
   }
 };
 </pre></p></div><h2 id='Dynamic_bump_allocator_h'><img src='/share/src/web/images/minus.gif' id='Dynamic bump allocator' onclick='toggle(this,"Dynamic_bump_allocator_d")' alt='+'/> 3.2 Dynamic bump allocator</h2><div id='Dynamic_bump_allocator_d' style='display:block'>
@@ -817,7 +825,7 @@ share/lib/rtl/rt/bump.hpp</pre>
 
   <span class="comment">// factory function
 </span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, size_t n) { 
-    <span class="small_keyword">return</span> allocator_t::create( new dynamic_bump_allocator_t(parent, n) ); 
+    <span class="small_keyword">return</span> allocator_t::create( new(parent) dynamic_bump_allocator_t(parent, n) ); 
   }
 };
 #<span class="preproc">endif</span>
@@ -827,6 +835,9 @@ and so ignores the size parameter of an allocation requrest.
 However, deallocations put the argument block into a freelist
 which can be used to service a subsequent allocation request.
 </p><p>The simplest variant is a bump allocator with an added freelist.
+</p><p>Note, this is a root allocator. It is passed a pointer to a single 
+memory extent. The allocator itself is allocated at the start
+of this block.
 </p><pre class='inclusion'>
 share/lib/rtl/rt/block.hpp</pre>
 <p><pre class='cppbg'>#<span class="preproc">ifndef</span> BLOCK
@@ -860,7 +871,8 @@ share/lib/rtl/rt/block.hpp</pre>
 
   <span class="comment">// factory function
 </span>  <span class="qualifier">static</span> alloc_ref_t create(<span class="qualifier">void</span> *q, size_t n) { 
-    <span class="small_keyword">return</span> allocator_t::create( new <span class="qualifier">static</span>_block_allocator_t(q, n)); 
+    <span class="qualifier">void</span> *data_block = (<span class="qualifier">char</span>*)q + sizeof(<span class="qualifier">static</span>_block_allocator_t);
+    <span class="small_keyword">return</span> allocator_t::create( new(q) <span class="qualifier">static</span>_block_allocator_t(data_block, n)); 
   }
 };
 #<span class="preproc">endif</span>
@@ -900,7 +912,7 @@ share/lib/rtl/rt/ts_allocator.hpp</pre>
 
   <span class="comment">// factory function
 </span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, alloc_ref_t delegate) { 
-    <span class="small_keyword">return</span> allocator_t::create( new ts_allocator_t(parent, delegate)); 
+    <span class="small_keyword">return</span> allocator_t::create( new(parent) ts_allocator_t(parent, delegate)); 
   }
 
 };
@@ -1038,7 +1050,7 @@ share/lib/rtl/rt/ring_allocator.hpp</pre>
 
   <span class="comment">// factory function
 </span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, mem_req_t req) { 
-    <span class="small_keyword">return</span> allocator_t::create (new ring_buffer_t (parent, req)); 
+    <span class="small_keyword">return</span> allocator_t::create (new(parent) ring_buffer_t (parent, req)); 
   }
 };
 #<span class="preproc">endif</span>
@@ -1049,6 +1061,8 @@ share/lib/rtl/rt/system_allocator.hpp</pre>
 <p><pre class='cppbg'>#<span class="preproc">ifndef</span> SYSTEM_ALLOCATOR
 #<span class="preproc">define</span> SYSTEM_ALLOCATOR
 #<span class="preproc">include</span> <span class="fstring">&lt;vector&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;algorithm&gt;</span>
+
 #<span class="preproc">include</span> <span class="fstring">"ring_allocator.hpp"</span>
 
 <span class="comment">// FIXME: WARNING: the system allocator MUST BE CONSTRUCTED AT STARTUP
@@ -1084,7 +1098,7 @@ share/lib/rtl/rt/system_allocator.hpp</pre>
  
   <span class="comment">// factory function
 </span>  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, ::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; reqs) { 
-    <span class="small_keyword">return</span> allocator_t::create (new system_allocator_t (parent, reqs)); 
+    <span class="small_keyword">return</span> allocator_t::create (new(parent) system_allocator_t (parent, reqs)); 
   }
 };
 
@@ -1093,9 +1107,13 @@ share/lib/rtl/rt/system_allocator.hpp</pre>
 </span>::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; fixup (::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; input) {
   ::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; output;
   <span class="small_keyword">for</span> (auto req : input) {
-    <span class="small_keyword">for</span>( <span class="qualifier">int</span> idx = 0; idx &lt;= output.size(); ++idx) {
+<span class="comment">//::std::cout << "Handling req " << req.block_size << ::std::endl;
+</span>    <span class="small_keyword">for</span>( <span class="qualifier">int</span> idx = 0; idx &lt;= output.size(); ++idx) {
       <span class="comment">// past last element
-</span>      <span class="small_keyword">if</span>(idx == output.size()) output.push_back(req);
+</span>      <span class="small_keyword">if</span>(idx == output.size()) {
+        output.push_back(req);
+        break;
+      }
 
       <span class="comment">// found equal so add to block count
 </span>      else <span class="small_keyword">if</span>(req.block_size == output[idx].block_size) {
@@ -1110,12 +1128,129 @@ share/lib/rtl/rt/system_allocator.hpp</pre>
       }
     }
   }
+::<span class="small_keyword">std</span>::cout &lt;&lt; <span class="fstring">"DONE"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+  ::<span class="small_keyword">std</span>::reverse(output.begin(), output.end());
   <span class="small_keyword">return</span> output;
 }
 
 
 #<span class="preproc">endif</span>
-</pre></p></div><h1 id='test_h'><img src='/share/src/web/images/minus.gif' id='test' onclick='toggle(this,"test_d")' alt='+'/> 8 test</h1><div id='test_d' style='display:block'>
+</pre></p></div><h1 id='Statictics_Allocator_h'><img src='/share/src/web/images/minus.gif' id='Statictics Allocator' onclick='toggle(this,"Statictics_Allocator_d")' alt='+'/> 8 Statictics Allocator</h1><div id='Statictics_Allocator_d' style='display:block'>
+<p>A delegating allocator that gathers statistics for the system allocator
+</p><p>// saves statistics to a file
+// stats saved: max allocation at any one time for each block size
+</p><pre class='inclusion'>
+share/lib/rtl/rt/statistics_allocator.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> STATISTICS_ALLOCATOR
+#<span class="preproc">define</span> STATISTICS_ALLOCATOR
+
+#<span class="preproc">include</span> <span class="fstring">&lt;cstddef&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cstdio&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;map&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+
+<span class="big_keyword">struct</span> statistics_allocator_t : <span class="qualifier">public</span> allocator_t {
+  alloc_ref_t delegate;
+
+  <span class="qualifier">char</span> <span class="qualifier">const</span> *filename;
+  using stat_t = ::<span class="small_keyword">std</span>::map&lt;size_t, ::<span class="small_keyword">std</span>::pair&lt;size_t,size_t&gt; &gt;;
+  using stat_rec_t = stat_t::value_type;
+  stat_t stats;
+
+  statistics_allocator_t(alloc_ref_t parent, alloc_ref_t delegat, <span class="qualifier">char</span> <span class="qualifier">const</span> *tg ) : 
+    filename(tg), allocator_t(parent), delegate(delegat) 
+  { ::<span class="small_keyword">std</span>::cout &lt;&lt; <span class="fstring">"Statistics to "</span> &lt;&lt; tg &lt;&lt; ::<span class="small_keyword">std</span>::endl; }
+
+  <span class="qualifier">virtual</span> size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+
+  <span class="qualifier">void</span> *allocate(size_t n) override { 
+    auto p = delegate.allocate(n);
+    auto loc = stats.find(n);
+    <span class="small_keyword">if</span>(loc == stats.end()) {
+      stat_rec_t rec = {n, {1, 1}};
+      stats.insert(rec);
+    } 
+    else {
+      auto rec = *loc;
+      rec.second.first++;
+      <span class="small_keyword">if</span>(rec.second.first&gt; rec.second.second) rec.second.second = rec.second.first; <span class="comment">// max allocated
+</span>      stats[n] = rec.second;
+    }
+    <span class="small_keyword">return</span> p;
+  }
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t n) override { 
+    delegate.deallocate(p,n);
+    auto loc = stats.find(n);
+    <span class="small_keyword">if</span>(loc == stats.end()) {
+      ::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Deallocate block of size "</span> &lt;&lt; n &lt;&lt; <span class="fstring">" but that size block has never been allocated"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+      <span class="comment">//::std::abort();
+</span>      <span class="small_keyword">return</span>;
+    }
+    auto rec = *loc;
+    rec.second.first--;
+    <span class="small_keyword">if</span>(rec.second.first&gt; rec.second.second) rec.second.second = rec.second.first; <span class="comment">// max allocated
+</span>    stats[n] = rec.second;
+  }
+
+  ~statistics_allocator_t() override {
+    auto outfile = ::<span class="small_keyword">std</span>::fopen(filename,<span class="fstring">"w"</span>);
+    ::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Stats written to "</span> &lt;&lt; filename &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    <span class="small_keyword">for</span> (auto rec : stats)
+      ::<span class="small_keyword">std</span>::fprintf(outfile, <span class="fstring">"%8lu: %8lu\n"</span>,rec.first, rec.second.second);
+    ::<span class="small_keyword">std</span>::fclose(outfile);
+  }
+
+  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, alloc_ref_t delegate, <span class="qualifier">char</span> <span class="qualifier">const</span> *filename) {
+    <span class="small_keyword">return</span> allocator_t::create (new statistics_allocator_t (parent, delegate, filename));
+  }
+
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='Counting_allocator_h'><img src='/share/src/web/images/minus.gif' id='Counting allocator' onclick='toggle(this,"Counting_allocator_d")' alt='+'/> 9 Counting allocator</h1><div id='Counting_allocator_d' style='display:block'>
+<p>Counts allocations and deallocations.
+</p><pre class='inclusion'>
+share/lib/rtl/rt/counting_allocator.hpp</pre>
+<p><pre class='cppbg'>#<span class="preproc">ifndef</span> COUNTING_ALLOCATOR
+#<span class="preproc">define</span> COUNTING_ALLOCATOR
+#<span class="preproc">include</span> <span class="fstring">"allocator.hpp"</span>
+
+<span class="big_keyword">struct</span> counting_allocator_t : <span class="qualifier">public</span> allocator_t {
+  alloc_ref_t delegate;
+  size_t allocations;
+  size_t deallocations;
+
+  <span class="qualifier">char</span> <span class="qualifier">const</span> *filename;
+
+  counting_allocator_t(alloc_ref_t parent, alloc_ref_t delegat, <span class="qualifier">char</span> <span class="qualifier">const</span> *tg ) : 
+    filename(tg), allocator_t(parent), delegate(delegat), allocations(0), deallocations(0) 
+  { ::<span class="small_keyword">std</span>::cout &lt;&lt; <span class="fstring">"Counts to "</span> &lt;&lt; tg &lt;&lt; ::<span class="small_keyword">std</span>::endl; }
+
+  <span class="qualifier">virtual</span> size_t size()<span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(*this); }
+
+  <span class="qualifier">void</span> *allocate(size_t n) override {
+    ++allocations; 
+    <span class="small_keyword">return</span> delegate.allocate(n);
+  }
+  <span class="qualifier">void</span> deallocate(<span class="qualifier">void</span> *p, size_t n) override { 
+    ++deallocations;
+    delegate.deallocate(p,n);
+  }
+
+  ~counting_allocator_t() override {
+    auto outfile = ::<span class="small_keyword">std</span>::fopen(filename,<span class="fstring">"w"</span>);
+    ::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Counts written to "</span> &lt;&lt; filename &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    ::<span class="small_keyword">std</span>::fprintf(outfile, <span class="fstring">"Allocations: %8lu, Deallocations: %8lu\n"</span>,allocations, deallocations);
+    ::<span class="small_keyword">std</span>::fclose(outfile);
+  }
+
+  <span class="qualifier">static</span> alloc_ref_t create(alloc_ref_t parent, alloc_ref_t delegate, <span class="qualifier">char</span> <span class="qualifier">const</span> *filename) {
+    <span class="small_keyword">return</span> allocator_t::create (new counting_allocator_t (parent, delegate, filename));
+  }
+
+};
+#<span class="preproc">endif</span>
+</pre></p></div><h1 id='test_h'><img src='/share/src/web/images/minus.gif' id='test' onclick='toggle(this,"test_d")' alt='+'/> 10 test</h1><div id='test_d' style='display:block'>
 <pre class='inclusion'>
 $PWD/test01.cxx</pre>
 <p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
@@ -1128,6 +1263,8 @@ using <span class="big_keyword">namespace</span> <span class="small_keyword">std
 #<span class="preproc">include</span> <span class="fstring">"ts_allocator.hpp"</span>
 #<span class="preproc">include</span> <span class="fstring">"ring_allocator.hpp"</span>
 #<span class="preproc">include</span> <span class="fstring">"system_allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"statistics_allocator.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"counting_allocator.hpp"</span>
 
 <span class="qualifier">int</span> main () {
   cout &lt;&lt; <span class="fstring">"Hello World"</span> &lt;&lt; endl; 
@@ -1144,11 +1281,13 @@ using <span class="big_keyword">namespace</span> <span class="small_keyword">std
     mem_req_t{128, 10},
     mem_req_t{256, 10}
   };
-  auto a6 = system_allocator_t(a1, config);
+  auto a6 = system_allocator_t::create(a1, config);
+  auto a7 = statistics_allocator_t::create(a1,a6,<span class="fstring">"stats.txt"</span>);
+  auto a8 = counting_allocator_t::create(a1,a7,<span class="fstring">"counts.tst"</span>);
   <span class="small_keyword">for</span> (<span class="qualifier">int</span> z : { 18,  43, 75 }) {
     cout &lt;&lt; <span class="fstring">"Request size "</span> &lt;&lt; z &lt;&lt; endl;
     <span class="small_keyword">for</span>(<span class="qualifier">int</span> i = 0; i &lt; 6; ++i) {
-      <span class="qualifier">void</span> *p = a6.allocate (z);
+      <span class="qualifier">void</span> *p = a8.allocate (z);
       cout &lt;&lt; <span class="fstring">"allocation "</span> &lt;&lt; i &lt;&lt; <span class="fstring">" -&gt; "</span> &lt;&lt; p &lt;&lt; endl;
     }
   }

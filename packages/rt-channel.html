@@ -314,7 +314,8 @@ var allbuttons = [
 "Asynchronous channel",
 "CSP Processes",
 "CSP threads",
-"CSP: the lot"
+"CSP: the lot",
+"Simple test case 1"
 ];
 function expand_all(dummy)
 {
@@ -403,7 +404,10 @@ function mouseout(id)
       <div class=m1 onclick="mshow('menu10','#CSP: the lot_h')"> <a href="#CSP:_the_lot_h">CSP: the lot</a></div>
       <div class=sm id=menu10>
       </div>
-    <script>counter_max=10;</script>
+      <div class=m1 onclick="mshow('menu11','#Simple test case 1_h')"> <a href="#Simple_test_case_1_h">Simple test case 1</a></div>
+      <div class=sm id=menu11>
+      </div>
+    <script>counter_max=11;</script>
   </div>
   <!--End Left Margin Toc-->
 
@@ -607,7 +611,7 @@ using uintptr_t = ::<span class="small_keyword">std</span>::uintptr_t;
   ::<span class="small_keyword">std</span>::atomic_size_t refcnt;
   fibre_t *top;
   
-  channel_t () : top (nullptr), refcnt(1) {}
+  channel_t () : top (nullptr), refcnt(0) {}
   <span class="qualifier">virtual</span> ~channel_t(){ 
     <span class="comment">//::std::cerr << "channel " << this << " destructor" << ::std::endl; 
 </span>  }
@@ -618,20 +622,6 @@ using uintptr_t = ::<span class="small_keyword">std</span>::uintptr_t;
 
   <span class="comment">// required for the polymorphic deleter
 </span>  <span class="qualifier">virtual</span> size_t size() <span class="qualifier">const</span> = 0;
-
-  <span class="comment">// push a fibre as a reader: precondition it must be a reader
-</span>  <span class="comment">// and, if the channel is non-empty it must contain only readers
-</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> push_reader(fibre_t *r)=0;
-
-  <span class="comment">// push a fibre as a writer: precondition it must be a writer
-</span>  <span class="comment">// and, if the channel is non-empty it must contain only writers
-</span>  <span class="qualifier">virtual</span> <span class="qualifier">void</span> push_writer(fibre_t *w)=0;
-
-  <span class="comment">// pop a reader if there is one, otherwise nullptr
-</span>  <span class="qualifier">virtual</span> fibre_t *pop_reader()=0;
-
-  <span class="comment">// pop a writer if there is one, otherwise nullptr
-</span>  <span class="qualifier">virtual</span> fibre_t *pop_writer()=0;
 
   <span class="qualifier">virtual</span> <span class="qualifier">void</span> signal()=0;
 
@@ -743,7 +733,7 @@ using uintptr_t = ::<span class="small_keyword">std</span>::uintptr_t;
   }
 
   ~channel_endpoint_t () {
-<span class="comment">// ::std::cerr << "Channel endpoint " << this << " destructor, channel " <<  channel << ", refcnt " << channel->refcnt.load() << ::std::endl; 
+ <span class="comment">//::std::cerr << "Channel endpoint " << this << " destructor, channel " <<  channel << ", refcnt " << channel->refcnt.load() << ::std::endl; 
 </span>    switch (channel-&gt;refcnt.load()) {
       case 0: break;
       case 1: delete_channel(); break;
@@ -752,8 +742,8 @@ using uintptr_t = ::<span class="small_keyword">std</span>::uintptr_t;
   }
 
   <span class="qualifier">void</span> delete_channel() {
- ::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Delete channel "</span> &lt;&lt; channel &lt;&lt; <span class="fstring">", refcnt "</span> &lt;&lt; channel-&gt;refcnt.load() &lt;&lt; ::<span class="small_keyword">std</span>::endl;
-    fibre_t *top = channel-&gt;top;
+ <span class="comment">//::std::cerr << "Delete channel " << channel << ", refcnt " << channel->refcnt.load() << ::std::endl;
+</span>    fibre_t *top = channel-&gt;top;
     channel-&gt;top = nullptr;
     channel-&gt;refcnt.store(0);
     <span class="small_keyword">while</span> (top) {
@@ -865,11 +855,6 @@ share/lib/rtl/rt/sequential_channel.hpp</pre>
   sequential_channel_t () : channel_t() {}
 
   size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(sequential_channel_t); }
-  <span class="qualifier">void</span> push_reader(fibre_t *r) override { st_push_reader(r); } 
-  <span class="qualifier">void</span> push_writer(fibre_t *w) override  { st_push_writer(w); }
-  fibre_t *pop_reader() override  { <span class="small_keyword">return</span> st_pop_reader(); }
-  fibre_t *pop_writer() override  { <span class="small_keyword">return</span> st_pop_writer(); }
-
   <span class="qualifier">void</span> signal() override  {} 
 
   <span class="qualifier">void</span> read(<span class="qualifier">void</span> **target, fibre_t **pcurrent) override  {
@@ -959,31 +944,9 @@ share/lib/rtl/rt/concurrent_channel.hpp</pre>
 
   size_t size() <span class="qualifier">const</span> override { <span class="small_keyword">return</span> sizeof(concurrent_channel_t); }
 
-  <span class="qualifier">void</span> push_reader(fibre_t *r) override { 
-    lock();
-    st_push_reader(r); 
-    unlock();
-  } 
-  <span class="qualifier">void</span> push_writer(fibre_t *w) override { 
-    lock();
-    st_push_writer(w); 
-    unlock();
-  }
-  fibre_t *pop_reader() override {
-    lock();
-    auto r = st_pop_reader();
-    unlock(); 
-    <span class="small_keyword">return</span> r;
-  }
-  fibre_t *pop_writer() override {
-    lock();
-    auto w = st_pop_writer();
-    unlock();
-    <span class="small_keyword">return</span> w;
-  }
-
   <span class="qualifier">void</span> read(<span class="qualifier">void</span> **target, fibre_t **pcurrent) override {
-    fibre_t *current = *pcurrent;
+<span class="comment">//::std::cout << "read on " << this << ::std::endl;
+</span>    fibre_t *current = *pcurrent;
     lock();
     fibre_t *w = st_pop_writer();
     <span class="small_keyword">if</span>(w) {
@@ -1000,7 +963,8 @@ share/lib/rtl/rt/concurrent_channel.hpp</pre>
 </span>        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
       } else {
         --refcnt;
-        st_push_reader(current);
+   <span class="comment">//::std::cout<< "do_read: fibre " << current << ", set channel "<< this <<" recnt to " << refcnt << ::std::endl;
+</span>        st_push_reader(current);
         unlock();
         *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// active list
 </span>      }
@@ -1008,7 +972,8 @@ share/lib/rtl/rt/concurrent_channel.hpp</pre>
   }
 
   <span class="qualifier">void</span> write(<span class="qualifier">void</span> **source, fibre_t **pcurrent) override {
-    fibre_t *current = *pcurrent;
+<span class="comment">//::std::cout << "write on " << this << ::std::endl;
+</span>    fibre_t *current = *pcurrent;
     lock();
     fibre_t *r = st_pop_reader();
     <span class="small_keyword">if</span>(r) {
@@ -1031,7 +996,7 @@ share/lib/rtl/rt/concurrent_channel.hpp</pre>
 </span>        delete_concrete_object(current,current-&gt;process-&gt;process_allocator);
       } else {
         --refcnt;
-  <span class="comment">// ::std::cout<< "do_write: fibre " << current << ", set channel "<< chan <<" recnt to " << chan->refcnt << ::std::endl;
+   <span class="comment">//::std::cout<< "do_write: fibre " << current << ", set channel "<< this <<" recnt to " << refcnt << ::std::endl;
 </span>        st_push_writer(current); <span class="comment">// i/o fail: push current onto channel
 </span>        unlock();
         *pcurrent = current-&gt;process-&gt;pop(); <span class="comment">// reset current from active list
@@ -1553,6 +1518,303 @@ con_t *subroutine_t::<span class="small_keyword">return</span>_control() {
   return (new procedure(global))->call(this,arg1,arg2,arg3);
 **</span>/
 #<span class="preproc">endif</span>
+</pre></p></div><h1 id='Simple_test_case_1_h'><img src='/share/src/web/images/minus.gif' id='Simple test case 1' onclick='toggle(this,"Simple_test_case_1_d")' alt='+'/> 11 Simple test case 1</h1><div id='Simple_test_case_1_d' style='display:block'>
+<pre class='inclusion'>
+$PWD/csp_01.cxx</pre>
+<p><pre class='cppbg'>#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;cassert&gt;</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;list&gt;</span>
+
+
+#<span class="preproc">include</span> <span class="fstring">"csp.hpp"</span>
+#<span class="preproc">include</span> <span class="fstring">"statistics_allocator.hpp"</span>
+
+<span class="comment">//#include "chips.hpp"
+</span>
+<span class="comment">// TEST CASE
+</span>
+<span class="big_keyword">struct</span> hello : coroutine_t {
+
+  CSP_RESUME_START
+    ::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Hello World"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    CSP_COSUICIDE
+  CSP_RESUME_END
+  CSP_SIZE
+};
+
+
+<span class="big_keyword">struct</span> producer : coroutine_t {
+  ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *plst;
+  ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt;::iterator it;
+  chan_epref_t out;
+  <span class="big_keyword">union</span> {
+    <span class="qualifier">void</span> *iodata;
+    <span class="qualifier">int</span> value;
+  };
+  io_request_t w_req;
+
+  ~producer() { }
+
+  CSP_CODEF_START
+    ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *plst_a,
+    chan_epref_t outchan_a
+  CSP_CODEF_MID
+    plst = plst_a;
+    out = outchan_a;
+  CSP_CODEF_END
+
+  CSP_RESUME_START
+    it = plst-&gt;begin();
+    SVC_WRITE_REQ(&amp;w_req,&amp;out,&amp;iodata);
+
+  case 1:
+    <span class="small_keyword">if</span>(it == plst-&gt;end()) { 
+      CSP_COSUICIDE
+    }
+    value = *it++;
+    pc = 1;
+    SVC(&amp;w_req)
+
+  CSP_RESUME_END
+  CSP_SIZE
+};
+
+<span class="big_keyword">struct</span> consumer: coroutine_t {
+  ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *plst;
+  <span class="big_keyword">union</span> {
+    <span class="qualifier">void</span> *iodata;
+    <span class="qualifier">int</span> value;
+  };
+  io_request_t r_req;
+  chan_epref_t inp;
+
+  ~consumer() {}
+
+  CSP_CODEF_START
+    ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *plst_a,
+    chan_epref_t inchan_a
+  CSP_CODEF_MID
+    plst = plst_a;
+    inp = inchan_a;
+  CSP_CODEF_END
+
+  CSP_RESUME_START  
+    SVC_READ_REQ(&amp;r_req,&amp;inp,&amp;iodata)
+
+  case 1:
+    SVC(&amp;r_req)
+
+  case 2:
+    ::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"Consumer gets "</span> &lt;&lt; value &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    plst-&gt;push_back(value);
+    CSP_GOTO(1)
+
+  CSP_RESUME_END
+  CSP_SIZE
+};
+
+<span class="big_keyword">struct</span> square : subroutine_t {
+  <span class="qualifier">int</span> inp;
+  <span class="qualifier">int</span> *pout;
+
+  square(fibre_t *f) : subroutine_t(f) {}
+ 
+  CSP_CALLDEF_START,
+    <span class="qualifier">int</span> *pout_a,
+    <span class="qualifier">int</span> inp_a
+  CSP_CALLDEF_MID
+    pout = pout_a;
+    inp = inp_a;
+  CSP_CALLDEF_END
+
+  CSP_RESUME_START
+    *pout = inp * inp;
+    {
+      con_t *tmp = caller;
+      delete_concrete_object(this, fibre-&gt;process-&gt;process_allocator);
+      <span class="small_keyword">return</span> tmp;
+    }
+  CSP_RESUME_END
+  CSP_SIZE
+};
+
+
+<span class="big_keyword">struct</span> transducer: coroutine_t {
+  <span class="big_keyword">union</span> {
+    <span class="qualifier">void</span> *iodata;
+    <span class="qualifier">int</span> value;
+  };
+  io_request_t r_req;
+  io_request_t w_req;
+  chan_epref_t inp;
+  chan_epref_t out;
+
+  ~transducer() {}
+
+  CSP_CODEF_START
+    chan_epref_t inchan_a,
+    chan_epref_t outchan_a
+  CSP_CODEF_MID 
+    inp = inchan_a;
+    out = outchan_a;
+  CSP_CODEF_END
+  
+  CSP_RESUME_START
+    SVC_READ_REQ(&amp;r_req,&amp;inp,&amp;iodata)
+    SVC_WRITE_REQ(&amp;w_req,&amp;out,&amp;iodata)
+
+  case 1:
+    SVC(&amp;r_req)
+
+  case 2:
+    <span class="comment">//CSP_CALL_DIRECT2(square,&value,value)
+</span>    <span class="small_keyword">return</span> (new(fibre-&gt;process-&gt;process_allocator) square(fibre))-&gt;call(this,&amp;value,value);
+
+  case 3:
+    pc = 1;
+    SVC(&amp;w_req)
+
+  CSP_RESUME_END
+  CSP_SIZE
+};
+
+
+<span class="big_keyword">struct</span> init: coroutine_t {
+  ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *inlst;
+  ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *outlst;
+  spawn_fibre_request_t spawn_req;
+  chan_epref_t ch1out;
+  chan_epref_t ch1inp;
+  chan_epref_t ch2out;
+  chan_epref_t ch2inp;
+  chan_epref_t clock_connection;
+  io_request_t clock_req;
+  <span class="qualifier">double</span> waituntil;
+  <span class="qualifier">double</span> *pwaituntil;
+  ::<span class="small_keyword">std</span>::shared_ptr&lt;csp_clock_t&gt; clock;
+
+  ~init() {}
+
+  <span class="comment">// store parameters in
+</span>  CSP_CODEF_START
+    ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *lin,
+    ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; *lout
+  CSP_CODEF_MID
+    inlst = lin;
+    outlst = lout;
+  CSP_CODEF_END
+
+  CSP_RESUME_START
+    ch1out = make_concurrent_channel(fibre-&gt;process-&gt;system-&gt;system_allocator);
+    ch1inp = ch1out-&gt;dup(); 
+    ch2out = make_concurrent_channel(fibre-&gt;process-&gt;system-&gt;system_allocator);
+    ch2inp = ch2out-&gt;dup();
+ 
+    SVC_SPAWN_FIBRE_DEFERRED_REQ(&amp;spawn_req, (new(fibre-&gt;process-&gt;process_allocator) producer)-&gt;setup(inlst, ch1out))
+    SVC(&amp;spawn_req)
+ 
+  case 1:
+    SVC_SPAWN_FIBRE_DEFERRED_REQ(&amp;spawn_req, (new(fibre-&gt;process-&gt;process_allocator) transducer)-&gt;setup(ch1inp, ch2out))
+    SVC(&amp;spawn_req)
+ 
+  case 2:
+    SVC_SPAWN_FIBRE_DEFERRED_REQ(&amp;spawn_req, (new(fibre-&gt;process-&gt;process_allocator) consumer)-&gt;setup(outlst,ch2inp))
+    SVC(&amp;spawn_req)
+ 
+  case 3:
+    SVC_SPAWN_FIBRE_DEFERRED_REQ(&amp;spawn_req, (new(fibre-&gt;process-&gt;process_allocator) hello))
+    SVC(&amp;spawn_req)
+  case 4:
+<span class="comment">/*
+    { 
+      clock = make_clock(fibre->process->system);
+      clock->start();
+      //::std::cerr << "Clock started, time is " << clock->now() << ::std::endl;
+      clock_connection = clock->connect();
+      //::std::cerr << "Got connection" << ::std::endl;
+      {
+        double rightnow = clock->now();
+        waituntil = rightnow + 12.10;
+        //::std::cerr << ::std::fixed << "Wait until" << waituntil << " for " << waituntil - rightnow << " seconds" << ::std::endl;
+      }
+      //::std::cerr << "Alarm time " << waituntil << ", stored at " << &waituntil
+      //  << "=" << pwaituntil << " which is stored at " << &pwaituntil << ::std::endl;
+      pwaituntil = &waituntil;
+      SVC_WRITE_REQ(&clock_req,&clock_connection,&pwaituntil);
+      ::std::cerr<<"****** INIT Sleeping ********" << ::std::endl;
+    }
+// too early to signal
+// need different kind of channel w. cv
+    SVC(&clock_req)
+// too late to signal
+  case 5:
+    // if this doesn't print, we didn't resume after the sleep correctly
+**</span>/
+    ::<span class="small_keyword">std</span>::cerr&lt;&lt;<span class="fstring">"****** INIT Sleep Over ********"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    CSP_COSUICIDE
+
+
+  CSP_RESUME_END
+  CSP_SIZE
+}; <span class="comment">// init class
+</span>
+#<span class="preproc">include</span> <span class="fstring">&lt;iostream&gt;</span>
+
+<span class="qualifier">int</span> main() {
+  <span class="comment">// create the input list
+</span>  ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; inlst;
+  <span class="small_keyword">for</span> (auto i = 0; i &lt; 20; ++i) inlst.push_back(i);
+
+  <span class="comment">// empty output list
+</span>  ::<span class="small_keyword">std</span>::list&lt;<span class="qualifier">int</span>&gt; outlst;
+
+  {
+    ::<span class="small_keyword">std</span>::vector&lt;mem_req_t&gt; reqs;
+    reqs.push_back(mem_req_t {sizeof(hello),50});
+    reqs.push_back(mem_req_t {sizeof(producer),50});
+    reqs.push_back(mem_req_t {sizeof(transducer),50});
+    reqs.push_back(mem_req_t {sizeof(consumer),50});
+    reqs.push_back(mem_req_t {sizeof(init),50});
+    reqs.push_back(mem_req_t {sizeof(square),50});
+    reqs.push_back(mem_req_t {256,50});
+    reqs.push_back(mem_req_t {512,50});
+
+    ::<span class="small_keyword">std</span>::cout &lt;&lt; <span class="fstring">"N reqs = "</span> &lt;&lt; reqs.size() &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    auto fixed_reqs = fixup(reqs); 
+    ::<span class="small_keyword">std</span>::cout &lt;&lt; <span class="fstring">"fixed up N reqs = "</span> &lt;&lt; fixed_reqs.size() &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    <span class="small_keyword">for</span>(auto req : fixed_reqs) ::<span class="small_keyword">std</span>::cout &lt;&lt; req.block_size &lt;&lt; <span class="fstring">" x "</span> &lt;&lt; req.n_blocks &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    <span class="comment">// bootstrap allocator
+</span>    alloc_ref_t malloc_free = malloc_free_allocator_t::create(); <span class="comment">// parent C++ allocator
+</span><span class="comment">/*
+    //alloc_ref_t malloc_free_debugger = new(malloc_free) debugging_allocator_t(malloc_free, malloc_free, "Malloc");
+
+
+    // system allocator
+    alloc_ref_t system_allocator_delegate = new(malloc_free_debugger) system_allocator_t(malloc_free_debugger,malloc_free_debugger, reqs);
+    alloc_ref_t system_allocator_debugger = new(malloc_free_debugger) debugging_allocator_t(malloc_free_debugger, system_allocator_delegate, "Sys");
+    alloc_ref_t system_allocator = new(malloc_free_debugger) statistics_allocator_t( malloc_free_debugger, system_allocator_debugger, "Sysalloc.stats.txt");
+
+
+    // initial process will use the system allocator
+    alloc_ref_t process_allocator = system_allocator;
+**</span>/
+    alloc_ref_t x = system_allocator_t::create(malloc_free, fixed_reqs);
+    alloc_ref_t system_allocator = statistics_allocator_t::create(malloc_free, x, <span class="fstring">"xstats.txt"</span>);
+    alloc_ref_t process_allocator = system_allocator;
+
+    <span class="comment">// creates the clock too
+</span>    system_t *system = new system_t(system_allocator);
+::<span class="small_keyword">std</span>::cout &lt;&lt; <span class="fstring">"STARTING"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    csp_run(system, process_allocator, (new(process_allocator) init)-&gt;setup(&amp;inlst, &amp;outlst));
+::<span class="small_keyword">std</span>::cerr &lt;&lt; <span class="fstring">"RUN COMPLETE"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+    delete system;
+  }
+
+  <span class="comment">// the result is now in the outlist so print it
+</span>  ::<span class="small_keyword">std</span>::cerr&lt;&lt; <span class="fstring">"main: +++++++++ List of squares:"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+  <span class="small_keyword">for</span>(auto v : outlst) ::<span class="small_keyword">std</span>::cerr &lt;&lt; v &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+  ::<span class="small_keyword">std</span>::cerr&lt;&lt; <span class="fstring">"main: +++++++++ Done"</span> &lt;&lt; ::<span class="small_keyword">std</span>::endl;
+} 
 </pre></p></div><!--Main Content Body End-->
 
           </div> <!-- rightpanel contents end -->
